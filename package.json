@@ -1,0 +1,25 @@
+{
+  "name": "rhenus-demo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build:autoprefix": "postcss ./static/css/*.css --dir static/css",
+    "watch:sass": "sass static/sass/:static/css/ -w"
+  },
+  "author": "Miroslav Viktorin",
+  "license": "ISC",
+  "description": "template",
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "eslint": "^9.24.0",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.1",
+    "postcss-nested": "^7.0.2",
+    "prettier": "^3.5.3",
+    "sass": "^1.86.3",
+    "stylelint": "^16.18.0",
+    "stylelint-config-standard": "^38.0.0",
+    "stylelint-config-standard-scss": "^14.0.0",
+    "autoprefixer": "^10.4.21"
+  }
+}

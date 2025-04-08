@@ -1,0 +1,34 @@
+@use "sass:map";
+@use "sass:meta";
+@use "./variables" as *;
+
+
+@function get-color($type, $shade: "default") {
+  @return map.get(map.get($colors, $type), $shade);
+}
+
+@function map-to-css-vars($map, $prefix: "") {
+  $output: ();
+
+  @each $key, $value in $map {
+    $name: if($prefix != "", "#{$prefix}-#{$key}", $key);
+
+    @if meta.type-of($value) == "map" {
+      $nested-vars: map-to-css-vars($value, $name);
+      $output: map.merge($output, $nested-vars);
+    } @else {
+      $output: map.merge(
+        $output,
+        (
+          "--#{$name}": $value,
+        )
+      );
+    }
+  }
+  
+  @return $output;
+}
+
+@function em($target, $content) {
+  @return calc(($target / $content) * 1em);
+}

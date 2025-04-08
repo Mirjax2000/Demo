@@ -1,0 +1,133 @@
+/* --- style --- */
+/* --- root --- */
+:root {
+  --accent: #fd7e14;
+  --success: #0d6efd;
+  --success-darker: #004ec3;
+  --info: #198754;
+  --error: #dc3545;
+}
+
+[data-theme=light] {
+  --border: rgba(33, 37, 41, 0.2901960784);
+  --shadow: rgba(33, 37, 41, 0.1843137255);
+  --bck-sidebar: #f8f9fa;
+  --bck-body: #f8f9fa;
+  --txt-default: #212529;
+}
+
+[data-theme=dark] {
+  --border: rgba(248, 249, 250, 0.2392156863);
+  --shadow: rgba(248, 249, 250, 0.0705882353);
+  --bck-sidebar: #212529;
+  --bck-body: #212529;
+  --txt-default: #f8f9fa;
+}
+
+/* --- placeholders --- */
+.L-sidebar {
+  user-select: none;
+}
+
+.L-sidebar .L-active {
+  border-radius: 5px;
+}
+
+.L-sidebar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 0;
+  flex-direction: column;
+  min-height: 100dvh;
+  width: 12.5rem;
+  background-color: var(--bck-sidebar);
+  box-shadow: 1px 0 1px var(--shadow);
+  padding: 1em;
+}
+.L-sidebar__header {
+  flex: 0 0 auto;
+  width: 100%;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1em;
+  padding-bottom: 0.5em;
+}
+.L-sidebar__nav {
+  flex: 1 1 auto;
+  width: 100%;
+}
+.L-sidebar__nav-link {
+  width: 100%;
+  display: block;
+  text-decoration: none;
+  color: var(--txt-default);
+  padding: 0.5em 1em;
+  border-left: 3px solid transparent;
+  transition: 0.1s all ease-in-out;
+}
+.L-sidebar__nav-link:hover {
+  border-left: 3px solid var(--success);
+}
+.L-sidebar__nav-link:active {
+  transform: translateX(1px);
+}
+.L-sidebar__span {
+  margin-left: 1em;
+}
+.L-sidebar__list {
+  width: 100%;
+  padding: 0;
+  margin-bottom: 0;
+  list-style: none;
+}
+.L-sidebar__list__item {
+  width: 100%;
+  margin-bottom: 0.3em;
+}
+.L-sidebar__list__item:last-child {
+  margin-top: 3em;
+  margin-bottom: 0;
+}
+.L-sidebar .L-active {
+  background-color: var(--success);
+  color: #f8f9fa;
+}
+.L-sidebar .L-active:hover {
+  border-left: 3px solid transparent;
+  background-color: var(--success-darker);
+}
+.L-sidebar__footer {
+  flex: 0 0 auto;
+  width: 100%;
+  border-top: 1px solid var(--border);
+  margin-top: 1em;
+  padding-top: 0.5em;
+}
+
+.P-body {
+  background-color: var(--bck-body);
+  color: var(--txt-default);
+}
+
+.P-container {
+  width: clamp(720px, 100%, 1140px);
+  padding-inline: 1em;
+  margin-inline: auto;
+}
+
+.P-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 1em;
+}
+
+.P-main {
+  flex: 1;
+}
+
+.P-sidebar {
+  flex: 0 0 auto;
+}
+
+/*# sourceMappingURL=style.css.map */

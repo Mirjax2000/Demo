@@ -1,0 +1,22 @@
+/* --- placeholders --- */
+
+%pos-rel {
+    position: relative;
+    isolation: isolate;
+}
+
+%pos-abs {
+    position: absolute;
+}
+
+%margin-in {
+    margin-inline: auto;
+}
+
+%select-none {
+    user-select: none;
+}
+
+%border-radius {
+    border-radius: 5px;
+}

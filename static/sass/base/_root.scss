@@ -1,0 +1,15 @@
+/* --- root --- */
+@use "../utils/mixins" as *;
+@use "../themes/" as *;
+@use "../utils/variables" as *;
+
+// ---
+@include export-to-root($theme, "");
+
+[data-theme="light"] {
+  @include export-to-dataset($light-theme, "");
+}
+
+[data-theme="dark"] {
+  @include export-to-dataset($dark-theme, "");
+}

@@ -1,0 +1,53 @@
+/* --- utils --- */
+
+.u-text-center {
+    text-align: center;
+}
+
+.u-text-right {
+    text-align: right;
+}
+
+.u-text-left {
+    text-align: left;
+}
+
+.u-text-success {
+    color: var(--scheme-success);
+}
+
+.u-text-info {
+    color: var(--scheme-info);
+}
+
+.u-text-warning {
+    color: var(--scheme-warning);
+}
+
+.u-text-error {
+    color: var(--scheme-warning);
+}
+
+.u-mb-small {
+    margin-bottom: 1rem;
+}
+
+.u-mb-medium {
+    margin-bottom: 2.5rem;
+}
+
+.u-mb-big {
+    margin-bottom: 5rem;
+}
+
+.u-mt-medium {
+    margin-top: 2.5rem;
+}
+
+.u-neg-merge-sml-left {
+    margin-left: -0.1em;
+}
+
+.u-text-smaller {
+    font-size: 80%;
+}

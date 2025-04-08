@@ -1,0 +1,44 @@
+/* --- typography --- */
+
+$font-path-variables: "../fonts/webfonts/Font-face/";
+$font-path-static: "../fonts/webfonts/Font-face/static/";
+
+@font-face {
+    font-family: "jet brains";
+    src:
+        url("#{$font-path-variables}JetBrainsMono.ttf")
+            format("truetype-variations"),
+        url("#{$font-path-variables}JetBrainsMono.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "jet brains";
+    src:
+        url("#{$font-path-variables}JetBrainsMono-Italic.ttf")
+            format("truetype-variations"),
+        url("#{$font-path-variables}JetBrainsMono-Italic.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: roboto;
+    src:
+        url("#{$font-path-variables}roboto.ttf") format("truetype-variations"),
+        url("#{$font-path-variables}roboto.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+html {
+    font-size: 100%;
+}
+
+body {
+    font-family: roboto, serif;
+}

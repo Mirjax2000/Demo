@@ -1,0 +1,34 @@
+// --- light theme ---
+$theme: (
+  "accent": #fd7e14,
+  "success": #0d6efd,
+  "success-darker": #004ec3,
+  "info": #198754,
+  "error": #dc3545,
+);
+
+// ---
+$light-theme: (
+  "border": #2125294a,
+  "shadow": #2125292f,
+  "bck": (
+    "sidebar": #f8f9fa,
+    "body": #f8f9fa,
+  ),
+  "txt": (
+    "default": #212529,
+  ),
+);
+
+// ---
+$dark-theme: (
+  "border": #f8f9fa3d,
+  "shadow": #f8f9fa12,
+  "bck": (
+    "sidebar": #212529,
+    "body": #212529,
+  ),
+  "txt": (
+    "default": #f8f9fa,
+  ),
+);

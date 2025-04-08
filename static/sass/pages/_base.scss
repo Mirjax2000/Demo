@@ -1,0 +1,23 @@
+@use "../utils/" as *;
+@use "../base/placeholders" as *;
+
+.P-body {
+  background-color: var(--bck-body);
+  color: var(--txt-default);
+}
+
+.P-container {
+  @include container(720px, 1140px, 1em);
+}
+
+.P-wrapper {
+  @include flex(flex-start, flex-start, 1em);
+}
+
+.P-main {
+  flex: 1;
+}
+
+.P-sidebar {
+  flex: 0 0 auto;
+}
