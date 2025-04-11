@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>
             {% block title %}
-                Default Title
+                Rhenus
             {% endblock title %}
         </title>
         <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}" />
@@ -29,10 +29,18 @@
                     <nav class="L-sidebar__nav">
                         <ul class="L-sidebar__list">
                             <li class="L-sidebar__list__item">
-                                <a href="{% url "homepage" %}" class="L-sidebar__nav-link"><i class="bi bi-house"></i><span class="L-sidebar__span">Home</span></a>
+                                <a href="#"
+                                   hx-get="{% url "homepage" %}"
+                                   hx-target="#content"
+                                   hx-indicator="#spinner"
+                                   class="L-sidebar__nav-link"><i class="bi bi-house"></i><span class="L-sidebar__span">Home</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
-                                <a href="{% url "dashboard" %}" class="L-sidebar__nav-link"><i class="bi bi-speedometer2"></i><span class="L-sidebar__span">Dashboard</span></a>
+                                <a href="#"
+                                   hx-get="{% url "dashboard" %}"
+                                   hx-target="#content"
+                                   hx-indicator="#spinner"
+                                   class="L-sidebar__nav-link"><i class="bi bi-speedometer2"></i><span class="L-sidebar__span">Dashboard</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
                                 <a href="#" class="L-sidebar__nav-link"><i class="bi bi-tools"></i><span class="L-sidebar__span">Vytvořit</span></a>
@@ -47,7 +55,12 @@
                                 <a href="#" class="L-sidebar__nav-link"><i class="bi bi-people"></i><span class="L-sidebar__span">Týmy</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
-                                <a href="{% url "logout" %}" class="L-sidebar__nav-link"><i class="bi bi-box-arrow-left"></i><span class="L-sidebar__span">Logout</span></a>
+                                <form method="post" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="L-sidebar__nav-link">
+                                        <i class="bi bi-box-arrow-left"></i><span class="L-sidebar__span">Logout</span>
+                                    </button>
+                                </form>
                             </li>
                         </ul>
                     </nav>
@@ -56,7 +69,7 @@
                     </footer>
                 </aside>
                 <!-- Right side content -->
-                <main class="P-main">
+                <main class="P-main" id="content">
                     {% block content %}
                         <!-- Main content will go here -->
                     {% endblock content %}
@@ -69,7 +82,7 @@
         {% block scripts %}
             <!-- JavaScript files go here -->
             <script src="{% static "js/bootstrap.bundle.min.js " %}"></script>
-            <script src="{% static "js/hmtx.min.js " %}"></script>
+            <script src="{% static "js/htmx.min.js " %}"></script>
             <script src="{% static "js/script.js " %}"></script>
         {% endblock scripts %}
     </body>
