@@ -29,10 +29,10 @@
                     <nav class="L-sidebar__nav">
                         <ul class="L-sidebar__list">
                             <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link"><i class="bi bi-house"></i><span class="L-sidebar__span">Home</span></a>
+                                <a href="{% url "homepage" %}" class="L-sidebar__nav-link"><i class="bi bi-house"></i><span class="L-sidebar__span">Home</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link L-active"><i class="bi bi-speedometer2"></i><span class="L-sidebar__span">Dashboard</span></a>
+                                <a href="{% url "dashboard" %}" class="L-sidebar__nav-link"><i class="bi bi-speedometer2"></i><span class="L-sidebar__span">Dashboard</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
                                 <a href="#" class="L-sidebar__nav-link"><i class="bi bi-tools"></i><span class="L-sidebar__span">Vytvořit</span></a>
@@ -57,11 +57,9 @@
                 </aside>
                 <!-- Right side content -->
                 <main class="P-main">
-                    <div class="container">
-                        {% block content %}
-                            <!-- Main content will go here -->
-                        {% endblock content %}
-                    </div>
+                    {% block content %}
+                        <!-- Main content will go here -->
+                    {% endblock content %}
                 </main>
             </div>
             <button id="themeToggler" class="btn btn-primary">
@@ -71,6 +69,7 @@
         {% block scripts %}
             <!-- JavaScript files go here -->
             <script src="{% static "js/bootstrap.bundle.min.js " %}"></script>
+            <script src="{% static "js/hmtx.min.js " %}"></script>
             <script src="{% static "js/script.js " %}"></script>
         {% endblock scripts %}
     </body>
