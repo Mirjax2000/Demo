@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static %}
-{% load crispy_forms_tags %}
 {% block title %}
   login
 {% endblock title %}
@@ -10,7 +9,7 @@
       <h2>Přihlášení</h2>
       <form class="L-form__form" method="post">
         {% csrf_token %}
-        {{ form|crispy }}
+        {{ form.as_p }}
         <button type="submit" class="btn btn-primary">Odeslat</button>
       </form>
       {% if form.non_field_errors %}<div>{{ form.non_field_errors }}</div>{% endif %}
