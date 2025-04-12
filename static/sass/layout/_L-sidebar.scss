@@ -42,6 +42,18 @@
   }
 
   &__nav-link {
+    &.link {
+      @extend %transition;
+
+      &:hover {
+        border-left: 3px solid var(--success);
+      }
+
+      &:active {
+        transform: translateX(1px);
+      }
+    }
+
     @extend %transition-theme;
 
     width: 100%;

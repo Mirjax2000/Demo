@@ -33,8 +33,12 @@
   border-radius: 5px;
 }
 
+.L-sidebar__nav-link.link {
+  transition: 0.2s all ease-in-out;
+}
+
 .P-body, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
-  transition: 0.5s background-color ease-in-out, 0.5s color ease-in-out;
+  transition: 1s background-color ease-in-out, 1s color ease-in-out;
 }
 
 .L-sidebar {
@@ -78,6 +82,12 @@
   color: var(--txt-default);
   padding: 0.5em 1em;
   border-left: 3px solid transparent;
+}
+.L-sidebar__nav-link.link:hover {
+  border-left: 3px solid var(--success);
+}
+.L-sidebar__nav-link.link:active {
+  transform: translateX(1px);
 }
 .L-sidebar__nav-link:hover {
   border-left: 3px solid var(--success);

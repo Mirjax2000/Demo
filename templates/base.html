@@ -22,21 +22,21 @@
         <div class="P-container">
             <div class="P-wrapper">
                 <!-- Left side navigation -->
-                <aside class="L-sidebar P-sidebar">
+                <aside class="L-sidebar P-sidebar" id="leftSide">
                     <header class="L-sidebar__header">
                         <a href="{% url "index" %}" class="L-sidebar__header__link">
                             <i class="bi bi-wrench-adjustable-circle"></i>
                             <span class="L-sidebar__header__logo">Rhenus HD - AMS</span>
                         </a>
                     </header>
-                    <nav class="L-sidebar__nav">
+                    <nav class="L-sidebar__nav" id="nav">
                         <ul class="L-sidebar__list">
                             <li class="L-sidebar__list__item">
                                 <a href="{% url "homepage" %}"
                                    hx-get="{% url "homepage" %}"
                                    hx-target="#content"
                                    hx-indicator="#spinner"
-                                   class="L-sidebar__nav-link">
+                                   class="L-sidebar__nav-link link">
                                     <i class="bi bi-house"></i>
                                     <span class="L-sidebar__span">Home</span>
                                 </a>
@@ -46,19 +46,19 @@
                                    hx-get="{% url "dashboard" %}"
                                    hx-target="#content"
                                    hx-indicator="#spinner"
-                                   class="L-sidebar__nav-link"><i class="bi bi-speedometer2"></i><span class="L-sidebar__span">Dashboard</span></a>
+                                   class="L-sidebar__nav-link link"><i class="bi bi-speedometer2"></i><span class="L-sidebar__span">Dashboard</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link L-active"><i class="bi bi-tools"></i><span class="L-sidebar__span">Vytvořit</span></a>
+                                <a href="#" class="L-sidebar__nav-link link"><i class="bi bi-tools"></i><span class="L-sidebar__span">Vytvořit</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link"><i class="bi bi-table"></i><span class="L-sidebar__span">Zakázky</span></a>
+                                <a href="#" class="L-sidebar__nav-link link"><i class="bi bi-table"></i><span class="L-sidebar__span">Zakázky</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link"><i class="bi bi-grid"></i><span class="L-sidebar__span">Sestavy</span></a>
+                                <a href="#" class="L-sidebar__nav-link link"><i class="bi bi-grid"></i><span class="L-sidebar__span">Sestavy</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link"><i class="bi bi-people"></i><span class="L-sidebar__span">Týmy</span></a>
+                                <a href="#" class="L-sidebar__nav-link link"><i class="bi bi-people"></i><span class="L-sidebar__span">Týmy</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
                                 <form method="post" action="{% url 'logout' %}">
