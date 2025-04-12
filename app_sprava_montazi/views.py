@@ -12,13 +12,13 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
 class HomePageView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
-        template_name = "app_sprava_montazi/homepage.html"
+        template_name = "app_sprava_montazi/partials/homepage.html"
         sleep(2)
         return render(self.request, template_name)
 
 
 class DashboardView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
-        template_name = "app_sprava_montazi/dashboard.html"
+        template_name = "app_sprava_montazi/partials/dashboard.html"
         sleep(2)
         return render(self.request, template_name)

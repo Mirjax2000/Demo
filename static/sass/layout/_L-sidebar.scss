@@ -3,6 +3,7 @@
 
 .L-sidebar {
   @extend %select-none;
+  @extend %transition-theme;
   @include flex(flex-start, flex-start);
 
   flex-direction: column;
@@ -16,8 +17,23 @@
     flex: 0 0 auto;
     width: 100%;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 1em;
     padding-bottom: 0.5em;
+    margin-bottom: 1em;
+
+    &__link {
+      @extend %transition-theme;
+
+      color: var(--txt-default);
+      text-decoration: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5em;
+    }
+
+    &__logo {
+      font-weight: lighter;
+    }
   }
 
   &__nav {
@@ -26,13 +42,14 @@
   }
 
   &__nav-link {
+    @extend %transition-theme;
+
     width: 100%;
     display: block;
     text-decoration: none;
     color: var(--txt-default);
     padding: 0.5em 1em;
     border-left: 3px solid transparent;
-    transition: 0.1s all ease-in-out;
 
     &:hover {
       border-left: 3px solid var(--success);
@@ -45,6 +62,28 @@
 
   &__span {
     margin-left: 1em;
+  }
+
+  &__btn {
+    @extend %transition-theme;
+
+    border: none;
+    text-align: left;
+    width: 100%;
+    background-color: var(--bck-sidebar);
+    color: var(--txt-default);
+    display: block;
+    text-decoration: none;
+    padding: 0.5em 1em;
+    border-left: 3px solid transparent;
+
+    &:hover {
+      border-left: 3px solid var(--success);
+    }
+
+    &:active {
+      transform: translateX(1px);
+    }
   }
 
   &__list {
@@ -83,4 +122,9 @@
     margin-top: 1em;
     padding-top: 0.5em;
   }
+}
+
+.bi-wrench-adjustable-circle {
+  color: var(--success);
+  font-size: 2rem;
 }

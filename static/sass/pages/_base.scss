@@ -2,6 +2,8 @@
 @use "../base/placeholders" as *;
 
 .P-body {
+  @extend %transition-theme;
+
   background-color: var(--bck-body);
   color: var(--txt-default);
 }

@@ -1,22 +1,32 @@
 /* --- placeholders --- */
 
 %pos-rel {
-    position: relative;
-    isolation: isolate;
+  position: relative;
+  isolation: isolate;
 }
 
 %pos-abs {
-    position: absolute;
+  position: absolute;
 }
 
 %margin-in {
-    margin-inline: auto;
+  margin-inline: auto;
 }
 
 %select-none {
-    user-select: none;
+  user-select: none;
 }
 
 %border-radius {
-    border-radius: 5px;
+  border-radius: 5px;
+}
+
+%transition {
+  transition: 0.1s all ease-in-out;
+}
+
+%transition-theme {
+  transition:
+    0.5s background-color ease-in-out,
+    0.5s color ease-in-out;
 }

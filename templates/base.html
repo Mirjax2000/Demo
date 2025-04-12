@@ -24,15 +24,15 @@
                 <!-- Left side navigation -->
                 <aside class="L-sidebar P-sidebar">
                     <header class="L-sidebar__header">
-                        <a href="{% url "index" %}" class="L-sidebar__nav-link">
+                        <a href="{% url "index" %}" class="L-sidebar__header__link">
                             <i class="bi bi-wrench-adjustable-circle"></i>
-                            <span class="L-sidebar__span">Rhenus HD - AMS</span>
+                            <span class="L-sidebar__header__logo">Rhenus HD - AMS</span>
                         </a>
                     </header>
                     <nav class="L-sidebar__nav">
                         <ul class="L-sidebar__list">
                             <li class="L-sidebar__list__item">
-                                <a href="#"
+                                <a href="{% url "homepage" %}"
                                    hx-get="{% url "homepage" %}"
                                    hx-target="#content"
                                    hx-indicator="#spinner"
@@ -49,7 +49,7 @@
                                    class="L-sidebar__nav-link"><i class="bi bi-speedometer2"></i><span class="L-sidebar__span">Dashboard</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link"><i class="bi bi-tools"></i><span class="L-sidebar__span">Vytvořit</span></a>
+                                <a href="#" class="L-sidebar__nav-link L-active"><i class="bi bi-tools"></i><span class="L-sidebar__span">Vytvořit</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
                                 <a href="#" class="L-sidebar__nav-link"><i class="bi bi-table"></i><span class="L-sidebar__span">Zakázky</span></a>
@@ -63,13 +63,16 @@
                             <li class="L-sidebar__list__item">
                                 <form method="post" action="{% url 'logout' %}">
                                     {% csrf_token %}
-                                    <button type="submit" class="L-sidebar__nav-link">
+                                    <button type="submit" class="L-sidebar__btn">
                                         <i class="bi bi-box-arrow-left"></i><span class="L-sidebar__span">Logout</span>
                                     </button>
                                 </form>
                             </li>
                         </ul>
                     </nav>
+                    <button id="themeToggler" class="L-sidebar__btn">
+                        <i class="fa-solid fa-toggle-off"></i><span class="L-sidebar__span">Theme</span>
+                    </button>
                     {% include "app_sprava_montazi/partials/spinner.html" %}
                     <footer class="L-sidebar__footer">
                         <p>DaliborZ-tech ©2025</p>
@@ -77,16 +80,13 @@
                 </aside>
                 <!-- Right side content -->
                 <main class="P-main">
-                    <section id="content">
-                        {% block content %}
+                    {% block content %}
+                        <section id="content" hx-swap="innerHTML">
                             <!-- Main content will go here -->
-                        {% endblock content %}
-                    </section>
+                        </section>
+                    {% endblock content %}
                 </main>
             </div>
-            <button id="themeToggler" class="btn btn-primary">
-                <i class="fa-solid fa-toggle-off"></i><span class="ms-2">Přepnout motiv</span>
-            </button>
         </div>
         {% block scripts %}
             <!-- JavaScript files go here -->
