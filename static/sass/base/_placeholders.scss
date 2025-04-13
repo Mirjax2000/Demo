@@ -22,11 +22,11 @@
 }
 
 %transition {
-  transition: 0.2s all ease-in-out;
+  transition: 0.1s all ease-in-out;
 }
 
 %transition-theme {
   transition:
-    1s background-color ease-in-out,
-    1s color ease-in-out;
+    0.8s background-color ease-in-out,
+    0.8s color ease-in-out;
 }

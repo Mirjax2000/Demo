@@ -34,11 +34,11 @@
 }
 
 .L-sidebar__nav-link.link {
-  transition: 0.2s all ease-in-out;
+  transition: 0.1s all ease-in-out;
 }
 
 .P-body, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
-  transition: 1s background-color ease-in-out, 1s color ease-in-out;
+  transition: 0.8s background-color ease-in-out, 0.8s color ease-in-out;
 }
 
 .L-sidebar {
@@ -80,8 +80,9 @@
   display: block;
   text-decoration: none;
   color: var(--txt-default);
-  padding: 0.5em 1em;
+  padding: 0.3em 0.5em;
   border-left: 3px solid transparent;
+  cursor: pointer;
 }
 .L-sidebar__nav-link.link:hover {
   border-left: 3px solid var(--success);
@@ -106,7 +107,7 @@
   color: var(--txt-default);
   display: block;
   text-decoration: none;
-  padding: 0.5em 1em;
+  padding: 0.3em 0.5em;
   border-left: 3px solid transparent;
 }
 .L-sidebar__btn:hover {
@@ -123,7 +124,7 @@
 }
 .L-sidebar__list__item {
   width: 100%;
-  margin-bottom: 0.3em;
+  margin-bottom: 1em;
 }
 .L-sidebar__list__item:last-child {
   margin-top: 3em;

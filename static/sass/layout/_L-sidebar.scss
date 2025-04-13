@@ -60,8 +60,9 @@
     display: block;
     text-decoration: none;
     color: var(--txt-default);
-    padding: 0.5em 1em;
+    padding: 0.3em 0.5em;
     border-left: 3px solid transparent;
+    cursor: pointer;
 
     &:hover {
       border-left: 3px solid var(--success);
@@ -86,7 +87,7 @@
     color: var(--txt-default);
     display: block;
     text-decoration: none;
-    padding: 0.5em 1em;
+    padding: 0.3em 0.5em;
     border-left: 3px solid transparent;
 
     &:hover {
@@ -106,7 +107,7 @@
 
     &__item {
       width: 100%;
-      margin-bottom: 0.3em;
+      margin-bottom: 1em;
 
       &:last-child {
         margin-top: 3em;
