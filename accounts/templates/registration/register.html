@@ -1,21 +1,42 @@
 {% extends "base.html" %}
-{% load static %}
 {% block title %}
     Sign Up
 {% endblock title %}
 {% block content %}
     <section class="L-form">
         <div>
-            <h2>Registrace</h2>
+            <header class="L-form__header">
+                <h2>Registrace</h2>
+            </header>
             <form class="L-form__form" method="post">
                 {% csrf_token %}
-                {{ form.as_p }}
+                <div class="L-form__group">
+                    <label for="{{ form.username.id_for_label }}">
+                        {{ form.username.label }}
+                        {{ form.username }}
+                    </label>
+                </div>
+                <div class="L-form__group">
+                    <label for="{{ form.password1.id_for_label }}">
+                        {{ form.password1.label }}
+                        {{ form.password1 }}
+                    </label>
+                </div>
+                <div class="L-form__group">
+                    <label for="{{ form.password2.id_for_label }}">
+                        {{ form.password2.label }}
+                        {{ form.password2 }}
+                    </label>
+                </div>
                 <button type="submit" class="btn btn-primary">Registrovat</button>
             </form>
             {% if form.non_field_errors %}<div>{{ form.non_field_errors }}</div>{% endif %}
             <p>
-                Máte už účet? <a href="{% url 'login' %}">Přihlaste se</a>
+                Máte účet?&nbsp;&nbsp;<a href="{% url 'login' %}">Přihlaste se</a>
             </p>
         </div>
+        <div class="L-form__error">{{ form.username.errors }}</div>
+        <div class="L-form__error">{{ form.password1.errors }}</div>
+        <div class="L-form__error">{{ form.password2.errors }}</div>
     </section>
 {% endblock content %}

@@ -14,6 +14,7 @@
   --bck-sidebar: #f8f9fa;
   --bck-body: #f8f9fa;
   --txt-default: #212529;
+  --txt-muted: #d6d6d6;
 }
 
 [data-theme=dark] {
@@ -22,9 +23,14 @@
   --bck-sidebar: #212529;
   --bck-body: #212529;
   --txt-default: #f8f9fa;
+  --txt-muted: #a8a8a8;
 }
 
 /* --- placeholders --- */
+.L-form {
+  margin-inline: auto;
+}
+
 .L-sidebar {
   user-select: none;
 }
@@ -149,6 +155,29 @@
 .bi-wrench-adjustable-circle {
   color: var(--success);
   font-size: 2rem;
+}
+
+.L-form {
+  width: clamp(12.5rem, 100%, 31.25rem);
+  margin-top: 1em;
+  color: var(--txt-default);
+}
+.L-form__form {
+  padding-block: 0.5em;
+}
+.L-form__header {
+  margin-bottom: 1em;
+}
+.L-form__header h2 {
+  display: inline-block;
+  text-decoration: underline;
+}
+.L-form__group label,
+.L-form__group input {
+  display: block;
+}
+.L-form__group input {
+  margin-bottom: 1em;
 }
 
 .C-spinner {

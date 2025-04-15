@@ -4,8 +4,6 @@
 - ucetni - user
 - SuperUser - SuperUser
 
-
-
 ## TODO ##
 - uchovat v pameti theme
 
@@ -13,4 +11,10 @@
 - max width 1140px
 - min width 720px
 - include templates, budou v partials adresarich
-- target id pro include elementy musi byt ve stejnym templatu aby bylo videt kam se to targetuje
+- hx-target: "id"  pro include elementy musi byt ve stejnym templatu aby bylo videt kam se to targetuje
+
+
+## db model ##
+
+- misto urceni:
+    -   
