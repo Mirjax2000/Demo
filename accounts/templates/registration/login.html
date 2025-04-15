@@ -4,17 +4,36 @@
 {% endblock title %}
 {% block content %}
   <section class="L-form">
-    <div>
-      <h2>Přihlášení</h2>
+    <div class="L-form__wrapper-form">
+      <header class="L-form__header">
+        <h2>Přihlášení</h2>
+      </header>
       <form class="L-form__form" method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        <div class="L-form__group">
+          <label for="{{ form.username.id_for_label }}">
+            {{ form.username.label }}
+            {{ form.username }}
+          </label>
+        </div>
+        <div class="L-form__group">
+          <label for="{{ form.username.id_for_label }}">
+            {{ form.password.label }}
+            {{ form.password }}
+          </label>
+        </div>
         <button type="submit" class="btn btn-primary">Odeslat</button>
       </form>
-      {% if form.non_field_errors %}<div>{{ form.non_field_errors }}</div>{% endif %}
       <p>
         Nemáte účet? <a href="{% url 'signup' %}">Zaregistrujte se</a>
       </p>
     </div>
+    {% if form.errors %}
+      <div class="L-form__wrapper-error">
+        <div class="L-form__error">{{ form.non_field_errors }}</div>
+        <div class="L-form__error">{{ form.username.errors }}</div>
+        <div class="L-form__error">{{ form.password.errors }}</div>
+      </div>
+    {% endif %}
   </section>
 {% endblock content %}
