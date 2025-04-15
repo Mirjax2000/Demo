@@ -22,13 +22,32 @@
   }
 
   &__group {
+    margin-bottom: 1em;
+
     label,
     input {
       display: block;
+      width: 100%;
     }
+  }
 
-    input {
-      margin-bottom: 1em;
+  &__wrapper-form {
+    @extend %margin-in;
+
+    width: 50%;
+  }
+
+  &__wrapper-error {
+    @extend %border-radius;
+    @extend %select-none;
+
+    padding: 1em;
+    border: 1px solid var(--border);
+    color: var(--error);
+
+    ul {
+      padding: 0;
+      list-style: none;
     }
   }
 }
