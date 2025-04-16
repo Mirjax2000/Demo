@@ -9,7 +9,7 @@ from django.views.generic.edit import FormView
 class RegisterView(FormView):
     template_name = "registration/register.html"
     form_class = UserCreationForm
-    success_url = reverse_lazy("/")
+    success_url = reverse_lazy("index")
 
     def form_valid(self, form):
         user = form.save()
