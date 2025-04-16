@@ -16,6 +16,7 @@ class AdviceStatus(models.TextChoices):
 
 
 class TeamType(models.TextChoices):
+    EMPTY = "Empty", "Nevyplneno"
     BY_CUSTOMER = "By customer", "Zákazníkem"
     BY_DELIVERY_CREW = "By delivery crew", "Dopravcem"
     BY_ASSEMBLY_CREW = "By assembly crew", "Montážníky"
@@ -95,10 +96,10 @@ class Order(models.Model):
     #     blank=True,
     #     verbose_name="Kontakt",
     # )
-    evidence_term = models.DateField(
+    evidence_termin = models.DateField(
         null=True, blank=False, verbose_name="Termín evidence"
     )
-    delivery_term = models.DateField(
+    delivery_termin = models.DateField(
         null=True, blank=True, verbose_name="Termín doručení"
     )
     # article = models.ForeignKey(
@@ -118,7 +119,8 @@ class Order(models.Model):
     team_type = models.CharField(
         max_length=32,
         blank=True,
-        choices=TEAM_TYPE_CHOICES,
+        choices=TeamType.choices,
+        default=TeamType.EMPTY,
         verbose_name="Realizace kým",
     )
     team = models.ForeignKey(
