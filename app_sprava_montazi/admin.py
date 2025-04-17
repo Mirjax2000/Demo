@@ -4,19 +4,16 @@ from .models import Order, Team
 
 
 class OrderAdmin(admin.ModelAdmin):
-    search_fields = [
-        "order_number",
-        "mandant",
-        "customer_name",
-    ]
+    search_fields = ["order_number"]
     list_filter = ["status"]
-    list_display = ["order_number", "mandant", "customer_name", "team_type", "team"]
+    list_display = ["order_number", "distrib_hub", "mandant", "team_type", "team"]
 
 
 class TeamAdmin(admin.ModelAdmin):
-    search_fields = ["company", "city"]
+    search_fields = ["name", "city"]
+    list_filter = ["active"]
     list_display = (
-        "company",
+        "name",
         "city",
         "region",
         "active",
