@@ -4,8 +4,10 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content="Rhenus HD - Asset Management System for maintenance and repair operations" />
-        <meta name="keywords" content="rhenus, asset management, maintenance, repair, operations, industrial services" />
+        <meta name="description"
+              content="Rhenus HD - Asset Management System for maintenance and repair operations" />
+        <meta name="keywords"
+              content="rhenus, asset management, maintenance, repair, operations, industrial services" />
         <title>
             {% block title %}
                 Rhenus
@@ -45,7 +47,10 @@
                                 <a href="#" class="L-sidebar__nav-link link"><i class="bi bi-tools"></i><span class="L-sidebar__span">Vytvořit</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link link"><i class="bi bi-table"></i><span class="L-sidebar__span">Zakázky</span></a>
+                                <a hx-get="{% url "orders_all" %}"
+                                   hx-target="#content"
+                                   hx-indicator="#spinner"
+                                   class="L-sidebar__nav-link link"><i class="bi bi-table"></i><span class="L-sidebar__span">Zakázky</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
                                 <a href="#" class="L-sidebar__nav-link link"><i class="bi bi-grid"></i><span class="L-sidebar__span">Sestavy</span></a>
