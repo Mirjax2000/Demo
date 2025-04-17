@@ -20,6 +20,7 @@ app_sprava_montazi: list = [
     path("", IndexView.as_view(), name="index"),
     path("homepage/", HomePageView.as_view(), name="homepage"),
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
+    path("orders_all/", DashboardView.as_view(), name="orders_all"),
 ]
 
 app_accounts_urls: list = [
