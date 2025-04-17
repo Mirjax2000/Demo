@@ -1,19 +1,18 @@
-# import os
-# import sys
-# from pathlib import Path
+import os
+import sys
+from pathlib import Path
 
-# import django
-# from rich.console import Console
+import django
+from rich.console import Console
 
-# root_path = Path(__file__).resolve().parent.parent
-# sys.path.append(str(root_path))
+root_path = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_path))
 
-# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "knihovna.settings")
-# django.setup()
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "AMS.settings")
+django.setup()
+from app_sprava_montazi import models
 
-# from myapp.models import Author
-
-# cons: Console = Console()
+cons: Console = Console()
 
 
 # def populate():
@@ -27,5 +26,5 @@
 #     print("Databáze byla naplněna!")
 
 
-# if __name__ == "__main__":
-#     populate()
+if __name__ == "__main__":
+    ...
