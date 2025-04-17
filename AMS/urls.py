@@ -10,7 +10,12 @@ from django.urls import path
 from django.urls.conf import include
 
 from accounts.views import RegisterView
-from app_sprava_montazi.views import DashboardView, IndexView, HomePageView
+from app_sprava_montazi.views import (
+    DashboardView,
+    IndexView,
+    HomePageView,
+    OrdersAllView,
+)
 
 urlpatterns: list = [
     path("admin/", admin.site.urls),
@@ -20,6 +25,7 @@ app_sprava_montazi: list = [
     path("", IndexView.as_view(), name="index"),
     path("homepage/", HomePageView.as_view(), name="homepage"),
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
+    path("orders_all/", OrdersAllView.as_view(), name="orders_all"),
 ]
 
 app_accounts_urls: list = [

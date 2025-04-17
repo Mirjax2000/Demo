@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", default="")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: list = []
 
 
 # Application definition
@@ -49,7 +49,12 @@ INSTALLED_APPS = [
     "django_dump_load_utf8",
     # --- restframework
     "rest_framework",
+    # --- model Phone
+    "phonenumber_field",
 ]
+PHONENUMBER_DEFAULT_REGION = "CZ"
+PHONENUMBER_DB_FORMAT = "E164"
+PHONENUMBER_DEFAULT_FORMAT = "E164"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

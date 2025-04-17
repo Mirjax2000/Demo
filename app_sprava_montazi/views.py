@@ -22,3 +22,7 @@ class DashboardView(LoginRequiredMixin, View):
         template_name = "app_sprava_montazi/partials/dashboard.html"
         sleep(2)
         return render(self.request, template_name)
+
+
+class OrdersAllView(LoginRequiredMixin, View):
+    pass
