@@ -126,6 +126,19 @@ class Article(Model):
         return str(self.article)
 
 
+class DistribHub(Model):
+    code = CharField(max_length=3, unique=True)
+    city = CharField(max_length=32)
+    slug = SlugField(blank=True, unique=True)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(f"{self.code}-{self.city}")
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return str(self.slug)
+
+
 class Order(Model):
     """Zakazka"""
 
@@ -134,39 +147,43 @@ class Order(Model):
         unique=True,
         verbose_name="Číslo zakázky",
     )
-    mandant = CharField(max_length=4, verbose_name="Mandant")
-    distrib_hub = CharField(max_length=32, verbose_name="Místo určení")
-    status = CharField(
-        max_length=32,
-        choices=Status.choices,
-        default=Status.NEW,
-        verbose_name="Stav",
-    )
-    client = ForeignKey(
-        Client,
-        null=True,
-        blank=True,
+    distrib_hub = ForeignKey(
+        DistribHub,
         on_delete=PROTECT,
-        verbose_name="Zákazník",
+        verbose_name="Místo určení",
     )
+    # mandant = CharField(max_length=4, verbose_name="Mandant")
+    # status = CharField(
+    #     max_length=32,
+    #     choices=Status.choices,
+    #     default=Status.NEW,
+    #     verbose_name="Stav",
+    # )
+    # client = ForeignKey(
+    #     Client,
+    #     null=True,
+    #     blank=True,
+    #     on_delete=PROTECT,
+    #     verbose_name="Zákazník",
+    # )
 
-    evidence_termin = DateField(
-        null=True,
-        blank=False,
-        verbose_name="Termín evidence",
-    )
-    delivery_termin = DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name="Termín doručení",
-    )
-    article = models.ForeignKey(
-        Article,
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        verbose_name="Artikl",
-    )
+    # evidence_termin = DateField(
+    #     null=True,
+    #     blank=False,
+    #     verbose_name="Termín evidence",
+    # )
+    # delivery_termin = DateTimeField(
+    #     null=True,
+    #     blank=True,
+    #     verbose_name="Termín doručení",
+    # )
+    # article = models.ForeignKey(
+    #     Article,
+    #     on_delete=models.PROTECT,
+    #     null=True,
+    #     blank=True,
+    #     verbose_name="Artikl",
+    # )
     # advice = models.ForeignKey(
     #     "Advice",
     #     on_delete=models.SET_NULL,
@@ -174,21 +191,21 @@ class Order(Model):
     #     blank=True,
     #     verbose_name="Avizace",
     # )
-    team_type = models.CharField(
-        max_length=32,
-        blank=True,
-        choices=TeamType.choices,
-        default=TeamType.BY_CUSTOMER,
-        verbose_name="Realizace kým",
-    )
-    team = models.ForeignKey(
-        Team,
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        verbose_name="Montážní tým",
-    )
-    notes = models.TextField(blank=True, verbose_name="Poznámky")
+    # team_type = models.CharField(
+    #     max_length=32,
+    #     blank=True,
+    #     choices=TeamType.choices,
+    #     default=TeamType.BY_CUSTOMER,
+    #     verbose_name="Realizace kým",
+    # )
+    # team = models.ForeignKey(
+    #     Team,
+    #     on_delete=models.PROTECT,
+    #     null=True,
+    #     blank=True,
+    #     verbose_name="Montážní tým",
+    # )
+    # notes = models.TextField(blank=True, verbose_name="Poznámky")
     created = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Vytvořeno",
