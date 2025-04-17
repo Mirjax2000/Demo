@@ -152,7 +152,7 @@ class Order(Model):
         on_delete=PROTECT,
         verbose_name="Místo určení",
     )
-    # mandant = CharField(max_length=4, verbose_name="Mandant")
+    mandant = CharField(max_length=4, verbose_name="Mandant")
     # status = CharField(
     #     max_length=32,
     #     choices=Status.choices,
