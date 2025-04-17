@@ -182,4 +182,6 @@ pids
 .rts2_cache_es/
 .rts2_cache_umd/
 
+# csv soubory
+*.csv
 # End of combined .gitignore
