@@ -136,7 +136,7 @@ class DistribHub(Model):
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return str(self.slug)
+        return f"{self.code}-{self.city}"
 
 
 class Order(Model):

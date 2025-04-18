@@ -14,6 +14,10 @@ $light-theme: (
   "bck": (
     "sidebar": #f8f9fa,
     "body": #f8f9fa,
+    "table-head": #cfcfcf,
+    "table-row-even": #f3f3f3,
+    "table-row-odd": #fff,
+    "table-row-hover": #e5e5e5,
   ),
   "txt": (
     "default": #212529,
@@ -28,6 +32,10 @@ $dark-theme: (
   "bck": (
     "sidebar": #212529,
     "body": #212529,
+    "table-head": #212529,
+    "table-row-odd": #2c2c2c,
+    "table-row-even": #212529,
+    "table-row-hover": #4f4f4f,
   ),
   "txt": (
     "default": #f8f9fa,

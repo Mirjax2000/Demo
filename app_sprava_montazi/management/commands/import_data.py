@@ -11,16 +11,19 @@ cons: Console = Console()
 
 
 class Command(BaseCommand):
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **kwargs) -> None:
         directory: Path = Path("./files")
         file: str = "dataset.csv"
         file_path: Path = directory / file
+        #
         dataset: pd.DataFrame = pd.read_csv(file_path, encoding="cp1250", delimiter=";")
         dataset.columns = dataset.columns.str.strip()
         dataset = dataset[["Místo urcení", "Císlo zakázky", "Mandant"]]
         dataset_dict: list = dataset.to_dict(orient="records")
+        #
         for item in dataset_dict:
             distrib_hub_obj = DistribHub.objects.get(code=item["Místo urcení"])
+            #
             order, created = Order.objects.get_or_create(
                 order_number=item["Císlo zakázky"],
                 distrib_hub=distrib_hub_obj,

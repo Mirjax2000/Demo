@@ -8,10 +8,10 @@
 
   flex-direction: column;
   min-height: 100dvh;
-  width: 12.5rem;
+  width: 11.25rem;
   background-color: var(--bck-sidebar);
   box-shadow: 1px 0 1px var(--shadow);
-  padding: 1em;
+  padding: 0.5em;
 
   &__header {
     flex: 0 0 auto;
@@ -22,13 +22,10 @@
 
     &__link {
       @extend %transition-theme;
+      @include flex(space-between, center);
 
       color: var(--txt-default);
       text-decoration: none;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 0.5em;
     }
 
     &__logo {
@@ -80,14 +77,14 @@
   &__btn {
     @extend %transition-theme;
 
-    border: none;
-    text-align: left;
     width: 100%;
+    display: block;
+    text-align: left;
+    padding: 0.3em 0.5em;
     background-color: var(--bck-sidebar);
     color: var(--txt-default);
-    display: block;
     text-decoration: none;
-    padding: 0.3em 0.5em;
+    border: none;
     border-left: 3px solid transparent;
 
     &:hover {
@@ -110,8 +107,7 @@
       margin-bottom: 1em;
 
       &:last-child {
-        margin-top: 3em;
-        margin-bottom: 0;
+        margin-block: 3em 0;
       }
     }
   }
@@ -139,5 +135,5 @@
 
 .bi-wrench-adjustable-circle {
   color: var(--success);
-  font-size: 2rem;
+  font-size: 1.8rem;
 }

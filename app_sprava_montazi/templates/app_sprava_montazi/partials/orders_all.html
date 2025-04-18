@@ -1,16 +1,18 @@
-<div class="container mt-3">
-    <h2 class="mb-4">Seznam zakázek</h2>
-    <table class="table table-bordered table-hover table-dark table-striped">
-        <thead class="table-dark">
+<div class="container mt-3 L-table">
+    <h2 class="mb-2">
+        <i class="bi bi-list-ul L-table__icon"></i> Seznam zakázek
+    </h2>
+    <table class="L-table__table table table-hover">
+        <thead>
             <tr>
                 <th>Název</th>
                 <th>Místo určení</th>
                 <th>Mandant</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="L-table__body">
             {% for order in page_obj %}
-                <tr>
+                <tr class="L-table__body__link">
                     <td>{{ order.order_number }}</td>
                     <td>{{ order.distrib_hub }}</td>
                     <td>{{ order.mandant }}</td>
@@ -23,10 +25,10 @@
         </tbody>
     </table>
     <nav>
-        <ul class="pagination justify-content-center">
+        <ul class="pagination justify-content-end">
             {% if page_obj.has_previous %}
                 <li class="page-item">
-                    <a class="page-link bg-dark text-light"
+                    <a class="page-link L-table__pagination"
                        hx-get="{% url 'orders_all' %}?page={{ page_obj.previous_page_number }}"
                        hx-indicator="#spinner"
                        hx-target="#content"
@@ -34,17 +36,17 @@
                 </li>
             {% else %}
                 <li class="page-item disabled">
-                    <span class="page-link bg-dark text-light">Předchozí</span>
+                    <span class="page-link L-table__pagination">Předchozí</span>
                 </li>
             {% endif %}
             {% for num in page_obj.paginator.page_range %}
                 {% if page_obj.number == num %}
                     <li class="page-item active">
-                        <span class="page-link">{{ num }}</span>
+                        <span class="L-table__pagination page-link ">{{ num }}</span>
                     </li>
                 {% else %}
                     <li class="page-item">
-                        <a class="page-link bg-dark text-light"
+                        <a class="L-table__pagination page-link "
                            hx-get="{% url 'orders_all' %}?page={{ num }}"
                            hx-indicator="#spinner"
                            hx-target="#content"
@@ -54,7 +56,7 @@
             {% endfor %}
             {% if page_obj.has_next %}
                 <li class="page-item">
-                    <a class="page-link bg-dark text-light"
+                    <a class="L-table__pagination page-link "
                        hx-get="{% url 'orders_all' %}?page={{ page_obj.next_page_number }}"
                        hx-target="#content"
                        hx-indicator="#spinner"
@@ -62,7 +64,7 @@
                 </li>
             {% else %}
                 <li class="page-item disabled">
-                    <span class="page-link bg-dark text-light">Další</span>
+                    <span class="page-link L-table__pagination">Další</span>
                 </li>
             {% endif %}
         </ul>
