@@ -51,7 +51,7 @@
   transition: 0.1s all ease-in-out;
 }
 
-.P-body, .L-table__table thead th, .L-table__body__link:nth-child(even) td, .L-table__body__link:nth-child(odd) td, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
+.P-body, .L-table__table thead th, .L-table__body__link:nth-child(even) td, .L-table__body__link:nth-child(odd) td, .page-item.disabled span, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
   transition: 0.5s background-color ease-in-out, 0.5s color ease-in-out;
 }
 
