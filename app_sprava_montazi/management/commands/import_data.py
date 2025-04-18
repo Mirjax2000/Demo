@@ -19,7 +19,7 @@ class Command(BaseCommand):
         dataset.columns = dataset.columns.str.strip()
         dataset = dataset[["Místo urcení", "Císlo zakázky", "Mandant"]]
         dataset_dict: list = dataset.to_dict(orient="records")
-        for item in dataset_dict[25:31]:
+        for item in dataset_dict:
             distrib_hub_obj = DistribHub.objects.get(code=item["Místo urcení"])
             order, created = Order.objects.get_or_create(
                 order_number=item["Císlo zakázky"],
