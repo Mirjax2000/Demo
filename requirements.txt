@@ -18,12 +18,16 @@ mccabe==0.7.0
 mdurl==0.1.2
 mypy==1.15.0
 mypy-extensions==1.0.0
+numpy==2.2.4
+pandas==2.2.3
 pathspec==0.12.1
 phonenumbers==9.0.3
 platformdirs==4.3.7
 Pygments==2.19.1
 pylint==3.3.6
+python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
+pytz==2025.2
 PyYAML==6.0.2
 regex==2024.11.6
 rich==14.0.0
