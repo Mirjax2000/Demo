@@ -2,12 +2,16 @@
     <h3 class="mb-3">
         <i class="bi bi-list-ul L-table__icon"></i> Seznam zakázek
     </h3>
-    <form class="mb-3">
-        <div class="input-group">
-            <input class="form-control form-control-lg"
-                   type="search"
-                   placeholder="Hledej ...">
-            <button class="btn btn-primary px-4" type="submit">
+    <form>
+        <div class="input-group mb-3">
+            <select class="form-select" style="max-width: 150px;">
+                <option selected>All Categories</option>
+                <option value="1">Category 1</option>
+                <option value="2">Category 2</option>
+                <option value="3">Category 3</option>
+            </select>
+            <input type="search" class="form-control" placeholder="Hledej ...">
+            <button class="btn btn-primary" type="submit">
                 <i class="bi bi-search"></i>
             </button>
         </div>
