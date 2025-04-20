@@ -29,9 +29,9 @@ class Status(TextChoices):
 
 
 class TeamType(TextChoices):
-    BY_CUSTOMER = "By customer", "Zákazníkem"
-    BY_DELIVERY_CREW = "By delivery crew", "Dopravcem"
-    BY_ASSEMBLY_CREW = "By assembly crew", "Montážníky"
+    BY_CUSTOMER = "By_customer", "Zákazníkem"
+    BY_DELIVERY_CREW = "By_delivery_crew", "Dopravcem"
+    BY_ASSEMBLY_CREW = "By_assembly_crew", "Montážníky"
 
 
 class AdviceStatus(TextChoices):
@@ -40,10 +40,10 @@ class AdviceStatus(TextChoices):
 
 
 class Whom(TextChoices):
-    TO_CUSTOMER = "To customer", "Zákazníkovi"
-    TO_DELIVERY_CREW = "To delivery crew", "Dopravci"
-    TO_ASSEMBLY_CREW = "To assembly crew", "Montážníkům"
-    TO_CUSTOMER_CARE = "To customer care", "Zákaznickému servisu"
+    TO_CUSTOMER = "To_customer", "Zákazníkovi"
+    TO_DELIVERY_CREW = "To_delivery_crew", "Dopravci"
+    TO_ASSEMBLY_CREW = "To_assembly_crew", "Montážníkům"
+    TO_CUSTOMER_CARE = "To_customer_care", "Zákaznickému servisu"
 
 
 class Team(Model):
@@ -55,7 +55,7 @@ class Team(Model):
     city = CharField(max_length=32, verbose_name="Město")
     region = CharField(max_length=32, blank=True, verbose_name="Region")
     phone = PhoneNumberField(max_length=17)
-    email = EmailField(max_length=64, verbose_name="E-mail")
+    email = EmailField(max_length=64, blank=True, verbose_name="E-mail")
     active = BooleanField(default=True, verbose_name="Aktivní")
     price_per_hour = DecimalField(
         max_digits=6,
@@ -153,12 +153,12 @@ class Order(Model):
         verbose_name="Místo určení",
     )
     mandant = CharField(max_length=4, verbose_name="Mandant")
-    # status = CharField(
-    #     max_length=32,
-    #     choices=Status.choices,
-    #     default=Status.NEW,
-    #     verbose_name="Stav",
-    # )
+    status = CharField(
+        max_length=32,
+        choices=Status.choices,
+        default=Status.NEW,
+        verbose_name="Stav",
+    )
     # client = ForeignKey(
     #     Client,
     #     null=True,
@@ -169,7 +169,7 @@ class Order(Model):
 
     # evidence_termin = DateField(
     #     null=True,
-    #     blank=False,
+    #     blank=True,
     #     verbose_name="Termín evidence",
     # )
     # delivery_termin = DateTimeField(
@@ -191,21 +191,21 @@ class Order(Model):
     #     blank=True,
     #     verbose_name="Avizace",
     # )
-    # team_type = models.CharField(
-    #     max_length=32,
-    #     blank=True,
-    #     choices=TeamType.choices,
-    #     default=TeamType.BY_CUSTOMER,
-    #     verbose_name="Realizace kým",
-    # )
-    # team = models.ForeignKey(
-    #     Team,
-    #     on_delete=models.PROTECT,
-    #     null=True,
-    #     blank=True,
-    #     verbose_name="Montážní tým",
-    # )
-    # notes = models.TextField(blank=True, verbose_name="Poznámky")
+    team_type = models.CharField(
+        max_length=32,
+        blank=True,
+        choices=TeamType.choices,
+        default=TeamType.BY_CUSTOMER,
+        verbose_name="Realizace kým",
+    )
+    team = models.ForeignKey(
+        Team,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name="Montážní tým",
+    )
+    notes = models.TextField(blank=True, verbose_name="Poznámky")
     created = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Vytvořeno",
@@ -217,6 +217,17 @@ class Order(Model):
 
     def __str__(self) -> str:
         return str(self.order_number)
+
+    class Meta:
+        ordering = ["-created"]
+
+
+class Upload(models.Model):
+    file = models.FileField(upload_to="uploads/")
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"{self.file}"
 
     class Meta:
         ordering = ["-created"]
