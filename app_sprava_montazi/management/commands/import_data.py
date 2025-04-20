@@ -23,17 +23,17 @@ class Command(BaseCommand):
 
         dataset = dataset[["misto-urceni", "cislo-zakazky", "mandant"]]
         cons.print(dataset.head)
-        # dataset_dict: list = dataset.to_dict(orient="records")
-        #
-        # for item in dataset_dict:
-        #     distrib_hub_obj = DistribHub.objects.get(code=item["Místo urcení"])
-        #     #
-        #     order, created = Order.objects.get_or_create(
-        #         order_number=item["Císlo zakázky"],
-        #         distrib_hub=distrib_hub_obj,
-        #         mandant=item["Mandant"],
-        #     )
-        #     if created:
-        #         cons.log(f"{order} vytvoren")
-        #     else:
-        #         cons.log(f"{order} jiz existuje")
+        dataset_dict: list = dataset.to_dict(orient="records")
+
+        for item in dataset_dict:
+            distrib_hub_obj = DistribHub.objects.get(code=item["misto-urceni"])
+            #
+            order, created = Order.objects.get_or_create(
+                order_number=item["cislo-zakazky"],
+                distrib_hub=distrib_hub_obj,
+                mandant=item["mandant"],
+            )
+            if created:
+                cons.log(f"{order} vytvoren")
+            else:
+                cons.log(f"{order} jiz existuje")
