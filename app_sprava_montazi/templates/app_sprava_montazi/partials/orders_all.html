@@ -1,14 +1,15 @@
 <div class="container mt-2 L-table">
-    <h3 class="mb-3">
+    <h3 class="mb-3 u-text-warning">
         <i class="bi bi-list-ul L-table__icon"></i> Seznam zakázek
     </h3>
     <form>
         <div class="input-group mb-3">
             <select class="form-select" style="max-width: 150px;">
-                <option selected>All Categories</option>
-                <option value="1">Category 1</option>
-                <option value="2">Category 2</option>
-                <option value="3">Category 3</option>
+                <option value="1">Všechny</option>
+                <option value="2">Otevřené</option>
+                <option value="3">Realizované</option>
+                <option value="4">Zrušené</option>
+                <option value="5">Vyúčtované</option>
             </select>
             <input type="search" class="form-control" placeholder="Hledej ...">
             <button class="btn btn-primary" type="submit">
@@ -23,6 +24,9 @@
                 <th>Název</th>
                 <th>Místo určení</th>
                 <th>Mandant</th>
+                <th>Realizace kým</th>
+                <th>Montážní tým</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody class="L-table__body">
@@ -31,6 +35,17 @@
                     <td>{{ order.order_number }}</td>
                     <td>{{ order.distrib_hub }}</td>
                     <td>{{ order.mandant }}</td>
+                    {% if order.team_type == "By_assembly_crew" %}
+                        <td class="u-txt-success">{{ order.get_team_type_display }}</td>
+                    {% else %}
+                        <td>{{ order.get_team_type_display }}</td>
+                    {% endif %}
+                    {% if order.team == None and order.team_type == "By_assembly_crew" %}
+                        <td class="u-txt-warning">Nevybráno</td>
+                    {% else %}
+                        <td class="u-txt-trans">{{ order.team }}</td>
+                    {% endif %}
+                    <td>{{ order.get_status_display }}</td>
                 </tr>
             {% empty %}
                 <tr>
