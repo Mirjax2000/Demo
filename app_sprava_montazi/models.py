@@ -94,7 +94,7 @@ class Client(Model):
         blank=True,
         verbose_name="Číslo popisné",
     )
-    city = CharField(max_length=32, verbose_name="Město")
+    city = CharField(max_length=32, blank=True, verbose_name="Město")
     zip_code = CharField(max_length=5, verbose_name="PSČ")
     phone = PhoneNumberField(max_length=17, blank=True)
     email = EmailField(blank=True, verbose_name="E-mail")
@@ -159,13 +159,13 @@ class Order(Model):
         default=Status.NEW,
         verbose_name="Stav",
     )
-    # client = ForeignKey(
-    #     Client,
-    #     null=True,
-    #     blank=True,
-    #     on_delete=PROTECT,
-    #     verbose_name="Zákazník",
-    # )
+    client = ForeignKey(
+        Client,
+        null=True,
+        blank=True,
+        on_delete=PROTECT,
+        verbose_name="Zákazník",
+    )
 
     # evidence_termin = DateField(
     #     null=True,
@@ -214,6 +214,13 @@ class Order(Model):
         auto_now=True,
         verbose_name="Upraveno",
     )
+
+    def is_missing_team(self) -> bool:
+        """
+        Zkontroluje, jestli chybí tým pro montážní posádku.
+        Tato metoda ověřuje, zda není přiřazen žádný tým, pokud je team_type nastaven na BY_ASSEMBLY_CREW.
+        """
+        return self.team is None and self.team_type == TeamType.BY_ASSEMBLY_CREW
 
     def __str__(self) -> str:
         return str(self.order_number)
