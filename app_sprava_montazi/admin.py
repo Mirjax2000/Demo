@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Order, Team, DistribHub, Upload
+from .models import Order, Team, DistribHub, Upload, Client
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -8,17 +8,33 @@ class OrderAdmin(admin.ModelAdmin):
         "order_number",
         "distrib_hub",
         "mandant",
+        "client",
         "team_type",
         "team",
     ]
     list_filter = ["status"]
-    list_display = ["order_number", "distrib_hub", "mandant", "team_type", "team"]
+    list_display = [
+        "order_number",
+        "distrib_hub",
+        "mandant",
+        "client",
+        "team_type",
+        "team",
+    ]
     list_per_page = 15
 
 
 class DistribHubAdmin(admin.ModelAdmin):
     search_fields = ["code", "city"]
     list_display = ("slug", "code", "city")
+    list_per_page = 15
+
+
+class ClientAdmin(admin.ModelAdmin):
+    search_fields = ["name", "email"]
+    list_display = ("name", "street", "city", "zip_code", "incomplete")
+    list_filter = ["incomplete"]
+
     list_per_page = 15
 
 
@@ -29,7 +45,8 @@ class TeamAdmin(admin.ModelAdmin):
     list_per_page = 15
 
 
-admin.site.register(Order, OrderAdmin)
 admin.site.register(DistribHub, DistribHubAdmin)
-admin.site.register(Upload)
+admin.site.register(Client, ClientAdmin)
+admin.site.register(Order, OrderAdmin)
 admin.site.register(Team, TeamAdmin)
+admin.site.register(Upload)
