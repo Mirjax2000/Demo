@@ -21,9 +21,11 @@
     <table class="L-table__table table table-hover">
         <thead>
             <tr>
-                <th>Název</th>
+                <th>Číslo zakázky</th>
                 <th>Místo určení</th>
                 <th>Mandant</th>
+                <th>Zákazník</th>
+                <th>PSC</th>
                 <th>Realizace kým</th>
                 <th>Montážní tým</th>
                 <th>Status</th>
@@ -32,20 +34,43 @@
         <tbody class="L-table__body">
             {% for order in page_obj %}
                 <tr class="L-table__body__link">
+                    <!---->
                     <td>{{ order.order_number }}</td>
+                    <!---->
                     <td>{{ order.distrib_hub }}</td>
+                    <!---->
                     <td>{{ order.mandant }}</td>
+                    <!---->
+                    {% if order.client.incomplete %}
+                        <td class="u-txt-warning">
+                            <i class="bi bi-exclamation-diamond-fill"></i>&nbsp;{{ order.client }}
+                        </td>
+                    {% else %}
+                        <td class="u-txt-success">
+                            <i class="fa-solid fa-check"></i>&nbsp;{{ order.client }}
+                        </td>
+                    {% endif %}
+                    <!---->
+                    <td>{{ order.client.zip_code }}</td>
+                    <!---->
                     {% if order.team_type == "By_assembly_crew" %}
                         <td class="u-txt-success">{{ order.get_team_type_display }}</td>
                     {% else %}
                         <td>{{ order.get_team_type_display }}</td>
                     {% endif %}
-                    {% if order.team == None and order.team_type == "By_assembly_crew" %}
-                        <td class="u-txt-warning">Nevybráno</td>
+                    <!---->
+                    {% if order.is_missing_team %}
+                        <td class="u-txt-warning">⚠️&nbsp;Nevybráno</td>
+                    {% elif order.team %}
+                        <td class="u-txt-success">
+                            <i class="fa-solid fa-check"></i>&nbsp;{{ order.team }}
+                        </td>
                     {% else %}
-                        <td class="u-txt-trans">{{ order.team }}</td>
+                        <td class="u-txt-center">–</td>
                     {% endif %}
+                    <!---->
                     <td>{{ order.get_status_display }}</td>
+                    <!---->
                 </tr>
             {% empty %}
                 <tr>
