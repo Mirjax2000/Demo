@@ -35,7 +35,7 @@
             {% for order in page_obj %}
                 <tr class="L-table__body__link">
                     <!---->
-                    <td>{{ order.order_number }}</td>
+                    <td>{{ order.order_number|upper }}</td>
                     <!---->
                     <td>{{ order.distrib_hub }}</td>
                     <!---->
