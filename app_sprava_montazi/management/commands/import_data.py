@@ -61,7 +61,7 @@ class Command(BaseCommand):
                 name=name.strip(), zip_code=item["psc"]
             )
             if client_created:
-                cons.log(f"{client} vytvoren", style="blue")
+                cons.log(f"🆗 {client} vytvoren", style="blue")
                 client_count += 1
             else:
                 cons.log(f"{client} jiz existuje", style="yellow")
@@ -74,10 +74,13 @@ class Command(BaseCommand):
                 client=client,
             )
             if order_created:
-                cons.log(f"{order} vytvoren", style="blue")
+                cons.log(f"🆗 {order}: vytvoren", style="blue")
+                cons.log("...")
                 order_count += 1
+
             else:
-                cons.log(f"{order} jiz existuje", style="yellow")
+                cons.log(f"⚠️ {order}: jiz existuje ", style="yellow")
+                cons.log("...")
                 duplicit_count += 1
         #
         cons.log("-" * 35)
