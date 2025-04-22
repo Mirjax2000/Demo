@@ -32,12 +32,23 @@ class Command(BaseCommand):
                 "prijmeni",
                 "krestni-jmeno",
                 "psc",
+                "montaz",
             ]
         ]
         dataset["krestni-jmeno"] = dataset["krestni-jmeno"].fillna("")
-        cons.print(dataset.head)
-        dataset_dict: list = dataset.to_dict(orient="records")
+        # filtr datasetu
+        # montaz == 1
+        # montaz == 0 a cislo_zakazky končí na -R
+        filtered_dataset = dataset[
+            (dataset["montaz"] == 1)
+            | ((dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-R")))
+        ]
+        cons.print(dataset.info())
+        cons.print(filtered_dataset.info())
 
+        dataset_dict: list = filtered_dataset.to_dict(orient="records")
+        order_count, client_count, duplicit_count = 0, 0, 0
+        #
         for item in dataset_dict:
             # ziskavam FK DistribHubu
             distrib_hub_obj = DistribHub.objects.get(code=item["misto-urceni"])
@@ -48,6 +59,7 @@ class Command(BaseCommand):
             )
             if client_created:
                 cons.log(f"{client} vytvoren", style="blue")
+                client_count += 1
             else:
                 cons.log(f"{client} jiz existuje", style="yellow")
             #
@@ -60,5 +72,13 @@ class Command(BaseCommand):
             )
             if order_created:
                 cons.log(f"{order} vytvoren", style="blue")
+                order_count += 1
             else:
                 cons.log(f"{order} jiz existuje", style="yellow")
+                duplicit_count += 1
+        #
+        cons.log("-" * 35)
+        cons.log(f"clientu vytvoreno: {client_count}", style="blue")
+        cons.log(f"zakazek vytvoreno: {order_count}", style="blue")
+        cons.log(f"Duplicitni zakazky: {duplicit_count}", style="red bold")
+        cons.log("-" * 35)
