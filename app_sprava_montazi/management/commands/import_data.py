@@ -2,7 +2,7 @@
 
 from pathlib import Path
 import pandas as pd
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandParser
 from rich.console import Console
 from django.utils.text import slugify
 from app_sprava_montazi.models import DistribHub, Order, Client
@@ -12,9 +12,12 @@ cons: Console = Console()
 
 
 class Command(BaseCommand):
+    def add_arguments(self, parser: CommandParser) -> None:
+        parser.add_argument("file", type=str, help="pridej soubor csv")
+
     def handle(self, *args, **kwargs) -> None:
         directory: Path = Path("./files")
-        file: str = "dataset.csv"
+        file: str = kwargs["file"]
         file_path: Path = directory / file
         #
         dataset: pd.DataFrame = pd.read_csv(
@@ -78,6 +81,7 @@ class Command(BaseCommand):
                 duplicit_count += 1
         #
         cons.log("-" * 35)
+        cons.log(f"celkovy pocet zaznamu v datasetu je: {len(dataset)}")
         cons.log(f"clientu vytvoreno: {client_count}", style="blue")
         cons.log(f"zakazek vytvoreno: {order_count}", style="blue")
         cons.log(f"Duplicitni zakazky: {duplicit_count}", style="red bold")
