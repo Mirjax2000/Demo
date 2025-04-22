@@ -39,15 +39,16 @@ class Command(BaseCommand):
             ]
         ]
         dataset["krestni-jmeno"] = dataset["krestni-jmeno"].fillna("")
+        dataset["cislo-zakazky"] = dataset["cislo-zakazky"].apply(slugify)
         # filtr datasetu
         # montaz == 1
         # montaz == 0 a cislo_zakazky končí na -R
         filtered_dataset = dataset[
             (dataset["montaz"] == 1)
-            | ((dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-R")))
+            | ((dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-r")))
         ]
-        cons.print(dataset.info())
-        cons.print(filtered_dataset.info())
+
+        cons.print(dataset.head())
 
         dataset_dict: list = filtered_dataset.to_dict(orient="records")
         order_count, client_count, duplicit_count = 0, 0, 0
