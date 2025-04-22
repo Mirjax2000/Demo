@@ -1,7 +1,9 @@
-from django.core.management.base import BaseCommand
-from rich.console import Console
-from app_sprava_montazi.models import DistribHub
+"""Custom command distrib_hub"""
+
 from typing import TypedDict
+from rich.console import Console
+from django.core.management.base import BaseCommand
+from app_sprava_montazi.models import DistribHub
 
 cons: Console = Console()
 
