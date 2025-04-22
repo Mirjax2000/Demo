@@ -132,7 +132,8 @@ class DistribHub(Model):
     slug = SlugField(blank=True, unique=True)
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(f"{self.code}-{self.city}")
+        if self.slug != slugify(f"{self.code}-{self.city}"):
+            self.slug = slugify(f"{self.code}-{self.city}")
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
