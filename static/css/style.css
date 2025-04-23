@@ -113,6 +113,10 @@
   margin-top: 2.5rem;
 }
 
+.u-s-none {
+  user-select: none;
+}
+
 .L-sidebar {
   display: flex;
   justify-content: flex-start;

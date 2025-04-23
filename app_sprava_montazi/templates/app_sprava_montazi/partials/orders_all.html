@@ -67,22 +67,22 @@
                     <td>{{ order.client.zip_code }}</td>
                     <!--Realizace kym-->
                     {% if order.team_type == "By_assembly_crew" %}
-                        <td class="u-txt-success">{{ order.get_team_type_display }}</td>
+                        <td class="u-txt-success u-s-none">{{ order.get_team_type_display }}</td>
                     {% else %}
-                        <td>{{ order.get_team_type_display }}</td>
+                        <td class="u-s-none">{{ order.get_team_type_display }}</td>
                     {% endif %}
                     <!--Team-->
                     {% if order.is_missing_team %}
-                        <td class="u-txt-warning">⚠️&nbsp;Nevybráno</td>
+                        <td class="u-txt-warning u-s-none">⚠️&nbsp;Nevybráno</td>
                     {% elif order.team %}
-                        <td class="u-txt-success">
+                        <td class="u-txt-success u-s-none">
                             <i class="fa-solid fa-check"></i>&nbsp;{{ order.team }}
                         </td>
                     {% else %}
-                        <td class="u-txt-center">–</td>
+                        <td class="u-txt-center u-s-none">–</td>
                     {% endif %}
                     <!--Status-->
-                    <td>{{ order.get_status_display }}</td>
+                    <td class="u-s-none">{{ order.get_status_display }}</td>
                     <!--poznamka-->
                     {% if order.notes_first_10 %}
                         <td title="{{ order.notes }}">{{ order.notes_first_10 }}</td>
@@ -90,13 +90,13 @@
                         <td>-</td>
                     {% endif %}
                     <!--CTA icons-->
-                    <td class="L-table__update">
+                    <td class="L-table__update u-s-none">
                         <i class="fa-solid fa-file-pen me-2"></i>
                     </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">Žádné objednávky</td>
+                    <td colspan="4" class="text-center u-s-none">Žádné objednávky</td>
                 </tr>
             {% endfor %}
         </tbody>
