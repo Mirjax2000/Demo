@@ -314,8 +314,8 @@
 }
 
 .P-container {
-  width: clamp(720px, 100%, 1140px);
-  padding-inline: 1em;
+  width: clamp(45rem, 100%, 90rem);
+  padding-inline: 0.5em;
   margin-inline: auto;
 }
 
