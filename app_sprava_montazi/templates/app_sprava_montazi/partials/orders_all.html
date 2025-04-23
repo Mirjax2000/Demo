@@ -57,9 +57,9 @@
                     {% endif %}
                     <!--zakaznik-->
                     {% if order.client.incomplete %}
-                        <td class="u-txt-warning">⚠️&nbsp;{{ order.client }}</td>
+                        <td title="{{ order.client.name }}" class="u-txt-warning">⚠️&nbsp;{{ order.client }}</td>
                     {% else %}
-                        <td class="u-txt-success">
+                        <td title="{{ order.client.name }}" class="u-txt-success">
                             <i class="fa-solid fa-check"></i>&nbsp;{{ order.client }}
                         </td>
                     {% endif %}
