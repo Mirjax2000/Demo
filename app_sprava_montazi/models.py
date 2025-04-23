@@ -26,7 +26,7 @@ class Status(TextChoices):
     REALIZED = "Realized", "Realizováno"
     BILLED = "Billed", "Vyúčtovaný"
     CANCELED = "Canceled", "Zrušeno"
-    HIDDEN = "Hidden", "Zkryto"
+    HIDDEN = "Hidden", "Skryto"
 
 
 class TeamType(TextChoices):
