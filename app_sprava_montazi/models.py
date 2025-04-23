@@ -86,7 +86,7 @@ class Team(Model):
 
 class Client(Model):
     name = CharField(
-        max_length=50,
+        max_length=75,
         verbose_name="Jméno zákazníka",
     )
     street = CharField(max_length=50, blank=True, verbose_name="Ulice")
@@ -108,7 +108,9 @@ class Client(Model):
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return f"{self.name}"
+        if len(self.name) > 15:
+            return f"{str(self.name)[:15]} ..."
+        return self.name
 
 
 class Article(Model):
@@ -222,7 +224,7 @@ class Order(Model):
 
     def notes_first_10(self) -> str | None:
         if self.notes:
-            notes: str = str(self.notes)[:15]
+            notes: str = str(self.notes)[:10]
             return notes
         return None
 
