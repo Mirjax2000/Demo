@@ -11,6 +11,18 @@ from app_sprava_montazi.models import DistribHub, Order, Client
 cons: Console = Console()
 
 
+def create_client(item) -> tuple[Client, bool]:
+    name: str = f"{item['prijmeni']} {item['krestni-jmeno']}"
+    client, client_created = Client.objects.get_or_create(
+        name=name.strip(), zip_code=item["psc"]
+    )
+    if client_created:
+        cons.log(f"🆗 {client} vytvoren", style="blue")
+    else:
+        cons.log(f"{client} jiz existuje", style="yellow")
+    return client, client_created
+
+
 class Command(BaseCommand):
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("file", type=str, help="pridej soubor csv")
@@ -25,6 +37,7 @@ class Command(BaseCommand):
             encoding="cp1250",
             delimiter=";",
         )
+        #
         dataset.columns = dataset.columns.str.strip()
         dataset.columns = [slugify(col) for col in dataset.columns]
         dataset = dataset[
@@ -36,6 +49,8 @@ class Command(BaseCommand):
                 "krestni-jmeno",
                 "psc",
                 "montaz",
+                "avizovany-termin",
+                "erfassungstermin",
             ]
         ]
         dataset["krestni-jmeno"] = dataset["krestni-jmeno"].fillna("")
@@ -51,38 +66,37 @@ class Command(BaseCommand):
         cons.print(dataset.head())
 
         dataset_dict: list = filtered_dataset.to_dict(orient="records")
+        #
         order_count, client_count, duplicit_count = 0, 0, 0
         #
         for item in dataset_dict:
             # ziskavam FK DistribHubu
             distrib_hub_obj = DistribHub.objects.get(code=item["misto-urceni"])
+
+            #
             # vytvarim FK clienta
-            name: str = f"{item['prijmeni']} {item['krestni-jmeno']}"
-            client, client_created = Client.objects.get_or_create(
-                name=name.strip(), zip_code=item["psc"]
-            )
+            client, client_created = create_client(item)
             if client_created:
-                cons.log(f"🆗 {client} vytvoren", style="blue")
                 client_count += 1
-            else:
-                cons.log(f"{client} jiz existuje", style="yellow")
             #
             # vytvarim Order
-            order, order_created = Order.objects.get_or_create(
-                order_number=item["cislo-zakazky"],
-                distrib_hub=distrib_hub_obj,
-                mandant=item["mandant"],
-                client=client,
-            )
-            if order_created:
-                cons.log(f"🆗 {order}: vytvoren", style="blue")
-                cons.log("...")
-                order_count += 1
+            # order, order_created = Order.objects.get_or_create(
+            #     order_number=item["cislo-zakazky"],
+            #     distrib_hub=distrib_hub_obj,
+            #     mandant=item["mandant"],
+            #     client=client,
+            #     delivery_termin="",
+            #     evidence_termin="",
+            # )
+            # if order_created:
+            #     cons.log(f"🆗 {order}: vytvoren", style="blue")
+            #     cons.log("...")
+            #     order_count += 1
 
-            else:
-                cons.log(f"⚠️ {order}: jiz existuje ", style="yellow")
-                cons.log("...")
-                duplicit_count += 1
+            # else:
+            #     cons.log(f"⚠️ {order}: jiz existuje ", style="yellow")
+            #     cons.log("...")
+            #     duplicit_count += 1
         #
         cons.log("-" * 35)
         cons.log(f"celkovy pocet zaznamu v datasetu je: {len(dataset)}")
