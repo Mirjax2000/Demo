@@ -220,6 +220,12 @@ class Order(Model):
         verbose_name="Upraveno",
     )
 
+    def notes_first_10(self) -> str | None:
+        if self.notes:
+            notes: str = str(self.notes)[:15]
+            return notes
+        return None
+
     def is_missing_team(self) -> bool:
         """
         Zkontroluje, jestli chybí tým pro montážní posádku.
