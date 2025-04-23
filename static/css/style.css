@@ -299,6 +299,11 @@
   background-color: var(--bck-table-head);
   color: var(--txt-default);
 }
+.page-item.disabled__update {
+  text-align: center;
+  cursor: default;
+  color: var(--success);
+}
 
 .C-spinner {
   width: 100%;

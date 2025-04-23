@@ -67,4 +67,10 @@
     background-color: var(--bck-table-head);
     color: var(--txt-default);
   }
+
+  &__update {
+    text-align: center;
+    cursor: default;
+    color: var(--success);
+  }
 }
