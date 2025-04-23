@@ -30,6 +30,7 @@
                 <th>Realizace kým</th>
                 <th>Montážní tým</th>
                 <th>Status</th>
+                <th>Poznámka</th>
                 <th>update</th>
             </tr>
         </thead>
@@ -43,12 +44,14 @@
                     <!--mandant-->
                     <td>{{ order.mandant }}</td>
                     <!--Termin doruceni-->
-                    <td>{{ order.delivery_termin }}</td>
+                    {% if order.delivery_termin %}
+                        <td>{{ order.delivery_termin }}</td>
+                    {% else %}
+                        <td>-</td>
+                    {% endif %}
                     <!--zakaznik-->
                     {% if order.client.incomplete %}
-                        <td class="u-txt-warning">
-                            <i class="bi bi-exclamation-diamond-fill"></i>&nbsp;{{ order.client }}
-                        </td>
+                        <td class="u-txt-warning">⚠️&nbsp;{{ order.client }}</td>
                     {% else %}
                         <td class="u-txt-success">
                             <i class="fa-solid fa-check"></i>&nbsp;{{ order.client }}
@@ -74,6 +77,12 @@
                     {% endif %}
                     <!--Status-->
                     <td>{{ order.get_status_display }}</td>
+                    <!--poznamka-->
+                    {% if order.notes_first_10 %}
+                        <td title="{{ order.notes }}">{{ order.notes_first_10 }}</td>
+                    {% else %}
+                        <td>-</td>
+                    {% endif %}
                     <!--CAT icons-->
                     <td class="L-table__update">
                         <i class="fa-solid fa-file-pen"></i>
