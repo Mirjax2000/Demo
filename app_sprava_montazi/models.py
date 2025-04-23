@@ -26,6 +26,7 @@ class Status(TextChoices):
     REALIZED = "Realized", "Realizováno"
     BILLED = "Billed", "Vyúčtovaný"
     CANCELED = "Canceled", "Zrušeno"
+    HIDDEN = "Hidden", "Zkryto"
 
 
 class TeamType(TextChoices):
@@ -168,16 +169,17 @@ class Order(Model):
         verbose_name="Zákazník",
     )
 
-    # evidence_termin = DateField(
-    #     null=True,
-    #     blank=True,
-    #     verbose_name="Termín evidence",
-    # )
-    # delivery_termin = DateTimeField(
-    #     null=True,
-    #     blank=True,
-    #     verbose_name="Termín doručení",
-    # )
+    delivery_termin = DateField(
+        verbose_name="Termín doručení",
+    )
+
+    evidence_termin = DateField(
+        verbose_name="Termín evidence",
+    )
+    montage_termin = DateTimeField(
+        blank=True,
+        verbose_name="Termín montáže",
+    )
     # article = models.ForeignKey(
     #     Article,
     #     on_delete=models.PROTECT,
@@ -196,7 +198,7 @@ class Order(Model):
         max_length=32,
         blank=True,
         choices=TeamType.choices,
-        default=TeamType.BY_CUSTOMER,
+        default=TeamType.BY_ASSEMBLY_CREW,
         verbose_name="Realizace kým",
     )
     team = models.ForeignKey(
