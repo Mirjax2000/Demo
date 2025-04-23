@@ -47,11 +47,13 @@ def create_order(
         client=client,
         delivery_termin=delivery_termin,
         evidence_termin=evidence_termin,
+        notes=item["poznamka-mandanta"],
     )
     if order_created:
         cons.log(f"🆗 {order}: vytvoren", style="blue")
     else:
-        cons.log(f"⚠️ {order}: jiz existuje ", style="red bold")
+        cons.log(f"⚠️ {order}: jiz existuje ", style="red")
+    cons.log("...")
 
     return order, order_created
 
@@ -76,10 +78,12 @@ def create_dataset(file_path) -> DataFrame:
             "montaz",
             "avizovany-termin",
             "erfassungstermin",
+            "poznamka-mandanta",
         ]
     ]
     dataset["krestni-jmeno"] = dataset["krestni-jmeno"].fillna("")
     dataset["avizovany-termin"] = dataset["avizovany-termin"].fillna(False)
+    dataset["poznamka-mandanta"] = dataset["poznamka-mandanta"].fillna("")
     dataset["cislo-zakazky"] = dataset["cislo-zakazky"].apply(slugify)
     return dataset
 
