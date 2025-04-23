@@ -29,6 +29,7 @@
                 <th>Realizace kým</th>
                 <th>Montážní tým</th>
                 <th>Status</th>
+                <th>update</th>
             </tr>
         </thead>
         <tbody class="L-table__body">
@@ -71,6 +72,9 @@
                     <!---->
                     <td>{{ order.get_status_display }}</td>
                     <!---->
+                    <td class="L-table__update">
+                        <i class="fa-solid fa-file-pen"></i>
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
