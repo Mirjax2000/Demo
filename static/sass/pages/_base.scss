@@ -9,7 +9,7 @@
 }
 
 .P-container {
-  @include container(45rem, 90rem, 0.5em);
+  @include container(45rem, 90%, 5%);
 }
 
 .P-wrapper {

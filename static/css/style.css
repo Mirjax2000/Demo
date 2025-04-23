@@ -4,6 +4,7 @@
   --accent: #fd7e14;
   --success: #0d6efd;
   --success-darker: #004ec3;
+  --success-lighter: #428cfc;
   --info: #198754;
   --error: #dc3545;
 }
@@ -258,7 +259,7 @@
 }
 
 .L-table__table {
-  font-size: 90%;
+  font-size: 80%;
 }
 .L-table__table thead th {
   color: var(--txt-default);
@@ -290,6 +291,27 @@
   background-color: var(--bck-table-head);
   cursor: pointer;
 }
+.L-table__select {
+  max-width: 12.5rem;
+  padding-right: 1rem;
+  margin-right: 1rem;
+  cursor: pointer;
+}
+.L-table__update {
+  text-align: center;
+}
+.L-table__update i {
+  cursor: pointer;
+  color: var(--success-lighter);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5176470588);
+  transition: transform 0.1s ease-in-out;
+}
+.L-table__update i:hover {
+  transform: scale(1.2);
+}
+.L-table__update i:active {
+  transform: scale(0.9);
+}
 
 .page-item.disabled {
   pointer-events: none;
@@ -298,11 +320,6 @@
 .page-item.disabled span {
   background-color: var(--bck-table-head);
   color: var(--txt-default);
-}
-.page-item.disabled__update {
-  text-align: center;
-  cursor: default;
-  color: var(--success);
 }
 
 .C-spinner {
@@ -319,8 +336,8 @@
 }
 
 .P-container {
-  width: clamp(45rem, 100%, 90rem);
-  padding-inline: 0.5em;
+  width: clamp(45rem, 100%, 90%);
+  padding-inline: 5%;
   margin-inline: auto;
 }
 

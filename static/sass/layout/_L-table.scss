@@ -3,7 +3,7 @@
 
 .L-table {
   &__table {
-    font-size: 90%;
+    font-size: 80%;
 
     thead th {
       @extend %transition-theme;
@@ -55,8 +55,35 @@
     background-color: var(--bck-table-head);
     cursor: pointer;
   }
+
+  &__select {
+    max-width: 12.5rem;
+    padding-right: 1rem;
+    margin-right: 1rem;
+    cursor: pointer;
+  }
+
+  &__update {
+    text-align: center;
+
+    i {
+      cursor: pointer;
+      color: var(--success-lighter);
+      text-shadow: 1px 1px 2px #00000084;
+      transition: transform 0.1s ease-in-out;
+
+      &:hover {
+        transform: scale(1.2);
+      }
+
+      &:active {
+        transform: scale(0.9);
+      }
+    }
+  }
 }
 
+// pagination disabled
 .page-item.disabled {
   pointer-events: none;
   opacity: 0.2;
@@ -66,11 +93,5 @@
 
     background-color: var(--bck-table-head);
     color: var(--txt-default);
-  }
-
-  &__update {
-    text-align: center;
-    cursor: default;
-    color: var(--success);
   }
 }
