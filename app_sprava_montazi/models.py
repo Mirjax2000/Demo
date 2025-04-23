@@ -170,14 +170,16 @@ class Order(Model):
     )
 
     delivery_termin = DateField(
+        blank=True,
+        null=True,
         verbose_name="Termín doručení",
     )
-
     evidence_termin = DateField(
         verbose_name="Termín evidence",
     )
     montage_termin = DateTimeField(
         blank=True,
+        null=True,
         verbose_name="Termín montáže",
     )
     # article = models.ForeignKey(
