@@ -23,3 +23,13 @@
 .P-sidebar {
   flex: 0 0 auto;
 }
+
+[data-opacity="full"] {
+  transition: all 0.3s ease-in-out;
+  opacity: 1;
+}
+
+[data-opacity="half"] {
+  transition: all 0.3s ease-in-out;
+  opacity: 0.5;
+}

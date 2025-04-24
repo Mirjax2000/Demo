@@ -263,7 +263,7 @@
 }
 
 .L-table__table {
-  font-size: 80%;
+  font-size: 0.75rem;
 }
 .L-table__table thead th {
   color: var(--txt-default);
@@ -358,6 +358,16 @@
 
 .P-sidebar {
   flex: 0 0 auto;
+}
+
+[data-opacity=full] {
+  transition: all 0.3s ease-in-out;
+  opacity: 1;
+}
+
+[data-opacity=half] {
+  transition: all 0.3s ease-in-out;
+  opacity: 0.5;
 }
 
 /*# sourceMappingURL=style.css.map */
