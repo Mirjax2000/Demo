@@ -5,7 +5,7 @@
     const leftSide = document.getElementById("leftSide");
     const navLinks = leftSide.querySelectorAll(".L-sidebar__nav-link");
 
-    // navlinky prepinani classy L-active
+    // Navlinky - přepínání classy L-active
     navLinks.forEach((link) => {
         link.addEventListener("click", () => {
             navLinks.forEach((l) => l.classList.remove("L-active"));
@@ -15,7 +15,9 @@
 
     function toggleTheme() {
         const current = html.dataset.theme;
-        html.dataset.theme = current === "light" ? "dark" : "light";
+        const newTheme = current === "light" ? "dark" : "light";
+        html.dataset.theme = newTheme;
+        localStorage.setItem("theme", newTheme); // Uložení tématu
     }
 
     themeToggler.addEventListener("click", toggleTheme);
