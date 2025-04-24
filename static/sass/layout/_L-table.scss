@@ -4,8 +4,6 @@
 .L-table {
   &__table {
     font-size: 0.75rem;
-    table-layout: auto;
-    border-collapse: collapse;
 
     thead th {
       @extend %transition-theme;
