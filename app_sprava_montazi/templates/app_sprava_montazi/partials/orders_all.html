@@ -16,7 +16,11 @@
                     <!---->
                 {% endfor %}
             </select>
-            <input type="search" name="q" class="form-control" placeholder="Hledej ...">
+            <input type="search"
+                   name="query"
+                   class="form-control"
+                   placeholder="Hledej ..."
+                   id="inputSearch">
             <button class="btn btn-primary" type="submit">
                 <span>Hledej&nbsp;</span>
                 <i class="bi bi-search"></i>
@@ -24,7 +28,9 @@
         </div>
     </form>
     <hr>
-    <table class="L-table__table table table-hover">
+    <table class="L-table__table table table-hover"
+           id="orderTable"
+           data-opacity="full">
         <thead>
             <tr>
                 <th>Číslo zakázky</th>
@@ -103,7 +109,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center u-s-none">Žádné objednávky</td>
+                    <td colspan="6" class="text-center fw-bold u-s-none">Žádné objednávky</td>
                 </tr>
             {% endfor %}
         </tbody>
