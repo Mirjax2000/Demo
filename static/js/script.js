@@ -4,6 +4,10 @@
     const themeToggler = document.getElementById("themeToggler");
     const leftSide = document.getElementById("leftSide");
     const navLinks = leftSide.querySelectorAll(".L-sidebar__nav-link");
+    const content = document.getElementById("content");
+    const inputSearch = content.querySelector("#inputSearch");
+    const orderTable = content.querySelector("#orderTable");
+
 
     // Navlinky - přepínání classy L-active
     navLinks.forEach((link) => {
@@ -21,4 +25,23 @@
     }
 
     themeToggler.addEventListener("click", toggleTheme);
+    // 
+    //  nastaveni opacity kdyz zapisujeme do searche
+    content.addEventListener("input", function (event) {
+        if (event.target && event.target.id === "inputSearch") {
+            const inputSearch = event.target;
+            const orderTable = document.getElementById("orderTable")
+            if (inputSearch.value.length >= 1) {
+                orderTable.dataset.opacity = "half"; // Nastaví hodnotu data-opacity na "half"
+            } else {
+                orderTable.dataset.opacity = "full"; // Nastaví hodnotu data-opacity na "full"
+            }
+        }
+    });
+    
+    if (inputSearch && orderTable) {
+        if (inputSearch.value.length === 0) {
+            orderTable.dataset.opacity = "full";
+        }
+    }
 })();
