@@ -15,6 +15,14 @@
         </title>
         {% include "includes/css.html" %}
     </head>
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme) {
+                document.documentElement.setAttribute("data-theme", savedTheme);
+            }
+        })();
+    </script>
     <!---->
     <body class="P-body">
         <div class="P-container">
