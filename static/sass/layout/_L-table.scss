@@ -4,12 +4,14 @@
 .L-table {
   &__table {
     font-size: 0.75rem;
+    table-layout: auto;
+    border-collapse: collapse;
 
     thead th {
       @extend %transition-theme;
 
-      color: var(--txt-default);
-      background-color: var(--bck-table-head);
+      color: var(--txt-default) !important;
+      background-color: var(--bck-table-head) !important;
     }
   }
 
@@ -31,8 +33,8 @@
       td {
         @extend %transition-theme;
 
-        color: var(--txt-default);
-        background-color: var(--bck-table-row-even);
+        color: var(--txt-default) !important;
+        background-color: var(--bck-table-row-even) !important;
       }
     }
 
@@ -40,8 +42,8 @@
       td {
         @extend %transition-theme;
 
-        color: var(--txt-default);
-        background-color: var(--bck-table-row-odd);
+        color: var(--txt-default) !important;
+        background-color: var(--bck-table-row-odd) !important;
       }
     }
   }

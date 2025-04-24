@@ -49,7 +49,7 @@ body.home {
 
 [data-opacity=half] {
   transition: all 0.3s ease-in-out;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 /* --- placeholders --- */
@@ -281,10 +281,12 @@ body.home {
 
 .L-table__table {
   font-size: 0.75rem;
+  table-layout: auto;
+  border-collapse: collapse;
 }
 .L-table__table thead th {
-  color: var(--txt-default);
-  background-color: var(--bck-table-head);
+  color: var(--txt-default) !important;
+  background-color: var(--bck-table-head) !important;
 }
 .L-table__body__link {
   border-color: var(--border);
@@ -297,12 +299,12 @@ body.home {
   border: 1px solid var(--border);
 }
 .L-table__body__link:nth-child(even) td {
-  color: var(--txt-default);
-  background-color: var(--bck-table-row-even);
+  color: var(--txt-default) !important;
+  background-color: var(--bck-table-row-even) !important;
 }
 .L-table__body__link:nth-child(odd) td {
-  color: var(--txt-default);
-  background-color: var(--bck-table-row-odd);
+  color: var(--txt-default) !important;
+  background-color: var(--bck-table-row-odd) !important;
 }
 .L-table__icon {
   font-size: 80%;
