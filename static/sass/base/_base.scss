@@ -1,6 +1,16 @@
 /* --- base --- */
 body,
 body.home {
-    opacity: 1;
-    background-color: var(--scheme-clr-1);
+  opacity: 1;
+  background-color: var(--scheme-clr-1);
+}
+
+[data-opacity="full"] {
+  transition: all 0.3s ease-in-out;
+  opacity: 1;
+}
+
+[data-opacity="half"] {
+  transition: all 0.3s ease-in-out;
+  opacity: 0.6;
 }

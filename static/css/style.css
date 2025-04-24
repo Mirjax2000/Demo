@@ -35,6 +35,23 @@
   --txt-muted: #a8a8a8;
 }
 
+/* --- base --- */
+body,
+body.home {
+  opacity: 1;
+  background-color: var(--scheme-clr-1);
+}
+
+[data-opacity=full] {
+  transition: all 0.3s ease-in-out;
+  opacity: 1;
+}
+
+[data-opacity=half] {
+  transition: all 0.3s ease-in-out;
+  opacity: 0.6;
+}
+
 /* --- placeholders --- */
 .L-form, .L-form__wrapper-form {
   margin-inline: auto;
@@ -358,16 +375,6 @@
 
 .P-sidebar {
   flex: 0 0 auto;
-}
-
-[data-opacity=full] {
-  transition: all 0.3s ease-in-out;
-  opacity: 1;
-}
-
-[data-opacity=half] {
-  transition: all 0.3s ease-in-out;
-  opacity: 0.5;
 }
 
 /*# sourceMappingURL=style.css.map */
