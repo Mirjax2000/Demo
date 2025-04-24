@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic import TemplateView, View
 from .models import Order, DistribHub, Status
+from django.db.models import Q
 
 cons: Console = Console()
 
@@ -56,10 +57,17 @@ class OrdersSearchView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs) -> HttpResponse:
         status: str = request.POST.get("status", "").strip()
+        query: str = request.POST.get("query", "").strip().lower()
         orders = Order.objects.all()
+        if query:
+            orders = orders.filter(
+                Q(order_number__icontains=query)
+                | Q(client__name__icontains=query)
+                | Q(distrib_hub__slug__icontains=query)
+                | Q(mandant__icontains=query)
+            )
         if status:
             orders = orders.filter(status=status)
-
         #
         orders = orders.order_by("-created")
         #
@@ -73,3 +81,17 @@ class OrdersSearchView(LoginRequiredMixin, View):
         }
         #
         return render(request, "app_sprava_montazi/partials/orders_all.html", context)
+
+
+# class SearchListView(LoginRequiredMixin, ListView):
+#     model = Contact
+#     template_name = "partials/contact-list.html"
+#     context_object_name = "contacts"
+
+#     def get_queryset(self):
+#         user = self.request.user
+#         query = self.request.GET.get("search", "")
+#         return Contact.objects.filter(
+#             Q(name__icontains=query) | Q(email__icontains=query),
+#             user=user,
+#         ).order_by("-created_at")
