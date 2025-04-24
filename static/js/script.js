@@ -5,8 +5,7 @@
     const leftSide = document.getElementById("leftSide");
     const navLinks = leftSide.querySelectorAll(".L-sidebar__nav-link");
     const content = document.getElementById("content");
-    const inputSearch = content.querySelector("#inputSearch");
-    const orderTable = content.querySelector("#orderTable");
+
 
 
     // Navlinky - přepínání classy L-active
@@ -38,10 +37,32 @@
             }
         }
     });
-    
-    if (inputSearch && orderTable) {
-        if (inputSearch.value.length === 0) {
-            orderTable.dataset.opacity = "full";
-        }
+
+    if (content) {
+        content.addEventListener('htmx:load', function () {
+            const inputSearch = content.querySelector("#inputSearch");
+            const orderTable = content.querySelector("#orderTable");
+            if (inputSearch && orderTable) {
+                if (inputSearch.value.length === 0) {
+                    orderTable.dataset.opacity = "full";
+                    console.log("HTMX obsah načten a zpracován");
+                }
+            }
+            if (orderTable) {
+                $(orderTable).DataTable({
+                    paging: false,
+                    rowReorder: true,
+                    fixedColumns: true,
+                    layout: {
+                        topEnd: null
+                    }
+                });
+            }
+        });
+
     }
 })();
+
+
+
+
