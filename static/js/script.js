@@ -3,8 +3,11 @@
     const html = document.documentElement;
     const themeToggler = document.getElementById("themeToggler");
     const orderTable = document.getElementById("orderTable");
-
-
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+        html.dataset.theme = savedTheme;
+        html.classList.add(savedTheme);
+    }
 
     function toggleTheme() {
         const current = html.dataset.theme;
@@ -14,13 +17,12 @@
 
         localStorage.setItem("theme", newTheme);
 
-        html.classList.remove(current); // odeber staré téma
-        html.classList.add(newTheme);   // přidej nové téma
+        html.classList.remove(current);
+        html.classList.add(newTheme);
     }
 
     themeToggler.addEventListener("click", toggleTheme);
     // 
-
 
     if (orderTable) {
         $(orderTable).DataTable({
