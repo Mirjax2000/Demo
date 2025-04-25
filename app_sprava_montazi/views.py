@@ -50,11 +50,11 @@ class OrdersView(LoginRequiredMixin, ListView):
     context_object_name = "orders"
 
     def get_queryset(self) -> QuerySet[Any]:
-        orders = Order.objects.all().order_by("-created")
+        orders = Order.objects.all()
         status: str = self.request.GET.get("status", "").strip()
         if status:
             orders = orders.filter(status=status)
-        return orders
+        return orders.order_by("-order_number")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

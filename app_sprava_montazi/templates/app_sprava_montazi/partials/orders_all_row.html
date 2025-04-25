@@ -46,6 +46,8 @@
         {% endif %}
         <!--Status-->
         <td class="u-s-none">{{ order.get_status_display }}</td>
+        <!--Articles-->
+        <td class="u-s-none">{{ order.articles.count }}</td>
         <!--poznamka-->
         {% if order.notes_first_10 %}
             <td title="{{ order.notes }}">{{ order.notes_first_10 }}</td>

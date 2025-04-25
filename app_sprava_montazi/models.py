@@ -15,6 +15,7 @@ from django.db.models import (
     SlugField,
     TextChoices,
     TextField,
+    PositiveIntegerField,
 )
 from django.utils.text import slugify
 from phonenumber_field.modelfields import PhoneNumberField
@@ -111,22 +112,6 @@ class Client(Model):
         if len(self.name) > 15:
             return f"{str(self.name)[:15]}..."
         return self.name
-
-
-class Article(Model):
-    article = CharField(max_length=32, verbose_name="Artikl")
-    price = DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Cena",
-    )
-    quantity = IntegerField(null=True, blank=True, verbose_name="Množství")
-    note = TextField(blank=True, verbose_name="Popis")
-
-    def __str__(self) -> str:
-        return str(self.article)
 
 
 class DistribHub(Model):
@@ -238,7 +223,34 @@ class Order(Model):
         return str(self.order_number)
 
     class Meta:
-        ordering = ["-created"]
+        ordering = ["-order_number"]
+
+
+class Article(Model):
+    order = ForeignKey(
+        Order,
+        on_delete=PROTECT,
+        related_name="articles",
+    )
+    name = CharField(max_length=32, verbose_name="Artikl")
+    price = DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Cena",
+    )
+    quantity = PositiveIntegerField(default=1, verbose_name="Množství")
+    note = TextField(blank=True, verbose_name="Popis")
+    slug = SlugField(blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.slug != self.name:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return str(self.name)
 
 
 class Upload(models.Model):

@@ -26,6 +26,7 @@
 
     if (orderTable) {
         $(orderTable).DataTable({
+            order: [[0, 'desc']],
 
             rowReorder: false,
             fixedColumns: true,
@@ -42,7 +43,7 @@
                 bottomEnd: 'paging'
             },
             columnDefs: [
-                { orderable: false, targets: [5, 11] }
+                { orderable: false, targets: [5, 12] }
             ],
 
             language: {

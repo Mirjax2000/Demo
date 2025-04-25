@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Order, Team, DistribHub, Upload, Client
+from .models import Order, Team, DistribHub, Upload, Client, Article
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -45,8 +45,20 @@ class TeamAdmin(admin.ModelAdmin):
     list_per_page = 15
 
 
+class ArticleAdmin(admin.ModelAdmin):
+    search_fields = ["name", "order"]
+    list_display = (
+        "order",
+        "name",
+        "price",
+        "quantity",
+    )
+    list_per_page = 15
+
+
 admin.site.register(DistribHub, DistribHubAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Team, TeamAdmin)
+admin.site.register(Article, ArticleAdmin)
 admin.site.register(Upload)
