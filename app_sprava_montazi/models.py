@@ -109,7 +109,7 @@ class Client(Model):
 
     def __str__(self) -> str:
         if len(self.name) > 15:
-            return f"{str(self.name)[:15]} ..."
+            return f"{str(self.name)[:15]}..."
         return self.name
 
 
@@ -231,7 +231,6 @@ class Order(Model):
     def is_missing_team(self) -> bool:
         """
         Zkontroluje, jestli chybí tým pro montážní posádku.
-        Tato metoda ověřuje, zda není přiřazen žádný tým, pokud je team_type nastaven na BY_ASSEMBLY_CREW.
         """
         return self.team is None and self.team_type == TeamType.BY_ASSEMBLY_CREW
 
