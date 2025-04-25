@@ -10,42 +10,42 @@
     thead th {
       @extend %transition-theme;
 
-      color: var(--txt-default) !important;
-      background-color: var(--bck-table-head) !important;
+      color: var(--txt-default);
+      background-color: var(--bck-table-head);
     }
   }
 
   &__body {
     &__link {
+      // td {
+      //   border: 1px solid var(--border);
+      // }
+
       border-color: var(--border);
-      border-left: 2px solid transparent;
+      border-left: 3px solid transparent;
 
       &:hover {
-        border-left: 2px solid var(--success);
-      }
-
-      td {
-        border: 1px solid var(--border);
+        border-left: 3px solid var(--success);
       }
     }
 
-    &__link:nth-child(even) {
-      td {
-        @extend %transition-theme;
+    // &__link:nth-child(even) {
+    //   td {
+    //     @extend %transition-theme;
 
-        color: var(--txt-default) !important;
-        background-color: var(--bck-table-row-even) !important;
-      }
-    }
+    //     color: var(--txt-default);
+    //     background-color: var(--bck-table-row-even);
+    //   }
+    // }
 
-    &__link:nth-child(odd) {
-      td {
-        @extend %transition-theme;
+    // &__link:nth-child(odd) {
+    //   td {
+    //     @extend %transition-theme;
 
-        color: var(--txt-default) !important;
-        background-color: var(--bck-table-row-odd) !important;
-      }
-    }
+    //     color: var(--txt-default);
+    //     background-color: var(--bck-table-row-odd);
+    //   }
+    // }
   }
 
   &__icon {

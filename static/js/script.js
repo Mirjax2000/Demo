@@ -19,8 +19,13 @@
     function toggleTheme() {
         const current = html.dataset.theme;
         const newTheme = current === "light" ? "dark" : "light";
+
         html.dataset.theme = newTheme;
-        localStorage.setItem("theme", newTheme); // Uložení tématu
+
+        localStorage.setItem("theme", newTheme);
+
+        html.classList.remove(current); // odeber staré téma
+        html.classList.add(newTheme);   // přidej nové téma
     }
 
     themeToggler.addEventListener("click", toggleTheme);
