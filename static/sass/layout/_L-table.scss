@@ -2,10 +2,21 @@
 @use "../base/placeholders" as *;
 
 .L-table {
+  &__nav-panel {
+    @include flex(space-around, flex-end);
+
+    &__form {
+      flex: 0;
+    }
+
+    &__buttons {
+      flex: 1;
+      text-align: right;
+    }
+  }
+
   &__table {
     font-size: 0.75rem;
-    table-layout: auto;
-    border-collapse: collapse;
 
     thead th {
       @extend %transition-theme;
@@ -16,52 +27,25 @@
   }
 
   &__body {
-    &__link {
-      // td {
-      //   border: 1px solid var(--border);
-      // }
-
+    &__row {
       border-color: var(--border);
       border-left: 3px solid transparent;
+      border-right: 3px solid transparent;
 
       &:hover {
         border-left: 3px solid var(--success);
+        border-right: 3px solid var(--success);
       }
     }
-
-    // &__link:nth-child(even) {
-    //   td {
-    //     @extend %transition-theme;
-
-    //     color: var(--txt-default);
-    //     background-color: var(--bck-table-row-even);
-    //   }
-    // }
-
-    // &__link:nth-child(odd) {
-    //   td {
-    //     @extend %transition-theme;
-
-    //     color: var(--txt-default);
-    //     background-color: var(--bck-table-row-odd);
-    //   }
-    // }
   }
 
   &__icon {
     font-size: 80%;
   }
 
-  &__pagination {
-    color: var(--txt-default);
-    background-color: var(--bck-table-head);
-    cursor: pointer;
-  }
-
   &__select {
-    max-width: 12.5rem;
+    width: 9.625rem !important;
     padding-right: 1rem;
-    margin-right: 1rem;
     cursor: pointer;
   }
 
@@ -85,15 +69,8 @@
   }
 }
 
-// pagination disabled
-.page-item.disabled {
-  pointer-events: none;
-  opacity: 0.2;
-
-  span {
-    @extend %transition-theme;
-
-    background-color: var(--bck-table-head);
-    color: var(--txt-default);
-  }
+.dt-input {
+  color: var(--default) !important;
+  background-color: var(--bck-table-head) !important;
+  border: 1px solid var(--border) !important;
 }
