@@ -83,15 +83,3 @@ class OrdersSearchView(LoginRequiredMixin, View):
         return render(request, "app_sprava_montazi/partials/orders_all.html", context)
 
 
-# class SearchListView(LoginRequiredMixin, ListView):
-#     model = Contact
-#     template_name = "partials/contact-list.html"
-#     context_object_name = "contacts"
-
-#     def get_queryset(self):
-#         user = self.request.user
-#         query = self.request.GET.get("search", "")
-#         return Contact.objects.filter(
-#             Q(name__icontains=query) | Q(email__icontains=query),
-#             user=user,
-#         ).order_by("-created_at")

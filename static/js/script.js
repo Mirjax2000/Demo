@@ -55,12 +55,9 @@
             }
             if (orderTable) {
                 $(orderTable).DataTable({
-                    paging: false,
                     rowReorder: true,
                     fixedColumns: true,
-                    layout: {
-                        topEnd: null
-                    }
+
                 });
             }
         });
