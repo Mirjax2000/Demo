@@ -1,0 +1,60 @@
+{% for order in orders %}
+    <tr class="L-table__body__row">
+        <!--cislo zakazky-->
+        <td>{{ order.order_number|upper }}</td>
+        <!--misto urceni-->
+        <td>{{ order.distrib_hub }}</td>
+        <!--mandant-->
+        <td>{{ order.mandant }}</td>
+        <!--Termin doruceni-->
+        {% if order.delivery_termin %}
+            <td>{{ order.delivery_termin }}</td>
+        {% else %}
+            <td>-</td>
+        {% endif %}
+        <!--zakaznik-->
+        {% if order.client.incomplete %}
+            <td title="{{ order.client.name }}" class="u-txt-warning">⚠️&nbsp;{{ order.client }}</td>
+        {% else %}
+            <td title="{{ order.client.name }}" class="u-txt-success">
+                <i class="fa-solid fa-check"></i>&nbsp;{{ order.client }}
+            </td>
+        {% endif %}
+        <!--PSC-->
+        <td>{{ order.client.zip_code }}</td>
+        <!--Realizace kym-->
+        {% if order.team_type == "By_assembly_crew" %}
+            <td class="u-txt-success u-s-none">{{ order.get_team_type_display }}</td>
+        {% else %}
+            <td class="u-s-none">{{ order.get_team_type_display }}</td>
+        {% endif %}
+        <!--Team-->
+        {% if order.is_missing_team %}
+            <td class="u-txt-warning u-s-none">⚠️&nbsp;Nevybráno</td>
+        {% elif order.team %}
+            <td class="u-txt-success u-s-none">
+                <i class="fa-solid fa-check"></i>&nbsp;{{ order.team }}
+            </td>
+        {% else %}
+            <td class="u-txt-center u-s-none">–</td>
+        {% endif %}
+        <!--termin montaze-->
+        {% if order.montage_termin %}
+            <td class="u-s-none">{{ order.montage_termin }}</td>
+        {% else %}
+            <td class="u-txt-warning u-s-none">⚠️&nbsp;Nevybráno</td>
+        {% endif %}
+        <!--Status-->
+        <td class="u-s-none">{{ order.get_status_display }}</td>
+        <!--poznamka-->
+        {% if order.notes_first_10 %}
+            <td title="{{ order.notes }}">{{ order.notes_first_10 }}</td>
+        {% else %}
+            <td>-</td>
+        {% endif %}
+        <!--CTA icons-->
+        <td class="L-table__update u-s-none">
+            <i class="fa-solid fa-file-pen me-2"></i>
+        </td>
+    </tr>
+{% endfor %}
