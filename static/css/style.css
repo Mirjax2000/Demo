@@ -332,12 +332,6 @@ body.home {
   transform: scale(0.9);
 }
 
-.dt-input {
-  color: var(--default) !important;
-  background-color: var(--bck-table-head) !important;
-  border: 1px solid var(--border) !important;
-}
-
 .C-spinner {
   width: 100%;
   display: flex;
