@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic import ListView, TemplateView, View
-from .models import Order, DistribHub, Status
+from .models import Order, DistribHub, Status, Team
 
 cons: Console = Console()
 
@@ -54,12 +54,27 @@ class OrdersView(LoginRequiredMixin, ListView):
         status: str = self.request.GET.get("status", "").strip()
         if status:
             orders = orders.filter(status=status)
-        return orders.order_by("-order_number")
+        return orders
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         context["statuses"] = Status
         context["active"] = "orders_all"
+
+        return context
+
+
+class TeamsView(LoginRequiredMixin, ListView):
+    """Vypis seznamu modelu Order"""
+
+    model = Team
+    template_name = "app_sprava_montazi/teams_all.html"
+    context_object_name = "teams"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["active"] = "team"
 
         return context
