@@ -76,6 +76,13 @@ class Team(Model):
     notes = TextField(blank=True, verbose_name="Poznámka")
     slug = SlugField(unique=True, blank=True)
 
+    def first_15(self) -> str:
+        if self.notes:
+            if len(self.notes) > 15:
+                return f"{str(self.notes)[:15]}..."
+            return str(self.notes)
+        return "-"
+
     def __str__(self) -> str:
         return str(self.name)
 
