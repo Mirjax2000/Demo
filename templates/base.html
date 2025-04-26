@@ -7,21 +7,26 @@
         <meta name="description"
               content="Rhenus HD - Asset Management System for maintenance and repair operations" />
         <meta name="keywords"
-              content="rhenus, asset management, maintenance, repair, operations, industrial services" />
+              content="rhenus, asset management, maintenance, repair, operations" />
         <title>
             {% block title %}
                 Rhenus
             {% endblock title %}
         </title>
         {% include "includes/css.html" %}
+        {% block css %}
+            <!-- css files go here -->
+        {% endblock css %}
     </head>
     <script>
         (function () {
-            const savedTheme = localStorage.getItem("theme");
-            if (savedTheme) {
-                document.documentElement.setAttribute("data-theme", savedTheme);
-            }
-        })();
+        const savedTheme = localStorage.getItem("theme");
+        const html = document.documentElement;
+        if (savedTheme) {
+            document.documentElement.setAttribute("data-theme", savedTheme);
+            html.classList.add(savedTheme);
+        }
+    })();
     </script>
     <!---->
     <body class="P-body">
@@ -71,7 +76,7 @@
                             <span class="L-sidebar__span">Sestavy</span></a>
                     </li>
                     <li class="L-sidebar__list__item">
-                    <a href="#" class="L-sidebar__nav-link link"><i class="bi bi-people"></i>
+                    <a href="{% url "teams" %}" class="L-sidebar__nav-link link {% if active == 'teams' %}L-active{% endif %}"><i class="bi bi-people"></i>
                     <span class="L-sidebar__span">Týmy</span></a>
             </li>
             <li class="L-sidebar__list__item">

@@ -1,0 +1,30 @@
+{% for team in teams %}
+    <tr class="L-table__body__row">
+        <!--jmeno-->
+        <td>{{ team.name }}</td>
+        <!--mesto-->
+        <td>{{ team.city }}</td>
+        <!--region-->
+        <td>{{ team.region }}</td>
+        <!--active-->
+        {% if team.active %}
+            <td class="u-txt-success">
+                <i class="fa-solid fa-check"></i>
+            </td>
+        {% else %}
+            <td class="u-txt-warning">
+                <i class="fa-solid fa-minus"></i>
+            </td>
+        {% endif %}
+        <!--cena hod-->
+        <td>{{ team.price_per_hour }}</td>
+        <!--cena km-->
+        <td>{{ team.price_per_km }}</td>
+        <!--notes-->
+        <td title="{{ team.notes }}">{{ team.first_15 }}</td>
+        <!--CTA-->
+        <td class="L-table__update u-s-none">
+            <i class="fa-solid fa-file-pen me-2"></i>
+        </td>
+    </tr>
+{% endfor %}
