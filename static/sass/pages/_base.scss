@@ -18,10 +18,10 @@
 
 .P-main {
   flex: 1;
+  position: relative;
+  isolation: isolate;
 }
 
 .P-sidebar {
   flex: 0 0 auto;
 }
-
-

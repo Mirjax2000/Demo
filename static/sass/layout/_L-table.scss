@@ -68,3 +68,9 @@
     }
   }
 }
+
+.L-table .dt-input {
+  background-color: var(--bck-table-head) !important;
+  color: var(--txt-default) !important;
+  border-color: var(--border) !important;
+}

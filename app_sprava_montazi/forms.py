@@ -1,5 +1,4 @@
 from django import forms
-from django.forms import widgets
 from .models import Order, Article, DistribHub, Team
 
 
@@ -48,3 +47,50 @@ class TeamForm(forms.ModelForm):
             "price_per_km",
             "notes",
         ]
+
+        widgets = {
+            "name": forms.TextInput(
+                attrs={"class": "L-form__input", "placeholder": "Název společnosti"}
+            ),
+            "city": forms.TextInput(
+                attrs={"class": "L-form__input", "placeholder": "Město"}
+            ),
+            "region": forms.TextInput(
+                attrs={"class": "L-form__input", "placeholder": "Region"}
+            ),
+            "phone": forms.NumberInput(
+                attrs={"class": "L-form__input", "placeholder": "Telefon"}
+            ),
+            "email": forms.EmailInput(
+                attrs={"class": "L-form__input", "placeholder": "E-mail"}
+            ),
+            "active": forms.CheckboxInput(
+                attrs={
+                    "class": "form-check-input",
+                }
+            ),
+            "price_per_hour": forms.NumberInput(
+                attrs={"class": "L-form__input", "placeholder": "Cena za hodinu"}
+            ),
+            "price_per_km": forms.NumberInput(
+                attrs={"class": "L-form__input", "placeholder": "Cena za km"}
+            ),
+            "notes": forms.Textarea(
+                attrs={"class": "L-form__input", "rows": 4, "placeholder": "Poznámky"}
+            ),
+        }
+        error_messages = {
+            "name": {
+                "required": "Jméno je povinné!",
+                "max_length": "Jméno je příliš dlouhé! (max. 32 znaků)",
+                "unique": "Tato spolecnost uz existuje",
+            },
+            "city": {
+                "required": "Jméno je povinné!",
+                "max_length": "Jméno je příliš dlouhé! (max. 32 znaků)",
+                "unique": "Tato spolecnost uz existuje",
+            },
+            "phone": {
+                "required": "Telefon je povinny",
+            },
+        }

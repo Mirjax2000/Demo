@@ -1,6 +1,10 @@
 @use "../utils/" as *;
 @use "../base/placeholders" as *;
 
+.L-form .errorlist {
+  color: var(--error);
+}
+
 .L-form {
   @extend %margin-in;
 
@@ -19,6 +23,17 @@
       display: inline-block;
       text-decoration: underline;
     }
+  }
+
+  &__input {
+    @extend %border-radius;
+
+    background-color: var(--bck-table-head);
+    display: block;
+    padding: 0.5em 1em;
+    width: 100%;
+    color: var(--txt-default);
+    border: 1px solid var(--border);
   }
 
   &__group {

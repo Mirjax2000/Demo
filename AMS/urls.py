@@ -16,6 +16,7 @@ from app_sprava_montazi.views import (
     HomePageView,
     OrdersView,
     TeamsView,
+    TeamCreateView,
 )
 
 urlpatterns: list = [
@@ -28,6 +29,7 @@ app_sprava_montazi: list = [
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path("orders/", OrdersView.as_view(), name="orders"),
     path("teams/", TeamsView.as_view(), name="teams"),
+    path("teams/create", TeamCreateView.as_view(), name="team_create"),
 ]
 
 app_accounts_urls: list = [

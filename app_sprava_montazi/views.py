@@ -6,8 +6,10 @@ from django.db.models.query import QuerySet
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.views.generic import ListView, TemplateView, View
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, ListView, TemplateView, View
 from .models import Order, DistribHub, Status, Team
+from .forms import TeamForm
 
 cons: Console = Console()
 
@@ -78,3 +80,12 @@ class TeamsView(LoginRequiredMixin, ListView):
         context["active"] = "teams"
 
         return context
+
+
+class TeamCreateView(LoginRequiredMixin, CreateView):
+    """Vypis seznamu modelu Order"""
+
+    model = Team
+    form_class = TeamForm
+    template_name = "app_sprava_montazi/partials/team_form.html"
+    success_url = reverse_lazy("teams")

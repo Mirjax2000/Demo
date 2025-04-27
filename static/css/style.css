@@ -61,7 +61,7 @@ body.home {
   user-select: none;
 }
 
-.L-form__wrapper-error, .L-sidebar .L-active {
+.L-form__input, .L-form__wrapper-error, .L-sidebar .L-active {
   border-radius: 5px;
 }
 
@@ -243,6 +243,10 @@ body.home {
   font-size: 1.8rem;
 }
 
+.L-form .errorlist {
+  color: var(--error);
+}
+
 .L-form {
   width: clamp(12.5rem, 100%, 31.25rem);
   margin-top: 1em;
@@ -257,6 +261,14 @@ body.home {
 .L-form__header h2 {
   display: inline-block;
   text-decoration: underline;
+}
+.L-form__input {
+  background-color: var(--bck-table-head);
+  display: block;
+  padding: 0.5em 1em;
+  width: 100%;
+  color: var(--txt-default);
+  border: 1px solid var(--border);
 }
 .L-form__group {
   margin-bottom: 1em;
@@ -332,6 +344,12 @@ body.home {
   transform: scale(0.9);
 }
 
+.L-table .dt-input {
+  background-color: var(--bck-table-head) !important;
+  color: var(--txt-default) !important;
+  border-color: var(--border) !important;
+}
+
 .C-spinner {
   width: 100%;
   display: flex;
@@ -360,6 +378,8 @@ body.home {
 
 .P-main {
   flex: 1;
+  position: relative;
+  isolation: isolate;
 }
 
 .P-sidebar {

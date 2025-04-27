@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="L-form">
+        <div class="L-form__header">
+            <h2>Nový tým</h2>
+        </div>
+        <form method="post" class="L-form__form" novalidate>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="u-txt-right">
+                <button type="submit" class="btn btn-primary">Uložit</button>
+            </div>
+        </form>
+    </div>
+
+{% endblock content %}
