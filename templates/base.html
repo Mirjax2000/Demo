@@ -76,7 +76,8 @@
                             <span class="L-sidebar__span">Sestavy</span></a>
                     </li>
                     <li class="L-sidebar__list__item">
-                    <a href="{% url "teams" %}" class="L-sidebar__nav-link link {% if active == 'teams' %}L-active{% endif %}"><i class="bi bi-people"></i>
+                    <a href="{% url "teams" %}"
+                       class="L-sidebar__nav-link link {% if active == 'teams' %}L-active{% endif %}"><i class="bi bi-people"></i>
                     <span class="L-sidebar__span">Týmy</span></a>
             </li>
             <li class="L-sidebar__list__item">
@@ -99,6 +100,7 @@
 </aside>
 <!-- Right side content -->
 <main class="P-main">
+    {% include "includes/message.html" %}
     {% block content %}
     {% endblock content %}
 </main>

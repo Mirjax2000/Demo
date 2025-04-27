@@ -10,7 +10,7 @@
         {% if order.delivery_termin %}
             <td>{{ order.delivery_termin }}</td>
         {% else %}
-            <td>-</td>
+            <td class="u-txt-center">-</td>
         {% endif %}
         <!--zakaznik-->
         {% if order.client.incomplete %}
@@ -36,7 +36,7 @@
                 <i class="fa-solid fa-check"></i>&nbsp;{{ order.team }}
             </td>
         {% else %}
-            <td class="u-txt-center u-s-none">–</td>
+            <td class="u-s-none">–</td>
         {% endif %}
         <!--termin montaze-->
         {% if order.montage_termin %}
@@ -47,13 +47,9 @@
         <!--Status-->
         <td class="u-s-none">{{ order.get_status_display }}</td>
         <!--Articles-->
-        <td class="u-s-none">{{ order.articles.count }}</td>
+        <td class="u-s-none u-txt-center">{{ order.articles.count }}</td>
         <!--poznamka-->
-        {% if order.notes_first_10 %}
-            <td title="{{ order.notes }}">{{ order.notes_first_10 }}</td>
-        {% else %}
-            <td>-</td>
-        {% endif %}
+        <td title="{{ order.notes }}">{{ order.notes_first_10 }}</td>
         <!--CTA icons-->
         <td class="L-table__update u-s-none">
             <i class="fa-solid fa-file-pen me-2"></i>
