@@ -1,4 +1,8 @@
+"""Forms"""
+
 from django import forms
+from django.utils.text import slugify
+from django.core.exceptions import ValidationError
 from .models import Order, Article, DistribHub, Team
 
 
@@ -88,9 +92,15 @@ class TeamForm(forms.ModelForm):
             "city": {
                 "required": "Jméno je povinné!",
                 "max_length": "Jméno je příliš dlouhé! (max. 32 znaků)",
-                "unique": "Tato spolecnost uz existuje",
             },
             "phone": {
                 "required": "Telefon je povinny",
             },
         }
+
+    def clean_name(self) -> str:
+        name = str(self.cleaned_data.get("name"))
+        slug = slugify(name)
+        if Team.objects.filter(slug=slug).exists():
+            raise ValidationError("Společnost s tímto názvem už existuje.")
+        return name
