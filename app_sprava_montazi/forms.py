@@ -63,7 +63,10 @@ class TeamForm(forms.ModelForm):
                 attrs={"class": "L-form__input", "placeholder": "Region"}
             ),
             "phone": forms.NumberInput(
-                attrs={"class": "L-form__input phone", "placeholder": "Telefon",}
+                attrs={
+                    "class": "L-form__input phone",
+                    "placeholder": "Telefon",
+                }
             ),
             "email": forms.EmailInput(
                 attrs={"class": "L-form__input", "placeholder": "E-mail"}
@@ -104,6 +107,12 @@ class TeamForm(forms.ModelForm):
     def clean_name(self) -> str:
         name = str(self.cleaned_data.get("name"))
         slug = slugify(name)
-        if Team.objects.filter(slug=slug).exists():
+
+        qs = Team.objects.filter(slug=slug)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
             raise ValidationError("Společnost s tímto názvem už existuje.")
+
         return name
