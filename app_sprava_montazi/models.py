@@ -224,11 +224,10 @@ class Order(Model):
         verbose_name="Upraveno",
     )
 
-    def notes_first_10(self) -> str | None:
+    def notes_first_10(self) -> str:
         if self.notes:
-            notes: str = str(self.notes)[:10]
-            return notes
-        return None
+            return f"{str(self.notes)[:10]}..."
+        return "-"
 
     def is_missing_team(self) -> bool:
         """
