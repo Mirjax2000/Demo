@@ -61,7 +61,7 @@ body.home {
   user-select: none;
 }
 
-.L-form__input, .L-form__wrapper-error, .L-sidebar .L-active {
+.L-form__input, .L-form__group input, .L-form__wrapper-error, .L-sidebar .L-active {
   border-radius: 5px;
 }
 
@@ -69,7 +69,7 @@ body.home {
   transition: 0.1s all ease-in-out;
 }
 
-.P-body, .L-table__table thead th, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
+.P-body, .L-table__table thead th, .L-table .dt-input, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
   transition: 0.5s background-color ease-in-out, 0.5s color ease-in-out;
 }
 
@@ -252,6 +252,9 @@ body.home {
   margin-top: 1em;
   color: var(--txt-default);
 }
+.L-form p {
+  margin-bottom: 0.3em;
+}
 .L-form__form {
   padding-block: 0.5em;
 }
@@ -263,18 +266,26 @@ body.home {
   text-decoration: underline;
 }
 .L-form__input {
-  background-color: var(--bck-table-head);
-  display: block;
-  padding: 0.5em 1em;
   width: 100%;
+  display: block;
   color: var(--txt-default);
+  background-color: var(--bck-table-head);
+  padding: 0.3em 0.5em;
   border: 1px solid var(--border);
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4117647059);
 }
 .L-form__group {
   margin-bottom: 1em;
 }
-.L-form__group label,
+.L-form__group label {
+  display: block;
+  width: 100%;
+}
 .L-form__group input {
+  padding: 0.3em 0.5em;
+  border: 1px solid var(--border);
+  color: var(--txt-default);
+  background-color: var(--bck-table-head);
   display: block;
   width: 100%;
 }

@@ -70,6 +70,8 @@
 }
 
 .L-table .dt-input {
+  @extend %transition-theme;
+
   background-color: var(--bck-table-head) !important;
   color: var(--txt-default) !important;
   border-color: var(--border) !important;
