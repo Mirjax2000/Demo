@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, TemplateView, View
+from django.views.generic import CreateView, ListView, TemplateView, UpdateView, View
 from .models import Order, DistribHub, Status, Team
 from .forms import TeamForm
 
@@ -83,8 +83,13 @@ class TeamsView(LoginRequiredMixin, ListView):
 
 
 class TeamCreateView(LoginRequiredMixin, CreateView):
-    """Vypis seznamu modelu Order"""
+    model = Team
+    form_class = TeamForm
+    template_name = "app_sprava_montazi/partials/team_form.html"
+    success_url = reverse_lazy("teams")
 
+
+class TeamUpdateView(LoginRequiredMixin, UpdateView):
     model = Team
     form_class = TeamForm
     template_name = "app_sprava_montazi/partials/team_form.html"
