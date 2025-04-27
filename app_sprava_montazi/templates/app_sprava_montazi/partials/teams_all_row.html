@@ -8,18 +8,28 @@
         <td>{{ team.region }}</td>
         <!--active-->
         {% if team.active %}
-            <td class="u-txt-success">
-                <i class="fa-solid fa-check"></i>
+            <td class="u-txt-center">
+                <i class="fa-solid fa-check u-txt-success"></i>
+                <span class="u-txt-trans">0</span>
             </td>
         {% else %}
-            <td class="u-txt-warning">
-                <i class="fa-solid fa-xmark"></i>
+            <td class="u-txt-center">
+                <i class="fa-solid fa-xmark u-txt-warning"></i>
+                <span class="u-txt-trans">1</span>
             </td>
         {% endif %}
         <!--cena hod-->
-        <td>{{ team.price_per_hour }}</td>
+        {% if team.price_per_hour_float == 0.0 %}
+            <td class="u-txt-warning u-txt-center">-</td>
+        {% else %}
+            <td class="u-txt-center">{{ team.price_per_hour_float }}</td>
+        {% endif %}
         <!--cena km-->
-        <td>{{ team.price_per_km }}</td>
+        {% if team.price_per_km_float == 0.0 %}
+            <td class="u-txt-warning u-txt-center">-</td>
+        {% else %}
+            <td class="u-txt-center">{{ team.price_per_km_float }}</td>
+        {% endif %}
         <!--notes-->
         <td title="{{ team.notes }}">{{ team.first_15 }}</td>
         <!--CTA-->
