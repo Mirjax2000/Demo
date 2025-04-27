@@ -24,7 +24,9 @@
         <td title="{{ team.notes }}">{{ team.first_15 }}</td>
         <!--CTA-->
         <td class="L-table__update u-s-none">
-            <i class="fa-solid fa-file-pen me-2"></i>
+            <a href="{% url "team_update" slug=team.slug %}">
+                <i class="fa-solid fa-file-pen me-2"></i>
+            </a>
         </td>
     </tr>
 {% endfor %}
