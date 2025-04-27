@@ -51,7 +51,7 @@
 
     if (teamTable) {
         $(teamTable).DataTable({
-
+            order: [[3, 'asc']],
             rowReorder: false,
             fixedColumns: true,
             pageLength: 15,
@@ -66,11 +66,16 @@
                 bottomStart: 'info',
                 bottomEnd: 'paging'
             },
-
+            columnDefs: [
+                { orderable: false, targets: [6, 7] },
+                { targets: [4, 5], type: 'num-fmt' }
+            ],
             language: {
-                emptyTable: "Žádné objednávky"
+                emptyTable: "Žádné objednávky",
+                decimal: ","
             },
         });
+
     }
 
 })();
