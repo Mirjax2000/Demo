@@ -63,7 +63,7 @@ class TeamForm(forms.ModelForm):
                 attrs={"class": "L-form__input", "placeholder": "Region"}
             ),
             "phone": forms.NumberInput(
-                attrs={"class": "L-form__input", "placeholder": "Telefon"}
+                attrs={"class": "L-form__input phone", "placeholder": "Telefon",}
             ),
             "email": forms.EmailInput(
                 attrs={"class": "L-form__input", "placeholder": "E-mail"}
@@ -74,7 +74,10 @@ class TeamForm(forms.ModelForm):
                 }
             ),
             "price_per_hour": forms.NumberInput(
-                attrs={"class": "L-form__input", "placeholder": "Cena za hodinu"}
+                attrs={
+                    "class": "L-form__input",
+                    "placeholder": "Cena za hodinu",
+                }
             ),
             "price_per_km": forms.NumberInput(
                 attrs={"class": "L-form__input", "placeholder": "Cena za km"}
