@@ -76,6 +76,16 @@ class Team(Model):
     notes = TextField(blank=True, verbose_name="Poznámka")
     slug = SlugField(unique=True, blank=True)
 
+    def price_per_km_float(self) -> float:
+        if self.price_per_km is not None:
+            return float(self.price_per_km)
+        return 0.0
+
+    def price_per_hour_float(self) -> float:
+        if self.price_per_hour is not None:
+            return float(self.price_per_hour)
+        return 0.0
+
     def first_15(self) -> str:
         if self.notes:
             if len(self.notes) > 15:
