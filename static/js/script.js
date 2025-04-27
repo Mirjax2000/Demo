@@ -4,7 +4,13 @@
     const themeToggler = document.getElementById("themeToggler");
     const orderTable = document.getElementById("orderTable");
     const teamTable = document.getElementById("teamTable");
-
+    const phoneInputs = document.querySelectorAll(".phone")
+    // validace tel num v inputech
+    phoneInputs.forEach(function (input) {
+        input.addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    });
 
     function toggleTheme() {
         const current = html.dataset.theme;
