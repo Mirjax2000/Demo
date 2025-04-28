@@ -52,7 +52,7 @@
         <td title="{{ order.notes }}">{{ order.notes_first_10 }}</td>
         <!--CTA icons-->
         <td class="L-table__update u-s-none">
-            <i class="fa-solid fa-file-pen me-2"></i>
+            <a href="{% url "order_update" order.id %}"><i class="fa-solid fa-file-pen me-2"></i></a>
         </td>
     </tr>
 {% endfor %}

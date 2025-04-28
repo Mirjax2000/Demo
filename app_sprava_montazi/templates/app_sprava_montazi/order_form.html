@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}
+    formular
+{% endblock title %}
+{% block content %}
+    <h1>Vytvořit novou objednávku</h1>
+    <form method="post">
+        {% csrf_token %}
+        <h2>Informace o zákazníkovi</h2>
+        {{ client_form.as_p }}
+        <h2>Informace o objednávce</h2>
+        {{ order_form.as_p }}
+        {{ article_formset.management_form }}
+        {% for form in article_formset %}
+            <fieldset>
+                <legend>Artikl</legend>
+                {{ form.as_p }}
+            </fieldset>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Uložit objednávku</button>
+    </form>
+    <a href="{% url 'orders' %}">Zpět na seznam objednávek</a>
+{% endblock content %}
