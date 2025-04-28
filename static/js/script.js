@@ -4,14 +4,24 @@
     const themeToggler = document.getElementById("themeToggler");
     const orderTable = document.getElementById("orderTable");
     const teamTable = document.getElementById("teamTable");
-    const phoneInputs = document.querySelectorAll(".phone")
+    const phoneInputs = document.querySelectorAll(".phone");
+    const messages = $(".C-messages");
+
+    messages.each(function (index, element) {
+        setTimeout(function () {
+            $(element).fadeOut(1000, function () {
+                $(this).remove();
+            });
+        }, 3000);
+    });
+
     // validace tel num v inputech
     phoneInputs.forEach(function (input) {
         input.addEventListener('input', function () {
             this.value = this.value.replace(/[^0-9]/g, '');
         });
     });
-
+    // theme control
     function toggleTheme() {
         const current = html.dataset.theme;
         const newTheme = current === "light" ? "dark" : "light";
