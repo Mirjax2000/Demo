@@ -23,9 +23,33 @@ class OrderForm(forms.ModelForm):
             "notes",
         ]
         widgets = {
-            "delivery_termin": forms.DateInput(attrs={"type": "date"}),
-            "evidence_termin": forms.DateInput(attrs={"type": "date"}),
-            "montage_termin": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "order_number": forms.TextInput(
+                attrs={"class": "L-form__input", "placeholder": "Číslo zakázky..."}
+            ),
+            "distrib_hub": forms.Select(
+                attrs={"class": "L-form__input", "placeholder": "místo určení..."}
+            ),
+            "mandant": forms.TextInput(
+                attrs={"class": "L-form__input", "placeholder": "Mandant..."}
+            ),
+            "status": forms.Select(
+                attrs={"class": "L-form__input", "placeholder": "stav..."}
+            ),
+            "team_type": forms.Select(
+                attrs={"class": "L-form__input", "placeholder": "Realizace kým..."}
+            ),
+            "team": forms.Select(
+                attrs={"class": "L-form__input", "placeholder": "Montážní tým..."}
+            ),
+            "delivery_termin": forms.DateInput(
+                attrs={"class": "L-form__date", "type": "date"}
+            ),
+            "evidence_termin": forms.DateInput(
+                attrs={"class": "L-form__date", "type": "date"}
+            ),
+            "montage_termin": forms.DateTimeInput(
+                attrs={"class": "L-form__datetime", "type": "datetime-local"}
+            ),
             "notes": forms.Textarea(
                 attrs={"class": "L-form__input", "rows": 4, "placeholder": "Poznámky"}
             ),
@@ -37,8 +61,27 @@ class ArticleForm(forms.ModelForm):
         model = Article
         fields = ["name", "price", "quantity", "note"]
         widgets = {
+            "name": forms.TextInput(
+                attrs={"class": "L-form__input", "placeholder": "artikl..."}
+            ),
+            "price": forms.NumberInput(
+                attrs={
+                    "class": "L-form__input",
+                    "placeholder": "cena...",
+                }
+            ),
+            "quantity": forms.NumberInput(
+                attrs={
+                    "class": "L-form__input",
+                    "placeholder": "množství...",
+                }
+            ),
             "note": forms.Textarea(
-                attrs={"class": "L-form__input", "rows": 4, "placeholder": "Poznámky"}
+                attrs={
+                    "class": "L-form__input",
+                    "rows": 4,
+                    "placeholder": "poznámky...",
+                }
             ),
         }
 
@@ -47,8 +90,8 @@ ArticleInlineFormSet = inlineformset_factory(
     Order,
     Article,
     form=ArticleForm,
-    extra=10,  # Počet prázdných formulářů pro artikly, které se zobrazí při načtení
-    can_delete=True,  # Umožní uživateli mazat jednotlivé artikly
+    extra=10,
+    can_delete=True,
 )
 
 
@@ -65,11 +108,61 @@ class ClientForm(forms.ModelForm):
             "email",
         ]
 
+        widgets = {
+            "name": forms.TextInput(
+                attrs={"class": "L-form__input", "placeholder": "celé jméno..."}
+            ),
+            "street": forms.TextInput(
+                attrs={"class": "L-form__input", "placeholder": "ulice..."}
+            ),
+            "number": forms.NumberInput(
+                attrs={
+                    "class": "L-form__input",
+                    "placeholder": "číslo ulice...",
+                    "max-length": "6",
+                }
+            ),
+            "city": forms.TextInput(
+                attrs={"class": "L-form__input", "placeholder": "město..."}
+            ),
+            "zip_code": forms.TextInput(
+                attrs={"class": "L-form__input number", "placeholder": "PSC..."}
+            ),
+            "phone": forms.TextInput(
+                attrs={
+                    "class": "L-form__input number",
+                    "placeholder": "Telefon",
+                    "type": "tel",
+                }
+            ),
+            "email": forms.EmailInput(
+                attrs={"class": "L-form__input", "placeholder": "E-mail"}
+            ),
+        }
+        error_messages = {
+            "name": {
+                "required": "Jméno je povinné!",
+            },
+            "street": {
+                "max_length": "Jméno je příliš dlouhé! (max. 32 znaků)",
+            },
+            "city": {
+                "max_length": "Jméno je příliš dlouhé! (max. 32 znaků)",
+            },
+            "number": {
+                "max_length": "Jméno je příliš dlouhé! (max. 6 znaků)",
+            },
+            "phone": {},
+            "zip_code": {
+                "required": "Jméno je povinné!",
+            },
+        }
+
 
 class DistribHubForm(forms.ModelForm):
     class Meta:
         model = DistribHub
-        fields: list = []
+        fields: list = ["code", "city"]
 
 
 class TeamForm(forms.ModelForm):
@@ -97,10 +190,11 @@ class TeamForm(forms.ModelForm):
             "region": forms.TextInput(
                 attrs={"class": "L-form__input", "placeholder": "Region"}
             ),
-            "phone": forms.NumberInput(
+            "phone": forms.TextInput(
                 attrs={
-                    "class": "L-form__input phone",
+                    "class": "L-form__input number",
                     "placeholder": "Telefon",
+                    "type": "tel",
                 }
             ),
             "email": forms.EmailInput(
