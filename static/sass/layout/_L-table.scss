@@ -49,6 +49,10 @@
     cursor: pointer;
   }
 
+  &__link {
+    color: var(--txt-default);
+  }
+
   &__update {
     text-align: center;
 

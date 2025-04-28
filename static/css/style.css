@@ -69,7 +69,7 @@ body.home {
   transition: 0.1s all ease-in-out;
 }
 
-.P-body, .L-table__table thead th, .L-table .dt-input, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
+.P-body, .L-detail, .L-table__table thead th, .L-table .dt-input, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
   transition: 0.5s background-color ease-in-out, 0.5s color ease-in-out;
 }
 
@@ -339,6 +339,9 @@ body.home {
   padding-right: 1rem;
   cursor: pointer;
 }
+.L-table__link {
+  color: var(--txt-default);
+}
 .L-table__update {
   text-align: center;
 }
@@ -359,6 +362,21 @@ body.home {
   background-color: var(--bck-table-head) !important;
   color: var(--txt-default) !important;
   border-color: var(--border) !important;
+}
+
+.L-detail {
+  padding: 0.3em;
+  color: var(--txt-default);
+}
+.L-detail h2 {
+  font-weight: 400;
+}
+.L-detail h3 {
+  text-decoration: underline;
+  font-weight: 400;
+}
+.L-detail__artikl {
+  margin-top: 1em;
 }
 
 .C-spinner {

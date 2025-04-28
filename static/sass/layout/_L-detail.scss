@@ -1,0 +1,22 @@
+@use "../utils/" as *;
+@use "../base/placeholders" as *;
+
+.L-detail {
+  @extend %transition-theme;
+
+  padding: 0.3em;
+  color: var(--txt-default);
+
+  h2 {
+    font-weight: 400;
+  }
+
+  h3 {
+    text-decoration: underline;
+    font-weight: 400;
+  }
+
+  &__artikl {
+    margin-top: 1em;
+  }
+}
