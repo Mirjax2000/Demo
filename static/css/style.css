@@ -369,6 +369,14 @@ body.home {
   align-items: center;
 }
 
+.C-messages {
+  position: absolute;
+  left: 0.5rem;
+  min-width: 10rem;
+  width: fit-content;
+  height: fit-content;
+}
+
 .P-body {
   background-color: var(--bck-body);
   color: var(--txt-default);
