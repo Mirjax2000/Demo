@@ -18,8 +18,8 @@ from app_sprava_montazi.views import (
     TeamsView,
     TeamCreateView,
     TeamUpdateView,
+    OrderDetailView,
     order_create,
-    order_detail,
     order_update,
 )
 
@@ -34,8 +34,8 @@ app_sprava_montazi: list = [
     # orders
     path("orders/", OrdersView.as_view(), name="orders"),
     path("order/create/", order_create, name="order_create"),
-    path("order/update/<int:order_id>/", order_update, name="order_update"),
-    path("order/detail/<int:order_id>/", order_detail, name="order_detail"),
+    path("order/update/<int:pk>/", order_update, name="order_update"),
+    path("order/detail/<int:pk>/", OrderDetailView.as_view(), name="order_detail"),
     # teams
     path("teams/", TeamsView.as_view(), name="teams"),
     path("teams/create", TeamCreateView.as_view(), name="team_create"),
