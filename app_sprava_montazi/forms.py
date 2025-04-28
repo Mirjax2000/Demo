@@ -47,7 +47,7 @@ ArticleInlineFormSet = inlineformset_factory(
     Order,
     Article,
     form=ArticleForm,
-    extra=1,  # Počet prázdných formulářů pro artikly, které se zobrazí při načtení
+    extra=10,  # Počet prázdných formulářů pro artikly, které se zobrazí při načtení
     can_delete=True,  # Umožní uživateli mazat jednotlivé artikly
 )
 
