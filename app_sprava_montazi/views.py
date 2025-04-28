@@ -6,11 +6,12 @@ from django.db.models.query import QuerySet
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView, View
 from .models import Order, DistribHub, Status, Team
-from .forms import TeamForm
+from .forms import TeamForm, ArticleInlineFormSet, OrderForm, ClientForm
+from django.forms import formset_factory
 
 cons: Console = Console()
 
@@ -99,3 +100,106 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
     form_class = TeamForm
     template_name = "app_sprava_montazi/partials/team_form.html"
     success_url = reverse_lazy("teams")
+
+
+def order_create(request):
+    if request.method == "POST":
+        order_form = OrderForm(request.POST)
+        client_form = ClientForm(request.POST)
+        article_formset = ArticleInlineFormSet(request.POST)
+
+        if client_form.is_valid():
+            client = client_form.save() 
+            if order_form.is_valid():
+                order = order_form.save(commit=False) 
+                order.client = client  # Přiřadíme uloženého klienta k objednávce
+                order.save()  # Nyní uložíme objednávku
+                article_formset = ArticleInlineFormSet(request.POST, instance=order)
+                if article_formset.is_valid():
+                    article_formset.save()
+                    return redirect("order_detail", order_id=order.id)
+                else:
+                    # Pokud se artikly nevalidují, musíme smazat uloženého klienta a objednávku
+                    client.delete()
+                    if order.id:
+                        order.delete()
+                    # Znovu zobrazíme formulář s chybami
+                    return render(
+                        request,
+                        "order_create.html",
+                        {
+                            "order_form": order_form,
+                            "article_formset": article_formset,
+                            "client_form": client_form,
+                        },
+                    )
+            else:
+                # Pokud se objednávka nevaliduje, musíme smazat uloženého klienta
+                client.delete()
+                # Znovu zobrazíme formulář s chybami
+                return render(
+                    request,
+                    "order_create.html",
+                    {
+                        "order_form": order_form,
+                        "article_formset": article_formset,
+                        "client_form": client_form,
+                    },
+                )
+        else:
+            article_formset = (
+                ArticleInlineFormSet()
+            )  # Prázdný formset pro zobrazení chyb
+            # Znovu zobrazíme formulář s chybami klienta
+            return render(
+                request,
+                "order_create.html",
+                {
+                    "order_form": order_form,
+                    "article_formset": article_formset,
+                    "client_form": client_form,
+                },
+            )
+    else:
+        order_form = OrderForm()
+        article_formset = ArticleInlineFormSet()
+        client_form = ClientForm()
+
+    context = {
+        "order_form": order_form,
+        "article_formset": article_formset,
+        "client_form": client_form,
+    }
+    return render(request, "app_sprava_montazi/order_form.html", context)
+
+
+def order_update(request, order_id):
+    order = Order.objects.get(pk=order_id)
+    if request.method == "POST":
+        order_form = OrderForm(request.POST, instance=order)
+        article_formset = ArticleInlineFormSet(request.POST, instance=order)
+
+        if order_form.is_valid() and article_formset.is_valid():
+            order = order_form.save()
+            article_formset.instance = order
+            article_formset.save()
+            return redirect("order_detail", order_id=order.id)
+    else:
+        order_form = OrderForm(instance=order)
+        article_formset = ArticleInlineFormSet(instance=order)
+
+    context = {
+        "order_form": order_form,
+        "article_formset": article_formset,
+    }
+    return render(request, "app_sprava_montazi/order_form.html", context)
+
+
+def order_detail(request, order_id):
+    order = Order.objects.get(pk=order_id)
+    articles = order.articles.all()
+    context = {
+        "order": order,
+        "articles": articles,
+    }
+    return render(request, "app_sprava_montazi/order_detail.html", context)

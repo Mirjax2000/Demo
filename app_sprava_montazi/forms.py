@@ -3,32 +3,67 @@
 from django import forms
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
-from .models import Order, Article, DistribHub, Team
+from django.forms import inlineformset_factory
+from .models import Order, Article, DistribHub, Team, Client
 
 
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields: list = [
+        fields = [
+            "order_number",
+            "distrib_hub",
+            "mandant",
             "status",
-            "client",
+            "delivery_termin",
+            "evidence_termin",
             "montage_termin",
             "team_type",
             "team",
             "notes",
         ]
-
-
-class ClientForm(forms.ModelForm):
-    class Meta:
-        model = Order
-        fields: list = []
+        widgets = {
+            "delivery_termin": forms.DateInput(attrs={"type": "date"}),
+            "evidence_termin": forms.DateInput(attrs={"type": "date"}),
+            "montage_termin": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "notes": forms.Textarea(
+                attrs={"class": "L-form__input", "rows": 4, "placeholder": "Poznámky"}
+            ),
+        }
 
 
 class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
-        fields: list = []
+        fields = ["name", "price", "quantity", "note"]
+        widgets = {
+            "note": forms.Textarea(
+                attrs={"class": "L-form__input", "rows": 4, "placeholder": "Poznámky"}
+            ),
+        }
+
+
+ArticleInlineFormSet = inlineformset_factory(
+    Order,
+    Article,
+    form=ArticleForm,
+    extra=1,  # Počet prázdných formulářů pro artikly, které se zobrazí při načtení
+    can_delete=True,  # Umožní uživateli mazat jednotlivé artikly
+)
+
+
+class ClientForm(forms.ModelForm):
+    class Meta:
+        model = Client
+        fields = [
+            "name",
+            "street",
+            "number",
+            "city",
+            "zip_code",
+            "phone",
+            "email",
+        ]
 
 
 class DistribHubForm(forms.ModelForm):

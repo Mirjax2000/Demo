@@ -186,20 +186,7 @@ class Order(Model):
         null=True,
         verbose_name="Termín montáže",
     )
-    # article = models.ForeignKey(
-    #     Article,
-    #     on_delete=models.PROTECT,
-    #     null=True,
-    #     blank=True,
-    #     verbose_name="Artikl",
-    # )
-    # advice = models.ForeignKey(
-    #     "Advice",
-    #     on_delete=models.SET_NULL,
-    #     null=True,
-    #     blank=True,
-    #     verbose_name="Avizace",
-    # )
+
     team_type = models.CharField(
         max_length=32,
         blank=True,
