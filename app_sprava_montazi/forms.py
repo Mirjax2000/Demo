@@ -163,6 +163,26 @@ class DistribHubForm(forms.ModelForm):
     class Meta:
         model = DistribHub
         fields: list = ["code", "city"]
+        widgets = {
+            "code": forms.TextInput(
+                attrs={"class": "L-form__input", "placeholder": "kod..."}
+            ),
+            "city": forms.TextInput(
+                attrs={"class": "L-form__input", "placeholder": "city..."}
+            ),
+        }
+
+        error_messages = {
+            "code": {
+                "required": "Kod je povinný!",
+                "max_length": "Jméno je příliš dlouhé! (max. 3 znaky)",
+                "unique": "Tento kod uz existuje",
+            },
+            "city": {
+                "required": "Jméno je povinné!",
+                "max_length": "Jméno je příliš dlouhé! (max. 32 znaků)",
+            },
+        }
 
 
 class TeamForm(forms.ModelForm):
