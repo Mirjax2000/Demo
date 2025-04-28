@@ -4,6 +4,7 @@
     const themeToggler = document.getElementById("themeToggler");
     const orderTable = document.getElementById("orderTable");
     const teamTable = document.getElementById("teamTable");
+    const articleTable = document.getElementById("articleTable");
     const numberInputs = document.querySelectorAll(".number");
     const messages = $(".C-messages");
 
@@ -87,11 +88,27 @@
                 { targets: [4, 5], type: 'num-fmt' }
             ],
             language: {
-                emptyTable: "Žádné objednávky",
+                emptyTable: "Žádné Teamy",
                 decimal: ","
             },
         });
 
+    }
+
+    if (articleTable) {
+        $(articleTable).DataTable({
+            rowReorder: false,
+            fixedColumns: true,
+            searching: false,
+            paging: false,
+
+            columnDefs: [
+                { orderable: false, targets: [3] },
+            ],
+            language: {
+                emptyTable: "Žádné Artikly !!!",
+            },
+        });
     }
 
 })();
