@@ -6,10 +6,17 @@ from django.db.models.query import QuerySet
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, TemplateView, UpdateView, View
-from .models import Order, DistribHub, Status, Team
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+    View,
+)
+from .models import Order, DistribHub, Status, Team, Article
 from .forms import TeamForm, ArticleInlineFormSet, OrderForm, ClientForm
 from django.forms import formset_factory
 
@@ -87,7 +94,7 @@ class TeamsView(LoginRequiredMixin, ListView):
 class TeamCreateView(LoginRequiredMixin, CreateView):
     model = Team
     form_class = TeamForm
-    template_name = "app_sprava_montazi/partials/team_form.html"
+    template_name = "app_sprava_montazi/team_form.html"
     success_url = reverse_lazy("teams")
 
     def form_valid(self, form):
@@ -98,7 +105,7 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
 class TeamUpdateView(LoginRequiredMixin, UpdateView):
     model = Team
     form_class = TeamForm
-    template_name = "app_sprava_montazi/partials/team_form.html"
+    template_name = "app_sprava_montazi/team_form.html"
     success_url = reverse_lazy("teams")
 
 
@@ -109,9 +116,9 @@ def order_create(request):
         article_formset = ArticleInlineFormSet(request.POST)
 
         if client_form.is_valid():
-            client = client_form.save() 
+            client = client_form.save()
             if order_form.is_valid():
-                order = order_form.save(commit=False) 
+                order = order_form.save(commit=False)
                 order.client = client  # Přiřadíme uloženého klienta k objednávce
                 order.save()  # Nyní uložíme objednávku
                 article_formset = ArticleInlineFormSet(request.POST, instance=order)
@@ -173,8 +180,8 @@ def order_create(request):
     return render(request, "app_sprava_montazi/order_form.html", context)
 
 
-def order_update(request, order_id):
-    order = Order.objects.get(pk=order_id)
+def order_update(request, pk):
+    order = Order.objects.get(pk=pk)
     if request.method == "POST":
         order_form = OrderForm(request.POST, instance=order)
         article_formset = ArticleInlineFormSet(request.POST, instance=order)
@@ -183,7 +190,7 @@ def order_update(request, order_id):
             order = order_form.save()
             article_formset.instance = order
             article_formset.save()
-            return redirect("order_detail", order_id=order.id)
+            return redirect("order_detail", pk=order.id)
     else:
         order_form = OrderForm(instance=order)
         article_formset = ArticleInlineFormSet(instance=order)
@@ -195,11 +202,16 @@ def order_update(request, order_id):
     return render(request, "app_sprava_montazi/order_form.html", context)
 
 
-def order_detail(request, order_id):
-    order = Order.objects.get(pk=order_id)
-    articles = order.articles.all()
-    context = {
-        "order": order,
-        "articles": articles,
-    }
-    return render(request, "app_sprava_montazi/order_detail.html", context)
+class OrderDetailView(LoginRequiredMixin, DetailView):
+    model = Order
+    template_name = "app_sprava_montazi/order_detail.html"
+    context_object_name = "order"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        articles = Article.objects.filter(order=self.object)
+
+        context["active"] = "orders"
+        context["articles"] = articles
+
+        return context
