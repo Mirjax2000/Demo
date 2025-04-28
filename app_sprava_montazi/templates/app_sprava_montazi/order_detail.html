@@ -3,113 +3,114 @@
     detail objednavky
 {% endblock title %}
 {% block content %}
-    <h1>Detail objednávky č. {{ order.order_number }}</h1>
-    <div>
-        <h2>Informace o objednávce</h2>
-        <ul>
-            <li>
-                <strong>Číslo zakázky:</strong> {{ order.order_number }}
-            </li>
-            <li>
-                <strong>Místo určení:</strong> {{ order.distrib_hub }}
-            </li>
-            <li>
-                <strong>Mandant:</strong> {{ order.mandant }}
-            </li>
-            <li>
-                <strong>Stav:</strong> {{ order.get_status_display }}
-            </li>
-            {% if order.client %}
-                <li>
-                    <strong>Zákazník:</strong> <a href="#">{{ order.client }}</a>
+    <section class="L-detail">
+        <h2>Detail objednávky č. {{ order.order_number|upper }}</h2>
+        <hr>
+        <div>
+            <h3>Objednávka</h3>
+            <ul class="L-detail__list">
+                <!--order-->
+                <li class="L-detail__item">
+                    <strong>Číslo zakázky:</strong> {{ order.order_number|upper }}
                 </li>
-                <li>
-                    <strong>Ulice:</strong> {{ order.client.street }} {{ order.client.number }}
+                <!--distrib_hub-->
+                <li class="L-detail__item">
+                    <strong>Místo určení:</strong> {{ order.distrib_hub }}
                 </li>
-                <li>
-                    <strong>Město:</strong> {{ order.client.city }}
+                <!--mandant-->
+                <li class="L-detail__item">
+                    <strong>Mandant:</strong> {{ order.mandant }}
                 </li>
-                <li>
-                    <strong>PSČ:</strong> {{ order.client.zip_code }}
+                <!--status-->
+                <li class="L-detail__item">
+                    <strong>Stav:</strong> {{ order.get_status_display }}
                 </li>
-                {% if order.client.phone %}
-                    <li>
-                        <strong>Telefon:</strong> {{ order.client.phone }}
+                <!--zakaznik-->
+                {% if order.client %}
+                    <li class="L-detail__item">
+                        <strong>Zákazník:</strong> <a href="#">{{ order.client }}</a>
+                    </li>
+                    <li class="L-detail__item">
+                        <strong>Ulice:</strong> {{ order.client.street }} {{ order.client.number }}
+                    </li>
+                    <li class="L-detail__item">
+                        <strong>Město:</strong> {{ order.client.city }}
+                    </li>
+                    <li class="L-detail__item">
+                        <strong>PSČ:</strong> {{ order.client.zip_code }}
+                    </li>
+                    {% if order.client.phone %}
+                        <li class="L-detail__item">
+                            <strong>Telefon:</strong> {{ order.client.phone }}
+                        </li>
+                    {% endif %}
+                    {% if order.client.email %}
+                        <li class="L-detail__item">
+                            <strong>E-mail:</strong> {{ order.client.email }}
+                        </li>
+                    {% endif %}
+                {% else %}
+                    <li class="L-detail__item">
+                        <strong>Zákazník:</strong> Neuveden
                     </li>
                 {% endif %}
-                {% if order.client.email %}
-                    <li>
-                        <strong>E-mail:</strong> {{ order.client.email }}
+                {% if order.delivery_termin %}
+                    <li class="L-detail__item">
+                        <strong>Termín doručení:</strong> {{ order.delivery_termin|date:"d. m. Y" }}
                     </li>
                 {% endif %}
+                <!--evidence_termin-->
+                <li class="L-detail__item">
+                    <strong>Termín evidence:</strong> {{ order.evidence_termin|date:"d. m. Y" }}
+                </li>
+                {% if order.montage_termin %}
+                    <li class="L-detail__item">
+                        <strong>Termín montáže:</strong> {{ order.montage_termin|date:"d. m. Y
+                        H:i" }}
+                    </li>
+                {% else %}
+                    <li class="L-detail__item">
+                        <strong>Termín montáže:</strong><span class="u-txt-warning ms-2">Nevybráno</span>
+                    </li>
+                {% endif %}
+                <li class="L-detail__item">
+                    <strong>Realizace kým:</strong> {{ order.get_team_type_display }}
+                </li>
+                {% if order.team %}
+                    <li class="L-detail__item">
+                        <strong>Montážní tým:</strong> <a href="#">{{ order.team }}</a>
+                    </li>
+                {% else %}
+                    <li class="L-detail__item">
+                        <strong>Montážní tým:</strong><span class="u-txt-warning ms-2">Nevybráno</span>
+                    </li>
+                {% endif %}
+                {% if order.notes %}
+                    <li class="L-detail__item">
+                        <strong>Poznámky:</strong> {{ order.notes }}
+                    </li>
+                {% endif %}
+                <li class="L-detail__item">
+                    <strong>Vytvořeno:</strong> {{ order.created|date:"d. m. Y H:i" }}
+                </li>
+                <li class="L-detail__item">
+                    <strong>Upraveno:</strong> {{ order.updated|date:"d. m. Y H:i" }}
+                </li>
+            </ul>
+            <a href="{% url 'order_update' order.id %}" class="btn btn-primary">Upravit objednávku</a>
+            <a href="#" class="btn btn-primary">Volat zákazníka</a>
+            <a href="#" class="btn btn-primary">Volat montážní tým</a>
+        </div>
+        <div class="L-detail__artikl">
+            <h3>Artikly</h3>
+            {% if articles %}
+                {% include "app_sprava_montazi/partials/order_detail_table.html" %}
             {% else %}
-                <li>
-                    <strong>Zákazník:</strong> Neuveden
-                </li>
+                {% include "app_sprava_montazi/partials/order_detail_table.html" %}
             {% endif %}
-            {% if order.delivery_termin %}
-                <li>
-                    <strong>Termín doručení:</strong> {{ order.delivery_termin|date:"d. m. Y" }}
-                </li>
-            {% endif %}
-            <li>
-                <strong>Termín evidence:</strong> {{ order.evidence_termin|date:"d. m. Y" }}
-            </li>
-            {% if order.montage_termin %}
-                <li>
-                    <strong>Termín montáže:</strong> {{ order.montage_termin|date:"d. m. Y H:i" }}
-                </li>
-            {% endif %}
-            <li>
-                <strong>Realizace kým:</strong> {{ order.get_team_type_display }}
-            </li>
-            {% if order.team %}
-                <li>
-                    <strong>Montážní tým:</strong> <a href="#">{{ order.team }}</a>
-                </li>
-            {% endif %}
-            {% if order.notes %}
-                <li>
-                    <strong>Poznámky:</strong> {{ order.notes }}
-                </li>
-            {% endif %}
-            <li>
-                <strong>Vytvořeno:</strong> {{ order.created|date:"d. m. Y H:i" }}
-            </li>
-            <li>
-                <strong>Upraveno:</strong> {{ order.updated|date:"d. m. Y H:i" }}
-            </li>
-        </ul>
-        <a href="{% url 'order_update' order_id=order.id %}">Upravit objednávku</a>
-    </div>
-    <div>
-        <h2>Artikly</h2>
-        {% if articles %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Název</th>
-                        <th>Cena</th>
-                        <th>Množství</th>
-                        <th>Popis</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for article in articles %}
-                        <tr>
-                            <td>{{ article.name }}</td>
-                            <td>{{ article.price }} Kč</td>
-                            <td>{{ article.quantity }}</td>
-                            <td>{{ article.note }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>K této objednávce nejsou přiřazeny žádné artikly.</p>
-        {% endif %}
-    </div>
-    <p>
-        <a href="{% url 'orders' %}">Zpět na seznam objednávek</a>
-    </p>
+        </div>
+        <p class="mt-2">
+            <a href="{% url 'orders' %}">Zpět na seznam objednávek</a>
+        </p>
+    </section>
 {% endblock content %}

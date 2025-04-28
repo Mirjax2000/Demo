@@ -1,7 +1,9 @@
 {% for order in orders %}
     <tr class="L-table__body__row">
         <!--cislo zakazky-->
-        <td>{{ order.order_number|upper }}</td>
+        <td>
+            <a href="{% url "order_detail" order.id %}" class="L-table__link">{{ order.order_number|upper }}</a>
+        </td>
         <!--misto urceni-->
         <td>{{ order.distrib_hub }}</td>
         <!--mandant-->
@@ -14,10 +16,10 @@
         {% endif %}
         <!--zakaznik-->
         {% if order.client.incomplete %}
-            <td title="{{ order.client.name }}" class="u-txt-warning">⚠️&nbsp;{{ order.client }}</td>
+            <td title="{{ order.client }}" class="u-txt-warning">⚠️&nbsp;{{ order.client.first_15 }}</td>
         {% else %}
-            <td title="{{ order.client.name }}" class="u-txt-success">
-                <i class="fa-solid fa-check"></i>&nbsp;{{ order.client }}
+            <td title="{{ order.client }}" class="u-txt-success">
+                <i class="fa-solid fa-check"></i>&nbsp;{{ order.client.first_15 }}
             </td>
         {% endif %}
         <!--PSC-->
