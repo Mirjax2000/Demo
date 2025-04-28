@@ -125,10 +125,13 @@ class Client(Model):
         self.slug = slugify(f"{self.name}{self.city}{self.street}{self.number}")
         super().save(*args, **kwargs)
 
-    def __str__(self) -> str:
+    def first_15(self):
         if len(self.name) > 15:
             return f"{str(self.name)[:15]}..."
         return self.name
+
+    def __str__(self) -> str:
+        return str(self.name)
 
 
 class DistribHub(Model):
