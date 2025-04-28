@@ -4,7 +4,7 @@
     const themeToggler = document.getElementById("themeToggler");
     const orderTable = document.getElementById("orderTable");
     const teamTable = document.getElementById("teamTable");
-    const phoneInputs = document.querySelectorAll(".phone");
+    const numberInputs = document.querySelectorAll(".number");
     const messages = $(".C-messages");
 
     messages.each(function (index, element) {
@@ -16,7 +16,7 @@
     });
 
     // validace tel num v inputech
-    phoneInputs.forEach(function (input) {
+    numberInputs.forEach(function (input) {
         input.addEventListener('input', function () {
             this.value = this.value.replace(/[^0-9]/g, '');
         });
