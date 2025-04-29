@@ -292,6 +292,9 @@ body.home {
   box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4117647059);
   cursor: pointer;
 }
+.L-form__date::placeholder, .L-form__datetime::placeholder {
+  color: red;
+}
 .L-form__group {
   margin-bottom: 1em;
 }
