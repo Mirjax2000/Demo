@@ -16,12 +16,28 @@
         }, 5000);
     });
 
+    // validace tel num v inputech  v HTMX
+    document.body.addEventListener('htmx:afterSwap', function () {
+
+        let numberInputs = document.querySelectorAll(".number");
+        console.log(numberInputs);
+
+        numberInputs.forEach(function (input) {
+            input.addEventListener('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        });
+    });
+
+
     // validace tel num v inputech
     numberInputs.forEach(function (input) {
         input.addEventListener('input', function () {
             this.value = this.value.replace(/[^0-9]/g, '');
         });
     });
+
+
     // theme control
     function toggleTheme() {
         const current = html.dataset.theme;

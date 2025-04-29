@@ -1,5 +1,7 @@
 <div>
-    <form method="post" action="{% url 'client_update' client.slug %}">
+    <form hx-post="{% url 'client_update' client.slug %}"
+          hx-target="#detailClient"
+          hx-indikator="#spinner">
         {% csrf_token %}
         <input type="hidden" name="order_pk" value="{{ order_pk }}">
         <h3>Zákazník</h3>

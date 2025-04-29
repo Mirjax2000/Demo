@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
+from django.template.loader import render_to_string
 from django.views.generic import (
     CreateView,
     DetailView,
@@ -61,12 +62,24 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "app_sprava_montazi/partials/client_form.html"
 
     def form_valid(self, form) -> HttpResponse:
+        self.object = form.save()
         messages.success(self.request, f"Zákazník {self.object.name} aktualizován.")
-        return super().form_valid(form)
+
+        # HTMX redirect
+        response = HttpResponse()
+        response["HX-Redirect"] = self.get_success_url()
+        return response
+
+    def form_invalid(self, form) -> HttpResponse:
+        # Znovu vygeneruje formulář s chybami a pošle jako fragment
+        context = self.get_context_data(form=form)
+        html = render_to_string(self.template_name, context, request=self.request)
+        messages.success(self.request, f"Zákazník {self.object.name} Chyba !!!")
+        return HttpResponse(html)
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        order_pk = self.request.GET.get("order_pk")
+        order_pk = self.request.GET.get("order_pk") or self.request.POST.get("order_pk")
         context["order_pk"] = order_pk
         return context
 
