@@ -395,6 +395,10 @@ body.home {
   border-color: var(--border) !important;
 }
 
+.L-detail .errorlist {
+  color: var(--error);
+}
+
 .L-detail {
   width: clamp(12.5rem, 80%, 80%);
   padding: 0.5em;

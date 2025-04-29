@@ -1,6 +1,10 @@
 @use "../utils/" as *;
 @use "../base/placeholders" as *;
 
+.L-detail .errorlist {
+  color: var(--error);
+}
+
 .L-detail {
   @extend %transition-theme;
 

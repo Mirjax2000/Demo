@@ -74,7 +74,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         # Znovu vygeneruje formulář s chybami a pošle jako fragment
         context = self.get_context_data(form=form)
         html = render_to_string(self.template_name, context, request=self.request)
-        messages.success(self.request, f"Zákazník {self.object.name} Chyba !!!")
+        messages.error(self.request, f"Zákazník {self.object.name} Chyba !!!")
         return HttpResponse(html)
 
     def get_context_data(self, **kwargs) -> dict:
