@@ -78,39 +78,6 @@ class OrdersView(LoginRequiredMixin, ListView):
         return context
 
 
-class TeamsView(LoginRequiredMixin, ListView):
-    """Vypis seznamu modelu Order"""
-
-    model = Team
-    template_name = "app_sprava_montazi/teams_all.html"
-    context_object_name = "teams"
-
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-
-        context["active"] = "teams"
-
-        return context
-
-
-class TeamCreateView(LoginRequiredMixin, CreateView):
-    model = Team
-    form_class = TeamForm
-    template_name = "app_sprava_montazi/team_form.html"
-    success_url = reverse_lazy("teams")
-
-    def form_valid(self, form) -> HttpResponse:
-        messages.success(self.request, "Tým byl úspěšně vytvořen.")
-        return super().form_valid(form)
-
-
-class TeamUpdateView(LoginRequiredMixin, UpdateView):
-    model = Team
-    form_class = TeamForm
-    template_name = "app_sprava_montazi/team_form.html"
-    success_url = reverse_lazy("teams")
-
-
 class OrderCreateView(LoginRequiredMixin, View):
     template = "app_sprava_montazi/order_form.html"
 
@@ -149,6 +116,39 @@ class OrderCreateView(LoginRequiredMixin, View):
 
         messages.error(request, "Nastala chyba při ukládání objednávky.")
         return render(request, self.template, context)
+
+
+class TeamsView(LoginRequiredMixin, ListView):
+    """Vypis seznamu modelu Order"""
+
+    model = Team
+    template_name = "app_sprava_montazi/teams_all.html"
+    context_object_name = "teams"
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+
+        context["active"] = "teams"
+
+        return context
+
+
+class TeamCreateView(LoginRequiredMixin, CreateView):
+    model = Team
+    form_class = TeamForm
+    template_name = "app_sprava_montazi/team_form.html"
+    success_url = reverse_lazy("teams")
+
+    def form_valid(self, form) -> HttpResponse:
+        messages.success(self.request, "Tým byl úspěšně vytvořen.")
+        return super().form_valid(form)
+
+
+class TeamUpdateView(LoginRequiredMixin, UpdateView):
+    model = Team
+    form_class = TeamForm
+    template_name = "app_sprava_montazi/team_form.html"
+    success_url = reverse_lazy("teams")
 
 
 def order_create(request):
