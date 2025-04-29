@@ -55,7 +55,7 @@ body.home {
 }
 
 /* --- placeholders --- */
-.L-form, .L-form__wrapper-form {
+.L-form__wrapper-form {
   margin-inline: auto;
 }
 
@@ -254,7 +254,7 @@ body.home {
 }
 
 .L-form {
-  width: clamp(12.5rem, 100%, 31.25rem);
+  width: clamp(15rem, 100%, 31.25rem);
   margin-top: 1em;
   color: var(--txt-default);
 }
@@ -313,9 +313,9 @@ body.home {
   border: 1px solid var(--border);
 }
 .L-form__wrapper-form {
-  padding: 1em;
+  padding: 0.5em 2em;
   border: 1px solid var(--border);
-  width: 50%;
+  width: 70%;
 }
 .L-form__wrapper-for-two {
   display: flex;
