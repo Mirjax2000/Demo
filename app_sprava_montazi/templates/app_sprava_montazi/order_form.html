@@ -3,21 +3,31 @@
     formular
 {% endblock title %}
 {% block content %}
-    <h1>Vytvořit novou objednávku</h1>
-    <form method="post">
-        {% csrf_token %}
-        <h2>Informace o zákazníkovi</h2>
-        {{ client_form.as_p }}
-        <h2>Informace o objednávce</h2>
-        {{ order_form.as_p }}
-        {{ article_formset.management_form }}
-        {% for form in article_formset %}
+    <section class="L-form order-form">
+        <div class="L-form__header">
+            <h2>Vytvořit novou objednávku</h2>
+        </div>
+        <form method="post" class="L-form__form">
+            <div class="L-form__wrapper-for-two">
+                <div class="L-form__wrapper-form">
+                    <h3>Objednávka</h3>
+                    {{ order_form.as_p }}
+                </div>
+                <div class="L-form__wrapper-form">
+                    {% csrf_token %}
+                    <h3>Zákazník</h3>
+                    {{ client_form.as_p }}
+                </div>
+            </div>
+            {% comment %} {{ article_formset.management_form }}
+            {% for form in article_formset %}
             <fieldset>
-                <legend>Artikl</legend>
-                {{ form.as_p }}
+            <legend>Artikl</legend>
+            {{ form.as_p }}
             </fieldset>
-        {% endfor %}
-        <button type="submit" class="btn btn-primary">Uložit objednávku</button>
-    </form>
-    <a href="{% url 'orders' %}">Zpět na seznam objednávek</a>
+            {% endfor %} {% endcomment %}
+            <button type="submit" class="btn btn-primary mt-3">Uložit objednávku</button>
+        </form>
+        <a href="{% url 'orders' %}">Zpět na seznam objednávek</a>
+    </section>
 {% endblock content %}

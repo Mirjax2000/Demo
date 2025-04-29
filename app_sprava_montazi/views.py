@@ -109,6 +109,21 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("teams")
 
 
+class OrderCreateView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        order_form = OrderForm()
+        client_form = ClientForm()
+
+        context = {
+            "order_form": order_form,
+            "client_form": client_form,
+        }
+        return render(request, "app_sprava_montazi/order_form.html", context)
+
+    def post(self, request, *args, **kwargs):
+        pass
+
+
 def order_create(request):
     if request.method == "POST":
         order_form = OrderForm(request.POST)
@@ -124,7 +139,7 @@ def order_create(request):
                 article_formset = ArticleInlineFormSet(request.POST, instance=order)
                 if article_formset.is_valid():
                     article_formset.save()
-                    return redirect("order_detail", order_id=order.id)
+                    return redirect("order_detail", pk=order.id)
                 else:
                     # Pokud se artikly nevalidují, musíme smazat uloženého klienta a objednávku
                     client.delete()

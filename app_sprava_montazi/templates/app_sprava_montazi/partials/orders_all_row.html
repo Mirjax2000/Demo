@@ -49,7 +49,11 @@
         <!--Status-->
         <td class="u-s-none">{{ order.get_status_display }}</td>
         <!--Articles-->
-        <td class="u-s-none u-txt-center">{{ order.articles.count }}</td>
+        {% if order.articles.count == 0 %}
+            <td class="u-s-none u-txt-center u-txt-error">{{ order.articles.count }}</td>
+        {% else %}
+            <td class="u-s-none u-txt-center">{{ order.articles.count }}</td>
+        {% endif %}
         <!--poznamka-->
         <td title="{{ order.notes }}">{{ order.notes_first_10 }}</td>
         <!--CTA icons-->

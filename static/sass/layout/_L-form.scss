@@ -5,16 +5,20 @@
   color: var(--error);
 }
 
-.L-form {
-  p {
-    margin-bottom: 0.3em;
-  }
+.L-form.order-form {
+  width: clamp(12.5rem, 80%, 80%);
+}
 
+.L-form {
   @extend %margin-in;
 
   width: clamp(12.5rem, 100%, 31.25rem);
   margin-top: 1em;
   color: var(--txt-default);
+
+  p {
+    margin-bottom: 0.3em;
+  }
 
   &__form {
     padding-block: 0.5em;
@@ -41,6 +45,25 @@
     box-shadow: 1px 1px 1px #00000069;
   }
 
+  select {
+    color: var(--success-lighter);
+    font-weight: bold;
+  }
+
+  &__date,
+  &__datetime {
+    @extend %border-radius;
+
+    width: 100%;
+    display: block;
+    color: var(--txt-default);
+    background-color: var(--bck-table-head);
+    padding: 0.3em 0.5em;
+    border: 1px solid var(--border);
+    box-shadow: 1px 1px 1px #00000069;
+    cursor: pointer;
+  }
+
   &__group {
     margin-bottom: 1em;
 
@@ -52,19 +75,26 @@
     input {
       @extend %border-radius;
 
-      padding: 0.3em 0.5em;
-      border: 1px solid var(--border);
-      color: var(--txt-default);
-      background-color: var(--bck-table-head);
       display: block;
       width: 100%;
+      color: var(--txt-default);
+      background-color: var(--bck-table-head);
+      padding: 0.3em 0.5em;
+      border: 1px solid var(--border);
     }
   }
 
   &__wrapper-form {
     @extend %margin-in;
+    @extend %border-radius;
 
+    padding: 1em;
+    border: 1px solid var(--border);
     width: 50%;
+  }
+
+  &__wrapper-for-two {
+    @include flex(space-around, flex-start, 2%);
   }
 
   &__wrapper-error {
