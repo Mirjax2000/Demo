@@ -12,6 +12,7 @@
 [data-theme=light] {
   --border: rgba(33, 37, 41, 0.2901960784);
   --shadow: rgba(33, 37, 41, 0.1843137255);
+  --bck-list-item: white;
   --bck-sidebar: #f8f9fa;
   --bck-body: #f8f9fa;
   --bck-table-head: #cfcfcf;
@@ -25,6 +26,7 @@
 [data-theme=dark] {
   --border: rgba(248, 249, 250, 0.2392156863);
   --shadow: rgba(248, 249, 250, 0.0705882353);
+  --bck-list-item: black;
   --bck-sidebar: #212529;
   --bck-body: #212529;
   --bck-table-head: #212529;
@@ -61,7 +63,7 @@ body.home {
   user-select: none;
 }
 
-.L-form__input, .L-form__date, .L-form__datetime, .L-form__group input, .L-form__wrapper-form, .L-form__wrapper-error, .L-sidebar .L-active {
+.L-detail__info, .L-detail__artikl, .L-form__input, .L-form__date, .L-form__datetime, .L-form__group input, .L-form__wrapper-form, .L-form__wrapper-error, .L-sidebar .L-active {
   border-radius: 5px;
 }
 
@@ -69,7 +71,7 @@ body.home {
   transition: 0.1s all ease-in-out;
 }
 
-.P-body, .L-detail, .L-table__table thead th, .L-table .dt-input, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
+.P-body, .L-detail, .L-detail__item, .L-table__table thead th, .L-table .dt-input, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
   transition: 0.5s background-color ease-in-out, 0.5s color ease-in-out;
 }
 
@@ -394,7 +396,8 @@ body.home {
 }
 
 .L-detail {
-  padding: 0.3em;
+  width: clamp(12.5rem, 80%, 80%);
+  padding: 0.5em;
   color: var(--txt-default);
 }
 .L-detail h2 {
@@ -402,10 +405,41 @@ body.home {
 }
 .L-detail h3 {
   text-decoration: underline;
-  font-weight: 400;
+  font-weight: 200;
+}
+.L-detail__list {
+  margin: 0;
+  padding: 0;
+  margin-bottom: 1em;
+}
+.L-detail__item {
+  list-style-type: none;
+  margin-bottom: 0.3em;
+  padding: 0.3em;
+  background-color: var(--bck-list-item);
+  border: 1px solid var(--border);
+}
+.L-detail__wrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 2%;
+  margin-bottom: 1em;
+}
+.L-detail__info {
+  flex: 1 0 auto;
+  padding: 1em;
+  border: 1px solid var(--border);
+  max-width: 50%;
 }
 .L-detail__artikl {
+  overflow: auto;
+  padding: 1em 0.5em;
+  border: 1px solid var(--border);
   margin-top: 1em;
+}
+.L-detail__artikl h3 {
+  margin: 0;
 }
 
 .C-spinner {

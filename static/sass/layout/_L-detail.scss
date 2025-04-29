@@ -4,7 +4,8 @@
 .L-detail {
   @extend %transition-theme;
 
-  padding: 0.3em;
+  width: clamp(12.5rem, 80%, 80%);
+  padding: 0.5em;
   color: var(--txt-default);
 
   h2 {
@@ -13,10 +14,50 @@
 
   h3 {
     text-decoration: underline;
-    font-weight: 400;
+    font-weight: 200;
+  }
+
+  &__list {
+    margin: 0;
+    padding: 0;
+    margin-bottom: 1em;
+  }
+
+  &__item {
+    @extend %transition-theme;
+
+    list-style-type: none;
+    margin-bottom: 0.3em;
+    padding: 0.3em;
+    background-color: var(--bck-list-item);
+    border: 1px solid var(--border);
+  }
+
+  &__wrapper {
+    @include flex(flex-start, flex-start, 2%);
+
+    margin-bottom: 1em;
+  }
+
+  &__info {
+    @extend %border-radius;
+
+    flex: 1 0 auto;
+    padding: 1em;
+    border: 1px solid var(--border);
+    max-width: 50%;
   }
 
   &__artikl {
+    @extend %border-radius;
+
+    overflow: auto;
+    padding: 1em 0.5em;
+    border: 1px solid var(--border);
     margin-top: 1em;
+
+    h3 {
+      margin: 0;
+    }
   }
 }
