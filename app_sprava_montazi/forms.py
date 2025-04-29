@@ -54,6 +54,15 @@ class OrderForm(forms.ModelForm):
                 attrs={"class": "L-form__input", "rows": 4, "placeholder": "Poznámky"}
             ),
         }
+        error_messages = {
+            "order_number": {
+                "required": "číslo objednávky je povinné",
+                "unique": "objednávka uz existuje.",
+            },
+            "distrib_hub": {
+                "required": "místo určení je povinné",
+            },
+        }
 
 
 class ArticleForm(forms.ModelForm):
