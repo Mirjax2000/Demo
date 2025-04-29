@@ -419,7 +419,7 @@ body.home {
 .C-messages {
   position: absolute;
   left: 0.5rem;
-  min-width: 10rem;
+  min-width: 50%;
   width: fit-content;
   height: fit-content;
 }

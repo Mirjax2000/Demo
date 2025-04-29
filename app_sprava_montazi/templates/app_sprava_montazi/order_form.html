@@ -26,8 +26,14 @@
             {{ form.as_p }}
             </fieldset>
             {% endfor %} {% endcomment %}
-            <button type="submit" class="btn btn-primary mt-3">Uložit objednávku</button>
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary mt-3">
+                    <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit objednávku
+                </button>
+            </div>
         </form>
-        <a href="{% url 'orders' %}">Zpět na seznam objednávek</a>
+        <div class="u-txt-right">
+            <a href="{% url 'orders' %}" class="u-txt-right">Zpět na seznam objednávek</a>
+        </div>
     </section>
 {% endblock content %}

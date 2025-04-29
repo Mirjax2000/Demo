@@ -1,5 +1,5 @@
 {% for message in messages %}
-    <div class="C-messages alert alert-success alert-dismissible fade show"
+    <div class="C-messages alert alert-{{ message.tags }} alert-dismissible fade show"
          role="alert">
         <strong>Message:</strong>{{ message }}
         <button type="button"
@@ -8,4 +8,3 @@
                 aria-label="Close"></button>
     </div>
 {% endfor %}
-
