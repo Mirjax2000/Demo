@@ -2,12 +2,14 @@
 
 from typing import Any
 from rich.console import Console
+from django.db import transaction
+from django.conf import settings
 from django.db.models.query import QuerySet
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy, reverse
 from django.views.generic import (
     CreateView,
     DetailView,
@@ -67,7 +69,7 @@ class OrdersView(LoginRequiredMixin, ListView):
             orders = orders.filter(status=status)
         return orders
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
 
         context["statuses"] = Status
@@ -83,7 +85,7 @@ class TeamsView(LoginRequiredMixin, ListView):
     template_name = "app_sprava_montazi/teams_all.html"
     context_object_name = "teams"
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
 
         context["active"] = "teams"
@@ -97,7 +99,7 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
     template_name = "app_sprava_montazi/team_form.html"
     success_url = reverse_lazy("teams")
 
-    def form_valid(self, form):
+    def form_valid(self, form) -> HttpResponse:
         messages.success(self.request, "Tým byl úspěšně vytvořen.")
         return super().form_valid(form)
 
@@ -110,18 +112,43 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class OrderCreateView(LoginRequiredMixin, View):
-    def get(self, request, *args, **kwargs):
+    template = "app_sprava_montazi/order_form.html"
+
+    def get(self, request, *args, **kwargs) -> HttpResponse:
         order_form = OrderForm()
         client_form = ClientForm()
-
         context = {
             "order_form": order_form,
             "client_form": client_form,
+            "active": "orders_all",
         }
-        return render(request, "app_sprava_montazi/order_form.html", context)
+        return render(request, self.template, context)
 
     def post(self, request, *args, **kwargs):
-        pass
+        order_form = OrderForm(request.POST)
+        client_form = ClientForm(request.POST)
+        context = {
+            "order_form": order_form,
+            "client_form": client_form,
+            "active": "orders_all",
+        }
+
+        if client_form.is_valid() and order_form.is_valid():
+            try:
+                with transaction.atomic():
+                    client = client_form.save()
+                    order = order_form.save(commit=False)
+                    order.client = client
+                    order.save()
+                messages.success(request, "Objednávka vytvořena.")
+                return redirect(reverse("order_detail", kwargs={"pk": order.id}))
+
+            except Exception as e:
+                if settings.DEBUG:
+                    cons.log(f"chyba pri ukladani objednavky: {e}")
+
+        messages.error(request, "Nastala chyba při ukládání objednávky.")
+        return render(request, self.template, context)
 
 
 def order_create(request):
