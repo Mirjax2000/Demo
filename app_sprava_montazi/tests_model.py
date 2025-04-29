@@ -1,5 +1,6 @@
 """Model testy"""
 
+from datetime import date
 from django.test import TestCase
 from django.db import IntegrityError
 from .models import DistribHub, Order, Team, TeamType
@@ -40,6 +41,7 @@ class OrderModelTest(TestCase):
             order_number="703777143100437749-R",
             distrib_hub=self.hub,
             mandant="1234",
+            evidence_termin=date.today(),
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=None,
         )
@@ -56,6 +58,7 @@ class OrderModelTest(TestCase):
             order_number="703777143100437750-R",
             distrib_hub=self.hub,
             mandant="1234",
+            evidence_termin=date.today(),
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=team,
         )
@@ -67,6 +70,7 @@ class OrderModelTest(TestCase):
             order_number="703777143100437751-R",
             distrib_hub=self.hub,
             mandant="1234",
+            evidence_termin=date.today(),
             team_type=TeamType.BY_CUSTOMER,
             team=None,
         )
