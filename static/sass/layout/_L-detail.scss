@@ -42,10 +42,18 @@
   &__info {
     @extend %border-radius;
 
-    flex: 1 0 auto;
     padding: 1em;
     border: 1px solid var(--border);
-    max-width: 50%;
+
+    &.order {
+      flex: 1 0 25rem;
+      max-width: 28.125rem;
+    }
+
+    &.client {
+      flex: 1 0 18.75rem;
+      max-width: 25rem;
+    }
   }
 
   &__artikl {

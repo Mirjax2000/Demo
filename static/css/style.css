@@ -427,10 +427,16 @@ body.home {
   margin-bottom: 1em;
 }
 .L-detail__info {
-  flex: 1 0 auto;
   padding: 1em;
   border: 1px solid var(--border);
-  max-width: 50%;
+}
+.L-detail__info.order {
+  flex: 1 0 25rem;
+  max-width: 28.125rem;
+}
+.L-detail__info.client {
+  flex: 1 0 18.75rem;
+  max-width: 25rem;
 }
 .L-detail__artikl {
   overflow: auto;
@@ -453,7 +459,7 @@ body.home {
 .C-messages {
   position: absolute;
   left: 0.5rem;
-  min-width: 50%;
+  min-width: 80%;
   width: fit-content;
   height: fit-content;
 }
