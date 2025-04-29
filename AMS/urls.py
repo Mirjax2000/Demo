@@ -19,6 +19,7 @@ from app_sprava_montazi.views import (
     TeamCreateView,
     TeamUpdateView,
     OrderDetailView,
+    OrderCreateView,
     order_create,
     order_update,
 )
@@ -31,15 +32,15 @@ app_sprava_montazi: list = [
     path("", IndexView.as_view(), name="index"),
     path("homepage/", HomePageView.as_view(), name="homepage"),
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
-    # orders
+    # --- orders ---
     path("orders/", OrdersView.as_view(), name="orders"),
-    path("order/create/", order_create, name="order_create"),
-    path("order/update/<int:pk>/", order_update, name="order_update"),
-    path("order/detail/<int:pk>/", OrderDetailView.as_view(), name="order_detail"),
-    # teams
+    path("order/create/", OrderCreateView.as_view(), name="order_create"),
+    path("order/<int:pk>/update/", order_update, name="order_update"),
+    path("order/<int:pk>/detail/", OrderDetailView.as_view(), name="order_detail"),
+    # --- teams ---
     path("teams/", TeamsView.as_view(), name="teams"),
-    path("teams/create", TeamCreateView.as_view(), name="team_create"),
-    path("teams/<slug:slug>/update", TeamUpdateView.as_view(), name="team_update"),
+    path("teams/create/", TeamCreateView.as_view(), name="team_create"),
+    path("teams/<slug:slug>/update/", TeamUpdateView.as_view(), name="team_update"),
 ]
 
 app_accounts_urls: list = [
