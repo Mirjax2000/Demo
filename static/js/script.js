@@ -13,7 +13,7 @@
             $(element).fadeOut(1000, function () {
                 $(this).remove();
             });
-        }, 3000);
+        }, 5000);
     });
 
     // validace tel num v inputech
@@ -92,7 +92,6 @@
                 decimal: ","
             },
         });
-
     }
 
     if (articleTable) {

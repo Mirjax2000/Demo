@@ -1,0 +1,13 @@
+<div>
+    <form method="post" action="{% url 'client_update' client.slug %}">
+        {% csrf_token %}
+        <input type="hidden" name="order_pk" value="{{ order_pk }}">
+        <h3>Zákazník</h3>
+        {{ form.as_p }}
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary mt-3">
+                <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit Zákazníka
+            </button>
+        </div>
+    </form>
+</div>

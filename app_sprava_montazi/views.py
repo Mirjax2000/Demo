@@ -18,7 +18,7 @@ from django.views.generic import (
     UpdateView,
     View,
 )
-from .models import Order, DistribHub, Status, Team, Article
+from .models import Order, DistribHub, Status, Team, Article, Client
 from .forms import TeamForm, ArticleInlineFormSet, OrderForm, ClientForm
 from django.forms import formset_factory
 
@@ -53,6 +53,26 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         context["active"] = "dashboard"
         return context
+
+
+class ClientUpdateView(LoginRequiredMixin, UpdateView):
+    model = Client
+    form_class = ClientForm
+    template_name = "app_sprava_montazi/partials/client_form.html"
+
+    def form_valid(self, form) -> HttpResponse:
+        messages.success(self.request, f"Zákazník {self.object.name} aktualizován.")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        order_pk = self.request.GET.get("order_pk")
+        context["order_pk"] = order_pk
+        return context
+
+    def get_success_url(self):
+        order_pk = self.request.POST.get("order_pk")
+        return reverse("order_detail", kwargs={"pk": order_pk})
 
 
 class OrdersView(LoginRequiredMixin, ListView):

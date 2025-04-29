@@ -1,4 +1,4 @@
-<div class="L-detail__info">
+<div class="L-detail__info client" id="detailClient">
     <h3>Zákazník</h3>
     <ul class="L-detail__list">
         <!--client name-->
@@ -52,11 +52,14 @@
             </li>
         {% endif %}
     </ul>
-    <div class="mb-2 col-6">
-        <a href="#" class="btn btn-primary d-block">
+    <div class="mb-2">
+        <a class="btn btn-primary d-block"
+           hx-get="{% url 'client_update' order.client.slug %}?order_pk={{ order.pk }}"
+           hx-target="#detailClient"
+           hx-indikator="#spinner">
             <i class="fa-solid fa-pen-to-square"></i>&nbsp;&nbsp;Upravit zákazníka</a>
     </div>
-    <div class="mb-2 col-6">
+    <div class="mb-2">
         <a href="#" class="btn btn-primary d-block">
             <i class="fa-solid fa-phone"></i>&nbsp;&nbsp;Volat zákazníka</a>
     </div>
