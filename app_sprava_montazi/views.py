@@ -74,7 +74,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form) -> HttpResponse:
-        messages.success(self.request, f"Zákazník {self.object} aktualizován.")
+        messages.success(self.request, f"Zákazník: {self.object} aktualizován.")
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
@@ -182,8 +182,10 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("teams")
 
     def form_valid(self, form) -> HttpResponse:
-        messages.success(self.request, "Tým byl úspěšně vytvořen.")
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        cons.log(response)
+        messages.success(self.request, f"Tým: {self.object} byl úspěšně vytvořen.")
+        return response
 
 
 class TeamUpdateView(LoginRequiredMixin, UpdateView):
