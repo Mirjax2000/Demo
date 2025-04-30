@@ -267,7 +267,8 @@ body.home {
 .L-form__header {
   margin-bottom: 1em;
 }
-.L-form__header h2 {
+.L-form__header h2,
+.L-form__header h3 {
   display: inline-block;
   text-decoration: underline;
 }
