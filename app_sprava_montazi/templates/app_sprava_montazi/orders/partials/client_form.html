@@ -1,9 +1,6 @@
-<div>
-    <form hx-post="{% url 'client_update' client.slug %}"
-          hx-target="#detailClient"
-          hx-indikator="#spinner">
+<section class="L-form mt-0">
+    <form method="post" class="L-form__form p-0">
         {% csrf_token %}
-        <input type="hidden" name="order_pk" value="{{ order_pk }}">
         <h3>Zákazník</h3>
         {{ form.as_p }}
         <div class="d-flex justify-content-end">
@@ -12,4 +9,4 @@
             </button>
         </div>
     </form>
-</div>
+</section>

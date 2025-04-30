@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}
-    detail objednavky
+    Client form
 {% endblock title %}
 {% block content %}
     <section class="L-detail">
@@ -8,9 +8,15 @@
         <hr>
         <div class="L-detail__wrapper">
             <!--objednavka-->
-            {% include "app_sprava_montazi/partials/order_detail_order.html" %}
+            <div class="L-detail__hidden L-detail__info order">
+                <!---->
+                {% include "app_sprava_montazi/orders/partials/order_detail_order.html" %}
+            </div>
             <!--zakaznik-->
-            {% include "app_sprava_montazi/partials/order_detail_client.html" %}
+            <div class="L-detail__info client">
+                <!---->
+                {% include "app_sprava_montazi/orders/partials/client_form.html" %}
+            </div>
         </div>
         <p class="mt-3">
             <a href="{% url 'orders' %}">Zpět na seznam objednávek</a>
