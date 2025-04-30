@@ -7,6 +7,9 @@ from .models import DistribHub
 
 class ClientFormTest(TestCase):
     def test_valid_data(self):
+        """
+        Testuje, zda formulář ClientForm je platný při zadání správných dat.
+        """
         form = ClientForm(
             data={
                 "name": "Jan Novák",
@@ -22,6 +25,9 @@ class ClientFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_missing_required_field_name(self):
+        """
+        Testuje, zda formulář ClientForm je neplatny při zadání nesprávných dat.
+        """
         form = ClientForm(
             data={
                 "name": "",
@@ -38,6 +44,9 @@ class ClientFormTest(TestCase):
         self.assertEqual(form.errors["name"][0], "Jméno je povinné!")
 
     def test_invalid_email_format(self):
+        """
+        Testuje, zda formulář ClientForm správně detekuje neplatný formát e-mailové adresy.
+        """
         form = ClientForm(
             data={
                 "name": "Jan Novák",
@@ -53,6 +62,9 @@ class ClientFormTest(TestCase):
         self.assertIn("email", form.errors)
 
     def test_zip_code_required(self):
+        """
+        Testuje, že pole 'zip_code' je ve formuláři ClientForm povinné.
+        """
         form = ClientForm(
             data={
                 "name": "Jan Novák",
@@ -71,6 +83,9 @@ class ClientFormTest(TestCase):
 
 class DistribHubFormTest(TestCase):
     def test_valid_form(self):
+        """
+        Testuje, zda je formulář DistribHubForm platný při zadání správných dat.
+        """
         form = DistribHubForm(
             data={
                 "code": "A01",
@@ -80,6 +95,9 @@ class DistribHubFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_missing_code(self):
+        """
+        Testuje, zda formulář DistribHubForm správně vyžaduje pole 'code'.
+        """
         form = DistribHubForm(
             data={
                 "code": "",
@@ -91,6 +109,9 @@ class DistribHubFormTest(TestCase):
         self.assertEqual(form.errors["code"][0], "Kod je povinný!")
 
     def test_code_too_long(self):
+        """
+        Testuje, zda formulář DistribHubForm správně detekuje příliš dlouhý kód.
+        """
         form = DistribHubForm(
             data={
                 "code": "ABCDE",  # moc dlouhé
@@ -101,6 +122,9 @@ class DistribHubFormTest(TestCase):
         self.assertIn("code", form.errors)
 
     def test_duplicate_code(self):
+        """
+        Testuje, zda formulář DistribHubForm správně detekuje duplicitní kód distribučního hubu.
+        """
         DistribHub.objects.create(code="A01", city="Praha")
         form = DistribHubForm(
             data={
@@ -113,6 +137,9 @@ class DistribHubFormTest(TestCase):
         self.assertEqual(form.errors["code"][0], "Tento kod uz existuje")
 
     def test_missing_city(self):
+        """
+        Testuje, zda formulář DistribHubForm správně detekuje chybějící hodnotu pole 'city'.
+        """
         form = DistribHubForm(
             data={
                 "code": "B01",

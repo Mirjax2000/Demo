@@ -31,5 +31,4 @@ class OrdersAllViewTest(TestCase):
         """
         response = self.client.get(reverse("orders"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "app_sprava_montazi/orders_all.html")
-
+        self.assertTemplateUsed(response, "app_sprava_montazi/orders/orders_all.html")
