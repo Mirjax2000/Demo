@@ -72,10 +72,7 @@
                 bottomStart: 'info',
                 bottomEnd: 'paging'
             },
-            columnDefs: [
-                { orderable: false, targets: [5] }
-            ],
-
+            columnDefs: [],
             language: {
                 emptyTable: "Žádné objednávky"
             },
@@ -100,7 +97,7 @@
                 bottomEnd: 'paging'
             },
             columnDefs: [
-                { orderable: false, targets: [6, 7] },
+                { orderable: false, targets: [6] },
                 { targets: [4, 5], type: 'num-fmt' }
             ],
             language: {
