@@ -35,7 +35,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
 class HomePageView(LoginRequiredMixin, TemplateView):
     """Homepage View"""
 
-    template_name: str = "app_sprava_montazi/homepage.html"
+    template_name: str = "app_sprava_montazi/homepage/homepage.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -47,7 +47,7 @@ class HomePageView(LoginRequiredMixin, TemplateView):
 class DashboardView(LoginRequiredMixin, TemplateView):
     """Dashboard View"""
 
-    template_name: str = "app_sprava_montazi/dashboard.html"
+    template_name: str = "app_sprava_montazi/dashboard/dashboard.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -59,40 +59,34 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 class ClientUpdateView(LoginRequiredMixin, UpdateView):
     model = Client
     form_class = ClientForm
-    template_name = "app_sprava_montazi/partials/client_form.html"
+    template_name = "app_sprava_montazi/orders/order_detail_client-form.html"
 
-    def form_valid(self, form) -> HttpResponse:
-        self.object = form.save()
-        messages.success(self.request, f"Zákazník {self.object.name} aktualizován.")
-
-        # HTMX redirect
-        response = HttpResponse()
-        response["HX-Redirect"] = self.get_success_url()
-        return response
-
-    def form_invalid(self, form) -> HttpResponse:
-        # Znovu vygeneruje formulář s chybami a pošle jako fragment
-        context = self.get_context_data(form=form)
-        html = render_to_string(self.template_name, context, request=self.request)
-        messages.error(self.request, f"Zákazník {self.object.name} Chyba !!!")
-        return HttpResponse(html)
-
-    def get_context_data(self, **kwargs) -> dict:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        order_pk = self.request.GET.get("order_pk") or self.request.POST.get("order_pk")
-        context["order_pk"] = order_pk
+        order_pk = self.kwargs["order_pk"]
+        order = Order.objects.get(pk=order_pk)
+        articles = Article.objects.filter(order=order_pk)
+
+        context["order"] = order
+        context["articles"] = articles
+        context["active"] = "orders"
+
         return context
 
-    def get_success_url(self):
-        order_pk = self.request.POST.get("order_pk")
-        return reverse("order_detail", kwargs={"pk": order_pk})
+    def form_valid(self, form) -> HttpResponse:
+        client = Client.objects.get(slug=self.kwargs["slug"])
+        messages.success(self.request, f"Zákazník {client} aktualizován.")
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse("order_detail", kwargs={"pk": self.kwargs["order_pk"]})
 
 
 class OrdersView(LoginRequiredMixin, ListView):
     """Vypis seznamu modelu Order"""
 
     model = Order
-    template_name = "app_sprava_montazi/orders_all.html"
+    template_name = "app_sprava_montazi/orders/orders_all.html"
     context_object_name = "orders"
 
     def get_queryset(self) -> QuerySet[Any]:
@@ -112,7 +106,7 @@ class OrdersView(LoginRequiredMixin, ListView):
 
 
 class OrderCreateView(LoginRequiredMixin, View):
-    template = "app_sprava_montazi/order_form.html"
+    template = "app_sprava_montazi/orders/order_form.html"
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
         order_form = OrderForm()
@@ -151,11 +145,27 @@ class OrderCreateView(LoginRequiredMixin, View):
         return render(request, self.template, context)
 
 
+class OrderDetailView(LoginRequiredMixin, DetailView):
+    model = Order
+    template_name = "app_sprava_montazi/orders/order_detail.html"
+    context_object_name = "order"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        order_pk = self.kwargs["pk"]
+        articles = Article.objects.filter(order=order_pk)
+
+        context["active"] = "orders"
+        context["articles"] = articles
+
+        return context
+
+
 class TeamsView(LoginRequiredMixin, ListView):
     """Vypis seznamu modelu Order"""
 
     model = Team
-    template_name = "app_sprava_montazi/teams_all.html"
+    template_name = "app_sprava_montazi/teams/teams_all.html"
     context_object_name = "teams"
 
     def get_context_data(self, **kwargs) -> dict:
@@ -169,7 +179,7 @@ class TeamsView(LoginRequiredMixin, ListView):
 class TeamCreateView(LoginRequiredMixin, CreateView):
     model = Team
     form_class = TeamForm
-    template_name = "app_sprava_montazi/team_form.html"
+    template_name = "app_sprava_montazi/teams/team_form.html"
     success_url = reverse_lazy("teams")
 
     def form_valid(self, form) -> HttpResponse:
@@ -180,7 +190,7 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
 class TeamUpdateView(LoginRequiredMixin, UpdateView):
     model = Team
     form_class = TeamForm
-    template_name = "app_sprava_montazi/team_form.html"
+    template_name = "app_sprava_montazi/teams/team_form.html"
     success_url = reverse_lazy("teams")
 
 
@@ -275,18 +285,3 @@ def order_update(request, pk):
         "article_formset": article_formset,
     }
     return render(request, "app_sprava_montazi/order_form.html", context)
-
-
-class OrderDetailView(LoginRequiredMixin, DetailView):
-    model = Order
-    template_name = "app_sprava_montazi/order_detail.html"
-    context_object_name = "order"
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        articles = Article.objects.filter(order=self.object)
-
-        context["active"] = "orders"
-        context["articles"] = articles
-
-        return context
