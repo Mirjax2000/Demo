@@ -235,7 +235,7 @@ class Article(Model):
         on_delete=PROTECT,
         related_name="articles",
     )
-    name = CharField(max_length=32, verbose_name="Artikl")
+    name = CharField(max_length=32, verbose_name="Název artiklu")
     price = DecimalField(
         max_digits=10,
         decimal_places=2,
