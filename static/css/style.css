@@ -333,6 +333,9 @@ body.home {
   list-style: none;
 }
 
+.L-table {
+  width: clamp(15rem, 100%, 87.5rem);
+}
 .L-table__nav-panel {
   display: flex;
   justify-content: space-around;
@@ -403,6 +406,11 @@ body.home {
   width: clamp(12.5rem, 80%, 80%);
   padding: 0.5em;
   color: var(--txt-default);
+}
+.L-detail__hidden {
+  opacity: 0.3;
+  pointer-events: none;
+  user-select: none;
 }
 .L-detail h2 {
   font-weight: 400;

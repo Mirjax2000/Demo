@@ -12,6 +12,12 @@
   padding: 0.5em;
   color: var(--txt-default);
 
+  &__hidden {
+    opacity: 0.3;
+    pointer-events: none;
+    user-select: none;
+  }
+
   h2 {
     font-weight: 400;
   }
