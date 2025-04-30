@@ -2,7 +2,8 @@
 @use "../base/placeholders" as *;
 
 .L-table {
-  width: clamp(15rem, 100%, 87.5rem);
+  width: clamp(30rem, 100%, 87.5rem);
+  margin-inline-start: 2%;
 
   &__nav-panel {
     @include flex(space-around, flex-end);

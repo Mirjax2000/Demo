@@ -8,7 +8,7 @@
 .L-detail {
   @extend %transition-theme;
 
-  width: clamp(12.5rem, 80%, 80%);
+  width: clamp(30rem, 100%, 87.5rem);
   padding: 0.5em;
   color: var(--txt-default);
 
@@ -63,6 +63,8 @@
     &.client {
       flex: 1 0 18.75rem;
       max-width: 25rem;
+      position: relative;
+      isolation: isolate;
     }
   }
 

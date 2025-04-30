@@ -63,7 +63,7 @@ body.home {
   user-select: none;
 }
 
-.L-detail__info, .L-detail__artikl, .L-form__input, .L-form__date, .L-form__datetime, .L-form__group input, .L-form__wrapper-form, .L-form__wrapper-error, .L-sidebar .L-active {
+.L-detail__info, .L-detail__artikl, .L-form__input, .L-form__date, .L-form__datetime, .L-form__group input, .L-form__wrapper-form, .L-form__articles, .L-form__wrapper-error, .L-sidebar .L-active {
   border-radius: 5px;
 }
 
@@ -250,7 +250,7 @@ body.home {
 }
 
 .L-form.order-form {
-  width: clamp(12.5rem, 80%, 80%);
+  width: clamp(50rem, 100%, 87.5rem);
 }
 
 .L-form {
@@ -314,15 +314,40 @@ body.home {
   border: 1px solid var(--border);
 }
 .L-form__wrapper-form {
-  padding: 0.5em 2em;
+  padding: 1.5em 2em;
   border: 1px solid var(--border);
   width: 70%;
+  position: relative;
+  isolation: isolate;
 }
 .L-form__wrapper-for-two {
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
   align-items: flex-start;
   gap: 2%;
+}
+.L-form__wrapper-for-two .L-form__wrapper-form.order {
+  flex: 1 0 25rem;
+  max-width: 28.125rem;
+  margin: 0;
+}
+.L-form__wrapper-for-two .L-form__wrapper-form.client {
+  flex: 1 0 18.75rem;
+  max-width: 25rem;
+  margin: 0;
+}
+.L-form__articles {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2%;
+  border: 1px solid var(--border);
+  flex-wrap: wrap;
+  width: clamp(50rem, 100%, 87.5rem);
+  margin-top: 2em;
+  padding: 1.5em 2em;
+  position: relative;
+  isolation: isolate;
 }
 .L-form__wrapper-error {
   padding: 1em;
@@ -333,9 +358,21 @@ body.home {
   padding: 0;
   list-style: none;
 }
+.L-form fieldset legend {
+  position: absolute;
+  top: 0;
+  left: 0.5em;
+  width: fit-content;
+  transform: translateY(-50%);
+  margin: 0;
+  line-height: 1em;
+  padding-inline: 0.5em;
+  background-color: var(--bck-table-head);
+}
 
 .L-table {
-  width: clamp(15rem, 100%, 87.5rem);
+  width: clamp(30rem, 100%, 87.5rem);
+  margin-inline-start: 2%;
 }
 .L-table__nav-panel {
   display: flex;
@@ -404,7 +441,7 @@ body.home {
 }
 
 .L-detail {
-  width: clamp(12.5rem, 80%, 80%);
+  width: clamp(30rem, 100%, 87.5rem);
   padding: 0.5em;
   color: var(--txt-default);
 }
@@ -450,6 +487,8 @@ body.home {
 .L-detail__info.client {
   flex: 1 0 18.75rem;
   max-width: 25rem;
+  position: relative;
+  isolation: isolate;
 }
 .L-detail__artikl {
   overflow: auto;
@@ -483,8 +522,8 @@ body.home {
 }
 
 .P-container {
-  width: clamp(45rem, 100%, 90%);
-  padding-inline: 5%;
+  width: clamp(64rem, 100%, 90%);
+  padding-inline: 1%;
   margin-inline: auto;
 }
 

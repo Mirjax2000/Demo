@@ -6,7 +6,7 @@
 }
 
 .L-form.order-form {
-  width: clamp(12.5rem, 80%, 80%);
+  width: clamp(50rem, 100%, 87.5rem);
 }
 
 .L-form {
@@ -91,13 +91,40 @@
     @extend %margin-in;
     @extend %border-radius;
 
-    padding: 0.5em 2em;
+    padding: 1.5em 2em;
     border: 1px solid var(--border);
     width: 70%;
+    position: relative;
+    isolation: isolate;
   }
 
   &__wrapper-for-two {
-    @include flex(space-around, flex-start, 2%);
+    @include flex(flex-start, flex-start, 2%);
+
+    .L-form__wrapper-form.order {
+      flex: 1 0 25rem;
+      max-width: 28.125rem;
+      margin: 0;
+    }
+
+    .L-form__wrapper-form.client {
+      flex: 1 0 18.75rem;
+      max-width: 25rem;
+      margin: 0;
+    }
+  }
+
+  &__articles {
+    @include flex(flex-start, center, 2%);
+    @extend %border-radius;
+
+    border: 1px solid var(--border);
+    flex-wrap: wrap;
+    width: clamp(50rem, 100%, 87.5rem);
+    margin-top: 2em;
+    padding: 1.5em 2em;
+    position: relative;
+    isolation: isolate;
   }
 
   &__wrapper-error {
@@ -111,6 +138,20 @@
     ul {
       padding: 0;
       list-style: none;
+    }
+  }
+
+  fieldset {
+    legend {
+      position: absolute;
+      top: 0;
+      left: 0.5em;
+      width: fit-content;
+      transform: translateY(-50%);
+      margin: 0;
+      line-height: 1em;
+      padding-inline: 0.5em;
+      background-color: var(--bck-table-head);
     }
   }
 }
