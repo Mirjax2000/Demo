@@ -73,7 +73,7 @@
                 bottomEnd: 'paging'
             },
             columnDefs: [
-                { orderable: false, targets: [5, 12] }
+                { orderable: false, targets: [5] }
             ],
 
             language: {
