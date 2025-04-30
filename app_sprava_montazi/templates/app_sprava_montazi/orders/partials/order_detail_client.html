@@ -7,11 +7,11 @@
     <!--street-->
     {% if order.client.street %}
         <li class="L-detail__item">
-            <strong>Ulice:</strong> {{ order.client.street }} {{ order.client.number }}
+            <strong>Ulice:</strong> {{ order.client.street }}
         </li>
     {% else %}
         <li class="L-detail__item">
-            <strong>Ulice:</strong> <span class="u-txt-warning">&nbsp;Nevyplněno</span>
+            <strong>Ulice:</strong><span class="u-txt-warning">&nbsp;Nevyplněno</span>
         </li>
     {% endif %}
     <!--city-->

@@ -22,8 +22,7 @@
                 <i class="fa-solid fa-check"></i>&nbsp;{{ order.client.first_15 }}
             </td>
         {% endif %}
-        <!--PSC-->
-        <td>{{ order.client.zip_code }}</td>
+
         <!--Realizace kym-->
         {% if order.team_type == "By_assembly_crew" %}
             <td class="u-txt-success u-s-none">{{ order.get_team_type_display }}</td>
