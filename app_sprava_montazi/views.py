@@ -21,7 +21,7 @@ from django.views.generic import (
 )
 from .models import Order, DistribHub, Status, Team, Article, Client
 from .forms import TeamForm, ArticleInlineFormSet, OrderForm, ClientForm
-from django.forms import formset_factory
+from django.forms import BaseModelForm, formset_factory
 
 cons: Console = Console()
 
@@ -111,9 +111,12 @@ class OrderCreateView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs) -> HttpResponse:
         order_form = OrderForm()
         client_form = ClientForm()
+        article_formset = ArticleInlineFormSet()
+
         context = {
             "order_form": order_form,
             "client_form": client_form,
+            "article_form": article_formset,
             # --- navigace
             "active": "orders_all",
         }
@@ -175,7 +178,6 @@ class TeamsView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         # --- navigace
         context["active"] = "teams"
-
         return context
 
 
@@ -209,6 +211,10 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
         # --- navigace
         context["active"] = "teams"
         return context
+
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        messages.success(self.request, f"Team: {self.object} byl aktualizovan.")
+        return super().form_valid(form)
 
 
 def order_create(request):
