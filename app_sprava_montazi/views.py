@@ -74,8 +74,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form) -> HttpResponse:
-        client = Client.objects.get(slug=self.kwargs["slug"])
-        messages.success(self.request, f"Zákazník {client} aktualizován.")
+        messages.success(self.request, f"Zákazník {self.object} aktualizován.")
         return super().form_valid(form)
 
     def get_success_url(self) -> str:

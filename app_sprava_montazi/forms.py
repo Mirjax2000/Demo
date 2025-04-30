@@ -110,7 +110,6 @@ class ClientForm(forms.ModelForm):
         fields = [
             "name",
             "street",
-            "number",
             "city",
             "zip_code",
             "phone",
@@ -123,13 +122,6 @@ class ClientForm(forms.ModelForm):
             ),
             "street": forms.TextInput(
                 attrs={"class": "L-form__input", "placeholder": "ulice..."}
-            ),
-            "number": forms.NumberInput(
-                attrs={
-                    "class": "L-form__input",
-                    "placeholder": "číslo ulice...",
-                    "max-length": "6",
-                }
             ),
             "city": forms.TextInput(
                 attrs={"class": "L-form__input", "placeholder": "město..."}
@@ -157,9 +149,6 @@ class ClientForm(forms.ModelForm):
             },
             "city": {
                 "max_length": "Jméno je příliš dlouhé! (max. 32 znaků)",
-            },
-            "number": {
-                "max_length": "Jméno je příliš dlouhé! (max. 6 znaků)",
             },
             "phone": {},
             "zip_code": {

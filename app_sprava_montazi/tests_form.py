@@ -14,7 +14,6 @@ class ClientFormTest(TestCase):
             data={
                 "name": "Jan Novák",
                 "street": "Hlavní",
-                "number": "123",
                 "city": "Praha",
                 "zip_code": "10000",
                 "phone": "212345678",
@@ -32,7 +31,6 @@ class ClientFormTest(TestCase):
             data={
                 "name": "",
                 "street": "Hlavní",
-                "number": "123",
                 "city": "Praha",
                 "zip_code": "10000",
                 "phone": "212345678",
@@ -51,7 +49,6 @@ class ClientFormTest(TestCase):
             data={
                 "name": "Jan Novák",
                 "street": "Hlavní",
-                "number": "123",
                 "city": "Praha",
                 "zip_code": "10000",
                 "phone": "212345678",
@@ -69,7 +66,6 @@ class ClientFormTest(TestCase):
             data={
                 "name": "Jan Novák",
                 "street": "Hlavní",
-                "number": "123",
                 "city": "Praha",
                 "zip_code": "",  # chybí PSČ
                 "phone": "212345678",

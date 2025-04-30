@@ -108,11 +108,6 @@ class Client(Model):
         verbose_name="Jméno zákazníka",
     )
     street = CharField(max_length=50, blank=True, verbose_name="Ulice")
-    number = CharField(
-        max_length=6,
-        blank=True,
-        verbose_name="Číslo popisné",
-    )
     city = CharField(max_length=32, blank=True, verbose_name="Město")
     zip_code = CharField(max_length=5, verbose_name="PSČ")
     phone = PhoneNumberField(max_length=17, blank=True)
@@ -121,8 +116,8 @@ class Client(Model):
     slug = SlugField(blank=True)
 
     def save(self, *args, **kwargs):
-        self.incomplete = not all([self.street, self.number, self.city, self.phone])
-        self.slug = slugify(f"{self.name}{self.city}{self.street}{self.number}")
+        self.incomplete = not all([self.street, self.city, self.phone])
+        self.slug = slugify(f"{self.name}{self.city}{self.street}")
         super().save(*args, **kwargs)
 
     def first_15(self):
@@ -216,7 +211,9 @@ class Order(Model):
 
     def notes_first_10(self) -> str:
         if self.notes:
-            return f"{str(self.notes)[:10]}..."
+            if len(self.notes) > 10:
+                return f"{str(self.notes)[:10]}..."
+            return self.notes
         return "-"
 
     def is_missing_team(self) -> bool:
@@ -248,12 +245,13 @@ class Article(Model):
     )
     quantity = PositiveIntegerField(default=1, verbose_name="Množství")
     note = TextField(blank=True, verbose_name="Popis")
-    slug = SlugField(blank=True)
 
-    def save(self, *args, **kwargs):
-        if self.slug != self.name:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
+    def first_15(self) -> str:
+        if self.note:
+            if len(self.note) > 15:
+                return f"{str(self.note)[:15]}..."
+            return self.note
+        return "-"
 
     def __str__(self) -> str:
         return str(self.name)
