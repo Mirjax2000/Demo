@@ -38,14 +38,15 @@ app_sprava_montazi: list = [
     path("order/create/", OrderCreateView.as_view(), name="order_create"),
     path("order/<int:pk>/update/", order_update, name="order_update"),
     path("order/<int:pk>/detail/", OrderDetailView.as_view(), name="order_detail"),
+    path(
+        "order/<slug:slug>/<int:order_pk>/client_update/",
+        ClientUpdateView.as_view(),
+        name="client_update",
+    ),
     # --- teams ---
     path("teams/", TeamsView.as_view(), name="teams"),
     path("teams/create/", TeamCreateView.as_view(), name="team_create"),
     path("teams/<slug:slug>/update/", TeamUpdateView.as_view(), name="team_update"),
-    # --- partials client ---
-    path(
-        "client/<slug:slug>/update/", ClientUpdateView.as_view(), name="client_update"
-    ),
 ]
 
 app_accounts_urls: list = [
