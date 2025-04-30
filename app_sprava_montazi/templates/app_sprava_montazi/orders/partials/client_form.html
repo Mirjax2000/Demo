@@ -1,8 +1,10 @@
 <section class="L-form mt-0">
     <form method="post" class="L-form__form p-0">
         {% csrf_token %}
-        <h3>Zákazník</h3>
-        {{ form.as_p }}
+        <fieldset>
+            <legend>Zákazník</legend>
+            {{ form.as_p }}
+        </fieldset>
         <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-primary mt-3">
                 <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit Zákazníka

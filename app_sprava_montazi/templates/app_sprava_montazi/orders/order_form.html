@@ -8,24 +8,31 @@
             <h2>Vytvořit novou objednávku</h2>
         </div>
         <form method="post" class="L-form__form">
+            {% csrf_token %}
             <div class="L-form__wrapper-for-two">
-                <div class="L-form__wrapper-form">
-                    <h3>Objednávka</h3>
-                    {{ order_form.as_p }}
+                <div class="L-form__wrapper-form order">
+                    <fieldset>
+                        <legend>Objednávka</legend>
+                        {{ order_form.as_p }}
+                    </fieldset>
                 </div>
-                <div class="L-form__wrapper-form">
-                    {% csrf_token %}
-                    <h3>Zákazník</h3>
-                    {{ client_form.as_p }}
+                <div class="L-form__wrapper-form client">
+                    <fieldset>
+                        <legend>Zákazník</legend>
+                        {{ client_form.as_p }}
+                    </fieldset>
                 </div>
             </div>
-            {% comment %} {{ article_formset.management_form }}
-            {% for form in article_formset %}
-            <fieldset>
-            <legend>Artikl</legend>
-            {{ form.as_p }}
-            </fieldset>
-            {% endfor %} {% endcomment %}
+            <!--articles form-->
+            <div class="L-form__articles">
+                {{ article_form.management_form }}
+                {% for form in article_form %}
+                    <fieldset>
+                        <legend>Artikl</legend>
+                        {{ form.as_p }}
+                    </fieldset>
+                {% endfor %}
+            </div>
             <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary mt-3">
                     <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit objednávku

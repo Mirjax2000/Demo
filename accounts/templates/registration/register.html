@@ -4,30 +4,30 @@
 {% endblock title %}
 {% block content %}
     <section class="L-form">
-        <div class="L-form__wrapper-form">
-            <header class="L-form__header">
-                <h2>Registrace</h2>
-            </header>
+        <div class="L-form__wrapper-form mt-5">
             <form class="L-form__form" method="post">
                 {% csrf_token %}
-                <div class="L-form__group">
-                    <label for="{{ form.username.id_for_label }}">
-                        {{ form.username.label }}
-                        {{ form.username }}
-                    </label>
-                </div>
-                <div class="L-form__group">
-                    <label for="{{ form.password1.id_for_label }}">
-                        {{ form.password1.label }}
-                        {{ form.password1 }}
-                    </label>
-                </div>
-                <div class="L-form__group">
-                    <label for="{{ form.password2.id_for_label }}">
-                        {{ form.password2.label }}
-                        {{ form.password2 }}
-                    </label>
-                </div>
+                <fieldset>
+                    <legend>Registrace</legend>
+                    <div class="L-form__group">
+                        <label for="{{ form.username.id_for_label }}">
+                            {{ form.username.label }}
+                            {{ form.username }}
+                        </label>
+                    </div>
+                    <div class="L-form__group">
+                        <label for="{{ form.password1.id_for_label }}">
+                            {{ form.password1.label }}
+                            {{ form.password1 }}
+                        </label>
+                    </div>
+                    <div class="L-form__group">
+                        <label for="{{ form.password2.id_for_label }}">
+                            {{ form.password2.label }}
+                            {{ form.password2 }}
+                        </label>
+                    </div>
+                </fieldset>
                 <button type="submit" class="btn btn-primary">Registrovat</button>
             </form>
             <p>
