@@ -99,7 +99,7 @@ ArticleInlineFormSet = inlineformset_factory(
     Order,
     Article,
     form=ArticleForm,
-    extra=1,
+    extra=5,
     can_delete=True,
 )
 
