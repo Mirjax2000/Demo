@@ -99,6 +99,7 @@ class OrdersView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
 
         context["statuses"] = Status
+        # --- navigace
         context["active"] = "orders_all"
 
         return context
@@ -113,6 +114,7 @@ class OrderCreateView(LoginRequiredMixin, View):
         context = {
             "order_form": order_form,
             "client_form": client_form,
+            # --- navigace
             "active": "orders_all",
         }
         return render(request, self.template, context)
@@ -123,6 +125,7 @@ class OrderCreateView(LoginRequiredMixin, View):
         context = {
             "order_form": order_form,
             "client_form": client_form,
+            # --- navigace
             "active": "orders_all",
         }
 
@@ -154,8 +157,9 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
         order_pk = self.kwargs["pk"]
         articles = Article.objects.filter(order=order_pk)
 
-        context["active"] = "orders"
         context["articles"] = articles
+        # --- navigace
+        context["active"] = "orders"
 
         return context
 
@@ -169,7 +173,7 @@ class TeamsView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-
+        # --- navigace
         context["active"] = "teams"
 
         return context
@@ -180,6 +184,12 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
     form_class = TeamForm
     template_name = "app_sprava_montazi/teams/team_form.html"
     success_url = reverse_lazy("teams")
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        # --- navigace
+        context["active"] = "teams"
+        return context
 
     def form_valid(self, form) -> HttpResponse:
         response = super().form_valid(form)
@@ -193,6 +203,12 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
     form_class = TeamForm
     template_name = "app_sprava_montazi/teams/team_form.html"
     success_url = reverse_lazy("teams")
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        # --- navigace
+        context["active"] = "teams"
+        return context
 
 
 def order_create(request):
