@@ -63,7 +63,7 @@ def create_dataset(file_path) -> DataFrame:
         file_path,
         encoding="cp1250",
         delimiter=";",
-    )
+    ).dropna(how="all")
     #
     dataset.columns = dataset.columns.str.strip()
     dataset.columns = [slugify(col) for col in dataset.columns]
