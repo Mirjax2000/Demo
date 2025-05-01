@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from datetime import datetime
+from django.conf.locale import da
 from rich.console import Console
 from pandas import DataFrame, read_csv
 from django.core.management.base import BaseCommand, CommandParser
@@ -18,11 +19,11 @@ def create_datetime(source):
     return None
 
 
-def create_client(item: dict) -> tuple[Client, bool]:
+def create_client(prijmeni: str, krestni_jmeno: str, psc: str) -> tuple[Client, bool]:
     """Vytvoreni clienta"""
-    name: str = f"{item['prijmeni']} {item['krestni-jmeno']}"
+    name: str = f"{prijmeni} {krestni_jmeno}"
     client, client_created = Client.objects.get_or_create(
-        name=name.strip(), zip_code=item["psc"]
+        name=name.strip(), zip_code=psc
     )
     if client_created:
         cons.log(f"🆗 {client} vytvoren", style="blue")
@@ -89,7 +90,47 @@ def create_dataset(file_path) -> DataFrame:
     return dataset
 
 
-def create_log(
+def dataset_filter(dataset) -> tuple[DataFrame, DataFrame]:
+    basic_dataset = dataset[dataset["montaz"] == 1]
+    extend_dataset = dataset[
+        (dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-r"))
+    ]
+    return basic_dataset, extend_dataset
+
+
+def create_orders_from_dataset(
+    dataset: DataFrame,
+    team_type,
+    counter: str,
+    basic_order_count: int = 0,
+    extend_order_count: int = 0,
+    client_count: int = 0,
+    duplicit_count: int = 0,
+):
+    for item in dataset.to_dict(orient="records"):
+        # ziskavam FK DistribHubu
+        distrib_hub = DistribHub.objects.get(code=item["misto-urceni"])
+        #
+        # vytvarim FK clienta
+        client, client_created = create_client(
+            item["prijmeni"], item["krestni-jmeno"], item["psc"]
+        )
+        if client_created:
+            client_count += 1
+        #
+        _, order_created = create_order(item, distrib_hub, client, team_type)
+        if order_created:
+            if counter == "basic":
+                basic_order_count += 1
+            elif counter == "extend":
+                extend_order_count += 1
+
+        else:
+            duplicit_count += 1
+    return basic_order_count, extend_order_count, client_count, duplicit_count
+
+
+def logs(
     dataset: DataFrame,
     client_count: int,
     basic_order_count: int,
@@ -97,15 +138,24 @@ def create_log(
     duplicit_count: int,
 ) -> None:
     """Vypis logu"""
-    cons.log("-" * 35)
-    cons.log(f"celkovy pocet zaznamu v datasetu je: {len(dataset)}")
-    cons.log(f"clientu vytvoreno: {client_count}", style="blue")
-    cons.log("---")
-    cons.log(f"zakazek basic vytvoreno: {basic_order_count}", style="blue")
-    cons.log(f"zakazek extend vytvoreno: {extend_order_count}", style="blue")
-    cons.log("---")
-    cons.log(f"Duplicitni zakazky: {duplicit_count}", style="red bold")
-    cons.log("-" * 35)
+    small_break: str = "------\n"
+    big_break: str = "-" * 40
+    cons.log(
+        big_break
+        + "\n"
+        + f"celkovy pocet zaznamu v datasetu je: {len(dataset)}\n"
+        + f"clientu vytvoreno: {client_count}\n"
+        + small_break
+        + f"zakazek basic vytvoreno: {basic_order_count}\n"
+        + f"zakazek extend vytvoreno: {extend_order_count}\n"
+        + small_break
+        + f"zakazek celkem vytvoreno: {extend_order_count + basic_order_count}\n"
+        + small_break
+        + f"Duplicitni zakazky: {duplicit_count}\n"
+        + big_break
+        + "\n",
+        style="blue",
+    )
 
 
 class Command(BaseCommand):
@@ -114,53 +164,35 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs) -> None:
         file_path: Path = Path("./files") / kwargs["file"]
-        #
+        # ---
         dataset = create_dataset(file_path)
-        # filtr datasetu
-        # (montaz == 1) nebo (montaz == 0 a cislo_zakazky končí na -R)
-        basic_dataset = dataset[dataset["montaz"] == 1]
-        extend_dataset = dataset[
-            (dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-r"))
+        basic_dataset, extend_dataset = dataset_filter(dataset)
+        # ---
+        datasets = [
+            (basic_dataset, TeamType.BY_ASSEMBLY_CREW, "basic"),
+            (extend_dataset, TeamType.BY_CUSTOMER, "extend"),
         ]
-
-        #
-        basic_order_count, extend_order_count, client_count, duplicit_count = 0, 0, 0, 0
+        # Inicializace počítadel
+        basic_order_count = 0
+        extend_order_count = 0
+        client_count = 0
+        duplicit_count = 0
+        # spusteni create funkce v cyklu
         # -------------------------------
-        for item in basic_dataset.to_dict(orient="records"):
-            # ziskavam FK DistribHubu
-            distrib_hub = DistribHub.objects.get(code=item["misto-urceni"])
-            #
-            # vytvarim FK clienta
-            client, client_created = create_client(item)
-            if client_created:
-                client_count += 1
-            #
-            _, order_created = create_order(
-                item, distrib_hub, client, TeamType.BY_ASSEMBLY_CREW
+        for _dataset, team_type, counter in datasets:
+            basic_order_count, extend_order_count, client_count, duplicit_count = (
+                create_orders_from_dataset(
+                    _dataset,
+                    team_type,
+                    counter,
+                    basic_order_count,
+                    extend_order_count,
+                    client_count,
+                    duplicit_count,
+                )
             )
-            if order_created:
-                basic_order_count += 1
-            else:
-                duplicit_count += 1
-
-        for item in extend_dataset.to_dict(orient="records"):
-            # ziskavam FK DistribHubu
-            distrib_hub = DistribHub.objects.get(code=item["misto-urceni"])
-            #
-            # vytvarim FK clienta
-            client, client_created = create_client(item)
-            if client_created:
-                client_count += 1
-            #
-            _, order_created = create_order(
-                item, distrib_hub, client, TeamType.BY_CUSTOMER
-            )
-            if order_created:
-                extend_order_count += 1
-            else:
-                duplicit_count += 1
         # -------------------------------
-        create_log(
+        logs(
             dataset,
             client_count,
             basic_order_count,
