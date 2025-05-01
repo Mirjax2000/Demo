@@ -1,12 +1,12 @@
 """Custom commands"""
 
 from pathlib import Path
+from datetime import datetime
+from rich.console import Console
 from pandas import DataFrame, read_csv
 from django.core.management.base import BaseCommand, CommandParser
 from django.utils.text import slugify
-from rich.console import Console
-from app_sprava_montazi.models import DistribHub, Order, Client
-from datetime import datetime
+from app_sprava_montazi.models import DistribHub, Order, Client, TeamType
 
 cons: Console = Console()
 
@@ -33,7 +33,7 @@ def create_client(item: dict) -> tuple[Client, bool]:
 
 
 def create_order(
-    item: dict, distrib_hub_obj: DistribHub, client: Client
+    item: dict, distrib_hub_obj: DistribHub, client: Client, team_type
 ) -> tuple[Order, bool]:
     """vytvarim Order"""
 
@@ -47,6 +47,7 @@ def create_order(
         client=client,
         delivery_termin=delivery_termin,
         evidence_termin=evidence_termin,
+        team_type=team_type,
         notes=item["poznamka-mandanta"],
     )
     if order_created:
@@ -89,13 +90,20 @@ def create_dataset(file_path) -> DataFrame:
 
 
 def create_log(
-    dataset: DataFrame, client_count: int, order_count: int, duplicit_count: int
+    dataset: DataFrame,
+    client_count: int,
+    basic_order_count: int,
+    extend_order_count: int,
+    duplicit_count: int,
 ) -> None:
     """Vypis logu"""
     cons.log("-" * 35)
     cons.log(f"celkovy pocet zaznamu v datasetu je: {len(dataset)}")
     cons.log(f"clientu vytvoreno: {client_count}", style="blue")
-    cons.log(f"zakazek vytvoreno: {order_count}", style="blue")
+    cons.log("---")
+    cons.log(f"zakazek basic vytvoreno: {basic_order_count}", style="blue")
+    cons.log(f"zakazek extend vytvoreno: {extend_order_count}", style="blue")
+    cons.log("---")
     cons.log(f"Duplicitni zakazky: {duplicit_count}", style="red bold")
     cons.log("-" * 35)
 
@@ -110,14 +118,15 @@ class Command(BaseCommand):
         dataset = create_dataset(file_path)
         # filtr datasetu
         # (montaz == 1) nebo (montaz == 0 a cislo_zakazky končí na -R)
-        filtered_dataset = dataset[
-            (dataset["montaz"] == 1)
-            | ((dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-r")))
+        basic_dataset = dataset[dataset["montaz"] == 1]
+        extend_dataset = dataset[
+            (dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-r"))
         ]
+
         #
-        order_count, client_count, duplicit_count = 0, 0, 0
+        basic_order_count, extend_order_count, client_count, duplicit_count = 0, 0, 0, 0
         # -------------------------------
-        for item in filtered_dataset.to_dict(orient="records"):
+        for item in basic_dataset.to_dict(orient="records"):
             # ziskavam FK DistribHubu
             distrib_hub = DistribHub.objects.get(code=item["misto-urceni"])
             #
@@ -126,10 +135,35 @@ class Command(BaseCommand):
             if client_created:
                 client_count += 1
             #
-            _, order_created = create_order(item, distrib_hub, client)
+            _, order_created = create_order(
+                item, distrib_hub, client, TeamType.BY_ASSEMBLY_CREW
+            )
             if order_created:
-                order_count += 1
+                basic_order_count += 1
+            else:
+                duplicit_count += 1
+
+        for item in extend_dataset.to_dict(orient="records"):
+            # ziskavam FK DistribHubu
+            distrib_hub = DistribHub.objects.get(code=item["misto-urceni"])
+            #
+            # vytvarim FK clienta
+            client, client_created = create_client(item)
+            if client_created:
+                client_count += 1
+            #
+            _, order_created = create_order(
+                item, distrib_hub, client, TeamType.BY_CUSTOMER
+            )
+            if order_created:
+                extend_order_count += 1
             else:
                 duplicit_count += 1
         # -------------------------------
-        create_log(dataset, client_count, order_count, duplicit_count)
+        create_log(
+            dataset,
+            client_count,
+            basic_order_count,
+            extend_order_count,
+            duplicit_count,
+        )
