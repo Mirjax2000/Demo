@@ -108,43 +108,54 @@ class OrdersView(LoginRequiredMixin, ListView):
 class OrderCreateView(LoginRequiredMixin, View):
     template = "app_sprava_montazi/orders/order_form.html"
 
+    def get_forms(self, data=None):
+        return (
+            OrderForm(data),
+            ClientForm(data),
+            ArticleInlineFormSet(data),
+        )
+
     def get(self, request, *args, **kwargs) -> HttpResponse:
-        order_form = OrderForm()
-        client_form = ClientForm()
-        article_formset = ArticleInlineFormSet()
+        order_form, client_form, article_formset = self.get_forms()
 
         context = {
             "order_form": order_form,
             "client_form": client_form,
-            "article_form": article_formset,
+            "article_formset": article_formset,
             # --- navigace
             "active": "orders_all",
         }
         return render(request, self.template, context)
 
     def post(self, request, *args, **kwargs):
-        order_form = OrderForm(request.POST)
-        client_form = ClientForm(request.POST)
+        order_form, client_form, article_formset = self.get_forms(request.POST)
         context = {
             "order_form": order_form,
             "client_form": client_form,
+            "article_formset": article_formset,
             # --- navigace
             "active": "orders_all",
         }
 
-        if client_form.is_valid() and order_form.is_valid():
+        if (
+            client_form.is_valid()
+            and order_form.is_valid()
+            and article_formset.is_valid()
+        ):
             try:
                 with transaction.atomic():
                     client = client_form.save()
                     order = order_form.save(commit=False)
                     order.client = client
                     order.save()
+                    article_formset.instance = order
+                    article_formset.save()
                 messages.success(request, "Objednávka vytvořena.")
                 return redirect(reverse("order_detail", kwargs={"pk": order.id}))
 
             except Exception as e:
                 if settings.DEBUG:
-                    cons.log(f"chyba pri ukladani objednavky: {e}")
+                    cons.log(f"chyba: {str(e)}")
 
         messages.error(request, "Nastala chyba při ukládání objednávky.")
         return render(request, self.template, context)

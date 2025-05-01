@@ -59,6 +59,9 @@ class OrderForm(forms.ModelForm):
                 "required": "číslo objednávky je povinné",
                 "unique": "objednávka uz existuje.",
             },
+            "mandant": {
+                "required": "Mandant je povinný",
+            },
             "distrib_hub": {
                 "required": "místo určení je povinné",
             },
@@ -150,7 +153,10 @@ class ClientForm(forms.ModelForm):
             "city": {
                 "max_length": "Jméno je příliš dlouhé! (max. 32 znaků)",
             },
-            "phone": {},
+            "phone": {
+                "required": "Telefon je povinný",
+                "invalid": "Zadej platné telefonní číslo ve formátu 602345678.",
+            },
             "zip_code": {
                 "required": "Jméno je povinné!",
             },
@@ -220,7 +226,7 @@ class TeamForm(forms.ModelForm):
             ),
             "active": forms.CheckboxInput(
                 attrs={
-                    "class": "form-check-input",
+                    "class": "L-form__checkbox",
                 }
             ),
             "price_per_hour": forms.NumberInput(
@@ -247,7 +253,8 @@ class TeamForm(forms.ModelForm):
                 "max_length": "Jméno je příliš dlouhé! (max. 32 znaků)",
             },
             "phone": {
-                "required": "Telefon je povinny",
+                "required": "Telefon je povinný",
+                "invalid": "Zadej platné telefonní číslo ve formátu 212345678.",
             },
         }
 

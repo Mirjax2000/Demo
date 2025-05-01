@@ -197,6 +197,7 @@ class Order(Model):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
+        limit_choices_to={"active": True},
         verbose_name="Montážní tým",
     )
     notes = models.TextField(blank=True, verbose_name="Poznámky")
