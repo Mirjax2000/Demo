@@ -2,11 +2,11 @@
 
 from pathlib import Path
 from datetime import datetime
-from django.conf.locale import da
 from rich.console import Console
 from pandas import DataFrame, read_csv
 from django.core.management.base import BaseCommand, CommandParser
 from django.utils.text import slugify
+from tomlkit.items import Bool
 from app_sprava_montazi.models import DistribHub, Order, Client, TeamType
 
 cons: Console = Console()
@@ -52,15 +52,15 @@ def create_order(
         notes=item["poznamka-mandanta"],
     )
     if order_created:
-        cons.log(f"🆗 {order}: vytvoren", style="blue")
+        cons.log(f"🆗 {order}: vytvoren\n...", style="blue")
     else:
-        cons.log(f"⚠️ {order}: jiz existuje ", style="red")
-    cons.log("...")
+        cons.log(f"⚠️ {order}: jiz existuje\n...", style="red")
 
     return order, order_created
 
 
 def create_dataset(file_path) -> DataFrame:
+    """Create dataset"""
     dataset: DataFrame = read_csv(
         file_path,
         encoding="cp1250",
@@ -83,6 +83,7 @@ def create_dataset(file_path) -> DataFrame:
             "poznamka-mandanta",
         ]
     ]
+    # cisteni datasetu
     dataset["krestni-jmeno"] = dataset["krestni-jmeno"].fillna("")
     dataset["avizovany-termin"] = dataset["avizovany-termin"].fillna(False)
     dataset["poznamka-mandanta"] = dataset["poznamka-mandanta"].fillna("")
@@ -91,6 +92,7 @@ def create_dataset(file_path) -> DataFrame:
 
 
 def dataset_filter(dataset) -> tuple[DataFrame, DataFrame]:
+    """dataset filter"""
     basic_dataset = dataset[dataset["montaz"] == 1]
     extend_dataset = dataset[
         (dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-r"))
@@ -106,10 +108,11 @@ def create_orders_from_dataset(
     extend_order_count: int = 0,
     client_count: int = 0,
     duplicit_count: int = 0,
-):
+) -> tuple[int, int, int, int]:
+    """create orders form dataset"""
     for item in dataset.to_dict(orient="records"):
         # ziskavam FK DistribHubu
-        distrib_hub = DistribHub.objects.get(code=item["misto-urceni"])
+        distrib_hub: DistribHub = DistribHub.objects.get(code=item["misto-urceni"])
         #
         # vytvarim FK clienta
         client, client_created = create_client(
@@ -124,7 +127,6 @@ def create_orders_from_dataset(
                 basic_order_count += 1
             elif counter == "extend":
                 extend_order_count += 1
-
         else:
             duplicit_count += 1
     return basic_order_count, extend_order_count, client_count, duplicit_count
