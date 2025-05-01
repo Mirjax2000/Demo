@@ -6,9 +6,9 @@
                 {% csrf_token %}
                 <fieldset>
                     <legend>Montážní tým</legend>
-                    {{ form.as_p }}
+                    {% include "app_sprava_montazi/partials/form_field.html" with form=form %}
                 </fieldset>
-                <div class="u-txt-right">
+                <div class="u-txt-right mt-3">
                     <button type="submit" class="btn btn-primary">Uložit</button>
                 </div>
             </form>

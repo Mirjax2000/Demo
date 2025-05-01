@@ -3,7 +3,7 @@
         {% csrf_token %}
         <fieldset>
             <legend>Zákazník</legend>
-            {{ form.as_p }}
+            {% include "app_sprava_montazi/partials/form_field.html" with form=form %}
         </fieldset>
         <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-primary mt-3">

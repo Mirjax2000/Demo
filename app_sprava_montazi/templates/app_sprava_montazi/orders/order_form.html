@@ -7,29 +7,29 @@
         <div class="L-form__header">
             <h2>Vytvořit novou objednávku</h2>
         </div>
-        <form method="post" class="L-form__form">
+        <form method="post" class="L-form__form" novalidate>
             {% csrf_token %}
             <div class="L-form__wrapper-for-two">
                 <div class="L-form__wrapper-form order">
                     <fieldset>
                         <legend>Objednávka</legend>
-                        {{ order_form.as_p }}
+                        {% include "app_sprava_montazi/partials/form_field.html" with form=order_form %}
                     </fieldset>
                 </div>
                 <div class="L-form__wrapper-form client">
                     <fieldset>
                         <legend>Zákazník</legend>
-                        {{ client_form.as_p }}
+                        {% include "app_sprava_montazi/partials/form_field.html" with form=client_form %}
                     </fieldset>
                 </div>
             </div>
             <!--articles form-->
             <div class="L-form__articles">
-                {{ article_form.management_form }}
-                {% for form in article_form %}
+                {{ article_formset.management_form }}
+                {% for form in article_formset %}
                     <fieldset>
                         <legend>Artikl</legend>
-                        {{ form.as_p }}
+                        {% include "app_sprava_montazi/partials/form_field.html" with form=form %}
                     </fieldset>
                 {% endfor %}
             </div>
