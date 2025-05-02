@@ -59,7 +59,8 @@ body.home {
   user-select: none;
 }
 
-.L-detail__info, .L-detail__artikl, .L-form__group .L-form__input, .L-form__group .L-form__select, .L-form__group .L-form__date, .L-sidebar .L-active {
+.L-detail__info, .L-detail__artikl, .L-form__group .L-form__input,
+.L-form__group input, .L-form__group .L-form__select, .L-form__group .L-form__date, .L-sidebar .L-active {
   border-radius: 5px;
 }
 
@@ -67,7 +68,8 @@ body.home {
   transition: 0.1s all ease-in-out;
 }
 
-.P-body, .L-detail, .L-detail__item, .L-table__table thead th, .L-table .dt-input, .L-form, .L-form__group .L-form__input, .L-form__group .L-form__select, .L-form__group .L-form__date, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
+.P-body, .L-detail, .L-detail__item, .L-table__table thead th, .L-table .dt-input, .L-form, .L-form__group .L-form__input,
+.L-form__group input, .L-form__group .L-form__select, .L-form__group .L-form__date, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
   transition: 0.5s background-color ease-in-out, 0.5s color ease-in-out;
 }
 
@@ -248,8 +250,10 @@ body.home {
 }
 .L-form__group label {
   user-select: none;
+  display: block;
 }
-.L-form__group .L-form__input {
+.L-form__group .L-form__input,
+.L-form__group input {
   display: block;
   width: 100%;
   color: var(--txt-default);

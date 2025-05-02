@@ -11,9 +11,11 @@
   &__group {
     label {
       user-select: none;
+      display: block;
     }
 
-    .L-form__input {
+    .L-form__input,
+    input {
       @extend %border-radius;
       @extend %transition-theme;
 
