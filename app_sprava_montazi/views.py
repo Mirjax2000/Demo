@@ -44,6 +44,18 @@ class HomePageView(LoginRequiredMixin, TemplateView):
         return context
 
 
+class CreatePageView(LoginRequiredMixin, TemplateView):
+    """Createpage View"""
+
+    template_name: str = "app_sprava_montazi/create/create.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["active"] = "create"
+        return context
+
+
 class DashboardView(LoginRequiredMixin, TemplateView):
     """Dashboard View"""
 
@@ -89,7 +101,7 @@ class OrdersView(LoginRequiredMixin, ListView):
     context_object_name = "orders"
 
     def get_queryset(self) -> QuerySet[Any]:
-        orders = Order.objects.all()
+        orders = Order.objects.exclude(status="hidden")
         status: str = self.request.GET.get("status", "").strip()
         if status:
             orders = orders.filter(status=status)
@@ -97,7 +109,6 @@ class OrdersView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-
         context["statuses"] = Status
         # --- navigace
         context["active"] = "orders_all"
