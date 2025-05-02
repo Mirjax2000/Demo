@@ -104,7 +104,7 @@ class OrdersView(LoginRequiredMixin, ListView):
         orders = Order.objects.exclude(status="Hidden")
         status: str = self.request.GET.get("status", "").strip()
         if status:
-            orders = orders.filter(status=status)
+            orders = Order.objects.filter(status=status)
         return orders
 
     def get_context_data(self, **kwargs) -> dict:
