@@ -1,15 +1,11 @@
 @use "../utils/" as *;
 @use "../base/placeholders" as *;
 
-.L-detail .errorlist {
-  color: var(--error);
-}
-
 .L-detail {
   @extend %transition-theme;
 
+  margin-inline-start: 2%;
   width: clamp(30rem, 100%, 87.5rem);
-  padding: 0.5em;
   color: var(--txt-default);
 
   &__hidden {
