@@ -21,6 +21,7 @@ from app_sprava_montazi.views import (
     OrderDetailView,
     OrderCreateView,
     ClientUpdateView,
+    CreatePageView,
     order_create,
     order_update,
 )
@@ -43,6 +44,8 @@ app_sprava_montazi: list = [
         ClientUpdateView.as_view(),
         name="client_update",
     ),
+    # --- create ---
+    path("createpage/", CreatePageView.as_view(), name="createpage"),
     # --- teams ---
     path("teams/", TeamsView.as_view(), name="teams"),
     path("teams/create/", TeamCreateView.as_view(), name="team_create"),
