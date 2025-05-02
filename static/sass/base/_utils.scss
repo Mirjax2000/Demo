@@ -59,3 +59,10 @@
 .u-s-none {
   user-select: none;
 }
+
+.u-flex-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 2%;
+}

@@ -134,6 +134,13 @@ body.home {
   user-select: none;
 }
 
+.u-flex-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 2%;
+}
+
 .L-sidebar {
   display: flex;
   justify-content: flex-start;
@@ -248,6 +255,9 @@ body.home {
   margin-top: 0.5em;
   color: var(--txt-default);
 }
+.L-form__group {
+  margin-bottom: 0.3em;
+}
 .L-form__group label {
   user-select: none;
   display: block;
@@ -293,7 +303,8 @@ body.home {
 }
 .L-form__fieldset {
   width: 50%;
-  max-width: 25rem;
+  max-width: 21.875rem;
+  min-width: 18.75rem;
 }
 .L-form__error ul {
   padding: 0;
@@ -306,18 +317,28 @@ body.home {
   margin: 0;
   padding: 0.3em;
 }
-.L-form__wrapper-for-two {
+.L-form__articles {
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
   gap: 2%;
-}
-.L-form__articles {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 2%;
+  max-width: 32rem;
   flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.L-form__articles label {
+  display: inline-block;
+}
+.L-form__articles .toggle-btn {
+  width: 15.625rem;
+}
+.L-form__articles__fieldset {
+  width: 15.625rem;
+  display: none;
+}
+.L-form__articles .artikl-1,
+.L-form__articles .artikl-2 {
+  display: block;
 }
 
 .L-table {

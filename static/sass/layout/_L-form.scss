@@ -9,6 +9,8 @@
   color: var(--txt-default);
 
   &__group {
+    margin-bottom: 0.3em;
+
     label {
       user-select: none;
       display: block;
@@ -70,7 +72,8 @@
 
   &__fieldset {
     width: 50%;
-    max-width: 25rem;
+    max-width: 21.875rem;
+    min-width: 18.75rem;
   }
 
   &__error {
@@ -88,13 +91,29 @@
     }
   }
 
-  &__wrapper-for-two {
-    @include flex(flex-start, flex-start, 2%);
-  }
-
   &__articles {
-    @include flex(flex-start, center, 2%);
+    @include flex(flex-start, flex-start, 2%);
 
+    max-width: 32rem;
     flex-wrap: wrap;
+    flex-shrink: 0;
+
+    label {
+      display: inline-block;
+    }
+
+    .toggle-btn {
+      width: 15.625rem;
+    }
+
+    &__fieldset {
+      width: 15.625rem;
+      display: none;
+    }
+
+    .artikl-1,
+    .artikl-2 {
+      display: block;
+    }
   }
 }
