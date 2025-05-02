@@ -22,7 +22,6 @@
                 <i class="fa-solid fa-check"></i>&nbsp;{{ order.client.first_15 }}
             </td>
         {% endif %}
-
         <!--Realizace kym-->
         {% if order.team_type == "By_assembly_crew" %}
             <td class="u-txt-success u-s-none">{{ order.get_team_type_display }}</td>
@@ -42,6 +41,8 @@
         <!--termin montaze-->
         {% if order.montage_termin %}
             <td class="u-s-none">{{ order.montage_termin }}</td>
+        {% elif order.team_type != "By_assembly_crew" %}
+            <td class="u-s-none">–</td>
         {% else %}
             <td class="u-txt-warning u-s-none">⚠️&nbsp;Nevybráno</td>
         {% endif %}

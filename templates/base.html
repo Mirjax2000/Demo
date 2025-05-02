@@ -61,7 +61,8 @@
                             </li>
                             <!---->
                             <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link link">
+                                <a href="{% url "createpage" %}"
+                                   class="L-sidebar__nav-link link {% if active == 'create' %}L-active{% endif %}">
                                     <i class="bi bi-tools"></i>
                                     <span class="L-sidebar__span">Vytvořit</span></a>
                             </li>

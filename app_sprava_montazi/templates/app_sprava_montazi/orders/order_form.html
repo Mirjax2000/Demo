@@ -15,13 +15,13 @@
                         {% include "app_sprava_montazi/partials/form_field.html" with form=order_form %}
                     </fieldset>
                     <!--zakaznik-->
-                    <fieldset class="L-form__fieldset u-flex-column-stretch">
+                    <fieldset class="L-form__fieldset">
                         <div>
                             <legend>Zákazník</legend>
                             {% include "app_sprava_montazi/partials/form_field.html" with form=client_form %}
                         </div>
                         <!---->
-                        <div>
+                        <div class="precise__margin-1">
                             <div class="u-txt-right mt-3">
                                 <button type="submit" class="btn btn-primary mt-3">
                                     <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit objednávku
