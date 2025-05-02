@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
     <section class="L-form">
-        <div class="L-form__wrapper-form mt-5">
+        <div class="L-form__wrapper">
             <form method="post" class="L-form__form" novalidate>
                 {% csrf_token %}
-                <fieldset>
-                    <legend>Montážní tým</legend>
+                <fieldset class="L-form__fieldset">
+                    <legend class="L-form__legend">Montážní tým</legend>
                     {% include "app_sprava_montazi/partials/form_field.html" with form=form %}
+                    <div class="u-txt-right mt-3">
+                        <button type="submit" class="btn btn-primary">Uložit</button>
+                    </div>
                 </fieldset>
-                <div class="u-txt-right mt-3">
-                    <button type="submit" class="btn btn-primary">Uložit</button>
-                </div>
             </form>
         </div>
     </section>

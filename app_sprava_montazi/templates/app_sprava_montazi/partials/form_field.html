@@ -1,11 +1,9 @@
 {% for field in form %}
-    <div>
-        <div>{{ field.label_tag }}</div>
-        <div>{{ field }}</div>
-        {% if field.errors %}
-            <div>{{ field.errors }}</div>
-        {% else %}
-            <div>no error</div>
-        {% endif %}
+    <div class="L-form__group">
+        {{ field.label_tag }}
+        {{ field }}
+    </div>
+    <div class="L-form__error">
+        {% if field.errors %}{{ field.errors }}{% endif %}
     </div>
 {% endfor %}

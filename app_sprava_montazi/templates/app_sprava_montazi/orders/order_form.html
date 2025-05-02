@@ -5,8 +5,9 @@
 {% block content %}
     <section class="L-form order-form">
         <div class="L-form__header">
-            <h2>Vytvořit novou objednávku</h2>
+            <h3>Vytvořit novou objednávku</h3>
         </div>
+        <hr>
         <form method="post" class="L-form__form" novalidate>
             {% csrf_token %}
             <div class="L-form__wrapper-for-two">
