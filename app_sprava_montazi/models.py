@@ -56,7 +56,7 @@ class Team(Model):
     )
     city = CharField(max_length=32, verbose_name="Město")
     region = CharField(max_length=32, blank=True, verbose_name="Region")
-    phone = PhoneNumberField(max_length=17)
+    phone = PhoneNumberField(max_length=17, verbose_name="Telefon")
     email = EmailField(max_length=64, blank=True, verbose_name="E-mail")
     active = BooleanField(default=True, verbose_name="Aktivní")
     price_per_hour = DecimalField(
@@ -110,7 +110,7 @@ class Client(Model):
     street = CharField(max_length=50, blank=True, verbose_name="Ulice")
     city = CharField(max_length=32, blank=True, verbose_name="Město")
     zip_code = CharField(max_length=5, verbose_name="PSČ")
-    phone = PhoneNumberField(max_length=17, blank=True)
+    phone = PhoneNumberField(max_length=17, blank=True, verbose_name="Telefon")
     email = EmailField(blank=True, verbose_name="E-mail")
     incomplete = BooleanField(default=True, verbose_name="Neúplný záznam")
     slug = SlugField(blank=True)
