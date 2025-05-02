@@ -101,7 +101,7 @@ class OrdersView(LoginRequiredMixin, ListView):
     context_object_name = "orders"
 
     def get_queryset(self) -> QuerySet[Any]:
-        orders = Order.objects.exclude(status="hidden")
+        orders = Order.objects.exclude(status="Hidden")
         status: str = self.request.GET.get("status", "").strip()
         if status:
             orders = orders.filter(status=status)
