@@ -24,34 +24,61 @@ class OrderForm(forms.ModelForm):
         ]
         widgets = {
             "order_number": forms.TextInput(
-                attrs={"class": "L-form__input", "placeholder": "Číslo zakázky..."}
+                attrs={
+                    "class": "L-form__input",
+                    "placeholder": "Číslo zakázky...",
+                }
             ),
             "distrib_hub": forms.Select(
-                attrs={"class": "L-form__input", "placeholder": "místo určení..."}
+                attrs={
+                    "class": "L-form__select",
+                }
             ),
             "mandant": forms.TextInput(
-                attrs={"class": "L-form__input", "placeholder": "Mandant..."}
+                attrs={
+                    "class": "L-form__input",
+                    "placeholder": "Mandant...",
+                }
             ),
             "status": forms.Select(
-                attrs={"class": "L-form__input", "placeholder": "stav..."}
+                attrs={
+                    "class": "L-form__select",
+                }
             ),
             "team_type": forms.Select(
-                attrs={"class": "L-form__input", "placeholder": "Realizace kým..."}
+                attrs={
+                    "class": "L-form__select",
+                }
             ),
             "team": forms.Select(
-                attrs={"class": "L-form__input", "placeholder": "Montážní tým..."}
+                attrs={
+                    "class": "L-form__select",
+                }
             ),
             "delivery_termin": forms.DateInput(
-                attrs={"class": "L-form__date", "type": "date"}
+                attrs={
+                    "class": "L-form__date",
+                    "type": "date",
+                }
             ),
             "evidence_termin": forms.DateInput(
-                attrs={"class": "L-form__date", "type": "date"}
+                attrs={
+                    "class": "L-form__date",
+                    "type": "date",
+                }
             ),
             "montage_termin": forms.DateTimeInput(
-                attrs={"class": "L-form__datetime", "type": "datetime-local"}
+                attrs={
+                    "class": "L-form__date",
+                    "type": "datetime-local",
+                }
             ),
             "notes": forms.Textarea(
-                attrs={"class": "L-form__input", "rows": 4, "placeholder": "Poznámky"}
+                attrs={
+                    "class": "L-form__input",
+                    "rows": 4,
+                    "placeholder": "Poznámky",
+                }
             ),
         }
         error_messages = {
@@ -86,6 +113,7 @@ class ArticleForm(forms.ModelForm):
                 attrs={
                     "class": "L-form__input",
                     "placeholder": "množství...",
+                    "min": 1,
                 }
             ),
             "note": forms.Textarea(
