@@ -2,47 +2,55 @@
 {% block title %}
     formular
 {% endblock title %}
+<!---->
 {% block content %}
-    <section class="L-form order-form">
-        <div class="L-form__header">
-            <h3>Vytvořit novou objednávku</h3>
-        </div>
-        <hr>
-        <form method="post" class="L-form__form" novalidate>
-            {% csrf_token %}
-            <div class="L-form__wrapper-for-two">
-                <div class="L-form__wrapper-form order">
-                    <fieldset>
+    <section class="L-form">
+        <div class="L-form__wrapper">
+            <form method="post" class="L-form__form" novalidate>
+                {% csrf_token %}
+                <div class="u-flex-row">
+                    <!--objednavka-->
+                    <fieldset class="L-form__fieldset">
                         <legend>Objednávka</legend>
                         {% include "app_sprava_montazi/partials/form_field.html" with form=order_form %}
                     </fieldset>
-                </div>
-                <div class="L-form__wrapper-form client">
-                    <fieldset>
-                        <legend>Zákazník</legend>
-                        {% include "app_sprava_montazi/partials/form_field.html" with form=client_form %}
+                    <!--zakaznik-->
+                    <fieldset class="L-form__fieldset u-flex-column-stretch">
+                        <div>
+                            <legend>Zákazník</legend>
+                            {% include "app_sprava_montazi/partials/form_field.html" with form=client_form %}
+                        </div>
+                        <!---->
+                        <div>
+                            <div class="u-txt-right mt-3">
+                                <button type="submit" class="btn btn-primary mt-3">
+                                    <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit objednávku
+                                </button>
+                            </div>
+                            <div class="u-txt-right mt-3">
+                                <a href="{% url 'orders' %}" class="u-txt-right">Zpět na seznam objednávek</a>
+                            </div>
+                        </div>
                     </fieldset>
+                    <!--artikly-->
+                    <div class="L-form__articles">
+                        <legend>Artikly</legend>
+                        {{ article_formset.management_form }}
+                        {% for form in article_formset %}
+                            <div class="L-form__articles__item">
+                                {% if forloop.counter != 1 and forloop.counter != 2 %}
+                                    <button type="button" class="toggle-btn btn btn-primary mb-3">
+                                        <i class="fa-solid fa-plus"></i>&nbsp;Přidat artikl {{ forloop.counter }}
+                                    </button>
+                                {% endif %}
+                                <fieldset class="L-form__articles__fieldset artikl-{{ forloop.counter }}">
+                                    {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form counter=forloop.counter %}
+                                </fieldset>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
-            </div>
-            <!--articles form-->
-            <div class="L-form__articles">
-                {{ article_formset.management_form }}
-                {% for form in article_formset %}
-                    <fieldset>
-                        <legend>Artikl</legend>
-                        {% include "app_sprava_montazi/partials/form_field.html" with form=form %}
-                    </fieldset>
-                {% endfor %}
-            </div>
-            <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-primary mt-3">
-                    <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit objednávku
-                </button>
-            </div>
-        </form>
-        <!---->
-        <div class="u-txt-right">
-            <a href="{% url 'orders' %}" class="u-txt-right">Zpět na seznam objednávek</a>
+            </form>
         </div>
     </section>
 {% endblock content %}

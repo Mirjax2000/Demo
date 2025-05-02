@@ -1,0 +1,49 @@
+<!-- Name -->
+<div class="L-form__group">
+    {{ form.name.label_tag }} <span class="u-txt-warning">{{ counter }}</span>
+    {{ form.name }}
+</div>
+<div class="L-form__error">
+    {% if form.name.errors %}{{ form.name.errors }}{% endif %}
+</div>
+<div class="u-flex-row">
+    <div>
+        <!-- Price -->
+        <div class="L-form__group">
+            {{ form.price.label_tag }}
+            {{ form.price }}
+        </div>
+        <div class="L-form__error">
+            {% if form.price.errors %}{{ form.price.errors }}{% endif %}
+        </div>
+    </div>
+    <div>
+        <!-- Quantity -->
+        <div class="L-form__group">
+            {{ form.quantity.label_tag }}
+            {{ form.quantity }}
+        </div>
+        <div class="L-form__error">
+            {% if form.quantity.errors %}{{ form.quantity.errors }}{% endif %}
+        </div>
+    </div>
+</div>
+<!-- Note -->
+<div class="L-form__group">
+    {{ form.note.label_tag }}
+    {{ form.note }}
+</div>
+<div class="L-form__error">
+    {% if form.note.errors %}{{ form.note.errors }}{% endif %}
+</div>
+<!-- Delete -->
+<!--
+        <div class="L-form__group">
+            <label>{{ form.DELETE }} Smazat artikl</label>
+            </div>
+            -->
+<!--non error field-->
+{% if form.non_field_errors %}
+    <!---->
+    <div class="L-form__error">{{ form.non_field_errors }}</div>
+{% endif %}
