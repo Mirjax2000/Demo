@@ -22,6 +22,7 @@ class OrderForm(forms.ModelForm):
             "team",
             "notes",
         ]
+
         widgets = {
             "order_number": forms.TextInput(
                 attrs={
@@ -83,16 +84,22 @@ class OrderForm(forms.ModelForm):
         }
         error_messages = {
             "order_number": {
-                "required": "číslo objednávky je povinné",
-                "unique": "objednávka uz existuje.",
+                "required": "číslo objednávky je povinné!",
+                "unique": "objednávka uz existuje!",
             },
             "mandant": {
-                "required": "Mandant je povinný",
+                "required": "Mandant je povinný!",
             },
             "distrib_hub": {
-                "required": "místo určení je povinné",
+                "required": "místo určení je povinné!",
             },
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Pokud je instance nová (tedy vytváří se), skryj pole status
+        if not self.instance.pk:
+            self.fields.pop("status")
 
 
 class ArticleForm(forms.ModelForm):
@@ -130,7 +137,7 @@ ArticleInlineFormSet = inlineformset_factory(
     Order,
     Article,
     form=ArticleForm,
-    extra=5,
+    extra=6,
     can_delete=True,
 )
 
@@ -208,7 +215,7 @@ class DistribHubForm(forms.ModelForm):
             "code": {
                 "required": "Kod je povinný!",
                 "max_length": "Jméno je příliš dlouhé! (max. 3 znaky)",
-                "unique": "Tento kod uz existuje",
+                "unique": "Tento kod uz existuje!",
             },
             "city": {
                 "required": "Jméno je povinné!",
