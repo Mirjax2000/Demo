@@ -1,39 +1,41 @@
 {% extends "base.html" %}
 {% block title %}
-  login
+  Přihlášení
 {% endblock title %}
+<!---->
 {% block content %}
   <section class="L-form">
-    <div class="L-form__wrapper-form mt-5">
-      <form class="L-form__form" method="post">
+    <div class="L-form__wrapper">
+      <form class="L-form__form" method="post" novalidate>
         {% csrf_token %}
-        <fieldset>
-          <legend>Přihlášení</legend>
+        <fieldset class="L-form__fieldset">
+          <legend class="L-form__legend">Přihlášení</legend>
+          <!---->
           <div class="L-form__group">
-            <label for="{{ form.username.id_for_label }}">
-              {{ form.username.label }}
-              {{ form.username }}
-            </label>
+            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            {% if form.username.errors %}<div class="L-form__error">{{ form.username.errors }}</div>{% endif %}
           </div>
+          <!---->
           <div class="L-form__group">
-            <label for="{{ form.username.id_for_label }}">
-              {{ form.password.label }}
-              {{ form.password }}
-            </label>
+            <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+            {{ form.password }}
+            {% if form.password.errors %}<div class="L-form__error">{{ form.password.errors }}</div>{% endif %}
+          </div>
+          <!---->
+          {% if form.non_field_errors %}
+            <!---->
+            <div class="L-form__error">{{ form.non_field_errors }}</div>
+          {% endif %}
+          <!---->
+          <div class="u-txt-right mt-3">
+            <button type="submit" class="btn btn-primary">Přihlásit</button>
+            <p class="u-txt-right mt-3">
+              Nemáte účet? <a href="{% url 'signup' %}">Zaregistrujte se</a>
+            </p>
           </div>
         </fieldset>
-        <button type="submit" class="btn btn-primary">Odeslat</button>
       </form>
-      <p>
-        Nemáte účet? <a href="{% url 'signup' %}">Zaregistrujte se</a>
-      </p>
     </div>
-    {% if form.errors %}
-      <div class="L-form__wrapper-error">
-        <div class="L-form__error">{{ form.non_field_errors }}</div>
-        <div class="L-form__error">{{ form.username.errors }}</div>
-        <div class="L-form__error">{{ form.password.errors }}</div>
-      </div>
-    {% endif %}
   </section>
 {% endblock content %}
