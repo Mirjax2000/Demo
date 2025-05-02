@@ -95,12 +95,6 @@ class OrderForm(forms.ModelForm):
             },
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Pokud je instance nová (tedy vytváří se), skryj pole status
-        if not self.instance.pk:
-            self.fields.pop("status")
-
 
 class ArticleForm(forms.ModelForm):
     class Meta:
