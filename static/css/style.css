@@ -147,6 +147,12 @@ body.home {
   justify-content: space-between;
 }
 
+.u-checkbox-size {
+  display: block;
+  padding: 0.8em;
+  margin-inline: auto;
+}
+
 .L-sidebar {
   display: flex;
   justify-content: flex-start;
