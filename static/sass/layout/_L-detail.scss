@@ -5,22 +5,19 @@
   @extend %transition-theme;
 
   margin-inline-start: 2%;
-  width: clamp(30rem, 100%, 87.5rem);
+  margin-top: 0.5em;
   color: var(--txt-default);
+
+  &__fieldset {
+    flex-grow: 1;
+    max-width: 22rem;
+    min-width: 20rem;
+  }
 
   &__hidden {
     opacity: 0.3;
     pointer-events: none;
     user-select: none;
-  }
-
-  h2 {
-    font-weight: 400;
-  }
-
-  h3 {
-    text-decoration: underline;
-    font-weight: 200;
   }
 
   &__list {
@@ -37,43 +34,5 @@
     padding: 0.3em;
     background-color: var(--bck-list-item);
     border: 1px solid var(--border);
-  }
-
-  &__wrapper {
-    @include flex(flex-start, flex-start, 2%);
-
-    margin-bottom: 1em;
-  }
-
-  &__info {
-    @extend %border-radius;
-
-    padding: 1em;
-    border: 1px solid var(--border);
-
-    &.order {
-      flex: 1 0 25rem;
-      max-width: 28.125rem;
-    }
-
-    &.client {
-      flex: 1 0 18.75rem;
-      max-width: 25rem;
-      position: relative;
-      isolation: isolate;
-    }
-  }
-
-  &__artikl {
-    @extend %border-radius;
-
-    overflow: auto;
-    padding: 1em 0.5em;
-    border: 1px solid var(--border);
-    margin-top: 1em;
-
-    h3 {
-      margin: 0;
-    }
   }
 }
