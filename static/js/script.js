@@ -49,13 +49,11 @@
                     field.type !== "submit" &&
                     field.type !== "button"
                 ) {
-                    if (field.tagName === "SELECT") {
-                        if (field.name === "team_type") {
-                            field.value = "By_assembly_crew";
-                        }
-                        else if (field.name === "status") {
-                            field.value = "New";
-                        }
+                    if (field.tagName === "SELECT" && field.name === "team_type") {
+                        field.value = "By_assembly_crew";
+                    }
+                    else if (field.tagName === "SELECT" && field.name === "status") {
+                        field.value = "New";
                     }
                     else {
                         field.value = "";
@@ -68,7 +66,6 @@
             });
         });
     });
-
 
     // validace tel num v inputech
     numberInputs.forEach(function (input) {
