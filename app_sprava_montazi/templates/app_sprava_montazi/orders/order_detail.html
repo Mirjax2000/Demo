@@ -4,20 +4,16 @@
 {% endblock title %}
 {% block content %}
     <section class="L-detail">
-        <h3>Detail objednávky č. {{ order.order_number|upper }}</h3>
-        <hr>
-        <div class="L-detail__wrapper">
+        <div class="L-detail__wrapper u-flex-row">
+            <!---->
             <!--objednavka-->
-            <div class="L-detail__info order">
-                <!---->
-                {% include "app_sprava_montazi/orders/partials/order_detail_order.html" %}
-            </div>
+            {% include "app_sprava_montazi/orders/partials/order_detail_order.html" %}
             <!--zakaznik-->
-            <div class="L-detail__info client">
-                <!---->
-                {% include "app_sprava_montazi/orders/partials/order_detail_client.html" %}
-            </div>
+            {% include "app_sprava_montazi/orders/partials/order_detail_client.html" %}
+            <!--artikl-->
+            {% include "app_sprava_montazi/orders/partials/order_detail_article.html" %}
         </div>
+        <!---->
         <p class="mt-3">
             <a href="{% url 'orders' %}">Zpět na seznam objednávek</a>
         </p>

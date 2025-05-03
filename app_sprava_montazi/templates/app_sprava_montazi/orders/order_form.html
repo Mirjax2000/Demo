@@ -21,7 +21,7 @@
                             {% include "app_sprava_montazi/partials/form_field.html" with form=client_form %}
                         </div>
                         <!---->
-                        <div class="precise__margin-1">
+                        <div>
                             <div class="u-txt-right mt-3">
                                 <button type="submit" class="btn btn-primary mt-3">
                                     <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit objednávku
@@ -33,22 +33,20 @@
                         </div>
                     </fieldset>
                     <!--artikly-->
-                    <div class="L-form__articles">
+                    <fieldset class="L-form__fieldset">
                         <legend>Artikly</legend>
                         {{ article_formset.management_form }}
                         {% for form in article_formset %}
-                            <div class="L-form__articles__item">
-                                {% if forloop.counter != 1 and forloop.counter != 2 %}
-                                    <button type="button" class="toggle-btn btn btn-primary mb-3">
-                                        <i class="fa-solid fa-plus"></i>&nbsp;Přidat artikl {{ forloop.counter }}
-                                    </button>
-                                {% endif %}
-                                <fieldset class="L-form__articles__fieldset artikl-{{ forloop.counter }}">
+                            <div>
+                                <button type="button" class="toggle-btn btn btn-primary mb-3">
+                                    <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Přidat artikl {{ forloop.counter }}
+                                </button>
+                                <div class="L-form__articles artikl-{{ forloop.counter }}">
                                     {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form counter=forloop.counter %}
-                                </fieldset>
+                                </div>
                             </div>
                         {% endfor %}
-                    </div>
+                    </fieldset>
                 </div>
             </form>
         </div>

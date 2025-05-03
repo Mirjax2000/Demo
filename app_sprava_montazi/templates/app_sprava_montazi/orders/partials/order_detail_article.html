@@ -1,0 +1,12 @@
+<fieldset class="L-detail__fieldset">
+    <legend>Artikly</legend>
+    {% if articles %}
+        {% include "app_sprava_montazi/orders/partials/order_detail_article_table.html" %}
+    {% else %}
+        {% include "app_sprava_montazi/orders/partials/order_detail_article_table.html" %}
+    {% endif %}
+    <div class="mt-2">
+        <a href="#" class="btn btn-primary d-block ms-5 me-5">
+            <i class="fa-solid fa-circle-plus"></i>&nbsp;&nbsp;Přidat artikl</a>
+    </div>
+</fieldset>
