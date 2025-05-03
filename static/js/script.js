@@ -20,31 +20,45 @@
     // articles
     arcticleBtns.on('click', function () {
         const target = $(this).next('.L-form__articles');
+        const addBtn = $(this).find('i');
 
+        // pokud už je otevřená, zavři ji
         if (target.is(':visible')) {
             target.slideUp();
+            addBtn.removeClass('fa-minus').addClass('fa-plus');
         } else {
+            // zavři ostatní sekce
             $('.L-form__articles').slideUp();
+            $('.toggle-btn i').removeClass('fa-minus').addClass('fa-plus');
+
+            // otevři právě tuhle
             target.slideDown();
+            addBtn.removeClass('fa-plus').addClass('fa-minus');
         }
     });
+
     // articl form cleaning
     deleteBtns.forEach(function (btn) {
         btn.addEventListener("click", function (e) {
             e.preventDefault();
-            const form = btn.closest("form");
+            const fieldset = this.closest("fieldset");
 
-            form.querySelectorAll("input, textarea, select").forEach(function (field) {
-                if (field.type !== "hidden" && field.type !== "submit" && field.type !== "button") {
+            fieldset.querySelectorAll("input, textarea, select").forEach(function (field) {
+                if (
+                    field.type !== "hidden" &&
+                    field.type !== "submit" &&
+                    field.type !== "button"
+                ) {
                     field.value = "";
                 }
             });
 
-            form.querySelectorAll(".L-form__error").forEach(function (errorDiv) {
+            fieldset.querySelectorAll(".L-form__error").forEach(function (errorDiv) {
                 errorDiv.innerHTML = "";
             });
         });
     });
+
 
 
     // validace tel num v inputech
