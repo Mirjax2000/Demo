@@ -29,13 +29,13 @@ cons: Console = Console()
 class IndexView(LoginRequiredMixin, TemplateView):
     """Index View"""
 
-    template_name: str = "base.html"
+    template_name = "base.html"
 
 
 class HomePageView(LoginRequiredMixin, TemplateView):
     """Homepage View"""
 
-    template_name: str = "app_sprava_montazi/homepage/homepage.html"
+    template_name = "app_sprava_montazi/homepage/homepage.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -47,7 +47,7 @@ class HomePageView(LoginRequiredMixin, TemplateView):
 class CreatePageView(LoginRequiredMixin, TemplateView):
     """Createpage View"""
 
-    template_name: str = "app_sprava_montazi/create/create.html"
+    template_name = "app_sprava_montazi/create/create.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -59,7 +59,7 @@ class CreatePageView(LoginRequiredMixin, TemplateView):
 class DashboardView(LoginRequiredMixin, TemplateView):
     """Dashboard View"""
 
-    template_name: str = "app_sprava_montazi/dashboard/dashboard.html"
+    template_name = "app_sprava_montazi/dashboard/dashboard.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
