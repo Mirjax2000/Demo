@@ -130,7 +130,7 @@ class DistribHubFormTest(TestCase):
         )
         self.assertFalse(form.is_valid())
         self.assertIn("code", form.errors)
-        self.assertEqual(form.errors["code"][0], "Tento kod uz existuje")
+        self.assertEqual(form.errors["code"][0], "Tento kod uz existuje!")
 
     def test_missing_city(self):
         """
