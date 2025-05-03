@@ -266,13 +266,13 @@ class TeamForm(forms.ModelForm):
             ),
             "active": forms.CheckboxInput(
                 attrs={
-                    "class": "L-form__checkbox",
+                    "class": "form-check-input u-checkbox-size",
                 }
             ),
             "price_per_hour": forms.NumberInput(
                 attrs={
                     "class": "L-form__input",
-                    "placeholder": "Cena za hodinu",
+                    "placeholder": "Cena za hod",
                 }
             ),
             "price_per_km": forms.NumberInput(
