@@ -9,7 +9,7 @@
     const deleteBtns = document.querySelectorAll(".form__delete");
     const messages = $(".C-messages");
     const arcticleBtns = $('.toggle-btn');
-
+    // messages
     messages.each(function (index, element) {
         setTimeout(function () {
             $(element).fadeOut(1000, function () {
@@ -49,16 +49,25 @@
                     field.type !== "submit" &&
                     field.type !== "button"
                 ) {
-                    field.value = "";
+                    if (field.tagName === "SELECT") {
+                        if (field.name === "team_type") {
+                            field.value = "By_assembly_crew";
+                        }
+                        else if (field.name === "status") {
+                            field.value = "New";
+                        }
+                    }
+                    else {
+                        field.value = "";
+                    }
                 }
             });
 
             fieldset.querySelectorAll(".L-form__error").forEach(function (errorDiv) {
-                errorDiv.innerHTML = "";
+                errorDiv.innerHTML = "";  // Vyčistění chybových hlášení
             });
         });
     });
-
 
 
     // validace tel num v inputech
@@ -67,7 +76,6 @@
             this.value = this.value.replace(/[^0-9]/g, '');
         });
     });
-
 
     // theme control
     function toggleTheme() {
