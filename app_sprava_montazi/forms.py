@@ -4,7 +4,7 @@ from django import forms
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory
-from .models import Order, Article, DistribHub, Team, Client
+from .models import Order, Article, DistribHub, Team, Client, TeamType, Status
 
 
 class OrderForm(forms.ModelForm):
@@ -94,6 +94,18 @@ class OrderForm(forms.ModelForm):
                 "required": "místo určení je povinné!",
             },
         }
+
+    def clean_team_type(self):
+        team_type = self.cleaned_data.get("team_type")
+        if not team_type:
+            return TeamType.BY_ASSEMBLY_CREW
+        return team_type
+
+    def clean_status(self):
+        status = self.cleaned_data.get("status")
+        if not status:
+            return Status.NEW
+        return status
 
 
 class ArticleForm(forms.ModelForm):
@@ -186,7 +198,7 @@ class ClientForm(forms.ModelForm):
                 "invalid": "Zadej platné telefonní číslo ve formátu 602345678.",
             },
             "zip_code": {
-                "required": "Jméno je povinné!",
+                "required": "PSC je povinné!",
             },
         }
 
