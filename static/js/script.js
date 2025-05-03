@@ -6,6 +6,7 @@
     const teamTable = document.getElementById("teamTable");
     const articleTable = document.getElementById("articleTable");
     const numberInputs = document.querySelectorAll(".number");
+    const deleteBtns = document.querySelectorAll(".form__delete");
     const messages = $(".C-messages");
     const arcticleBtns = $('.toggle-btn');
 
@@ -27,17 +28,20 @@
             target.slideDown();
         }
     });
+    // articl form cleaning
+    deleteBtns.forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            const form = btn.closest("form");
 
+            form.querySelectorAll("input, textarea, select").forEach(function (field) {
+                if (field.type !== "hidden" && field.type !== "submit" && field.type !== "button") {
+                    field.value = "";
+                }
+            });
 
-    // validace tel num v inputech  v HTMX
-    document.body.addEventListener('htmx:afterSwap', function () {
-
-        let numberInputs = document.querySelectorAll(".number");
-        console.log(numberInputs);
-
-        numberInputs.forEach(function (input) {
-            input.addEventListener('input', function () {
-                this.value = this.value.replace(/[^0-9]/g, '');
+            form.querySelectorAll(".L-form__error").forEach(function (errorDiv) {
+                errorDiv.innerHTML = "";
             });
         });
     });

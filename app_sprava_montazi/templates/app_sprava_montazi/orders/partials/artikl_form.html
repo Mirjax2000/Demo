@@ -37,28 +37,10 @@
     {% if form.note.errors %}{{ form.note.errors }}{% endif %}
 </div>
 <div class="u-txt-right">
-    <button class="btn btn-primary article__delete">smazat</button>
+    <button class="btn btn-outline-secondary form__delete u-txt-smaller">Vyčistit</button>
 </div>
 <!--non error field-->
 {% if form.non_field_errors %}
     <!---->
     <div class="L-form__error">{{ form.non_field_errors }}</div>
 {% endif %}
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const deleteBtn = document.querySelector(".article__delete");
-        deleteBtn.addEventListener("click", function(e) {
-            e.preventDefault();  // Zabráníme odeslání formuláře
-    
-            // Najdeme nejbližší formulář
-            const form = deleteBtn.closest("form");
-    
-            // Vymažeme hodnoty všech input, textarea a select prvků
-            form.querySelectorAll("input, textarea, select").forEach(function(input) {
-                if (input.type !== "hidden" && input.type !== "submit" && input.type !== "button") {
-                    input.value = "";
-                }
-            });
-        });
-    });
-</script>

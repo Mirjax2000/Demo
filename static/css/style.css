@@ -141,14 +141,6 @@ body.home {
   gap: 2%;
 }
 
-.precise__margin-1 {
-  margin-top: 15em;
-}
-
-.precise__margin-2 {
-  margin-top: 11em;
-}
-
 .L-sidebar {
   display: flex;
   justify-content: flex-start;
