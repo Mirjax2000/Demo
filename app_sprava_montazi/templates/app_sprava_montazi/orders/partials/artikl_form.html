@@ -36,9 +36,11 @@
 <div class="L-form__error">
     {% if form.note.errors %}{{ form.note.errors }}{% endif %}
 </div>
-<div class="u-txt-right">
-    <button class="btn btn-outline-secondary form__delete u-txt-smaller">Vyčistit</button>
-</div>
+{% if form_type == "create" %}
+    <div class="u-txt-right">
+        <button class="btn btn-outline-secondary form__delete u-txt-smaller">Vyčistit</button>
+    </div>
+{% endif %}
 <!--non error field-->
 {% if form.non_field_errors %}
     <!---->

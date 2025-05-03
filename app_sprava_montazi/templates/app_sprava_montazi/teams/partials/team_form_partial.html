@@ -75,8 +75,9 @@
     {% if form.notes.errors %}{{ form.notes.errors }}{% endif %}
 </div>
 <!---->
-<div class="u-txt-right">
-    <button type="reset"
-            class="btn btn-outline-secondary form__delete u-txt-smaller">Vyčistit</button>
-</div>
+{% if form_type == "create" %}
+    <div class="u-txt-right">
+        <button class="btn btn-outline-secondary form__delete u-txt-smaller">Vyčistit</button>
+    </div>
+{% endif %}
 {% if form.non_field_errors %}<div class="L-form__error">{{ form.non_field_errors }}</div>{% endif %}
