@@ -63,6 +63,12 @@
 .u-flex-row {
   display: flex;
   justify-content: flex-start;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 2%;
+}
+
+.u-flex-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
