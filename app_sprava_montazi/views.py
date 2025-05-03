@@ -81,6 +81,9 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
 
         context["order"] = order
         context["articles"] = articles
+        # --- vycistit btn
+        context["form_type"] = "update"
+        # --- navigace
         context["active"] = "orders"
 
         return context
@@ -133,6 +136,8 @@ class OrderCreateView(LoginRequiredMixin, View):
             "order_form": order_form,
             "client_form": client_form,
             "article_formset": article_formset,
+            # --- vycistit btn
+            "form_type": "create",
             # --- navigace
             "active": "orders_all",
         }
@@ -211,6 +216,8 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
+        # --- vycistit btn
+        context["form_type"] = "create"
         # --- navigace
         context["active"] = "teams"
         return context
@@ -230,6 +237,8 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
+        # --- vycistit btn
+        context["form_type"] = "update"
         # --- navigace
         context["active"] = "teams"
         return context
