@@ -198,7 +198,7 @@ class ClientForm(forms.ModelForm):
                 "invalid": "Zadej platné telefonní číslo ve formátu 602345678.",
             },
             "zip_code": {
-                "required": "PSC je povinné!",
+                "required": "PSČ je povinné!",
             },
         }
 
