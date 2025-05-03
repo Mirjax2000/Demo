@@ -4,18 +4,29 @@ from datetime import date
 from django.test import TestCase
 from django.db import IntegrityError
 from django.utils.text import slugify
-from .models import DistribHub, Order, Team, TeamType, Article, Status, Client
+from django.utils import timezone
+from .models import DistribHub, Client, Order, Team, Status, TeamType
+from .models import Article
 
 
 class DistribHubModelTest(TestCase):
     def setUp(self):
         self.hub = DistribHub.objects.create(code="111", city="Praha")
 
-    def test_slug_is_generated_correctly(self):
+    def test_distrib_hub_creation(self):
         """
-        Testuje správné generování slug hodnoty pro Hub objekt.
+        Testuje vytvoření instance modelu DistribHub.
         """
+        distrib_hub = self.hub
+        self.assertTrue(isinstance(distrib_hub, DistribHub))
+        self.assertEqual(distrib_hub.code, "111")
+        self.assertEqual(distrib_hub.city, "Praha")
         self.assertEqual(self.hub.slug, "111-praha")
+
+    def test_distrib_hub_unique_code(self):
+        """je to unique? code"""
+        with self.assertRaises(Exception):
+            DistribHub.objects.create(code="111", city="Opava")
 
     def test_slug_and_code_are_unique(self):
         """
@@ -32,6 +43,26 @@ class DistribHubModelTest(TestCase):
 
 
 class ClientModelTests(TestCase):
+    def test_client_creation(self):
+        """
+        Testuje vytvoření nové instance modelu Client a ověřuje, že hodnoty polí jsou správně nastaveny.
+        """
+        client = Client.objects.create(
+            name="Pavel Dvořák",
+            street="Hlavní 123",
+            city="Praha",
+            zip_code="10000",
+            phone="777123456",
+            email="pavel.dvorak@example.com",
+        )
+        self.assertTrue(isinstance(client, Client))
+        self.assertEqual(client.name, "Pavel Dvořák")
+        self.assertEqual(client.city, "Praha")
+        self.assertEqual(client.zip_code, "10000")
+        self.assertEqual(client.phone, "777123456")
+        self.assertEqual(client.email, "pavel.dvorak@example.com")
+        self.assertEqual(client.first_15(), "Pavel Dvořák")
+
     def test_incomplete_field_true_when_data_missing(self):
         """
         Testuje, že pole 'incomplete' je True, pokud chybí některá povinná data klienta.
@@ -86,7 +117,7 @@ class ClientModelTests(TestCase):
         self.assertEqual(str(client), "Alena Testovka")
 
 
-class OrderModelTest(TestCase):
+class OrderModelTestV1(TestCase):
     def setUp(self):
         # Základní DistribHub pro testy
         self.hub = DistribHub.objects.create(code="111", city="Praha")
@@ -189,7 +220,7 @@ class OrderModelTest(TestCase):
         self.assertEqual(order.notes_first_10(), "-")
 
 
-class ArticleModelTest(TestCase):
+class ArticleModelTestV1(TestCase):
     def setUp(self):
         self.hub = DistribHub.objects.create(code="111", city="Praha")
         self.customer = Client.objects.create(name="ferda", zip_code="12345")
@@ -203,6 +234,25 @@ class ArticleModelTest(TestCase):
             team_type=TeamType.BY_CUSTOMER,
             team=None,
         )
+
+    def test_article_creation(self):
+        """
+        Testuje vytvoření instance modelu Article.
+        """
+        article = Article.objects.create(
+            order=self.order,
+            name="Postel",
+            price=1000.00,
+            quantity=1,
+            note="Standardní postel",
+        )
+        self.assertTrue(isinstance(article, Article))
+        self.assertEqual(article.name, "Postel")
+        self.assertEqual(article.price, 1000.00)
+        self.assertEqual(article.quantity, 1)
+        self.assertIsInstance(article.quantity, int)
+        self.assertIsInstance(article.price, float)
+        self.assertEqual(article.note, "Standardní postel")
 
     def test_article_str_returns_name(self):
         """
@@ -265,6 +315,34 @@ class TeamModelTest(TestCase):
             notes="Toto je testovací poznámka.",
         )
 
+    def test_team_creation(self):
+        """Team creation"""
+        team = self.team
+        self.assertTrue(isinstance(team, Team))
+        self.assertEqual(team.name, "Test Company")
+        self.assertEqual(team.city, "Praha")
+        self.assertEqual(team.region, "Střední Čechy")
+        self.assertEqual(team.email, "test@company.cz")
+        self.assertEqual(team.phone, "123456789")
+        self.assertEqual(team.price_per_hour, 150.50)
+        self.assertEqual(team.price_per_km, 12.30)
+        self.assertEqual(team.notes, "Toto je testovací poznámka.")
+        self.assertEqual(team.first_15(), "Toto je testova...")
+        self.assertEqual(team.price_per_hour_float(), 150.50)
+        self.assertEqual(team.price_per_km_float(), 12.30)
+        self.assertIsInstance(team.price_per_hour_float(), float)
+        self.assertIsInstance(team.price_per_km_float(), float)
+        self.assertTrue(team.active)
+        self.assertIsInstance(team.active, bool)
+
+    def test_team_unique_name(self):
+        """
+        Testuje, že nelze vytvořit dva týmy se stejným názvem (name).
+        """
+        Team.objects.create(name="Gamma Team", city="Plzeň")
+        with self.assertRaises(Exception):
+            Team.objects.create(name="Gamma Team", city="Karlovy Vary")
+
     def test_str_representation(self):
         """✅ Testuje, že metoda __str__ vrací název společnosti."""
         self.assertEqual(str(self.team), "Test Company")
@@ -316,3 +394,164 @@ class TeamModelTest(TestCase):
         """✅ Testuje, že nelze vytvořit dvě společnosti se stejným názvem."""
         with self.assertRaises(Exception):
             Team.objects.create(name="Test Company", city="Brno", phone="987654321")
+
+
+class OrderModelTestV2(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        DistribHub.objects.create(code="CB", city="České Budějovice")
+        Client.objects.create(name="Jan Novák", zip_code="11150")
+        Team.objects.create(name="Alfa Team", city="České Budějovice", active=True)
+
+    def test_order_creation(self):
+        """
+        Testuje vytvoření nové objednávky (Order) s předdefinovanými hodnotami.
+        """
+        distrib_hub = DistribHub.objects.get(code="CB")
+        client = Client.objects.get(name="Jan Novák")
+        team = Team.objects.get(name="Alfa Team")
+        order = Order.objects.create(
+            order_number="12345",
+            distrib_hub=distrib_hub,
+            mandant="ABC",
+            status=Status.NEW,
+            client=client,
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
+            montage_termin=timezone.now(),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+            team=team,
+            notes="Testovací poznámka",
+        )
+        self.assertTrue(isinstance(order, Order))
+        self.assertEqual(order.order_number, "12345")
+        self.assertEqual(order.distrib_hub, distrib_hub)
+        self.assertIsInstance(order.distrib_hub, DistribHub)
+        self.assertEqual(order.mandant, "ABC")
+        self.assertEqual(order.status, Status.NEW)
+        self.assertEqual(order.client, client)
+        self.assertIsInstance(order.client, Client)
+        self.assertEqual(order.team_type, TeamType.BY_ASSEMBLY_CREW)
+        self.assertEqual(order.team, team)
+        self.assertIsInstance(order.team, Team)
+        self.assertEqual(order.notes, "Testovací poznámka")
+        if order.team is not None:
+            self.assertEqual(order.team.price_per_km_float(), 0.0)
+            self.assertEqual(order.team.price_per_hour_float(), 0.0)
+            self.assertEqual(order.team.slug, "alfa-team")
+        else:
+            self.assertIsNone(order.team)
+
+    def test_notes_first_10_method(self):
+        """
+        Testuje metodu `notes_first_10` modelu Order.
+        - Pokud poznámka není zadána, vrací znak "-".
+        """
+        order_short_notes = Order.objects.create(
+            order_number="67890",
+            distrib_hub=DistribHub.objects.get(code="CB"),
+            mandant="DEF",
+            notes="Short",
+            evidence_termin=timezone.now().date(),
+        )
+        self.assertEqual(order_short_notes.notes_first_10(), "Short")
+
+        order_long_notes = Order.objects.create(
+            order_number="11223",
+            distrib_hub=DistribHub.objects.get(code="CB"),
+            evidence_termin=timezone.now().date(),
+            mandant="GHI",
+            notes="This is a very long note",
+        )
+        self.assertEqual(order_long_notes.notes_first_10(), "This is a ...")
+
+        order_no_notes = Order.objects.create(
+            order_number="44556",
+            evidence_termin=timezone.now().date(),
+            distrib_hub=DistribHub.objects.get(code="CB"),
+            mandant="JKL",
+        )
+        self.assertEqual(order_no_notes.notes_first_10(), "-")
+
+    def test_is_missing_team_method(self):
+        """
+        Testuje metodu is_missing_team u modelu Order.
+        Ověřuje, že metoda vrací True, pokud je typ týmu BY_ASSEMBLY_CREW a tým není přiřazen,
+        a vrací False v ostatních případech.
+        """
+        order_with_team = Order.objects.create(
+            order_number="77889",
+            distrib_hub=DistribHub.objects.get(code="CB"),
+            mandant="MNO",
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+            team=Team.objects.get(name="Alfa Team"),
+        )
+        self.assertFalse(order_with_team.is_missing_team())
+
+        order_without_team = Order.objects.create(
+            order_number="00112",
+            distrib_hub=DistribHub.objects.get(code="CB"),
+            evidence_termin=timezone.now().date(),
+            mandant="PQR",
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+            team=None,
+        )
+        self.assertTrue(order_without_team.is_missing_team())
+
+        order_different_team_type = Order.objects.create(
+            order_number="33445",
+            distrib_hub=DistribHub.objects.get(code="CB"),
+            mandant="STU",
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_CUSTOMER,
+            team=None,
+        )
+        self.assertFalse(order_different_team_type.is_missing_team())
+
+    def test_order_unique_order_number(self):
+        """
+        Testuje, že není možné vytvořit dvě objednávky (Order) se stejným číslem objednávky (order_number).
+        """
+        DistribHub.objects.create(code="LM", city="Liberec")
+        Order.objects.create(
+            order_number="unique1",
+            evidence_termin=timezone.now().date(),
+            distrib_hub=DistribHub.objects.get(code="LM"),
+            mandant="VWX",
+        )
+        with self.assertRaises(Exception):
+            Order.objects.create(
+                order_number="unique1",
+                evidence_termin=timezone.now().date(),
+                distrib_hub=DistribHub.objects.get(code="LM"),
+                mandant="YZA",
+            )
+
+    def test_order_ordering(self):
+        """
+        Testuje, zda jsou objednávky (Order) správně seřazeny podle čísla objednávky (order_number) v sestupném pořadí.
+        """
+        DistribHub.objects.create(code="PL", city="Plzeň")
+        Order.objects.create(
+            order_number="300",
+            evidence_termin=timezone.now().date(),
+            distrib_hub=DistribHub.objects.get(code="PL"),
+            mandant="BBB",
+        )
+        Order.objects.create(
+            order_number="100",
+            evidence_termin=timezone.now().date(),
+            distrib_hub=DistribHub.objects.get(code="PL"),
+            mandant="AAA",
+        )
+        Order.objects.create(
+            order_number="200",
+            evidence_termin=timezone.now().date(),
+            distrib_hub=DistribHub.objects.get(code="PL"),
+            mandant="CCC",
+        )
+        orders = Order.objects.all()
+        self.assertEqual(
+            list(orders.values_list("order_number", flat=True)), ["300", "200", "100"]
+        )
