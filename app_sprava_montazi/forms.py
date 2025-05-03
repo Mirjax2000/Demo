@@ -114,7 +114,6 @@ class ArticleForm(forms.ModelForm):
                 attrs={
                     "class": "L-form__input",
                     "placeholder": "množství...",
-                    "min": 1,
                 }
             ),
             "note": forms.Textarea(
