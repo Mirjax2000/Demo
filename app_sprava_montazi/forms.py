@@ -120,6 +120,8 @@ class ArticleForm(forms.ModelForm):
                 attrs={
                     "class": "L-form__input",
                     "placeholder": "cena...",
+                    "step": "0.01",
+                    "oninput": "this.value=this.value.slice(0,13)",
                 }
             ),
             "quantity": forms.NumberInput(
@@ -136,6 +138,19 @@ class ArticleForm(forms.ModelForm):
                 }
             ),
         }
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data.get("quantity")
+
+        # Validace, že množství je mezi 0 a 999
+        if quantity is None:
+            raise forms.ValidationError("Množství je povinné.")
+        if quantity > 999:
+            raise forms.ValidationError("Množství nemůže být větší než 999.")
+        if quantity < 0:
+            raise forms.ValidationError("Množství nemůže být záporné.")
+
+        return quantity
 
 
 ArticleInlineFormSet = inlineformset_factory(
@@ -276,7 +291,10 @@ class TeamForm(forms.ModelForm):
                 }
             ),
             "price_per_km": forms.NumberInput(
-                attrs={"class": "L-form__input", "placeholder": "Cena za km"}
+                attrs={
+                    "class": "L-form__input",
+                    "placeholder": "Cena za km",
+                }
             ),
             "notes": forms.Textarea(
                 attrs={"class": "L-form__input", "rows": 4, "placeholder": "Poznámky"}
