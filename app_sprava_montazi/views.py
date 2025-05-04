@@ -115,7 +115,7 @@ class OrderUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse("order_detail", kwargs={"pk": self.kwargs["pk"]})
+        return reverse("order_detail", kwargs={"pk": self.object.pk})
 
 
 class OrdersView(LoginRequiredMixin, ListView):
