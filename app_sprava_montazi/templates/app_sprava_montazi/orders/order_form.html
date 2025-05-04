@@ -23,7 +23,7 @@
                     <div>
                         <div class="u-txt-right mt-3">
                             <button type="submit" class="btn btn-primary mt-3">
-                                <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit objednávku
+                                <i class="fa-solid fa-plus me-2"></i>Uložit objednávku
                             </button>
                         </div>
                         <div class="u-txt-right mt-3">
@@ -38,7 +38,7 @@
                     {% for form in article_formset %}
                         <div>
                             <button type="button" class="toggle-btn btn btn-primary mb-3">
-                                <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Přidat artikl {{ forloop.counter }}
+                                <i class="fa-solid fa-plus me-2"></i>Přidat artikl {{ forloop.counter }}
                             </button>
                             <div class="L-form__articles artikl-{{ forloop.counter }}">
                                 {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form counter=forloop.counter %}
