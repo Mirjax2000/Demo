@@ -16,7 +16,8 @@
             </li>
             <!--status-->
             <li class="L-detail__item">
-                <strong>Stav:</strong> {{ order.get_status_display }}
+                <strong>Stav:</strong>
+                <span>&nbsp;&nbsp;{{ order.get_status_display }}</span>
             </li>
             <!--evidence_termin-->
             <li class="L-detail__item">
@@ -46,12 +47,15 @@
             {% endif %}
             <!--team type-->
             <li class="L-detail__item">
-                <strong>Realizace kým:</strong> {{ order.get_team_type_display }}
+                <strong>Realizace kým:</strong>
+                <!---->
+                <span class="{% if order.team_type == "By_customer" %}u-txt-error{% elif order.team_type == "By_assembly_crew" %}u-txt-success-light{% endif %}">&nbsp;&nbsp;{{ order.get_team_type_display }}</span>
             </li>
             <!--team-->
             {% if order.team %}
                 <li class="L-detail__item">
-                    <strong>Montážní tým:</strong> <a href="#">{{ order.team }}</a>
+                    <strong>Montážní tým:</strong>
+                    <a href="{% url "team_detail" order.team.slug %}">{{ order.team }}</a>
                 </li>
             {% else %}
                 <li class="L-detail__item">
