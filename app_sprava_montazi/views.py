@@ -8,7 +8,7 @@ from django.db.models.query import QuerySet
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import (
     CreateView,
@@ -70,7 +70,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 class ClientUpdateView(LoginRequiredMixin, UpdateView):
     model = Client
     form_class = ClientForm
-    template_name = "app_sprava_montazi/orders/order_detail_client-form.html"
+    template_name = "app_sprava_montazi/orders/order_update_client-form.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -95,27 +95,59 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return reverse("order_detail", kwargs={"pk": self.kwargs["order_pk"]})
 
 
-class OrderUpdateView(LoginRequiredMixin, UpdateView):
-    model = Order
-    form_class = OrderForm
-    template_name = "app_sprava_montazi/orders/order_detail_order-form.html"
+class OrderUpdateView(LoginRequiredMixin, View):
+    template = "app_sprava_montazi/orders/order_update_order-form.html"
 
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
+    def get_forms(self, order=None, data=None):
+        return (
+            OrderForm(data, instance=order),
+            ArticleInlineFormSet(data, instance=order),
+        )
 
-        # --- vycistit btn update/create
-        context["form_type"] = "update"
-        # --- navigace
-        context["active"] = "orders_all"
+    def get(self, request, pk, *args, **kwargs) -> HttpResponse:
+        order = get_object_or_404(Order, pk=pk)
+        order_form, article_formset = self.get_forms(order=order)
 
-        return context
+        context = {
+            "order": order,
+            "order_form": order_form,
+            "article_formset": article_formset,
+            # --- vycistit btn update/create
+            "form_type": "update",
+            # --- navigace
+            "active": "orders_all",
+        }
+        return render(request, self.template, context)
 
-    def form_valid(self, form) -> HttpResponse:
-        messages.success(self.request, f"Objednávka: {self.object} aktualizována.")
-        return super().form_valid(form)
+    def post(self, request, pk, *args, **kwargs):
+        order = get_object_or_404(Order, pk=pk)
+        order_form, article_formset = self.get_forms(order=order, data=request.POST)
+        context = {
+            "order": order,
+            "order_form": order_form,
+            "article_formset": article_formset,
+            # --- vycistit btn update/create
+            "form_type": "update",
+            # --- navigace
+            "active": "orders_all",
+        }
 
-    def get_success_url(self) -> str:
-        return reverse("order_detail", kwargs={"pk": self.object.pk})
+        if order_form.is_valid() and article_formset.is_valid():
+            try:
+                with transaction.atomic():
+                    order = order_form.save(commit=False)
+                    order.save()
+                    article_formset.instance = order
+                    article_formset.save()
+                    messages.success(request, "Objednávka upravena.")
+                    return redirect(reverse("order_detail", kwargs={"pk": order.id}))
+
+            except Exception as e:
+                if settings.DEBUG:
+                    cons.log(f"chyba při ukládání: {str(e)}")
+
+        messages.error(request, "Nastala chyba při ukládání změn objednávky.")
+        return render(request, self.template, context)
 
 
 class OrdersView(LoginRequiredMixin, ListView):
