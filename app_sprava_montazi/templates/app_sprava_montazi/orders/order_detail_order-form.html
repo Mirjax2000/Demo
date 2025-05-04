@@ -9,7 +9,7 @@
             {% include "app_sprava_montazi/orders/partials/order_form.html" %}
             <!--zakaznik-->
             {% with hidden=True %}
-                {% include "app_sprava_montazi/orders/partials/client_form.html" with show=hidden %}
+                {% include "app_sprava_montazi/orders/partials/order_detail_client.html" with show=hidden %}
             {% endwith %}
             <!--artikl-->
             {% with hidden=True %}
