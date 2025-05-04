@@ -92,22 +92,27 @@ body.home {
 
 .u-txt-success {
   color: var(--success) !important;
-  text-shadow: 0 0 1px var(--success);
+  -webkit-text-stroke: 1px var(--success);
+}
+
+.u-txt-success-light {
+  color: var(--success-lighter) !important;
+  -webkit-text-stroke: 1px var(--success-lighter);
 }
 
 .u-txt-info {
   color: var(--info) !important;
-  text-shadow: 0 0 1px var(--info);
+  -webkit-text-stroke: 1px var(--info);
 }
 
 .u-txt-warning {
   color: orange !important;
-  text-shadow: 0 0 1px orange;
+  -webkit-text-stroke: 1px orange;
 }
 
 .u-txt-error {
   color: var(--error) !important;
-  text-shadow: 0 0 1px var(--error);
+  -webkit-text-stroke: 1px var(--error);
 }
 
 .u-txt-trans {
