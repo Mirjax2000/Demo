@@ -22,8 +22,7 @@ from app_sprava_montazi.views import (
     OrderCreateView,
     ClientUpdateView,
     CreatePageView,
-    order_create,
-    order_update,
+    OrderUpdateView,
 )
 
 urlpatterns: list = [
@@ -37,12 +36,16 @@ app_sprava_montazi: list = [
     # --- orders ---
     path("orders/", OrdersView.as_view(), name="orders"),
     path("order/create/", OrderCreateView.as_view(), name="order_create"),
-    path("order/<int:pk>/update/", order_update, name="order_update"),
     path("order/<int:pk>/detail/", OrderDetailView.as_view(), name="order_detail"),
     path(
         "order/<slug:slug>/<int:order_pk>/client_update/",
         ClientUpdateView.as_view(),
         name="client_update",
+    ),
+    path(
+        "order/<int:pk>/order_update/",
+        OrderUpdateView.as_view(),
+        name="order_update",
     ),
     # --- create ---
     path("createpage/", CreatePageView.as_view(), name="createpage"),
