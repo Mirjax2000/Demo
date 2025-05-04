@@ -4,52 +4,59 @@
         <ul class="L-detail__list">
             <!--client name-->
             <li class="L-detail__item">
-                <strong>Zákazník:</strong> {{ order.client }}
+                <strong>Zákazník:</strong>
+                <span class="ms-1">{{ order.client }}</span>
             </li>
             <!--street-->
             {% if order.client.street %}
                 <li class="L-detail__item">
-                    <strong>Ulice:</strong> {{ order.client.street }}
+                    <strong>Ulice:</strong>
+                    <span class="ms-1">{{ order.client.street }}</span>
                 </li>
             {% else %}
                 <li class="L-detail__item">
-                    <strong>Ulice:</strong><span class="u-txt-warning">&nbsp;Nevyplněno</span>
+                    <strong>Ulice:</strong>
+                    <span class="u-txt-warning ms-1">Nevyplněno</span>
                 </li>
             {% endif %}
             <!--city-->
             {% if order.client.city %}
                 <li class="L-detail__item">
-                    <strong>Město:</strong> {{ order.client.city }}
+                    <strong>Město:</strong>
+                    <span class="ms-1">{{ order.client.city }}</span>
                 </li>
             {% else %}
                 <li class="L-detail__item">
                     <strong>Město:</strong>
-                    <span class="u-txt-warning">&nbsp;Nevyplněno</span>
+                    <span class="u-txt-warning ms-1">Nevyplněno</span>
                 </li>
             {% endif %}
             <!--PSC-->
             <li class="L-detail__item">
-                <strong>PSČ:</strong> {{ order.client.zip_code }}
+                <strong>PSČ:</strong>
+                <span class="ms-1">{{ order.client.zip_code }}</span>
             </li>
             <!--phone-->
             {% if order.client.phone %}
                 <li class="L-detail__item">
-                    <strong>Telefon:</strong> {{ order.client.phone }}
+                    <strong>Telefon:</strong>
+                    <span class="ms-1">{{ order.client.phone }}</span>
                 </li>
             {% else %}
                 <li class="L-detail__item">
                     <strong>Telefon:</strong>
-                    <span class="u-txt-warning">&nbsp;Nevyplněno</span>
+                    <span class="u-txt-warning ms-1">Nevyplněno</span>
                 </li>
             {% endif %}
             {% if order.client.email %}
                 <li class="L-detail__item">
-                    <strong>E-mail:</strong> {{ order.client.email }}
+                    <strong>E-mail:</strong>
+                    <span class="ms-1">{{ order.client.email }}</span>
                 </li>
             {% else %}
                 <li class="L-detail__item">
                     <strong>E-mail:</strong>
-                    <span class="u-txt-warning">&nbsp;Nevyplněno</span>
+                    <span class="u-txt-warning ms-1">Nevyplněno</span>
                 </li>
             {% endif %}
         </ul>
@@ -58,12 +65,12 @@
     <div>
         <div>
             <a href="#" class="btn btn-primary d-block mb-2 ms-5 me-5">
-                <i class="fa-solid fa-phone"></i>&nbsp;&nbsp;Volat zákazníka</a>
+                <i class="fa-solid fa-phone me-2"></i>Volat zákazníka</a>
         </div>
         <div>
             <a href="{% url 'client_update' order.client.slug order.pk %}"
                class="btn btn-primary d-block ms-5 me-5">
-                <i class="fa-solid fa-pen-to-square"></i>&nbsp;&nbsp;Upravit zákazníka</a>
+                <i class="fa-solid fa-pen-to-square me-2"></i>Upravit zákazníka</a>
         </div>
     </div>
 </section>
