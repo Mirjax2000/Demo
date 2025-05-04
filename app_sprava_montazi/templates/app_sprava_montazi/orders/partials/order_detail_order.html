@@ -26,7 +26,7 @@
             <!--delivery termin-->
             {% if order.delivery_termin %}
                 <li class="L-detail__item">
-                    <strong>Termín doručení:</strong> {{ order.delivery_termin|date:"d. m. Y" }}
+                    <strong>Termín doručení:</strong> {{ order.delivery_termin }}
                 </li>
             {% else %}
                 <li class="L-detail__item">
@@ -37,8 +37,7 @@
             <!--montage_termin-->
             {% if order.montage_termin %}
                 <li class="L-detail__item">
-                    <strong>Termín montáže:</strong> {{ order.montage_termin|date:"d. m. Y
-                    H:i" }}
+                    <strong>Termín montáže:</strong> {{ order.montage_termin }}
                 </li>
             {% else %}
                 <li class="L-detail__item">
