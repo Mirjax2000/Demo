@@ -1,0 +1,58 @@
+<fieldset class="L-detail__fieldset {% if show %}L-detail__hidden{% endif %}">
+    <div>
+        <legend>Tým</legend>
+        <ul class="L-detail__list">
+            <!--name-->
+            <li class="L-detail__item">
+                <strong>Společnost:</strong><span class="u-txt-success-light">&nbsp;&nbsp;{{ team.name }}</span>
+            </li>
+            <!--city-->
+            <li class="L-detail__item">
+                <strong>Město:</strong> {{ team.city }}
+            </li>
+            <!--Region-->
+            <li class="L-detail__item">
+                <strong>Region:</strong> {{ team.region }}
+            </li>
+            <!--Phone-->
+            <li class="L-detail__item">
+                <strong>Telefon:</strong> {{ team.phone }}
+            </li>
+            <!--Email-->
+            <li class="L-detail__item">
+                <strong>Email:</strong> {{ team.email }}
+            </li>
+            <!--active-->
+            <li class="L-detail__item">
+                {% if team.active %}
+                    <strong>Aktivní:</strong><span class="u-txt-success-light">&nbsp;&nbsp;Aktivní</span>
+                {% else %}
+                    <strong>Aktivní:</strong><span class="u-txt-warning">&nbsp;&nbsp;Neaktivní</span>
+                {% endif %}
+            </li>
+            <li class="L-detail__item">
+                <ul class="p-0 u-flex-row">
+                    <li class="L-detail__item mb-0 pb-1">
+                        <strong>cena za km:</strong><span>&nbsp;&nbsp;{{ team.price_per_km_float }}</span>
+                    </li>
+                    <li class="L-detail__item mb-0 pb-1">
+                        <strong>cena za hod:</strong><span>&nbsp;&nbsp;{{ team.price_per_hour_float }}</span>
+                    </li>
+                </ul>
+            </li>
+            <!--notes-->
+            {% if team.notes %}
+                <li class="L-detail__item">
+                    <strong>Poznámky:</strong> {{ team.notes }}
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    <!---->
+    <div>
+        <a href="{% url "team_update" team.slug %}"
+           class="btn btn-primary d-block ms-5 me-5">
+            <i class="fa-solid fa-pen-to-square"></i>&nbsp;&nbsp;Upravit tým</a>
+    </div>
+</fieldset>
+<!---->
