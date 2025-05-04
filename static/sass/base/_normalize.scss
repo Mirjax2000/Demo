@@ -40,8 +40,8 @@ code,
 kbd,
 samp,
 pre {
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo,
-    monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 1em;
 }
 
@@ -129,7 +129,7 @@ progress {
 }
 
 ::-webkit-file-upload-button {
-  appearance: 'button';
+  appearance: "button";
   font: inherit;
 }
 
