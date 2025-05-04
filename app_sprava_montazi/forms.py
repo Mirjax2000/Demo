@@ -145,8 +145,8 @@ class ArticleForm(forms.ModelForm):
                 attrs={
                     "class": "L-form__input",
                     "placeholder": "cena...",
-                    "step": "0.01",
-                    "oninput": "this.value=this.value.slice(0,13)",
+                    "step": "1",  # krokování po 10
+                    "min": "0",
                 }
             ),
             "quantity": forms.NumberInput(
@@ -313,12 +313,16 @@ class TeamForm(forms.ModelForm):
                 attrs={
                     "class": "L-form__input",
                     "placeholder": "Cena za hod",
+                    "step": "1",
+                    "min": "0",
                 }
             ),
             "price_per_km": forms.NumberInput(
                 attrs={
                     "class": "L-form__input",
                     "placeholder": "Cena za km",
+                    "step": "1",
+                    "min": "0",
                 }
             ),
             "notes": forms.Textarea(
