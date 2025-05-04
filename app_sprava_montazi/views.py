@@ -248,7 +248,6 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form) -> HttpResponse:
         response = super().form_valid(form)
-        cons.log(response)
         messages.success(self.request, f"Tým: {self.object} byl úspěšně vytvořen.")
         return response
 
