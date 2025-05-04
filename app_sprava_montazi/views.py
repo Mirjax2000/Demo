@@ -10,7 +10,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
-from django.template.loader import render_to_string
 from django.views.generic import (
     CreateView,
     DetailView,
@@ -81,7 +80,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
 
         context["order"] = order
         context["articles"] = articles
-        # --- vycistit btn
+        # --- vycistit btn update/create
         context["form_type"] = "update"
         # --- navigace
         context["active"] = "orders_all"
@@ -90,6 +89,29 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form) -> HttpResponse:
         messages.success(self.request, f"Zákazník: {self.object} aktualizován.")
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse("order_detail", kwargs={"pk": self.kwargs["order_pk"]})
+
+
+class OrderUpdateView(LoginRequiredMixin, UpdateView):
+    model = Order
+    form_class = OrderForm
+    template_name = "app_sprava_montazi/orders/order_detail_order-form.html"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+
+        # --- vycistit btn update/create
+        context["form_type"] = "update"
+        # --- navigace
+        context["active"] = "orders_all"
+
+        return context
+
+    def form_valid(self, form) -> HttpResponse:
+        messages.success(self.request, f"Objednávka: {self.object} aktualizována.")
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
@@ -136,7 +158,7 @@ class OrderCreateView(LoginRequiredMixin, View):
             "order_form": order_form,
             "client_form": client_form,
             "article_formset": article_formset,
-            # --- vycistit btn
+            # --- vycistit btn update/create
             "form_type": "create",
             # --- navigace
             "active": "orders_all",
@@ -149,6 +171,8 @@ class OrderCreateView(LoginRequiredMixin, View):
             "order_form": order_form,
             "client_form": client_form,
             "article_formset": article_formset,
+            # --- vycistit btn update/create
+            "form_type": "create",
             # --- navigace
             "active": "orders_all",
         }
@@ -216,7 +240,7 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        # --- vycistit btn
+        # --- vycistit btn create/update
         context["form_type"] = "create"
         # --- navigace
         context["active"] = "teams"
@@ -237,7 +261,7 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        # --- vycistit btn
+        # --- vycistit btn create/update
         context["form_type"] = "update"
         # --- navigace
         context["active"] = "teams"
