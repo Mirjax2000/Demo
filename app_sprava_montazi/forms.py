@@ -266,7 +266,7 @@ class TeamForm(forms.ModelForm):
             ),
             "active": forms.CheckboxInput(
                 attrs={
-                    "class": "form-check-input u-checkbox-size",
+                    "class": "form-check-input C-checkbox",
                 }
             ),
             "price_per_hour": forms.NumberInput(
