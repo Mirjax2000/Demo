@@ -1,77 +1,79 @@
-<fieldset class="L-detail__fieldset">
-    <legend>Objednávka</legend>
-    <ul class="L-detail__list">
-        <!--order-->
-        <li class="L-detail__item">
-            <strong>Číslo zakázky:</strong> {{ order.order_number|upper }}
-        </li>
-        <!--distrib_hub-->
-        <li class="L-detail__item">
-            <strong>Místo určení:</strong> {{ order.distrib_hub }}
-        </li>
-        <!--mandant-->
-        <li class="L-detail__item">
-            <strong>Mandant:</strong> {{ order.mandant }}
-        </li>
-        <!--status-->
-        <li class="L-detail__item">
-            <strong>Stav:</strong> {{ order.get_status_display }}
-        </li>
-        <!--evidence_termin-->
-        <li class="L-detail__item">
-            <strong>Termín evidence:</strong> {{ order.evidence_termin|date:"d. m. Y" }}
-        </li>
-        <!--delivery termin-->
-        {% if order.delivery_termin %}
+<fieldset class="L-detail__fieldset {% if show %}L-detail__hidden{% endif %}">
+    <div>
+        <legend>Objednávka</legend>
+        <ul class="L-detail__list">
+            <!--order-->
             <li class="L-detail__item">
-                <strong>Termín doručení:</strong> {{ order.delivery_termin|date:"d. m. Y" }}
+                <strong>Číslo zakázky:</strong> {{ order.order_number|upper }}
             </li>
-        {% else %}
+            <!--distrib_hub-->
             <li class="L-detail__item">
-                <strong>Termín doručení:</strong>
-                <span class="u-txt-warning">&nbsp;Nevybráno</span>
+                <strong>Místo určení:</strong> {{ order.distrib_hub }}
             </li>
-        {% endif %}
-        <!--montage_termin-->
-        {% if order.montage_termin %}
+            <!--mandant-->
             <li class="L-detail__item">
-                <strong>Termín montáže:</strong> {{ order.montage_termin|date:"d. m. Y
-                H:i" }}
+                <strong>Mandant:</strong> {{ order.mandant }}
             </li>
-        {% else %}
+            <!--status-->
             <li class="L-detail__item">
-                <strong>Termín montáže:</strong><span class="u-txt-warning ms-2">Nevybráno</span>
+                <strong>Stav:</strong> {{ order.get_status_display }}
             </li>
-        {% endif %}
-        <!--team type-->
-        <li class="L-detail__item">
-            <strong>Realizace kým:</strong> {{ order.get_team_type_display }}
-        </li>
-        <!--team-->
-        {% if order.team %}
+            <!--evidence_termin-->
             <li class="L-detail__item">
-                <strong>Montážní tým:</strong> <a href="#">{{ order.team }}</a>
+                <strong>Termín evidence:</strong> {{ order.evidence_termin|date:"d. m. Y" }}
             </li>
-        {% else %}
+            <!--delivery termin-->
+            {% if order.delivery_termin %}
+                <li class="L-detail__item">
+                    <strong>Termín doručení:</strong> {{ order.delivery_termin|date:"d. m. Y" }}
+                </li>
+            {% else %}
+                <li class="L-detail__item">
+                    <strong>Termín doručení:</strong>
+                    <span class="u-txt-warning">&nbsp;Nevybráno</span>
+                </li>
+            {% endif %}
+            <!--montage_termin-->
+            {% if order.montage_termin %}
+                <li class="L-detail__item">
+                    <strong>Termín montáže:</strong> {{ order.montage_termin|date:"d. m. Y
+                    H:i" }}
+                </li>
+            {% else %}
+                <li class="L-detail__item">
+                    <strong>Termín montáže:</strong><span class="u-txt-warning ms-2">Nevybráno</span>
+                </li>
+            {% endif %}
+            <!--team type-->
             <li class="L-detail__item">
-                <strong>Montážní tým:</strong><span class="u-txt-warning ms-2">Nevybráno</span>
+                <strong>Realizace kým:</strong> {{ order.get_team_type_display }}
             </li>
-        {% endif %}
-        <!--notes-->
-        {% if order.notes %}
+            <!--team-->
+            {% if order.team %}
+                <li class="L-detail__item">
+                    <strong>Montážní tým:</strong> <a href="#">{{ order.team }}</a>
+                </li>
+            {% else %}
+                <li class="L-detail__item">
+                    <strong>Montážní tým:</strong><span class="u-txt-warning ms-2">Nevybráno</span>
+                </li>
+            {% endif %}
+            <!--notes-->
+            {% if order.notes %}
+                <li class="L-detail__item">
+                    <strong>Poznámky:</strong> {{ order.notes }}
+                </li>
+            {% endif %}
+            <!--created-->
             <li class="L-detail__item">
-                <strong>Poznámky:</strong> {{ order.notes }}
+                <strong>Vytvořeno:</strong> {{ order.created|date:"d. m. Y H:i" }}
             </li>
-        {% endif %}
-        <!--created-->
-        <li class="L-detail__item">
-            <strong>Vytvořeno:</strong> {{ order.created|date:"d. m. Y H:i" }}
-        </li>
-        <!--updated-->
-        <li class="L-detail__item">
-            <strong>Upraveno:</strong> {{ order.updated|date:"d. m. Y H:i" }}
-        </li>
-    </ul>
+            <!--updated-->
+            <li class="L-detail__item">
+                <strong>Upraveno:</strong> {{ order.updated|date:"d. m. Y H:i" }}
+            </li>
+        </ul>
+    </div>
     <!---->
     <div>
         <a href="#" class="btn btn-primary d-block ms-5 me-5">

@@ -1,14 +1,12 @@
-<section class="L-form mt-0">
+<fieldset class="L-detail__fieldset">
     <form method="post" class="L-form__form p-0">
         {% csrf_token %}
-        <fieldset>
-            <legend>Zákazník</legend>
-            {% include "app_sprava_montazi/partials/form_field.html" with form=form %}
-        </fieldset>
+        <legend>Zákazník</legend>
+        {% include "app_sprava_montazi/partials/form_field.html" with form=form %}
         <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-primary mt-3">
                 <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit Zákazníka
             </button>
         </div>
     </form>
-</section>
+</fieldset>
