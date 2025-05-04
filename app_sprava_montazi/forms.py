@@ -60,19 +60,22 @@ class OrderForm(forms.ModelForm):
                 attrs={
                     "class": "L-form__date",
                     "type": "date",
-                }
+                },
+                format="%Y-%m-%d",
             ),
             "evidence_termin": forms.DateInput(
                 attrs={
                     "class": "L-form__date",
                     "type": "date",
-                }
+                },
+                format="%Y-%m-%d",
             ),
             "montage_termin": forms.DateTimeInput(
                 attrs={
                     "class": "L-form__date",
                     "type": "datetime-local",
-                }
+                },
+                format="%Y-%m-%dT%H:%M",
             ),
             "notes": forms.Textarea(
                 attrs={
@@ -94,6 +97,28 @@ class OrderForm(forms.ModelForm):
                 "required": "místo určení je povinné!",
             },
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["delivery_termin"].input_formats = [
+            "%Y-%m-%d",
+            "%d.%m.%Y",
+            "%d/%m/%Y",
+        ]
+
+        self.fields["evidence_termin"].input_formats = [
+            "%Y-%m-%d",
+            "%d.%m.%Y",
+            "%d/%m/%Y",
+        ]
+
+        self.fields["montage_termin"].input_formats = [
+            "%Y-%m-%dT%H:%M",
+            "%Y-%m-%d %H:%M",
+            "%d.%m.%Y %H:%M",
+            "%d/%m/%Y %H:%M",
+        ]
 
     def clean_team_type(self):
         team_type = self.cleaned_data.get("team_type")
