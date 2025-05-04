@@ -84,7 +84,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         # --- vycistit btn
         context["form_type"] = "update"
         # --- navigace
-        context["active"] = "orders"
+        context["active"] = "orders_all"
 
         return context
 
@@ -189,7 +189,7 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
 
         context["articles"] = articles
         # --- navigace
-        context["active"] = "orders"
+        context["active"] = "orders_all"
 
         return context
 
