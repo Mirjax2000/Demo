@@ -2,7 +2,7 @@
     <tr class="L-table__body__row">
         <!--jmeno-->
         <td>
-            <a href="{% url "team_update" slug=team.slug %}" class="L-table__link">{{ team.name }}</a>
+            <a href="{% url "team_detail" slug=team.slug %}" class="L-table__link">{{ team.name }}</a>
         </td>
         <!--mesto-->
         <td>{{ team.city }}</td>
