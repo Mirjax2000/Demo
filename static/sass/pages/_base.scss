@@ -17,9 +17,15 @@
 }
 
 .P-main {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
   flex: 1;
   position: relative;
   isolation: isolate;
+}
+
+.P-main.visible {
+  opacity: 1;
 }
 
 .P-sidebar {

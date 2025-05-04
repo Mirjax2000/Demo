@@ -5,13 +5,18 @@
   @extend %transition-theme;
 
   margin-inline-start: 2%;
-  margin-top: 0.5em;
+  margin-top: 1em;
   color: var(--txt-default);
+
+  &__body {
+    @include flex(flex-start, stretch, 2%);
+  }
 
   &__fieldset {
     flex-grow: 1;
     max-width: 22rem;
     min-width: 20rem;
+    flex-shrink: 0;
   }
 
   &__hidden {

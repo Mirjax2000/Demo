@@ -5,8 +5,12 @@
   @extend %transition-theme;
 
   margin-inline-start: 2%;
-  margin-top: 0.5em;
+  margin-top: 1em;
   color: var(--txt-default);
+
+  &__body {
+    @include flex(flex-start, stretch, 2%);
+  }
 
   &__group {
     margin-bottom: 0.3em;
