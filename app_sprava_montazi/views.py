@@ -257,7 +257,6 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
     model = Team
     form_class = TeamForm
     template_name = "app_sprava_montazi/teams/team_form.html"
-    success_url = reverse_lazy("teams")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -270,6 +269,21 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         messages.success(self.request, f"Team: {self.object} byl aktualizovan.")
         return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse("team_detail", kwargs={"slug": self.object.slug})
+
+
+class TeamDetailView(LoginRequiredMixin, DetailView):
+    model = Team
+    template_name = "app_sprava_montazi/teams/team_detail.html"
+    context_object_name = "team"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        # --- navigace
+        context["active"] = "teams"
+        return context
 
 
 def order_create(request):
