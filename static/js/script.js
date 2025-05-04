@@ -7,8 +7,13 @@
     const articleTable = document.getElementById("articleTable");
     const numberInputs = document.querySelectorAll(".number");
     const deleteBtns = document.querySelectorAll(".form__delete");
+    const P_main = document.querySelector(".P-main");
     const messages = $(".C-messages");
     const arcticleBtns = $('.toggle-btn');
+    // prechod pri nahrani stranky
+    window.addEventListener("load", () => {
+        P_main.classList.add("visible");
+    });
     // messages
     messages.each(function (index, element) {
         setTimeout(function () {
