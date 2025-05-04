@@ -38,10 +38,11 @@
 
   &__item {
     @extend %transition-theme;
+    @extend %border-radius;
 
     list-style-type: none;
     margin-bottom: 0.3em;
-    padding: 0.3em;
+    padding: 0.5em;
     background-color: var(--bck-list-item);
     border: 1px solid var(--border);
   }
