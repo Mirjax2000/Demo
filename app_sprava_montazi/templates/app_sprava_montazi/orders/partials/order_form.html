@@ -1,11 +1,11 @@
 <fieldset class="L-detail__fieldset {% if show %}L-detail__hidden{% endif %}">
     <form method="post">
         {% csrf_token %}
-        <legend>Zákazník</legend>
+        <legend>Objednávka</legend>
         {% include "app_sprava_montazi/partials/form_field.html" with form=form %}
         <div class="u-txt-right mt-3">
             <button type="submit" class="btn btn-primary mt-3">
-                <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit Zákazníka
+                <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit objednávku
             </button>
         </div>
     </form>
