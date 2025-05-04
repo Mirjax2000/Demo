@@ -152,7 +152,7 @@ class ClientUpdateViewTest(TestCase):
     def setUp(self):
         # Vytvoříme testovacího uživatele
         self.user = User.objects.create_user(username="testuser", password="testpass")
-        self.template = "app_sprava_montazi/orders/order_detail_client-form.html"
+        self.template = "app_sprava_montazi/orders/order_update_client-form.html"
         self.hub = DistribHub.objects.create(code="626", city="Chrastany")
         self.customer = Client.objects.create(name="franta", zip_code="11111")
         self.order = Order.objects.create(
