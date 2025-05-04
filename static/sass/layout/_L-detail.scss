@@ -17,6 +17,11 @@
     max-width: 22rem;
     min-width: 20rem;
     flex-shrink: 0;
+
+    &__header {
+      font-size: 1.5rem;
+      font-weight: 400;
+    }
   }
 
   &__hidden {
