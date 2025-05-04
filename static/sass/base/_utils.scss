@@ -77,3 +77,13 @@
   flex-direction: column;
   justify-content: space-between;
 }
+
+.u-flex-row-between {
+  display: flex;
+  justify-content: space-between;
+  gap: 2%;
+}
+
+.u-flex-grow {
+  flex-grow: 1;
+}

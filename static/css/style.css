@@ -152,6 +152,16 @@ body.home {
   justify-content: space-between;
 }
 
+.u-flex-row-between {
+  display: flex;
+  justify-content: space-between;
+  gap: 2%;
+}
+
+.u-flex-grow {
+  flex-grow: 1;
+}
+
 .L-sidebar {
   display: flex;
   justify-content: flex-start;
