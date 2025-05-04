@@ -19,7 +19,7 @@
             <td title="{{ order.client }}" class="u-txt-warning">⚠️&nbsp;{{ order.client.first_15 }}</td>
         {% else %}
             <td title="{{ order.client }}" class="u-txt-success">
-                <i class="fa-solid fa-check"></i>&nbsp;{{ order.client.first_15 }}
+                <i class="fa-solid fa-check me-1"></i>{{ order.client.first_15 }}
             </td>
         {% endif %}
         <!--Realizace kym-->
@@ -33,7 +33,7 @@
             <td class="u-txt-warning u-s-none">⚠️&nbsp;Nevybráno</td>
         {% elif order.team %}
             <td class="u-txt-success u-s-none">
-                <i class="fa-solid fa-check"></i>&nbsp;{{ order.team }}
+                <i class="fa-solid fa-check me-1"></i>{{ order.team }}
             </td>
         {% else %}
             <td class="u-s-none">–</td>

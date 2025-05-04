@@ -4,52 +4,57 @@
         <ul class="L-detail__list">
             <!--name-->
             <li class="L-detail__item">
-                <strong>Společnost:</strong><span class="u-txt-success-light">&nbsp;&nbsp;{{ team.name }}</span>
+                <strong>Společnost:</strong><span class="u-txt-success-light ms-1">{{ team.name }}</span>
             </li>
             <!--city-->
             <li class="L-detail__item">
                 <strong>Město:</strong>
-                <span>&nbsp;&nbsp;{{ team.city }}</span>
+                <span class="ms-1">{{ team.city }}</span>
             </li>
             <!--Region-->
             <li class="L-detail__item">
                 <strong>Region:</strong>
-                <span>&nbsp;&nbsp;{{ team.region }}</span>
+                <span class="ms-1">{{ team.region }}</span>
             </li>
             <!--Phone-->
             <li class="L-detail__item">
                 <strong>Telefon:</strong>
-                <span>&nbsp;&nbsp;{{ team.phone }}</span>
+                <span class="ms-1">{{ team.phone }}</span>
             </li>
             <!--Email-->
             <li class="L-detail__item">
                 <strong>Email:</strong>
-                <span>&nbsp;&nbsp;{{ team.email }}</span>
+                <span class="ms-1">{{ team.email }}</span>
             </li>
             <!--active-->
             <li class="L-detail__item">
                 {% if team.active %}
-                    <strong>Aktivní:</strong><span class="u-txt-success-light">&nbsp;&nbsp;Aktivní</span>
+                    <strong>Aktivní:</strong>
+                    <span class="u-txt-success-light ms-1">Aktivní</span>
                 {% else %}
-                    <strong>Aktivní:</strong><span class="u-txt-warning">&nbsp;&nbsp;Neaktivní</span>
+                    <strong>Aktivní:</strong>
+                    <span class="u-txt-warning ms-1">Neaktivní</span>
                 {% endif %}
             </li>
             <li class="L-detail__item">
                 <ul class="p-0 u-flex-row-between">
                     <!--per hour-->
                     <li class="L-detail__item mb-0 pb-1 u-flex-grow">
-                        <strong class="d-block">cena za hod:</strong><span>&nbsp;&nbsp;{{ team.price_per_hour_float|floatformat:2 }}&nbsp;Kč</span>
+                        <strong class="d-block">cena za hod:</strong>
+                        <span class="d-block">{{ team.price_per_hour_float|floatformat:2 }}&nbsp;Kč</span>
                     </li>
                     <!--per km-->
                     <li class="L-detail__item mb-0 pb-1 u-flex-grow">
-                        <strong class="d-block">cena za km:</strong><span>&nbsp;&nbsp;{{ team.price_per_km_float|floatformat:2 }}&nbsp;Kč</span>
+                        <strong class="d-block">cena za km:</strong>
+                        <span class="d-block">{{ team.price_per_km_float|floatformat:2 }}&nbsp;Kč</span>
                     </li>
                 </ul>
             </li>
             <!--notes-->
             {% if team.notes %}
-                <li class="L-detail__item">
-                    <strong>Poznámky:</strong> <span>&nbsp;&nbsp;{{ team.notes }}</span>
+                <li class="L-detail__item p-3">
+                    <strong>Poznámky:</strong>
+                    <span class="ms-1">{{ team.notes }}</span>
                 </li>
             {% endif %}
         </ul>
@@ -58,7 +63,6 @@
     <div>
         <a href="{% url "team_update" team.slug %}"
            class="btn btn-primary d-block ms-5 me-5">
-            <i class="fa-solid fa-pen-to-square"></i>&nbsp;&nbsp;Upravit tým</a>
+            <i class="fa-solid fa-pen-to-square me-2"></i>Upravit tým</a>
     </div>
 </section>
-<!---->
