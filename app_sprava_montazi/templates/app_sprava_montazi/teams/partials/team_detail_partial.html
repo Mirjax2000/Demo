@@ -31,12 +31,14 @@
                 {% endif %}
             </li>
             <li class="L-detail__item">
-                <ul class="p-0 u-flex-row">
-                    <li class="L-detail__item mb-0 pb-1">
-                        <strong>cena za km:</strong><span>&nbsp;&nbsp;{{ team.price_per_km_float }}</span>
+                <ul class="p-0 u-flex-row-between">
+                    <!--per hour-->
+                    <li class="L-detail__item mb-0 pb-1 u-flex-grow">
+                        <strong class="d-block">cena za hod:</strong><span>&nbsp;&nbsp;{{ team.price_per_hour_float }}&nbsp;Kč</span>
                     </li>
-                    <li class="L-detail__item mb-0 pb-1">
-                        <strong>cena za hod:</strong><span>&nbsp;&nbsp;{{ team.price_per_hour_float }}</span>
+                    <!--per km-->
+                    <li class="L-detail__item mb-0 pb-1 u-flex-grow">
+                        <strong class="d-block">cena za km:</strong><span>&nbsp;&nbsp;{{ team.price_per_km_float }}&nbsp;Kč</span>
                     </li>
                 </ul>
             </li>
