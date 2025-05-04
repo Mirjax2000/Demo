@@ -1,6 +1,6 @@
-<fieldset class="L-detail__fieldset {% if show %}L-detail__hidden{% endif %}">
+<section class="L-detail__fieldset {% if show %}L-detail__hidden{% endif %}">
     <div>
-        <legend>Tým</legend>
+        <h3 class="L-detail__fieldset__header">Tým</h3>
         <ul class="L-detail__list">
             <!--name-->
             <li class="L-detail__item">
@@ -8,19 +8,23 @@
             </li>
             <!--city-->
             <li class="L-detail__item">
-                <strong>Město:</strong> {{ team.city }}
+                <strong>Město:</strong>
+                <span>&nbsp;&nbsp;{{ team.city }}</span>
             </li>
             <!--Region-->
             <li class="L-detail__item">
-                <strong>Region:</strong> {{ team.region }}
+                <strong>Region:</strong>
+                <span>&nbsp;&nbsp;{{ team.region }}</span>
             </li>
             <!--Phone-->
             <li class="L-detail__item">
-                <strong>Telefon:</strong> {{ team.phone }}
+                <strong>Telefon:</strong>
+                <span>&nbsp;&nbsp;{{ team.phone }}</span>
             </li>
             <!--Email-->
             <li class="L-detail__item">
-                <strong>Email:</strong> {{ team.email }}
+                <strong>Email:</strong>
+                <span>&nbsp;&nbsp;{{ team.email }}</span>
             </li>
             <!--active-->
             <li class="L-detail__item">
@@ -34,18 +38,18 @@
                 <ul class="p-0 u-flex-row-between">
                     <!--per hour-->
                     <li class="L-detail__item mb-0 pb-1 u-flex-grow">
-                        <strong class="d-block">cena za hod:</strong><span>&nbsp;&nbsp;{{ team.price_per_hour_float }}&nbsp;Kč</span>
+                        <strong class="d-block">cena za hod:</strong><span>&nbsp;&nbsp;{{ team.price_per_hour_float|floatformat:2 }}&nbsp;Kč</span>
                     </li>
                     <!--per km-->
                     <li class="L-detail__item mb-0 pb-1 u-flex-grow">
-                        <strong class="d-block">cena za km:</strong><span>&nbsp;&nbsp;{{ team.price_per_km_float }}&nbsp;Kč</span>
+                        <strong class="d-block">cena za km:</strong><span>&nbsp;&nbsp;{{ team.price_per_km_float|floatformat:2 }}&nbsp;Kč</span>
                     </li>
                 </ul>
             </li>
             <!--notes-->
             {% if team.notes %}
                 <li class="L-detail__item">
-                    <strong>Poznámky:</strong> {{ team.notes }}
+                    <strong>Poznámky:</strong> <span>&nbsp;&nbsp;{{ team.notes }}</span>
                 </li>
             {% endif %}
         </ul>
@@ -56,5 +60,5 @@
            class="btn btn-primary d-block ms-5 me-5">
             <i class="fa-solid fa-pen-to-square"></i>&nbsp;&nbsp;Upravit tým</a>
     </div>
-</fieldset>
+</section>
 <!---->

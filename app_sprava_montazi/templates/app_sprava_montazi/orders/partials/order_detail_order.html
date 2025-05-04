@@ -1,6 +1,6 @@
-<fieldset class="L-detail__fieldset {% if show %}L-detail__hidden{% endif %}">
+<section class="L-detail__fieldset {% if show %}L-detail__hidden{% endif %}">
     <div>
-        <legend>Objednávka</legend>
+        <h3 class="L-detail__fieldset__header">Objednávka</h3>
         <ul class="L-detail__list">
             <!--order-->
             <li class="L-detail__item">
@@ -21,27 +21,31 @@
             </li>
             <!--evidence_termin-->
             <li class="L-detail__item">
-                <strong>Termín evidence:</strong> {{ order.evidence_termin|date:"d. m. Y" }}
+                <strong>Termín evidence:</strong>
+                <span>&nbsp;&nbsp;{{ order.evidence_termin|date:"d. m. Y" }}</span>
             </li>
             <!--delivery termin-->
             {% if order.delivery_termin %}
                 <li class="L-detail__item">
-                    <strong>Termín doručení:</strong> {{ order.delivery_termin }}
+                    <strong>Termín doručení:</strong>
+                    <span>&nbsp;&nbsp;{{ order.delivery_termin|date:"d. m. Y" }}</span>
                 </li>
             {% else %}
                 <li class="L-detail__item">
                     <strong>Termín doručení:</strong>
-                    <span class="u-txt-warning">&nbsp;Nevybráno</span>
+                    <span class="u-txt-warning">&nbsp;&nbsp;Nevybráno</span>
                 </li>
             {% endif %}
             <!--montage_termin-->
             {% if order.montage_termin %}
                 <li class="L-detail__item">
-                    <strong>Termín montáže:</strong> {{ order.montage_termin }}
+                    <strong>Termín montáže:</strong>
+                    <span>&nbsp;&nbsp;{{ order.montage_termin|date:"d. m. Y H:i" }}</span>
                 </li>
             {% else %}
                 <li class="L-detail__item">
-                    <strong>Termín montáže:</strong><span class="u-txt-warning ms-2">Nevybráno</span>
+                    <strong>Termín montáže:</strong>
+                    <span class="u-txt-warning ms-2">&nbsp;&nbsp;Nevybráno</span>
                 </li>
             {% endif %}
             <!--team type-->
@@ -54,26 +58,31 @@
             {% if order.team %}
                 <li class="L-detail__item">
                     <strong>Montážní tým:</strong>
-                    <a href="{% url "team_detail" order.team.slug %}">{{ order.team }}</a>
+                    <span>&nbsp;&nbsp;
+                        <a href="{% url "team_detail" order.team.slug %}"
+                           class="u-txt-success-light">{{ order.team }}</a>
+                    </span>
                 </li>
             {% else %}
                 <li class="L-detail__item">
-                    <strong>Montážní tým:</strong><span class="u-txt-warning ms-2">Nevybráno</span>
+                    <strong>Montážní tým:</strong><span class="u-txt-warning ms-2">&nbsp;&nbsp;Nevybráno</span>
                 </li>
             {% endif %}
             <!--notes-->
             {% if order.notes %}
                 <li class="L-detail__item">
-                    <strong>Poznámky:</strong> {{ order.notes }}
+                    <strong>Poznámky:</strong><span>&nbsp;&nbsp;{{ order.notes }}</span>
                 </li>
             {% endif %}
             <!--created-->
             <li class="L-detail__item">
-                <strong>Vytvořeno:</strong> {{ order.created|date:"d. m. Y H:i" }}
+                <strong>Vytvořeno:</strong>
+                <span>&nbsp;&nbsp;{{ order.created|date:"d. m. Y H:i" }}</span>
             </li>
             <!--updated-->
             <li class="L-detail__item">
-                <strong>Upraveno:</strong> {{ order.updated|date:"d. m. Y H:i" }}
+                <strong>Upraveno:</strong>
+                <span>&nbsp;&nbsp;{{ order.updated|date:"d. m. Y H:i" }}</span>
             </li>
         </ul>
     </div>
@@ -83,5 +92,5 @@
            class="btn btn-primary d-block ms-5 me-5">
             <i class="fa-solid fa-pen-to-square"></i>&nbsp;&nbsp;Upravit objednávku</a>
     </div>
-</fieldset>
+</section>
 <!---->

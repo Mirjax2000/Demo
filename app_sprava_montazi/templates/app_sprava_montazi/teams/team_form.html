@@ -8,15 +8,7 @@
         <div class="L-form__wrapper">
             <form method="post" class="L-form__form" novalidate>
                 {% csrf_token %}
-                <fieldset class="L-form__fieldset">
-                    <legend class="L-form__legend">Montážní tým</legend>
                     {% include "app_sprava_montazi/teams/partials/team_form_partial.html" with form=form %}
-                    <div class="u-txt-right mt-3">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-plus"></i>&nbsp;&nbsp;Uložit tým
-                        </button>
-                    </div>
-                </fieldset>
             </form>
         </div>
     </section>

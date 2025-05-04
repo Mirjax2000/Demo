@@ -24,13 +24,13 @@
         {% if team.price_per_hour_float == 0.0 %}
             <td class="u-txt-warning u-txt-center">-</td>
         {% else %}
-            <td class="u-txt-center">{{ team.price_per_hour_float }}</td>
+            <td class="u-txt-center">{{ team.price_per_hour_float|floatformat:2 }}</td>
         {% endif %}
         <!--cena km-->
         {% if team.price_per_km_float == 0.0 %}
             <td class="u-txt-warning u-txt-center">-</td>
         {% else %}
-            <td class="u-txt-center">{{ team.price_per_km_float }}</td>
+            <td class="u-txt-center">{{ team.price_per_km_float|floatformat:2 }}</td>
         {% endif %}
         <!--notes-->
         <td title="{{ team.notes }}" class="u-txt-center">{{ team.first_15 }}</td>
