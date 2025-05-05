@@ -19,8 +19,8 @@ from django.views.generic import (
     View,
 )
 from .models import Order, DistribHub, Status, Team, Article, Client
-from .forms import TeamForm, ArticleInlineFormSet, OrderForm, ClientForm
-from django.forms import BaseModelForm, formset_factory
+from .forms import TeamForm, OrderForm, ClientForm, ArticleForm
+from django.forms import BaseModelForm, inlineformset_factory
 
 cons: Console = Console()
 
@@ -96,21 +96,35 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class OrderUpdateView(LoginRequiredMixin, View):
-    template = "app_sprava_montazi/orders/order_update_order-form.html"
+    template = "app_sprava_montazi/orders/order_form.html"
 
-    def get_forms(self, order=None, data=None):
+    def get_object(self):
+        return get_object_or_404(Order, pk=self.kwargs["pk"])
+
+    def get_article_formset(self, instance=None, data=None, extra=0):
+        ArticleInlineFormSet = inlineformset_factory(
+            Order,
+            Article,
+            form=ArticleForm,
+            extra=extra,
+            can_delete=True,
+        )
+        return ArticleInlineFormSet(data, instance=instance, prefix="article_set")
+
+    def get_forms(self, instance, data=None):
         return (
-            OrderForm(data, instance=order),
-            ArticleInlineFormSet(data, instance=order),
+            OrderForm(data, instance=instance),
+            ClientForm(data, instance=instance.client),
+            self.get_article_formset(instance=instance, data=data, extra=0),
         )
 
-    def get(self, request, pk, *args, **kwargs) -> HttpResponse:
-        order = get_object_or_404(Order, pk=pk)
-        order_form, article_formset = self.get_forms(order=order)
+    def get(self, request, *args, **kwargs):
+        order = self.get_object()
+        order_form, client_form, article_formset = self.get_forms(order)
 
         context = {
-            "order": order,
             "order_form": order_form,
+            "client_form": client_form,
             "article_formset": article_formset,
             # --- vycistit btn update/create
             "form_type": "update",
@@ -119,12 +133,13 @@ class OrderUpdateView(LoginRequiredMixin, View):
         }
         return render(request, self.template, context)
 
-    def post(self, request, pk, *args, **kwargs):
-        order = get_object_or_404(Order, pk=pk)
-        order_form, article_formset = self.get_forms(order=order, data=request.POST)
+    def post(self, request, *args, **kwargs):
+        order = self.get_object()
+        order_form, client_form, article_formset = self.get_forms(order, request.POST)
+
         context = {
-            "order": order,
             "order_form": order_form,
+            "client_form": client_form,
             "article_formset": article_formset,
             # --- vycistit btn update/create
             "form_type": "update",
@@ -132,21 +147,26 @@ class OrderUpdateView(LoginRequiredMixin, View):
             "active": "orders_all",
         }
 
-        if order_form.is_valid() and article_formset.is_valid():
+        if (
+            order_form.is_valid()
+            and client_form.is_valid()
+            and article_formset.is_valid()
+        ):
             try:
                 with transaction.atomic():
+                    client = client_form.save()
                     order = order_form.save(commit=False)
+                    order.client = client
                     order.save()
                     article_formset.instance = order
                     article_formset.save()
-                    messages.success(request, "Objednávka upravena.")
-                    return redirect(reverse("order_detail", kwargs={"pk": order.id}))
-
+                messages.success(request, "Objednávka upravena.")
+                return redirect(reverse("order_detail", kwargs={"pk": order.id}))
             except Exception as e:
                 if settings.DEBUG:
-                    cons.log(f"chyba při ukládání: {str(e)}")
+                    cons.log(f"chyba při aktualizaci: {str(e)}")
 
-        messages.error(request, "Nastala chyba při ukládání změn objednávky.")
+        messages.error(request, "Nastala chyba při ukládání změn.")
         return render(request, self.template, context)
 
 
@@ -176,14 +196,24 @@ class OrdersView(LoginRequiredMixin, ListView):
 class OrderCreateView(LoginRequiredMixin, View):
     template = "app_sprava_montazi/orders/order_form.html"
 
+    def get_article_formset(self, instance=None, data=None, extra=1):
+        ArticleInlineFormSet = inlineformset_factory(
+            Order,
+            Article,
+            form=ArticleForm,
+            extra=extra,
+            can_delete=True,
+        )
+        return ArticleInlineFormSet(data, instance=instance, prefix="article_set")
+
     def get_forms(self, data=None):
         return (
             OrderForm(data),
             ClientForm(data),
-            ArticleInlineFormSet(data),
+            self.get_article_formset(data=data, extra=1),
         )
 
-    def get(self, request, *args, **kwargs) -> HttpResponse:
+    def get(self, request, *args, **kwargs):
         order_form, client_form, article_formset = self.get_forms()
 
         context = {
@@ -192,7 +222,6 @@ class OrderCreateView(LoginRequiredMixin, View):
             "article_formset": article_formset,
             # --- vycistit btn update/create
             "form_type": "create",
-            # --- navigace
             "active": "orders_all",
         }
         return render(request, self.template, context)
@@ -205,13 +234,12 @@ class OrderCreateView(LoginRequiredMixin, View):
             "article_formset": article_formset,
             # --- vycistit btn update/create
             "form_type": "create",
-            # --- navigace
             "active": "orders_all",
         }
 
         if (
-            client_form.is_valid()
-            and order_form.is_valid()
+            order_form.is_valid()
+            and client_form.is_valid()
             and article_formset.is_valid()
         ):
             try:
@@ -224,7 +252,6 @@ class OrderCreateView(LoginRequiredMixin, View):
                     article_formset.save()
                 messages.success(request, "Objednávka vytvořena.")
                 return redirect(reverse("order_detail", kwargs={"pk": order.id}))
-
             except Exception as e:
                 if settings.DEBUG:
                     cons.log(f"chyba: {str(e)}")

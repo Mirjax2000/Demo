@@ -178,15 +178,6 @@ class ArticleForm(forms.ModelForm):
         return quantity
 
 
-ArticleInlineFormSet = inlineformset_factory(
-    Order,
-    Article,
-    form=ArticleForm,
-    extra=6,
-    can_delete=True,
-)
-
-
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client

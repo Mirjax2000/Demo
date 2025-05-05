@@ -1,35 +1,73 @@
 {% extends "base.html" %}
 {% block title %}
-    Order form
+    formular
 {% endblock title %}
 {% block content %}
-    <section class="L-detail">
-        <div class="L-detail__body">
-            <!--objednavka-->
-            {% include "app_sprava_montazi/orders/partials/order_form.html" with form=order_form %}
-            <!--zakaznik-->
-            {% with hidden=True %}
-                {% include "app_sprava_montazi/orders/partials/order_detail_client.html" with show=hidden %}
-            {% endwith %}
-            <!--artikl-->
-            <fieldset class="L-form__fieldset">
-                <legend>Artikly</legend>
-                {{ article_formset.management_form }}
-                {% for form in article_formset %}
+    <section class="L-form">
+        {# Add an ID to the form for easier selection in JS #}
+        <form method="post" novalidate id="order-form">
+            {% csrf_token %}
+            <div class="L-form__body">
+                <fieldset class="L-form__fieldset">
+                    <legend>Objednávka</legend>
+                    {# Assuming form_field.html iterates through form fields #}
+                    {% include "app_sprava_montazi/partials/form_field.html" with form=order_form %}
+                </fieldset>
+                <fieldset class="L-form__fieldset u-flex-column">
                     <div>
-                        <button type="button" class="toggle-btn btn btn-primary mb-3">
-                            <i class="fa-solid fa-plus me-2"></i>Přidat artikl {{ forloop.counter }}
-                        </button>
-                        <div class="L-form__articles artikl-{{ forloop.counter }}">
-                            {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form counter=forloop.counter %}
+                        <legend>Zákazník</legend>
+                        {% include "app_sprava_montazi/partials/form_field.html" with form=client_form %}
+                    </div>
+                </fieldset>
+                <fieldset class="L-form__fieldset">
+                    <legend>Artikly</legend>
+                    {# IMPORTANT: The management form MUST be included #}
+                    {{ article_formset.management_form }}
+                    {# Hidden template for new forms. Django's empty_form uses __prefix__ #}
+                    {# This div will be hidden and its content used as a template #}
+                    <div id="empty-form-template" style="display: none;">
+                        <div class="L-form__article-form">
+                            {# Add a class to identify individual form wrappers #}
+                            {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=article_formset.empty_form %}
+                            {# Add remove button to the template #}
+                            <button type="button"
+                                    class="remove-article-button btn btn-danger btn-sm mb-3">Odebrat artikl</button>
                         </div>
                     </div>
-                {% endfor %}
-            </fieldset>
-        </div>
-        <!---->
-        <p class="mt-3">
-            <a href="{% url 'orders' %}">Zpět na seznam objednávek</a>
-        </p>
+                    {# Container where existing forms are rendered and new forms will be added #}
+                    <div id="article-formset-container">
+                        {% for form in article_formset %}
+                            <div class="L-form__article-form">
+                                {# Add a class to identify individual form wrappers #}
+                                {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form %}
+                                {# Add remove button to existing forms #}
+                                {% if article_formset.can_delete %}
+                                    {# Only show remove if deletion is allowed #}
+                                    <button type="button"
+                                            class="remove-article-button btn btn-danger btn-sm mb-3">
+                                        Odebrat artikl
+                                    </button>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {# Button to add a new form #}
+                    <button type="button"
+                            id="add-article-button"
+                            class="btn btn-secondary mt-3 mb-3">
+                        <i class="fa-solid fa-plus me-2"></i>Přidat další artikl
+                    </button>
+                </fieldset>
+                {# Submit and back buttons - moved outside the fieldsets but within the form #}
+                <div class="u-txt-right mt-3">
+                    <button type="submit" class="btn btn-primary mt-3">
+                        <i class="fa-solid fa-plus me-2"></i>Uložit objednávku
+                    </button>
+                </div>
+                <div class="u-txt-right mt-3">
+                    <a href="{% url 'orders' %}" class="u-txt-right">Zpět na seznam objednávek</a>
+                </div>
+            </div>
+        </form>
     </section>
 {% endblock content %}
