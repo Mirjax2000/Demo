@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db.models.query import QuerySet
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import (
@@ -408,3 +408,11 @@ def order_update(request, pk):
         "article_formset": article_formset,
     }
     return render(request, "app_sprava_montazi/order_form.html", context)
+
+
+def chrome_devtools_json(request):
+    """
+    Handle Chrome DevTools request for .well-known/appspecific/com.chrome.devtools.json
+    Returns an empty JSON response to prevent 404 errors in the console.
+    """
+    return JsonResponse({}, content_type="application/json")

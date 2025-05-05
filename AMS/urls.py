@@ -24,10 +24,12 @@ from app_sprava_montazi.views import (
     ClientUpdateView,
     CreatePageView,
     OrderUpdateView,
+    chrome_devtools_json,
 )
 
 urlpatterns: list = [
     path("admin/", admin.site.urls),
+    path(".well-known/appspecific/com.chrome.devtools.json", chrome_devtools_json, name="chrome_devtools_json"),
 ]
 
 app_sprava_montazi: list = [
