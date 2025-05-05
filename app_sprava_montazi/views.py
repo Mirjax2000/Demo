@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
+from django.forms import BaseModelForm, inlineformset_factory
 from django.views.generic import (
     CreateView,
     DetailView,
@@ -19,8 +20,7 @@ from django.views.generic import (
     View,
 )
 from .models import Order, DistribHub, Status, Team, Article, Client
-from .forms import TeamForm, ArticleInlineFormSet, OrderForm, ClientForm
-from django.forms import BaseModelForm, formset_factory
+from .forms import TeamForm, ArticleForm, OrderForm, ClientForm
 
 cons: Console = Console()
 
@@ -101,11 +101,19 @@ class OrderUpdateView(LoginRequiredMixin, View):
     def get_object(self):
         return get_object_or_404(Order, pk=self.kwargs["pk"])
 
+    articleInlineFormSet = inlineformset_factory(
+        Order,
+        Article,
+        form=ArticleForm,
+        extra=0,
+        can_delete=True,
+    )
+
     def get_forms(self, instance, data=None):
         return (
             OrderForm(data, instance=instance),
             ClientForm(data, instance=instance.client),
-            ArticleInlineFormSet(data, instance=instance, prefix="article_set"),
+            self.articleInlineFormSet(data, instance=instance, prefix="article_set"),
         )
 
     def get(self, request, *args, **kwargs):
@@ -186,11 +194,19 @@ class OrdersView(LoginRequiredMixin, ListView):
 class OrderCreateView(LoginRequiredMixin, View):
     template = "app_sprava_montazi/orders/order_form.html"
 
+    articleInlineFormSet = inlineformset_factory(
+        Order,
+        Article,
+        form=ArticleForm,
+        extra=1,
+        can_delete=True,
+    )
+
     def get_forms(self, data=None):
         return (
             OrderForm(data),
             ClientForm(data),
-            ArticleInlineFormSet(data, prefix="article_set"),
+            self.articleInlineFormSet(data, prefix="article_set"),
         )
 
     def get(self, request, *args, **kwargs) -> HttpResponse:

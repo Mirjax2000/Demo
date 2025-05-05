@@ -3,7 +3,6 @@
 from django import forms
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
-from django.forms import inlineformset_factory
 from .models import Order, Article, DistribHub, Team, Client, TeamType, Status
 
 
@@ -176,15 +175,6 @@ class ArticleForm(forms.ModelForm):
             raise forms.ValidationError("Množství nemůže být záporné.")
 
         return quantity
-
-
-ArticleInlineFormSet = inlineformset_factory(
-    Order,
-    Article,
-    form=ArticleForm,
-    extra=0,
-    can_delete=True,
-)
 
 
 class ClientForm(forms.ModelForm):
