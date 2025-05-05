@@ -9,9 +9,6 @@
     const deleteBtns = document.querySelectorAll(".form__delete");
     const P_main = document.querySelector(".P-main");
     const messages = $(".C-messages");
-    const formsetContainer = $('#article-formset-container');
-    const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
-    const emptyFormHtml = $('#empty-form-template');
 
     // prechod pri nahrani stranky
     window.addEventListener("load", () => {
@@ -33,6 +30,7 @@
         });
     }
     // articles
+
 
     // form cleaning
     deleteBtns.forEach(function (btn) {
@@ -156,15 +154,15 @@
         });
     }
 
-    // ------ article formset 
-    if (emptyFormHtml.length) {
-        emptyFormHtml.html().trim()
-    }
+    const formsetContainer = $('#article-formset-container');
+    const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
+    const emptyFormHtml = $('#empty-form-template');
+
 
     // Přidání nového formuláře
     $('#add-article-button').on('click', function () {
         const formIndex = parseInt(totalFormsInput.val(), 10);
-        const newFormHtml = emptyFormHtml.replace(/__prefix__/g, formIndex);
+        const newFormHtml = emptyFormHtml.html().trim().replace(/__prefix__/g, formIndex);
         formsetContainer.append(newFormHtml);
         totalFormsInput.val(formIndex + 1);
     });
