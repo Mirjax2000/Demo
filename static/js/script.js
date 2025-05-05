@@ -15,13 +15,20 @@
         P_main.classList.add("visible");
     });
     // messages
-    messages.each(function (index, element) {
-        setTimeout(function () {
-            $(element).fadeOut(1000, function () {
-                $(this).remove();
-            });
-        }, 5000);
-    });
+    if (messages && messages.length > 0) {
+        messages.each(function (index, element) {
+            // Převod elementu na jQuery objekt
+            $(element).hide();
+            $(element).slideDown(250);
+
+            // Po 5 sekundách efekt zmizení + odstranění elementu
+            setTimeout(function () {
+                $(element).slideUp(250, function () {
+                    $(this).remove();
+                });
+            }, 5000);
+        });
+    }
     // articles
 
 
