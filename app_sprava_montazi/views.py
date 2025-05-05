@@ -101,7 +101,6 @@ class OrderUpdateView(LoginRequiredMixin, View):
     def get_forms(self, instance, data=None):
         return (
             OrderForm(data, instance=instance),
-            ClientForm(data, instance=instance.client),
             ArticleInlineFormSet(data, instance=instance, prefix="article_set"),
         )
 
