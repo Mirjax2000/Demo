@@ -126,7 +126,6 @@ class OrderUpdateView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         order = self.get_object()
         order_form, client_form, article_formset = self.get_forms(order, request.POST)
-        cons.log(request.POST)
 
         context = {
             "order_form": order_form,
