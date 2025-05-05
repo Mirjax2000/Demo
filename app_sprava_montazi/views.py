@@ -145,9 +145,6 @@ class OrderUpdateView(LoginRequiredMixin, View):
         ):
             try:
                 with transaction.atomic():
-                    for form in article_formset:
-                        if form.cleaned_data.get("DELETE"):
-                            cons.log(f"Form marked for deletion: {form.instance}")
                     client = client_form.save()
                     order = order_form.save(commit=False)
                     order.client = client

@@ -3,16 +3,13 @@
         {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
     </div>
 {% endif %}
-<div class="row" data-form-index="{{ form.prefix|default:'__prefix__' }}">
+<div class="row mb-2"
+     data-form-index="{{ form.prefix|default:'__prefix__' }}">
+    {{ form.id }}
     <div class="L-form__group">
         {{ form.name.label_tag }}
         {{ form.name }}
         {% for error in form.name.errors %}<span class="text-danger">{{ error }}</span>{% endfor %}
-    </div>
-    <div class="L-form__group">
-        {{ form.quantity.label_tag }}
-        {{ form.quantity }}
-        {% for error in form.quantity.errors %}<span class="text-danger">{{ error }}</span>{% endfor %}
     </div>
     <div class="u-flex-row">
         <div>
