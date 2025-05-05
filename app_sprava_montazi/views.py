@@ -98,10 +98,11 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
 class OrderUpdateView(LoginRequiredMixin, View):
     template = "app_sprava_montazi/orders/order_update_order-form.html"
 
-    def get_forms(self, order=None, data=None):
+    def get_forms(self, instance, data=None):
         return (
-            OrderForm(data, instance=order),
-            ArticleInlineFormSet(data, instance=order),
+            OrderForm(data, instance=instance),
+            ClientForm(data, instance=instance.client),
+            ArticleInlineFormSet(data, instance=instance, prefix="article_set"),
         )
 
     def get(self, request, pk, *args, **kwargs) -> HttpResponse:
