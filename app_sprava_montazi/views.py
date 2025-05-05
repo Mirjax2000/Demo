@@ -19,8 +19,8 @@ from django.views.generic import (
     View,
 )
 from .models import Order, DistribHub, Status, Team, Article, Client
-from .forms import TeamForm, OrderForm, ClientForm, ArticleForm
-from django.forms import BaseModelForm, inlineformset_factory
+from .forms import TeamForm, ArticleInlineFormSet, OrderForm, ClientForm
+from django.forms import BaseModelForm, formset_factory
 
 cons: Console = Console()
 
@@ -101,21 +101,11 @@ class OrderUpdateView(LoginRequiredMixin, View):
     def get_object(self):
         return get_object_or_404(Order, pk=self.kwargs["pk"])
 
-    def get_article_formset(self, instance=None, data=None, extra=0):
-        ArticleInlineFormSet = inlineformset_factory(
-            Order,
-            Article,
-            form=ArticleForm,
-            extra=extra,
-            can_delete=True,
-        )
-        return ArticleInlineFormSet(data, instance=instance, prefix="article_set")
-
     def get_forms(self, instance, data=None):
         return (
             OrderForm(data, instance=instance),
             ClientForm(data, instance=instance.client),
-            self.get_article_formset(instance=instance, data=data, extra=0),
+            ArticleInlineFormSet(data, instance=instance, prefix="article_set"),
         )
 
     def get(self, request, *args, **kwargs):
@@ -136,6 +126,7 @@ class OrderUpdateView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         order = self.get_object()
         order_form, client_form, article_formset = self.get_forms(order, request.POST)
+        cons.log(request.POST)
 
         context = {
             "order_form": order_form,
@@ -154,6 +145,9 @@ class OrderUpdateView(LoginRequiredMixin, View):
         ):
             try:
                 with transaction.atomic():
+                    for form in article_formset:
+                        if form.cleaned_data.get("DELETE"):
+                            cons.log(f"Form marked for deletion: {form.instance}")
                     client = client_form.save()
                     order = order_form.save(commit=False)
                     order.client = client
@@ -196,24 +190,14 @@ class OrdersView(LoginRequiredMixin, ListView):
 class OrderCreateView(LoginRequiredMixin, View):
     template = "app_sprava_montazi/orders/order_form.html"
 
-    def get_article_formset(self, instance=None, data=None, extra=1):
-        ArticleInlineFormSet = inlineformset_factory(
-            Order,
-            Article,
-            form=ArticleForm,
-            extra=extra,
-            can_delete=True,
-        )
-        return ArticleInlineFormSet(data, instance=instance, prefix="article_set")
-
     def get_forms(self, data=None):
         return (
             OrderForm(data),
             ClientForm(data),
-            self.get_article_formset(data=data, extra=1),
+            ArticleInlineFormSet(data, prefix="article_set"),
         )
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs) -> HttpResponse:
         order_form, client_form, article_formset = self.get_forms()
 
         context = {
@@ -222,6 +206,7 @@ class OrderCreateView(LoginRequiredMixin, View):
             "article_formset": article_formset,
             # --- vycistit btn update/create
             "form_type": "create",
+            # --- navigace
             "active": "orders_all",
         }
         return render(request, self.template, context)
@@ -234,12 +219,13 @@ class OrderCreateView(LoginRequiredMixin, View):
             "article_formset": article_formset,
             # --- vycistit btn update/create
             "form_type": "create",
+            # --- navigace
             "active": "orders_all",
         }
 
         if (
-            order_form.is_valid()
-            and client_form.is_valid()
+            client_form.is_valid()
+            and order_form.is_valid()
             and article_formset.is_valid()
         ):
             try:
@@ -252,6 +238,7 @@ class OrderCreateView(LoginRequiredMixin, View):
                     article_formset.save()
                 messages.success(request, "Objednávka vytvořena.")
                 return redirect(reverse("order_detail", kwargs={"pk": order.id}))
+
             except Exception as e:
                 if settings.DEBUG:
                     cons.log(f"chyba: {str(e)}")

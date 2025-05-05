@@ -33,15 +33,17 @@
                     <legend>Artikly</legend>
                     {{ article_formset.management_form }}
                     <!-- ŠABLONA PRO NOVÝ FORMULÁŘ -->
-                    <div id="empty-form-template" style="display: block;">
+                    <div id="empty-form-template" style="display: None;">
                         <div class="L-form__article-form">
                             {% with form=article_formset.empty_form %}
                                 {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form %}
-                                {% if article_formset.can_delete %}{{ form.DELETE }}  <!-- skryté pole DELETE -->{% endif %}
-                                <button type="button"
-                                        class="remove-article-button btn btn-danger btn-sm mb-3">
-                                    Odebrat artikl
-                                </button>
+                                {% if article_formset.can_delete %}
+                                    {{ form.DELETE }}
+                                    <button type="button"
+                                            class="remove-article-button btn btn-danger btn-sm mb-3">
+                                        Odebrat artikl
+                                    </button>
+                                {% endif %}
                             {% endwith %}
                         </div>
                     </div>
@@ -51,7 +53,7 @@
                             <div class="L-form__article-form">
                                 {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form %}
                                 {% if article_formset.can_delete %}
-                                    {{ form.DELETE }}  <!-- skryté pole DELETE -->
+                                    {{ form.DELETE }}
                                     <button type="button"
                                             class="remove-article-button btn btn-danger btn-sm mb-3">
                                         Odebrat artikl
