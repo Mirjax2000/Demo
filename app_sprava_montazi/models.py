@@ -244,7 +244,7 @@ class Article(Model):
         blank=True,
         verbose_name="Cena",
     )
-    quantity = PositiveIntegerField(verbose_name="Množství")
+    quantity = PositiveIntegerField(default=1, verbose_name="Množství")
     note = TextField(blank=True, verbose_name="Popis")
 
     def first_15(self) -> str:

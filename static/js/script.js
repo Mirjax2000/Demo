@@ -15,34 +15,24 @@
         P_main.classList.add("visible");
     });
     // messages
-    messages.each(function (index, element) {
-        setTimeout(function () {
-            $(element).fadeOut(1000, function () {
-                $(this).remove();
-            });
-        }, 5000);
-    });
+    if (messages && messages.length > 0) {
+        messages.each(function (index, element) {
+            // Převod elementu na jQuery objekt
+            $(element).hide();
+            $(element).slideDown(250);
+
+            // Po 5 sekundách efekt zmizení + odstranění elementu
+            setTimeout(function () {
+                $(element).slideUp(250, function () {
+                    $(this).remove();
+                });
+            }, 5000);
+        });
+    }
     // articles
-    arcticleBtns.on('click', function () {
-        const target = $(this).next('.L-form__articles');
-        const addBtn = $(this).find('i');
 
-        // pokud už je otevřená, zavři ji
-        if (target.is(':visible')) {
-            target.slideUp();
-            addBtn.removeClass('fa-minus').addClass('fa-plus');
-        } else {
-            // zavři ostatní sekce
-            $('.L-form__articles').slideUp();
-            $('.toggle-btn i').removeClass('fa-minus').addClass('fa-plus');
 
-            // otevři právě tuhle
-            target.slideDown();
-            addBtn.removeClass('fa-plus').addClass('fa-minus');
-        }
-    });
-
-    // articl form cleaning
+    // form cleaning
     deleteBtns.forEach(function (btn) {
         btn.addEventListener("click", function (e) {
             e.preventDefault();
@@ -164,8 +154,34 @@
         });
     }
 
+    const formsetContainer = $('#article-formset-container');
+    const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
+    const emptyFormHtml = $('#empty-form-template').html().trim();
+
+    // Přidání nového formuláře
+    $('#add-article-button').on('click', function () {
+        const formIndex = parseInt(totalFormsInput.val(), 10);
+        const newFormHtml = emptyFormHtml.replace(/__prefix__/g, formIndex);
+        formsetContainer.append(newFormHtml);
+        totalFormsInput.val(formIndex + 1);
+    });
+
+    // Odebrání formuláře
+    formsetContainer.on('click', '.remove-article-button', function () {
+        const formDiv = $(this).closest('.L-form__article-form');
+
+        // Pokud je ve formuláři delete checkbox (can_delete), zaškrtneme ho a skryjeme formulář
+        const deleteInput = formDiv.find('input[type="checkbox"][name$="-DELETE"]');
+        if (deleteInput.length) {
+            deleteInput.prop('checked', true);
+            formDiv.hide();
+        } else {
+            // Jinak rovnou odstraníme z DOM
+            formDiv.remove();
+
+            // Snížení počtu TOTAL_FORMS není nutné pro backend, ale můžeme ho udělat:
+            const newTotal = formsetContainer.find('.L-form__article-form').length;
+            totalFormsInput.val(newTotal);
+        }
+    });
 })();
-
-
-
-

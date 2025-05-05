@@ -37,17 +37,17 @@ app_sprava_montazi: list = [
     # --- orders ---
     path("orders/", OrdersView.as_view(), name="orders"),
     path("order/create/", OrderCreateView.as_view(), name="order_create"),
-    path("order/detail/<int:pk>/", OrderDetailView.as_view(), name="order_detail"),
-    path(
-        "order/client_update/<slug:slug>/<int:order_pk>/",
-        ClientUpdateView.as_view(),
-        name="client_update",
-    ),
     path(
         "order/order_update/<int:pk>/",
         OrderUpdateView.as_view(),
         name="order_update",
     ),
+    path(
+        "order/client_update/<slug:slug>/<int:order_pk>/",
+        ClientUpdateView.as_view(),
+        name="client_update",
+    ),
+    path("order/detail/<int:pk>/", OrderDetailView.as_view(), name="order_detail"),
     # --- create ---
     path("createpage/", CreatePageView.as_view(), name="createpage"),
     # --- teams ---
