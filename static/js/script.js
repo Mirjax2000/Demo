@@ -9,7 +9,10 @@
     const deleteBtns = document.querySelectorAll(".form__delete");
     const P_main = document.querySelector(".P-main");
     const messages = $(".C-messages");
-    const arcticleBtns = $('.toggle-btn');
+    const formsetContainer = $('#article-formset-container');
+    const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
+    const emptyFormHtml = $('#empty-form-template');
+
     // prechod pri nahrani stranky
     window.addEventListener("load", () => {
         P_main.classList.add("visible");
@@ -30,7 +33,6 @@
         });
     }
     // articles
-
 
     // form cleaning
     deleteBtns.forEach(function (btn) {
@@ -154,9 +156,10 @@
         });
     }
 
-    const formsetContainer = $('#article-formset-container');
-    const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
-    const emptyFormHtml = $('#empty-form-template').html().trim();
+    // ------ article formset 
+    if (emptyFormHtml.length) {
+        emptyFormHtml.html().trim()
+    }
 
     // Přidání nového formuláře
     $('#add-article-button').on('click', function () {
