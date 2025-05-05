@@ -4,29 +4,37 @@
 {% endblock title %}
 {% block content %}
     <section class="L-detail">
-        <div class="L-detail__body">
-            <!--objednavka-->
-            {% include "app_sprava_montazi/orders/partials/order_form.html" with form=order_form %}
-            <!--zakaznik-->
-            {% with hidden=True %}
-                {% include "app_sprava_montazi/orders/partials/order_detail_client.html" with show=hidden %}
-            {% endwith %}
-            <!--artikl-->
-            <fieldset class="L-form__fieldset">
-                <legend>Artikly</legend>
-                {{ article_formset.management_form }}
-                {% for form in article_formset %}
-                    <div>
-                        <button type="button" class="toggle-btn btn btn-primary mb-3">
-                            <i class="fa-solid fa-plus me-2"></i>Přidat artikl {{ forloop.counter }}
-                        </button>
-                        <div class="L-form__articles artikl-{{ forloop.counter }}">
-                            {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form counter=forloop.counter %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="L-detail__body">
+                <!--objednavka-->
+                {% include "app_sprava_montazi/orders/partials/order_form.html" with form=order_form %}
+                <!--zakaznik-->
+                {% with hidden=True %}
+                    {% include "app_sprava_montazi/orders/partials/order_detail_client.html" with show=hidden %}
+                {% endwith %}
+                <!--artikl-->
+                <fieldset class="L-form__fieldset">
+                    <legend>Artikly</legend>
+                    {{ article_formset.management_form }}
+                    {% for form in article_formset %}
+                        <div>
+                            <button type="button" class="toggle-btn btn btn-primary mb-3">
+                                <i class="fa-solid fa-plus me-2"></i>Přidat artikl {{ forloop.counter }}
+                            </button>
+                            <div class="L-form__articles artikl-{{ forloop.counter }}">
+                                {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form counter=forloop.counter %}
+                            </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </fieldset>
-        </div>
+                    {% endfor %}
+                </fieldset>
+            </div>
+            <div class="u-txt-right mt-3">
+                <button type="submit" class="btn btn-primary mt-3">
+                    <i class="fa-solid fa-save me-2"></i>Uložit změny
+                </button>
+            </div>
+        </form>
         <!---->
         <p class="mt-3">
             <a href="{% url 'orders' %}">Zpět na seznam objednávek</a>
