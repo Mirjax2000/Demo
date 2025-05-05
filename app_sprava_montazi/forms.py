@@ -182,7 +182,7 @@ ArticleInlineFormSet = inlineformset_factory(
     Order,
     Article,
     form=ArticleForm,
-    extra=6,
+    extra=1,
     can_delete=True,
 )
 
