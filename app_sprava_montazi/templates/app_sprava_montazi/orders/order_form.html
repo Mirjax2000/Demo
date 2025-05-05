@@ -2,24 +2,14 @@
 {% block title %}
     formular
 {% endblock title %}
-<!---->
 {% block content %}
     <section class="L-form">
-        <form method="post"  novalidate>
+        <form method="post" novalidate id="order-form">
             {% csrf_token %}
             <div class="L-form__body">
-                <!--objednavka-->
                 <fieldset class="L-form__fieldset">
                     <legend>Objednávka</legend>
                     {% include "app_sprava_montazi/partials/form_field.html" with form=order_form %}
-                </fieldset>
-                <!--zakaznik-->
-                <fieldset class="L-form__fieldset u-flex-column">
-                    <div>
-                        <legend>Zákazník</legend>
-                        {% include "app_sprava_montazi/partials/form_field.html" with form=client_form %}
-                    </div>
-                    <!---->
                     <div>
                         <div class="u-txt-right mt-3">
                             <button type="submit" class="btn btn-primary mt-3">
@@ -31,21 +21,49 @@
                         </div>
                     </div>
                 </fieldset>
-                <!--artikly-->
+                <!---->
+                <fieldset class="L-form__fieldset u-flex-column">
+                    <div>
+                        <legend>Zákazník</legend>
+                        {% include "app_sprava_montazi/partials/form_field.html" with form=client_form %}
+                    </div>
+                </fieldset>
+                <!---->
                 <fieldset class="L-form__fieldset">
                     <legend>Artikly</legend>
                     {{ article_formset.management_form }}
-                    {% for form in article_formset %}
-                        <div>
-                            <button type="button" class="toggle-btn btn btn-primary mb-3">
-                                <i class="fa-solid fa-plus me-2"></i>Přidat artikl {{ forloop.counter }}
-                            </button>
-                            <div class="L-form__articles artikl-{{ forloop.counter }}">
-                                {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form counter=forloop.counter %}
-                            </div>
+                    <!-- ŠABLONA PRO NOVÝ FORMULÁŘ -->
+                    <div id="empty-form-template" style="display: None;">
+                        <div class="L-form__article-form">
+                            {% with form=article_formset.empty_form %}
+                                {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form %}
+                            {% endwith %}
                         </div>
-                    {% endfor %}
+                    </div>
+                    <!-- OBSAH FORMSETU -->
+                    <div id="article-formset-container">
+                        {% for form in article_formset %}
+                            <div class="L-form__article-form">
+                                {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <!-- TLAČÍTKO PRO PŘIDÁNÍ NOVÉHO FORMULÁŘE -->
+                    <div class="text-end">
+                        <button type="button"
+                                id="add-article-button"
+                                class="btn btn-secondary mt-3 mb-3">
+                            <i class="fa-solid fa-plus me-2"></i>Přidat artikl
+                        </button>
+                    </div>
                 </fieldset>
+                {% if article_formset.non_form_errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for error in article_formset.non_form_errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
         </form>
     </section>
