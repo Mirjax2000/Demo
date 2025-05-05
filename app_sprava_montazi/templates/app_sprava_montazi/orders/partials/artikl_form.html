@@ -33,6 +33,10 @@
             </div>
         </div>
     </div>
+    <div class="L-form__group">
+        {{ form.note.label_tag }}
+        {{ form.note }}
+    </div>
     <!---->
     {% if form_type == "create" %}
         <span class="d-none">{{ form.DELETE }}</span>
