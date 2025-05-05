@@ -104,9 +104,9 @@ class OrderUpdateView(LoginRequiredMixin, View):
             ArticleInlineFormSet(data, instance=instance, prefix="article_set"),
         )
 
-    def get(self, request, pk, *args, **kwargs) -> HttpResponse:
+    def get(self, request, pk, *args, **kwargs):
         order = get_object_or_404(Order, pk=pk)
-        order_form, article_formset = self.get_forms(order=order)
+        order_form, article_formset = self.get_forms(order)
 
         context = {
             "order": order,
