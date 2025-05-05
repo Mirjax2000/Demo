@@ -37,13 +37,6 @@
                         <div class="L-form__article-form">
                             {% with form=article_formset.empty_form %}
                                 {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form %}
-                                {% if article_formset.can_delete %}
-                                    {{ form.DELETE }}
-                                    <button type="button"
-                                            class="remove-article-button btn btn-danger btn-sm mb-3">
-                                        Odebrat artikl
-                                    </button>
-                                {% endif %}
                             {% endwith %}
                         </div>
                     </div>
@@ -52,22 +45,17 @@
                         {% for form in article_formset %}
                             <div class="L-form__article-form">
                                 {% include "app_sprava_montazi/orders/partials/artikl_form.html" with form=form %}
-                                {% if article_formset.can_delete %}
-                                    {{ form.DELETE }}
-                                    <button type="button"
-                                            class="remove-article-button btn btn-danger btn-sm mb-3">
-                                        Odebrat artikl
-                                    </button>
-                                {% endif %}
                             </div>
                         {% endfor %}
                     </div>
                     <!-- TLAČÍTKO PRO PŘIDÁNÍ NOVÉHO FORMULÁŘE -->
-                    <button type="button"
-                            id="add-article-button"
-                            class="btn btn-secondary mt-3 mb-3">
-                        <i class="fa-solid fa-plus me-2"></i>Přidat další artikl
-                    </button>
+                    <div class="text-end">
+                        <button type="button"
+                                id="add-article-button"
+                                class="btn btn-secondary mt-3 mb-3">
+                            <i class="fa-solid fa-plus me-2"></i>Přidat další artikl
+                        </button>
+                    </div>
                 </fieldset>
             </div>
         </form>

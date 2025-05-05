@@ -3,8 +3,7 @@
         {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
     </div>
 {% endif %}
-<div class="row g-3 mb-3"
-     data-form-index="{{ form.prefix|default:'__prefix__' }}">
+<div class="row" data-form-index="{{ form.prefix|default:'__prefix__' }}">
     <div class="L-form__group">
         {{ form.name.label_tag }}
         {{ form.name }}
@@ -25,8 +24,24 @@
         {{ form.note }}
         {% for error in form.note.errors %}<span class="text-danger">{{ error }}</span>{% endfor %}
     </div>
+    <!---->
+    <!---->
     {% if form_type == "create" %}
-        <div class="u-txt-right">
+        <span class="d-none">{{ form.DELETE }}</span>
+        <div class="u-flex-row-between-start">
+            {% if article_formset.can_delete %}
+                <button type="button"
+                        class="remove-article-button btn btn-danger btn-sm mb-2">Odebrat artikl</button>
+            {% endif %}
+            <button class="btn btn-outline-secondary form__delete C-clear-form">Vyčistit</button>
+        </div>
+    {% else %}
+        <span class="d-none">{{ form.DELETE }}</span>
+        <div class="u-flex-row-between-start">
+            {% if article_formset.can_delete %}
+                <button type="button"
+                        class="remove-article-button btn btn-danger btn-sm mb-2">Odebrat artikl</button>
+            {% endif %}
             <button class="btn btn-outline-secondary form__delete C-clear-form">Vyčistit</button>
         </div>
     {% endif %}
