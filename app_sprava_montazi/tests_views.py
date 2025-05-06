@@ -112,6 +112,23 @@ class CreatePageViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
 
+    def test_form_in_context(self):
+        """
+        Testuje, zda je formulář v kontextu.
+        """
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(self.url)
+        self.assertIn('form', response.context)
+
+    def test_post_without_file(self):
+        """
+        Testuje, zda POST bez souboru vrátí chybu.
+        """
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.post(self.url, {})
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(response, 'form', 'file', 'Soubor je povinný!')
+
 
 class DashboardViewTest(TestCase):
     def setUp(self):

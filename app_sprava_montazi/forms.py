@@ -3,7 +3,7 @@
 from django import forms
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
-from .models import Order, Article, DistribHub, Team, Client, TeamType, Status
+from .models import Order, Article, DistribHub, Team, Client, TeamType, Status, Upload
 
 
 class OrderForm(forms.ModelForm):
@@ -347,3 +347,25 @@ class TeamForm(forms.ModelForm):
             raise ValidationError("Společnost s tímto názvem už existuje.")
 
         return name
+
+
+class UploadForm(forms.ModelForm):
+    class Meta:
+        model = Upload
+        fields = ["file"]
+        widgets = {
+            "file": forms.FileInput(
+                attrs={
+                    "class": "form-control",
+                    "id": "formFile",
+                    "type": "file",
+                    "accept": ".csv",
+                    "style": "background-color: var(--bck-table-head); color: var(--txt-default); border-color: var(--border);"
+                }
+            ),
+        }
+        error_messages = {
+            "file": {
+                "required": "Soubor je povinný!",
+            },
+        }
