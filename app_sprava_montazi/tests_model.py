@@ -47,7 +47,7 @@ class ClientModelTests(TestCase):
         """
         Testuje vytvoření nové instance modelu Client a ověřuje, že hodnoty polí jsou správně nastaveny.
         """
-        client = Client.objects.create(
+        customer = Client.objects.create(
             name="Pavel Dvořák",
             street="Hlavní 123",
             city="Praha",
@@ -55,66 +55,66 @@ class ClientModelTests(TestCase):
             phone="777123456",
             email="pavel.dvorak@example.com",
         )
-        self.assertTrue(isinstance(client, Client))
-        self.assertEqual(client.name, "Pavel Dvořák")
-        self.assertEqual(client.city, "Praha")
-        self.assertEqual(client.zip_code, "10000")
-        self.assertEqual(client.phone, "777123456")
-        self.assertEqual(client.email, "pavel.dvorak@example.com")
-        self.assertEqual(client.first_15(), "Pavel Dvořák")
+        self.assertTrue(isinstance(customer, Client))
+        self.assertEqual(customer.name, "Pavel Dvořák")
+        self.assertEqual(customer.city, "Praha")
+        self.assertEqual(customer.zip_code, "10000")
+        self.assertEqual(customer.phone, "777123456")
+        self.assertEqual(customer.email, "pavel.dvorak@example.com")
+        self.assertEqual(customer.first_15(), "Pavel Dvořák")
 
     def test_incomplete_field_true_when_data_missing(self):
         """
         Testuje, že pole 'incomplete' je True, pokud chybí některá povinná data klienta.
         """
-        client = Client.objects.create(name="Franta Pina", zip_code="12345")
-        self.assertTrue(client.incomplete)
+        customer = Client.objects.create(name="Franta Pina", zip_code="12345")
+        self.assertTrue(customer.incomplete)
 
     def test_incomplete_field_false_when_all_data_present(self):
         """
         Testuje, že pole 'incomplete' je False, pokud jsou u klienta vyplněna všechna potřebná data.
         """
-        client = Client.objects.create(
+        customer = Client.objects.create(
             name="Franta Pina",
             street="Ulice 1",
             city="Město",
             zip_code="54321",
             phone="+420123456789",
         )
-        self.assertFalse(client.incomplete)
+        self.assertFalse(customer.incomplete)
 
     def test_slug_is_created_correctly(self):
         """
         Testuje, že slug je správně vytvořen při uložení klienta.
         """
-        client = Client.objects.create(
+        customer = Client.objects.create(
             name="Jan Novák", street="Hlavní", city="Praha", zip_code="10000"
         )
         expected_slug = slugify("Jan NovákPrahaHlavní")
-        self.assertEqual(client.slug, expected_slug)
+        self.assertEqual(customer.slug, expected_slug)
 
     def test_first_15_short_name(self):
         """
         Testuje, zda metoda first_15 vrací správně zkrácené jméno klienta, pokud je jeho délka kratší nebo rovna 15 znakům.
         """
-        client = Client.objects.create(name="Krátké jméno", zip_code="12345")
-        self.assertEqual(client.first_15(), "Krátké jméno")
+        customer = Client.objects.create(name="Krátké jméno", zip_code="12345")
+        self.assertEqual(customer.first_15(), "Krátké jméno")
 
     def test_first_15_long_name(self):
         """
         Testuje metodu `first_15()` modelu Client, která by měla vrátit prvních 15 znaků jména klienta následovaných třemi tečkami, pokud je jméno delší než 15 znaků.
         """
-        client = Client.objects.create(
+        customer = Client.objects.create(
             name="Toto je opravdu dlouhé jméno", zip_code="12345"
         )
-        self.assertEqual(client.first_15(), "Toto je opravdu...")
+        self.assertEqual(customer.first_15(), "Toto je opravdu...")
 
     def test_str_method(self):
         """
         Testuje, že metoda __str__ vrací správné jméno klienta.
         """
-        client = Client.objects.create(name="Alena Testovka", zip_code="00000")
-        self.assertEqual(str(client), "Alena Testovka")
+        customer = Client.objects.create(name="Alena Testovka", zip_code="00000")
+        self.assertEqual(str(customer), "Alena Testovka")
 
 
 class OrderModelTestV1(TestCase):
@@ -408,14 +408,14 @@ class OrderModelTestV2(TestCase):
         Testuje vytvoření nové objednávky (Order) s předdefinovanými hodnotami.
         """
         distrib_hub = DistribHub.objects.get(code="CB")
-        client = Client.objects.get(name="Jan Novák")
+        customer = Client.objects.get(name="Jan Novák")
         team = Team.objects.get(name="Alfa Team")
         order = Order.objects.create(
             order_number="12345",
             distrib_hub=distrib_hub,
             mandant="ABC",
             status=Status.NEW,
-            client=client,
+            client=customer,
             delivery_termin=timezone.now().date(),
             evidence_termin=timezone.now().date(),
             montage_termin=timezone.now(),
@@ -429,7 +429,7 @@ class OrderModelTestV2(TestCase):
         self.assertIsInstance(order.distrib_hub, DistribHub)
         self.assertEqual(order.mandant, "ABC")
         self.assertEqual(order.status, Status.NEW)
-        self.assertEqual(order.client, client)
+        self.assertEqual(order.client, customer)
         self.assertIsInstance(order.client, Client)
         self.assertEqual(order.team_type, TeamType.BY_ASSEMBLY_CREW)
         self.assertEqual(order.team, team)

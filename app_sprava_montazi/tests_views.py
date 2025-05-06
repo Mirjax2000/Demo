@@ -1,11 +1,21 @@
 """View tests"""
 
 from datetime import date
-from django.test import TestCase
+from unittest.mock import patch
+from django.test import TestCase, Client as CL
 from django.conf import settings
 from django.urls import reverse
+from django.utils import timezone
 from django.contrib.auth.models import User
-from app_sprava_montazi.models import Order, DistribHub, Client, Team, TeamType, Status
+from app_sprava_montazi.models import (
+    Order,
+    DistribHub,
+    Article,
+    Client,
+    Team,
+    TeamType,
+    Status,
+)
 
 
 class IndexViewTest(TestCase):
@@ -15,9 +25,10 @@ class IndexViewTest(TestCase):
         self.url = reverse("index")
         self.template = "base.html"
 
-    def test_index_view(self):
+    def test_logged_in(self):
         """
-        Test pro zobrazení indexview.
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
         """
         self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
@@ -31,16 +42,6 @@ class IndexViewTest(TestCase):
         """
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
-
-    def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, self.template)
 
 
 class HomePageViewTest(TestCase):
@@ -50,9 +51,10 @@ class HomePageViewTest(TestCase):
         self.url = reverse("homepage")
         self.template = "app_sprava_montazi/homepage/homepage.html"
 
-    def test_index_view(self):
+    def test_logged_in(self):
         """
-        Test pro zobrazení indexview.
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
         """
         self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
@@ -66,16 +68,6 @@ class HomePageViewTest(TestCase):
         """
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
-
-    def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, self.template)
 
 
 class CreatePageViewTest(TestCase):
@@ -85,9 +77,10 @@ class CreatePageViewTest(TestCase):
         self.url = reverse("createpage")
         self.template = "app_sprava_montazi/create/create.html"
 
-    def test_index_view(self):
+    def test_logged_in(self):
         """
-        Test pro zobrazení indexview.
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
         """
         self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
@@ -101,16 +94,6 @@ class CreatePageViewTest(TestCase):
         """
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
-
-    def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, self.template)
 
 
 class DashboardViewTest(TestCase):
@@ -120,9 +103,10 @@ class DashboardViewTest(TestCase):
         self.url = reverse("dashboard")
         self.template = "app_sprava_montazi/dashboard/dashboard.html"
 
-    def test_index_view(self):
+    def test_logged_in(self):
         """
-        Test pro zobrazení indexview.
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
         """
         self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
@@ -136,16 +120,6 @@ class DashboardViewTest(TestCase):
         """
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
-
-    def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, self.template)
 
 
 class ClientUpdateViewTest(TestCase):
@@ -173,9 +147,10 @@ class ClientUpdateViewTest(TestCase):
             },
         )
 
-    def test_index_view(self):
+    def test_logged_in(self):
         """
-        Test pro zobrazení indexview.
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
         """
         self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
@@ -190,15 +165,264 @@ class ClientUpdateViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
 
+
+class OrderCreateViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.template = "app_sprava_montazi/orders/order_form.html"
+        self.url = reverse("order_create")
+        self.client = CL()
+        self.valid_status_key = Status.NEW
+        self.valid_team_type_key = TeamType.BY_ASSEMBLY_CREW
+        self.hub = DistribHub.objects.create(code="111", city="Praha")
+        self.customer = Client.objects.create(name="Pedro Pascal", zip_code="12345")
+        self.team = Team.objects.create(
+            name="Test Company",
+            city="Praha",
+            region="Střední Čechy",
+            phone="123456789",
+            email="test@company.cz",
+            active=True,
+            price_per_hour=150.50,
+            price_per_km=12.30,
+            notes="Toto je testovací poznámka.",
+        )
+        self.order = Order.objects.create(
+            order_number="703777143100437749-R",
+            distrib_hub=self.hub,
+            status=Status.NEW,
+            client=self.customer,
+            mandant="SCCZ",
+            evidence_termin=date.today(),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+            team=None,
+        )
+
+        # Základní validní data pro formuláře
+        self.valid_customer_data = {
+            "name": "Ferdinand",
+            "street": "Kopretinova 15",
+            "city": "Praha",
+            "zip_code": "12345",
+            "phone": "232232232",
+            "email": "ferdinand@seznam.cz",
+        }
+
+        self.valid_order_data = {
+            "order_number": "703777143100437749-O",
+            "distrib_hub": self.hub.id,
+            "mandant": "CCCC",
+            "status": self.valid_status_key,
+            "delivery_termin": "2024-05-15",
+            "evidence_termin": "2024-05-20",
+            "montage_termin": "2024-05-25T10:30",
+            "team_type": self.valid_team_type_key,
+            "team": self.team.id,
+            "notes": "This is a test order note.",
+        }
+
+        self.formset_management_data = {
+            "article_set-TOTAL_FORMS": 0,
+            "article_set-INITIAL_FORMS": 0,
+            "article_set-MIN_NUM_FORMS": 0,
+            "article_set-MAX_NUM_FORMS": 1000,
+        }
+
+        self.valid_article_data = {
+            "article_set-TOTAL_FORMS": 1,
+            "article_set-INITIAL_FORMS": 0,
+            "article_set-MIN_NUM_FORMS": 0,
+            "article_set-MAX_NUM_FORMS": 1000,
+            "article_set-0-name": "Postel",
+            "article_set-0-quantity": 1,
+            "article_set-0-price": 10000,
+            "article_set-0-note": "Tvrda postel",
+            "article_set-0-id": "",
+            "article_set-0-DELETE": "",
+        }
+
     def test_logged_in(self):
         """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
+        Testuje, zda přihlášený uživatel úspěšně získá GET stránku
+        a je použita správná šablona a formuláře v kontextu.
         """
         self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
+        # Zkontrolujeme, že formuláře jsou v kontextu
+        self.assertIn("order_form", response.context)
+        self.assertIn("client_form", response.context)
+        self.assertIn("article_formset", response.context)
+        # Zkontrolujeme, že formuláře v kontextu nejsou vázané na data (jsou prázdné)
+        self.assertFalse(response.context["order_form"].is_bound)
+        self.assertFalse(response.context["client_form"].is_bound)
+        self.assertFalse(response.context["article_formset"].is_bound)
+
+    def test_redirect_if_not_logged_in(self):
+        """
+        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
+        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
+        """
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    @patch("django.contrib.messages.success")
+    def test_successful_order_creation_with_articles(self, mock_success_message):
+        """
+        Testuje úspěšné vytvoření objednávky s klientem a články při validních datech.
+        """
+        self.client.login(username="testuser", password="testpass")
+        initial_order_count = Order.objects.count()
+        initial_client_count = Client.objects.count()
+        initial_article_count = Article.objects.count()
+
+        # Kombinujeme data pro POST - všechny formuláře validní, s jedním článkem
+        post_data = {
+            **self.valid_customer_data,
+            **self.valid_order_data,
+            **self.valid_article_data,
+        }
+
+        response = self.client.post(self.url, post_data)
+
+        # Zkontrolujeme vazby
+        created_order = Order.objects.latest("id")  # Získáme nově vytvořenou objednávku
+        created_client = Client.objects.latest("id")  # Získáme nově vytvořeného klienta
+        # Očekáváme přesměrování na detail objednávky
+        self.assertEqual(response.status_code, 302)
+        # Zkontrolujeme, že přesměrování je na URL detailu objednávky
+        self.assertRedirects(
+            response, reverse("order_detail", kwargs={"pk": created_order.pk})
+        )
+
+        # Zkontrolujeme, že data byla uložena do databáze
+        self.assertEqual(Order.objects.count(), initial_order_count + 1)
+        self.assertEqual(Client.objects.count(), initial_client_count + 1)
+        self.assertEqual(
+            Article.objects.count(),
+            initial_article_count + self.valid_article_data["article_set-TOTAL_FORMS"],
+        )
+
+        self.assertEqual(created_order.client, created_client)
+        self.assertEqual(
+            created_order.articles.count(),
+            self.valid_article_data["article_set-TOTAL_FORMS"],
+        )
+
+        created_article = created_order.articles.first()
+        self.assertEqual(
+            created_article.name, self.valid_article_data["article_set-0-name"]
+        )
+        self.assertEqual(
+            created_article.quantity, self.valid_article_data["article_set-0-quantity"]
+        )
+        self.assertEqual(
+            float(created_article.price), self.valid_article_data["article_set-0-price"]
+        )  # Decimal vs float
+
+        mock_success_message.assert_called_once()
+        args, kwargs = mock_success_message.call_args
+        self.assertEqual(args[1], "Objednávka vytvořena.")
+
+    @patch("django.contrib.messages.error")
+    def test_invalid_order_data_shows_errors(self, mock_error_message):
+        self.client.login(username="testuser", password="testpass")
+        invalid_data = self.valid_order_data.copy()
+        invalid_data["order_number"] = ""
+        invalid_data["evidence_termin"] = ""
+        invalid_data["distrib_hub"] = ""
+        invalid_data["mandant"] = ""
+        post_data = {
+            **self.valid_customer_data,
+            **invalid_data,
+            **self.formset_management_data,
+        }
+        response = self.client.post(self.url, post_data)
+        order_form = response.context.get("order_form")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            "číslo objednávky je povinné!", str(order_form.errors["order_number"])
+        )
+        self.assertIn("Mandant je povinný!", str(order_form.errors["mandant"]))
+        self.assertIn(
+            "Toto pole je vyžadováno", str(order_form.errors["evidence_termin"])
+        )
+        self.assertIn("místo určení je povinné!", str(order_form.errors["distrib_hub"]))
+
+        mock_error_message.assert_called_once()
+        args, kwargs = mock_error_message.call_args
+        self.assertEqual(args[1], "Nastala chyba při ukládání objednávky.")
+
+    @patch("django.contrib.messages.error")
+    def test_unique_order_data_shows_errors(self, mock_error_message):
+        self.client.login(username="testuser", password="testpass")
+        invalid_data = self.valid_order_data.copy()
+        invalid_data["order_number"] = "703777143100437749-R"
+        post_data = {
+            **self.valid_customer_data,
+            **invalid_data,
+            **self.formset_management_data,
+        }
+        response = self.client.post(self.url, post_data)
+        order_form = response.context.get("order_form")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("objednávka uz existuje!", str(order_form.errors["order_number"]))
+
+        mock_error_message.assert_called_once()
+        args, kwargs = mock_error_message.call_args
+        self.assertEqual(args[1], "Nastala chyba při ukládání objednávky.")
+
+    @patch("django.contrib.messages.success")
+    def test_successful_order_creation_without_articles(self, mock_success_message):
+        """
+        Testuje úspěšné vytvoření objednávky s klientem, ale bez článků.
+        Používá validní data vytvořená v setUp.
+        """
+        self.client.login(username="testuser", password="testpass")
+        initial_order_count = Order.objects.count()
+        initial_client_count = Client.objects.count()
+        initial_article_count = Article.objects.count()
+
+        # Kombinujeme data pro POST - validní Order a Client, prázdný formset
+        # Zajistíme unikátní order_number pro tento test
+        order_data = self.valid_order_data.copy()
+        order_data["order_number"] = "703143100437749-R"
+        post_data = {
+            **self.valid_customer_data,
+            **order_data,
+            **self.formset_management_data,
+        }
+
+        response = self.client.post(self.url, post_data)
+        created_order = Order.objects.latest("id")
+        created_client = Client.objects.latest("id")
+
+        self.assertEqual(response.status_code, 302)
+        # Zkontrolujeme vazby
+
+        self.assertEqual(response.status_code, 302)
+        # Zkontrolujeme, že přesměrování je na URL detailu objednávky
+        self.assertRedirects(
+            response, reverse("order_detail", kwargs={"pk": created_order.pk})
+        )
+
+        self.assertEqual(Order.objects.count(), initial_order_count + 1)
+        self.assertEqual(Client.objects.count(), initial_client_count + 1)
+        self.assertEqual(Article.objects.count(), initial_article_count)
+
+        self.assertEqual(created_order.client, created_client)
+        self.assertEqual(created_order.articles.count(), 0)
+        self.assertEqual(created_order.distrib_hub, self.hub)
+        self.assertEqual(created_order.team, self.team)
+        self.assertEqual(created_order.status, self.valid_status_key)
+        self.assertEqual(created_order.team_type, self.valid_team_type_key)
+
+        mock_success_message.assert_called_once()
+        args, kwargs = mock_success_message.call_args
+        self.assertEqual(args[1], "Objednávka vytvořena.")
 
 
 class OrdersAllViewTest(TestCase):
@@ -218,6 +442,16 @@ class OrdersAllViewTest(TestCase):
                 evidence_termin=date.today(),
             )
 
+    def test_logged_in(self):
+        """
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
+        """
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
+
     def test_orders_all_view(self):
         """
         Test pro zobrazení všech objednávek.
@@ -235,16 +469,6 @@ class OrdersAllViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
 
-    def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, self.template)
-
 
 class TeamsViewTest(TestCase):
     def setUp(self):
@@ -253,9 +477,10 @@ class TeamsViewTest(TestCase):
         self.url = reverse("teams")
         self.template = "app_sprava_montazi/teams/teams_all.html"
 
-    def test_index_view(self):
+    def test_logged_in(self):
         """
-        Test pro zobrazení indexview.
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
         """
         self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
@@ -269,16 +494,6 @@ class TeamsViewTest(TestCase):
         """
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
-
-    def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, self.template)
 
 
 class TeamCreateTest(TestCase):
@@ -288,9 +503,10 @@ class TeamCreateTest(TestCase):
         self.url = reverse("team_create")
         self.template = "app_sprava_montazi/teams/team_form.html"
 
-    def test_index_view(self):
+    def test_logged_in(self):
         """
-        Test pro zobrazení indexview.
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
         """
         self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
@@ -304,16 +520,6 @@ class TeamCreateTest(TestCase):
         """
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
-
-    def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, self.template)
 
 
 class TeamUpdateViewTest(TestCase):
@@ -334,9 +540,10 @@ class TeamUpdateViewTest(TestCase):
         self.url = reverse("team_update", kwargs={"slug": self.team.slug})
         self.template = "app_sprava_montazi/teams/team_form.html"
 
-    def test_index_view(self):
+    def test_logged_in(self):
         """
-        Test pro zobrazení indexview.
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
         """
         self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
@@ -350,13 +557,3 @@ class TeamUpdateViewTest(TestCase):
         """
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
-
-    def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, self.template)
