@@ -1,60 +1,60 @@
-"""
-URLs config
-"""
+"""URLs config"""
 
-from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from django.urls.conf import include
-
 from accounts.views import RegisterView
 from app_sprava_montazi.views import (
-    DashboardView,
-    IndexView,
-    HomePageView,
-    OrdersView,
-    TeamsView,
-    TeamCreateView,
-    TeamUpdateView,
-    TeamDetailView,
-    OrderDetailView,
-    OrderCreateView,
-    ClientUpdateView,
-    CreatePageView,
-    OrderUpdateView,
+    DashboardView as Dashboard,
+    IndexView as Index,
+    HomePageView as HomePage,
+    OrdersView as Orders,
+    TeamsView as Teams,
+    TeamCreateView as TeamCreate,
+    TeamUpdateView as TeamUpdate,
+    TeamDetailView as TeamDetail,
+    OrderDetailView as OrderDetail,
+    OrderCreateView as OrderCreate,
+    ClientUpdateView as ClientUpdate,
+    CreatePageView as CreatePage,
+    OrderUpdateView as OrderUpdate,
 )
 
+# --- typove zkratky
+SLUG = "<slug:slug>"
+OPK = "<int:order_pk>"
+PK = "<int:pk>"
+# ---
 urlpatterns: list = [
     path("admin/", admin.site.urls),
 ]
 
 app_sprava_montazi: list = [
-    path("", IndexView.as_view(), name="index"),
-    path("homepage/", HomePageView.as_view(), name="homepage"),
-    path("dashboard/", DashboardView.as_view(), name="dashboard"),
+    path("", Index.as_view(), name="index"),
+    path("homepage/", HomePage.as_view(), name="homepage"),
+    path("dashboard/", Dashboard.as_view(), name="dashboard"),
+    #
     # --- orders ---
-    path("orders/", OrdersView.as_view(), name="orders"),
-    path("order/create/", OrderCreateView.as_view(), name="order_create"),
+    path("orders/", Orders.as_view(), name="orders"),
+    path("order/create/", OrderCreate.as_view(), name="order_create"),
+    path(f"order/order_update/{PK}/", OrderUpdate.as_view(), name="order_update"),
     path(
-        "order/order_update/<int:pk>/",
-        OrderUpdateView.as_view(),
-        name="order_update",
-    ),
-    path(
-        "order/client_update/<slug:slug>/<int:order_pk>/",
-        ClientUpdateView.as_view(),
+        f"order/client_update/{SLUG}/{OPK}/",
+        ClientUpdate.as_view(),
         name="client_update",
     ),
-    path("order/detail/<int:pk>/", OrderDetailView.as_view(), name="order_detail"),
+    path(f"order/detail/{PK}/", OrderDetail.as_view(), name="order_detail"),
+    #
     # --- create ---
-    path("createpage/", CreatePageView.as_view(), name="createpage"),
+    path("createpage/", CreatePage.as_view(), name="createpage"),
+    #
     # --- teams ---
-    path("teams/", TeamsView.as_view(), name="teams"),
-    path("teams/create/", TeamCreateView.as_view(), name="team_create"),
-    path("teams/detail/<slug:slug>/", TeamDetailView.as_view(), name="team_detail"),
-    path("teams/update/<slug:slug>/", TeamUpdateView.as_view(), name="team_update"),
+    path("teams/", Teams.as_view(), name="teams"),
+    path("teams/create/", TeamCreate.as_view(), name="team_create"),
+    path(f"teams/detail/{SLUG}/", TeamDetail.as_view(), name="team_detail"),
+    path(f"teams/update/{SLUG}/", TeamUpdate.as_view(), name="team_update"),
 ]
 
 app_accounts_urls: list = [
