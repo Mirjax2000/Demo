@@ -51,10 +51,8 @@
         <span class="d-none">{{ form.DELETE }}</span>
         <div class="u-flex-row-between-start">
             {% if article_formset.can_delete %}
-                <button type="button"
-                        class="remove-article-button btn btn-danger btn-sm mb-2">Odebrat artikl</button>
+                <button type="button" class="remove-article-button btn btn-danger btn-sm">Odebrat artikl</button>
             {% endif %}
-            <button class="btn btn-outline-secondary form__delete C-clear-form">Vyčistit</button>
         </div>
     {% endif %}
 </div>
