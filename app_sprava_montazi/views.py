@@ -23,6 +23,7 @@ from .models import Order, DistribHub, Status, Team, Article, Client
 from .forms import TeamForm, ArticleForm, OrderForm, ClientForm
 
 cons: Console = Console()
+APP_URL = "app_sprava_montazi"
 
 
 class IndexView(LoginRequiredMixin, TemplateView):
@@ -34,11 +35,11 @@ class IndexView(LoginRequiredMixin, TemplateView):
 class HomePageView(LoginRequiredMixin, TemplateView):
     """Homepage View"""
 
-    template_name = "app_sprava_montazi/homepage/homepage.html"
+    template_name = f"{APP_URL}/homepage/homepage.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+        # --- navigace
         context["active"] = "homepage"
         return context
 
@@ -46,11 +47,11 @@ class HomePageView(LoginRequiredMixin, TemplateView):
 class CreatePageView(LoginRequiredMixin, TemplateView):
     """Createpage View"""
 
-    template_name = "app_sprava_montazi/create/create.html"
+    template_name = f"{APP_URL}/create/create.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+        # --- navigace
         context["active"] = "create"
         return context
 
@@ -58,19 +59,21 @@ class CreatePageView(LoginRequiredMixin, TemplateView):
 class DashboardView(LoginRequiredMixin, TemplateView):
     """Dashboard View"""
 
-    template_name = "app_sprava_montazi/dashboard/dashboard.html"
+    template_name = f"{APP_URL}/dashboard/dashboard.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+        # --- navigace
         context["active"] = "dashboard"
         return context
 
 
 class ClientUpdateView(LoginRequiredMixin, UpdateView):
+    """Uprav zakaznika"""
+
     model = Client
     form_class = ClientForm
-    template_name = "app_sprava_montazi/orders/order_update_client-form.html"
+    template_name = f"{APP_URL}/orders/order_update_client-form.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -95,104 +98,10 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return reverse("order_detail", kwargs={"pk": self.kwargs["order_pk"]})
 
 
-class OrderUpdateView(LoginRequiredMixin, View):
-    template = "app_sprava_montazi/orders/order_form.html"
-
-    def get_object(self):
-        return get_object_or_404(Order, pk=self.kwargs["pk"])
-
-    articleInlineFormSet = inlineformset_factory(
-        Order,
-        Article,
-        form=ArticleForm,
-        extra=0,
-        can_delete=True,
-    )
-
-    def get_forms(self, instance, data=None):
-        return (
-            OrderForm(data, instance=instance),
-            ClientForm(data, instance=instance.client),
-            self.articleInlineFormSet(data, instance=instance, prefix="article_set"),
-        )
-
-    def get(self, request, *args, **kwargs):
-        order = self.get_object()
-        order_form, client_form, article_formset = self.get_forms(order)
-
-        context = {
-            "order_form": order_form,
-            "client_form": client_form,
-            "article_formset": article_formset,
-            # --- vycistit btn update/create
-            "form_type": "update",
-            # --- navigace
-            "active": "orders_all",
-        }
-        return render(request, self.template, context)
-
-    def post(self, request, *args, **kwargs):
-        order = self.get_object()
-        order_form, client_form, article_formset = self.get_forms(order, request.POST)
-
-        context = {
-            "order_form": order_form,
-            "client_form": client_form,
-            "article_formset": article_formset,
-            # --- vycistit btn update/create
-            "form_type": "update",
-            # --- navigace
-            "active": "orders_all",
-        }
-
-        if (
-            order_form.is_valid()
-            and client_form.is_valid()
-            and article_formset.is_valid()
-        ):
-            try:
-                with transaction.atomic():
-                    client = client_form.save()
-                    order = order_form.save(commit=False)
-                    order.client = client
-                    order.save()
-                    article_formset.instance = order
-                    article_formset.save()
-                messages.success(request, "Objednávka upravena.")
-                return redirect(reverse("order_detail", kwargs={"pk": order.id}))
-            except Exception as e:
-                if settings.DEBUG:
-                    cons.log(f"chyba při aktualizaci: {str(e)}")
-
-        messages.error(request, "Nastala chyba při ukládání změn.")
-        return render(request, self.template, context)
-
-
-class OrdersView(LoginRequiredMixin, ListView):
-    """Vypis seznamu modelu Order"""
-
-    model = Order
-    template_name = "app_sprava_montazi/orders/orders_all.html"
-    context_object_name = "orders"
-
-    def get_queryset(self) -> QuerySet[Any]:
-        orders = Order.objects.exclude(status="Hidden")
-        status: str = self.request.GET.get("status", "").strip()
-        if status:
-            orders = Order.objects.filter(status=status)
-        return orders
-
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        context["statuses"] = Status
-        # --- navigace
-        context["active"] = "orders_all"
-
-        return context
-
-
 class OrderCreateView(LoginRequiredMixin, View):
-    template = "app_sprava_montazi/orders/order_form.html"
+    """Vytvor novou zakazku"""
+
+    template = f"{APP_URL}/orders/order_form.html"
 
     articleInlineFormSet = inlineformset_factory(
         Order,
@@ -259,9 +168,101 @@ class OrderCreateView(LoginRequiredMixin, View):
         return render(request, self.template, context)
 
 
+class OrderUpdateView(LoginRequiredMixin, View):
+    """Uprav objednavku"""
+
+    template = f"{APP_URL}/orders/order_update_order-form.html"
+
+    def get_object(self):
+        return get_object_or_404(Order, pk=self.kwargs["pk"])
+
+    articleInlineFormSet = inlineformset_factory(
+        Order,
+        Article,
+        form=ArticleForm,
+        extra=0,
+        can_delete=True,
+    )
+
+    def get_forms(self, instance, data=None):
+        return (
+            OrderForm(data, instance=instance),
+            self.articleInlineFormSet(data, instance=instance, prefix="article_set"),
+        )
+
+    def get(self, request, *args, **kwargs):
+        order = self.get_object()
+        order_form, article_formset = self.get_forms(order)
+
+        context = {
+            "order": order,
+            "order_form": order_form,
+            "article_formset": article_formset,
+            # --- vycistit btn update/create
+            "form_type": "update",
+            # --- navigace
+            "active": "orders_all",
+        }
+        return render(request, self.template, context)
+
+    def post(self, request, *args, **kwargs):
+        order = self.get_object()
+        order_form, article_formset = self.get_forms(order, request.POST)
+
+        context = {
+            "order": order,
+            "order_form": order_form,
+            "article_formset": article_formset,
+            # --- vycistit btn update/create
+            "form_type": "update",
+            # --- navigace
+            "active": "orders_all",
+        }
+
+        if order_form.is_valid() and article_formset.is_valid():
+            try:
+                with transaction.atomic():
+                    order = order_form.save(commit=False)
+                    order.save()
+                    article_formset.instance = order
+                    article_formset.save()
+                messages.success(request, "Objednávka upravena.")
+                return redirect(reverse("order_detail", kwargs={"pk": order.id}))
+
+            except Exception as e:
+                if settings.DEBUG:
+                    cons.log(f"chyba při aktualizaci: {str(e)}")
+
+        messages.error(request, "Nastala chyba při ukládání změn.")
+        return render(request, self.template, context)
+
+
+class OrdersView(LoginRequiredMixin, ListView):
+    """Vypis seznamu modelu Order"""
+
+    model = Order
+    template_name = f"{APP_URL}/orders/orders_all.html"
+    context_object_name = "orders"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        orders = Order.objects.exclude(status="Hidden")
+        status: str = self.request.GET.get("status", "").strip()
+        if status:
+            orders = Order.objects.filter(status=status)
+        return orders
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["statuses"] = Status
+        # --- navigace
+        context["active"] = "orders_all"
+
+        return context
+
+
 class OrderDetailView(LoginRequiredMixin, DetailView):
     model = Order
-    template_name = "app_sprava_montazi/orders/order_detail.html"
+    template_name = f"{APP_URL}/orders/order_detail.html"
     context_object_name = "order"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -280,7 +281,7 @@ class TeamsView(LoginRequiredMixin, ListView):
     """Vypis seznamu modelu Order"""
 
     model = Team
-    template_name = "app_sprava_montazi/teams/teams_all.html"
+    template_name = f"{APP_URL}/teams/teams_all.html"
     context_object_name = "teams"
 
     def get_context_data(self, **kwargs) -> dict:
@@ -293,7 +294,7 @@ class TeamsView(LoginRequiredMixin, ListView):
 class TeamCreateView(LoginRequiredMixin, CreateView):
     model = Team
     form_class = TeamForm
-    template_name = "app_sprava_montazi/teams/team_form.html"
+    template_name = f"{APP_URL}/teams/team_form.html"
     success_url = reverse_lazy("teams")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -313,7 +314,7 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
 class TeamUpdateView(LoginRequiredMixin, UpdateView):
     model = Team
     form_class = TeamForm
-    template_name = "app_sprava_montazi/teams/team_form.html"
+    template_name = f"{APP_URL}/teams/team_form.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -333,7 +334,7 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
 
 class TeamDetailView(LoginRequiredMixin, DetailView):
     model = Team
-    template_name = "app_sprava_montazi/teams/team_detail.html"
+    template_name = f"{APP_URL}/teams/team_detail.html"
     context_object_name = "team"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -341,96 +342,3 @@ class TeamDetailView(LoginRequiredMixin, DetailView):
         # --- navigace
         context["active"] = "teams"
         return context
-
-
-def order_create(request):
-    if request.method == "POST":
-        order_form = OrderForm(request.POST)
-        client_form = ClientForm(request.POST)
-        article_formset = ArticleInlineFormSet(request.POST)
-
-        if client_form.is_valid():
-            client = client_form.save()
-            if order_form.is_valid():
-                order = order_form.save(commit=False)
-                order.client = client  # Přiřadíme uloženého klienta k objednávce
-                order.save()  # Nyní uložíme objednávku
-                article_formset = ArticleInlineFormSet(request.POST, instance=order)
-                if article_formset.is_valid():
-                    article_formset.save()
-                    return redirect("order_detail", pk=order.id)
-                else:
-                    # Pokud se artikly nevalidují, musíme smazat uloženého klienta a objednávku
-                    client.delete()
-                    if order.id:
-                        order.delete()
-                    # Znovu zobrazíme formulář s chybami
-                    return render(
-                        request,
-                        "order_create.html",
-                        {
-                            "order_form": order_form,
-                            "article_formset": article_formset,
-                            "client_form": client_form,
-                        },
-                    )
-            else:
-                # Pokud se objednávka nevaliduje, musíme smazat uloženého klienta
-                client.delete()
-                # Znovu zobrazíme formulář s chybami
-                return render(
-                    request,
-                    "order_create.html",
-                    {
-                        "order_form": order_form,
-                        "article_formset": article_formset,
-                        "client_form": client_form,
-                    },
-                )
-        else:
-            article_formset = (
-                ArticleInlineFormSet()
-            )  # Prázdný formset pro zobrazení chyb
-            # Znovu zobrazíme formulář s chybami klienta
-            return render(
-                request,
-                "order_create.html",
-                {
-                    "order_form": order_form,
-                    "article_formset": article_formset,
-                    "client_form": client_form,
-                },
-            )
-    else:
-        order_form = OrderForm()
-        article_formset = ArticleInlineFormSet()
-        client_form = ClientForm()
-
-    context = {
-        "order_form": order_form,
-        "article_formset": article_formset,
-        "client_form": client_form,
-    }
-    return render(request, "app_sprava_montazi/order_form.html", context)
-
-
-def order_update(request, pk):
-    order = Order.objects.get(pk=pk)
-    if request.method == "POST":
-        order_form = OrderForm(request.POST, instance=order)
-        article_formset = ArticleInlineFormSet(request.POST, instance=order)
-
-        if order_form.is_valid() and article_formset.is_valid():
-            order = order_form.save()
-            article_formset.instance = order
-            article_formset.save()
-            return redirect("order_detail", pk=order.id)
-    else:
-        order_form = OrderForm(instance=order)
-        article_formset = ArticleInlineFormSet(instance=order)
-
-    context = {
-        "order_form": order_form,
-        "article_formset": article_formset,
-    }
-    return render(request, "app_sprava_montazi/order_form.html", context)
