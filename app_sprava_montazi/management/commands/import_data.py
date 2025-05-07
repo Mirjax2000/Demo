@@ -79,23 +79,21 @@ class Command(BaseCommand):
         # --- pro CLI jinak z formulare
         file_path: Path = Path("./files") / kwargs["file"]
         # ---
-        try:
-            dataset = DatasetTools.create_dataset(file_path)
-            all_datasets: dict[str, DataFrame] = DatasetTools.dataset_filter(dataset)
-            # ---
-            datasets: list[tuple] = [
-                (all_datasets["basic_dataset"], TeamType.BY_ASSEMBLY_CREW, "basic"),
-                (all_datasets["extend_dataset"], TeamType.BY_CUSTOMER, "extend"),
-            ]
-            # -------------------------------
-            for df, team_type, counter_type in datasets:
-                (self.create_orders_from_dataset(df, team_type, counter_type))
-            # -------------------------------
-            DatasetTools.logs(dataset, self.counter)
-            self.counter.clear()
+        dataset = DatasetTools.create_dataset(file_path)
+        all_datasets: dict[str, DataFrame] = DatasetTools.dataset_filter(dataset)
+        # ---
+        datasets: list[tuple] = [
+            (all_datasets["basic_dataset"], TeamType.BY_ASSEMBLY_CREW, "basic"),
+            (all_datasets["extend_dataset"], TeamType.BY_CUSTOMER, "extend"),
+        ]
+        # -------------------------------
+        for df, team_type, counter_type in datasets:
+            (self.create_orders_from_dataset(df, team_type, counter_type))
+        # -------------------------------
+        DatasetTools.logs(dataset, self.counter)
+        self.counter.clear()
 
-        except Exception as e:
-            raise CommandError(f"Import selhal: {str(e)}") from e
+
 
 
 class DatasetTools:
