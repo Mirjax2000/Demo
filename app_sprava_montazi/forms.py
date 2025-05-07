@@ -360,7 +360,7 @@ class UploadForm(forms.ModelForm):
                     "id": "formFile",
                     "type": "file",
                     "accept": ".csv",
-                    "style": "background-color: var(--bck-table-head); color: var(--txt-default); border-color: var(--border);"
+                    "style": "background-color: var(--bck-table-head); color: var(--txt-default); border-color: var(--border);",
                 }
             ),
         }

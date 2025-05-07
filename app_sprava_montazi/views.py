@@ -6,6 +6,7 @@ from typing import Any
 from rich.console import Console
 from django.db import transaction
 from django.conf import settings
+from django.core.management import call_command
 from django.db.models.query import QuerySet
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -23,13 +24,6 @@ from django.views.generic import (
 )
 from .models import Order, DistribHub, Status, Team, Article, Client, Upload
 from .forms import TeamForm, ArticleForm, OrderForm, ClientForm, UploadForm
-from .management.commands.import_data import (
-    create_dataset,
-    dataset_filter,
-    create_orders_from_dataset,
-    logs,
-    TeamType,
-)
 
 cons: Console = Console()
 APP_URL = "app_sprava_montazi"
@@ -70,69 +64,17 @@ class CreatePageView(LoginRequiredMixin, View):
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             upload = form.save()
-
-            # Create directory for uploaded files if it doesn't exist
-            upload_dir = Path(settings.MEDIA_ROOT) / "uploads"
-            if not os.path.exists(upload_dir):
-                os.makedirs(upload_dir)
-
             file_path = upload.file.path
+            call_command("import_data", file_path)
 
-            try:
-                # Process the uploaded file using import_data.py functionality
-                dataset = create_dataset(file_path)
-                basic_dataset, extend_dataset = dataset_filter(dataset)
-
-                # Initialize counters
-                basic_order_count = 0
-                extend_order_count = 0
-                client_count = 0
-                duplicit_count = 0
-
-                # Process datasets
-                datasets = [
-                    (basic_dataset, TeamType.BY_ASSEMBLY_CREW, "basic"),
-                    (extend_dataset, TeamType.BY_CUSTOMER, "extend"),
-                ]
-
-                for _dataset, team_type, counter in datasets:
-                    basic_order_count, extend_order_count, client_count, duplicit_count = (
-                        create_orders_from_dataset(
-                            _dataset,
-                            team_type,
-                            counter,
-                            basic_order_count,
-                            extend_order_count,
-                            client_count,
-                            duplicit_count,
-                        )
-                    )
-
-                # Log results
-                logs(
-                    dataset,
-                    client_count,
-                    basic_order_count,
-                    extend_order_count,
-                    duplicit_count,
-                )
-
-                # Add success message
-                messages.success(
-                    request, 
-                    f"Import dokončen. Vytvořeno {client_count} klientů, {basic_order_count + extend_order_count} zakázek."
-                )
-                return redirect("createpage")
-
-            except Exception as e:
-                messages.error(request, f"Chyba při importu: {str(e)}")
-                if settings.DEBUG:
-                    cons.log(f"Chyba při importu: {str(e)}")
-
+            messages.success(request, "Import dokončen.")
+            return redirect("createpage")
+        
         context = {
             "form": form,
             "active": "create",
         }
+
         return render(request, self.template_name, context)
 
 
