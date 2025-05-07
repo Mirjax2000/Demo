@@ -64,12 +64,11 @@ class CreatePageView(LoginRequiredMixin, View):
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             upload = form.save()
-            file_path = upload.file.path
-            call_command("import_data", file_path)
+            call_command("import_data", upload.file.path)
 
             messages.success(request, "Import dokončen.")
             return redirect("createpage")
-        
+
         context = {
             "form": form,
             "active": "create",
