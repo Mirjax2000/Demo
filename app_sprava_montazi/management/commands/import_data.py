@@ -3,9 +3,10 @@
 from pathlib import Path
 from datetime import datetime
 from typing import TypedDict
+from django.db import transaction
 from rich.console import Console
 from pandas import DataFrame, read_csv
-from django.core.management.base import BaseCommand, CommandParser, CommandError
+from django.core.management.base import BaseCommand, CommandParser
 from django.utils.text import slugify
 from app_sprava_montazi.models import DistribHub, Order, Client, TeamType
 
@@ -48,50 +49,87 @@ class Command(BaseCommand):
         team_type: TeamType,
         counter_type: str,
     ) -> None:
-        """create orders form dataset"""
-
+        """create orders form dataset with progress bar"""
         for item in dataset.to_dict(orient="records"):
-            # ziskavam FK DistribHubu
-            distrib_hub: DistribHub = DistribHub.objects.get(code=item["misto-urceni"])
-            # vytvarim FK clienta
-            client: ClientRecord = CreateRecords.create_client(
-                item["prijmeni"], item["krestni-jmeno"], item["psc"]
-            )
-            if client["client_created"]:
-                self.counter["client_count"] += 1
-            # vytvarim Order
-            order: OrderRecord = CreateRecords.create_order(
-                item, distrib_hub, client["client"], team_type
-            )
+            try:
+                # ziskavam FK DistribHubu
+                distrib_hub: DistribHub = DistribHub.objects.get(
+                    code=item["misto-urceni"]
+                )
+                # vytvarim FK clienta
+                client: ClientRecord = CreateRecords.create_client(
+                    item["prijmeni"], item["krestni-jmeno"], item["psc"]
+                )
+                if client["client_created"]:
+                    self.counter["client_count"] += 1
+                # vytvarim Order
+                order: OrderRecord = CreateRecords.create_order(
+                    item, distrib_hub, client["client"], team_type
+                )
+                # =========================================
+                if order["order_created"]:
+                    if counter_type == "basic":
+                        self.counter["basic_order_count"] += 1
+                    elif counter_type == "extend":
+                        self.counter["extend_order_count"] += 1
+                else:
+                    self.counter["duplicit_count"] += 1
+                # =========================================
+            except DistribHub.DoesNotExist:
+                cons.log(
+                    f"Chybi DistribHub pro objednavku: \n"
+                    f"{item.get('cislo-zakazky', 'N/A')}",
+                    style="red",
+                )
+                raise
 
-            if order["order_created"]:
-                if counter_type == "basic":
-                    self.counter["basic_order_count"] += 1
-                elif counter_type == "extend":
-                    self.counter["extend_order_count"] += 1
-            else:
-                self.counter["duplicit_count"] += 1
+            except ValueError as e:
+                cons.log(
+                    f"spatna data ve sloupcich CSV souboru \n"
+                    f"'{item.get('cislo-zakazky', 'N/A')}': {e}",
+                    style="red",
+                )
+                raise
+            except Exception as e:
+                cons.log(
+                    f"Neocekavana chyba u objednavky: \n"
+                    f"{item.get('cislo-zakazky', 'N/A')} {e}",
+                    style="red",
+                )
+                raise
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("file", type=str, help="pridej soubor csv")
 
     def handle(self, *args, **kwargs):
-        # --- pro CLI jinak z formulare
+        # cesta k souboru
         file_path: Path = Path("./files") / kwargs["file"]
-        # ---
+
+        # nacteni datasetu
         dataset = DatasetTools.create_dataset(file_path)
         all_datasets: dict[str, DataFrame] = DatasetTools.dataset_filter(dataset)
-        # ---
+
+        # rozdeleni datasetu podle typu montaze
         datasets: list[tuple] = [
             (all_datasets["basic_dataset"], TeamType.BY_ASSEMBLY_CREW, "basic"),
             (all_datasets["extend_dataset"], TeamType.BY_CUSTOMER, "extend"),
         ]
-        # -------------------------------
-        for df, team_type, counter_type in datasets:
-            (self.create_orders_from_dataset(df, team_type, counter_type))
-        # -------------------------------
-        DatasetTools.logs(dataset, self.counter)
-        self.counter.clear()
+
+        try:
+            with transaction.atomic():
+                for df, team_type, counter_type in datasets:
+                    self.create_orders_from_dataset(df, team_type, counter_type)
+
+                # pokud vse probehlo bez chyby, vypiseme logy
+                DatasetTools.logs(dataset, self.counter)
+
+        except Exception as e:
+            cons.log(f"Dataset se nezpracoval kvuli chybe: {e}", style="red bold")
+            cons.log("Zadna data z tohoto souboru nebyla ulozena.", style="red")
+            raise
+
+        finally:
+            self.counter.clear()
 
 
 class DatasetTools:
@@ -190,11 +228,6 @@ class CreateRecords:
             "client_created": client_created,
         }
 
-        if client_created:
-            cons.log(f"🆗 {client} vytvoren", style="blue")
-        else:
-            cons.log(f"{client} jiz existuje", style="yellow")
-
         return result
 
     @staticmethod
@@ -225,9 +258,5 @@ class CreateRecords:
             "order": order,
             "order_created": order_created,
         }
-        if order_created:
-            cons.log(f"🆗 {order}: vytvoren\n...", style="blue")
-        else:
-            cons.log(f"⚠️ {order}: jiz existuje\n...", style="red")
 
         return result

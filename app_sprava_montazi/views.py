@@ -23,7 +23,7 @@ from django.views.generic import (
     FormView,
 )
 from .models import Order, Status, Team, Article, Client
-from .forms import TeamForm, ArticleForm, OrderForm, ClientForm, UploadForm
+from .forms import TeamForm, ArticleForm, OrderForm, ClientForm, UploadForm, DistribHub
 
 cons: Console = Console()
 APP_URL = "app_sprava_montazi"
@@ -60,30 +60,37 @@ class CreatePageView(LoginRequiredMixin, FormView):
         context["active"] = "create"
         return context
 
-    def form_valid(self, form: UploadForm) -> HttpResponse:
+    def form_valid(self, form) -> HttpResponse:
         """Voláno, když je formulář validní."""
         upload = form.save()
         try:
             call_command("import_data", upload.file.path)
             messages.success(self.request, "Import dokončen.")
             return super().form_valid(form)
-
+        # ---
         except KeyError:
             if settings.DEBUG:
                 cons.log("Chyba: spatny CSV soubor", style="red")
             messages.error(self.request, "Špatný typ souboru CSV")
             return redirect("createpage")
-
+        # ---
+        except DistribHub.DoesNotExist:
+            if settings.DEBUG:
+                cons.log("Chyba DistribHub neexistuje", style="red")
+            messages.error(self.request, "Neexistujicí místo určení!")
+            return redirect("createpage")
+        # ---
+        except ValueError as e:
+            if settings.DEBUG:
+                cons.log(f"Chyba hodnoty {str(e)}", style="red")
+            messages.error(self.request, f"Chyba hodnoty v souboru CSV! {str(e)}")
+            return redirect("createpage")
+        # ---
         except Exception as e:
             if settings.DEBUG:
                 cons.log(f"Chyba {str(e)}", style="red")
             messages.error(self.request, "Neznamá chyba!")
             return redirect("createpage")
-
-    def form_invalid(self, form: UploadForm):
-        """Voláno, když formulář není validní."""
-        messages.error(self.request, "Chyba formuláře!")
-        return super().form_invalid(form)
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
