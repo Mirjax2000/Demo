@@ -67,9 +67,10 @@ class CreatePageView(LoginRequiredMixin, FormView):
             call_command("import_data", upload.file.path)
             messages.success(self.request, "Import dokončen.")
             return super().form_valid(form)
+        
         except CommandError:
             messages.error(self.request, "Špatný typ souboru CSV")
-            return self.form_invalid(form)  # Voláme form_invalid pro zobrazení chyb
+            return self.form_invalid(form)  
 
     def form_invalid(self, form):
         """Voláno, když formulář není validní."""
