@@ -69,7 +69,15 @@ class CreatePageView(LoginRequiredMixin, FormView):
             return super().form_valid(form)
 
         except KeyError:
+            if settings.DEBUG:
+                cons.log("Chyba: spatny CSV soubor", style="red")
             messages.error(self.request, "Špatný typ souboru CSV")
+            return redirect("createpage")
+
+        except Exception as e:
+            if settings.DEBUG:
+                cons.log(f"Chyba {str(e)}", style="red")
+            messages.error(self.request, "Neznamá chyba!")
             return redirect("createpage")
 
     def form_invalid(self, form: UploadForm):
