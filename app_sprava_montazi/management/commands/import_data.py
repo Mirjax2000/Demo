@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import TypedDict
 from rich.console import Console
 from pandas import DataFrame, read_csv
-from django.core.management.base import BaseCommand, CommandParser
+from django.core.management.base import BaseCommand, CommandParser, CommandError
 from django.utils.text import slugify
 from app_sprava_montazi.models import DistribHub, Order, Client, TeamType
 
@@ -47,7 +47,7 @@ class Command(BaseCommand):
         dataset: DataFrame,
         team_type: TeamType,
         counter_type: str,
-    ):
+    ) -> None:
         """create orders form dataset"""
 
         for item in dataset.to_dict(orient="records"):
@@ -75,22 +75,26 @@ class Command(BaseCommand):
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("file", type=str, help="pridej soubor csv")
 
-    def handle(self, *args, **kwargs) -> None:
+    def handle(self, *args, **kwargs):
         # --- pro CLI jinak z formulare
         file_path: Path = Path("./files") / kwargs["file"]
         # ---
-        dataset = DatasetTools.create_dataset(file_path)
-        all_datasets: dict[str, DataFrame] = DatasetTools.dataset_filter(dataset)
-        # ---
-        datasets: list[tuple] = [
-            (all_datasets["basic_dataset"], TeamType.BY_ASSEMBLY_CREW, "basic"),
-            (all_datasets["extend_dataset"], TeamType.BY_CUSTOMER, "extend"),
-        ]
-        # -------------------------------
-        for df, team_type, counter_type in datasets:
-            (self.create_orders_from_dataset(df, team_type, counter_type))
-        # -------------------------------
-        DatasetTools.logs(dataset, self.counter)
+        try:
+            dataset = DatasetTools.create_dataset(file_path)
+            all_datasets: dict[str, DataFrame] = DatasetTools.dataset_filter(dataset)
+            # ---
+            datasets: list[tuple] = [
+                (all_datasets["basic_dataset"], TeamType.BY_ASSEMBLY_CREW, "basic"),
+                (all_datasets["extend_dataset"], TeamType.BY_CUSTOMER, "extend"),
+            ]
+            # -------------------------------
+            for df, team_type, counter_type in datasets:
+                (self.create_orders_from_dataset(df, team_type, counter_type))
+            # -------------------------------
+            DatasetTools.logs(dataset, self.counter)
+
+        except Exception as e:
+            raise CommandError(f"Import selhal: {str(e)}") from e
 
 
 class DatasetTools:
