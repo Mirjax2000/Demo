@@ -94,8 +94,6 @@ class Command(BaseCommand):
         self.counter.clear()
 
 
-
-
 class DatasetTools:
     """Utility class"""
 
@@ -213,13 +211,15 @@ class CreateRecords:
         # ---
         order, order_created = Order.objects.get_or_create(
             order_number=item["cislo-zakazky"],
-            distrib_hub=distrib_hub_obj,
-            mandant=item["mandant"],
-            client=client,
-            delivery_termin=delivery_termin,
-            evidence_termin=evidence_termin,
-            team_type=team_type,
-            notes=item["poznamka-mandanta"],
+            defaults={
+                "distrib_hub": distrib_hub_obj,
+                "mandant": item["mandant"],
+                "client": client,
+                "delivery_termin": delivery_termin,
+                "evidence_termin": evidence_termin,
+                "team_type": team_type,
+                "notes": item["poznamka-mandanta"],
+            },
         )
         result: OrderRecord = {
             "order": order,
