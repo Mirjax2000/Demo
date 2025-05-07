@@ -92,6 +92,7 @@ class Command(BaseCommand):
                 (self.create_orders_from_dataset(df, team_type, counter_type))
             # -------------------------------
             DatasetTools.logs(dataset, self.counter)
+            self.counter.clear()
 
         except Exception as e:
             raise CommandError(f"Import selhal: {str(e)}") from e
