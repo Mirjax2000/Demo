@@ -1,13 +1,12 @@
 """app_sprava_montazi View"""
 
-import os
-from pathlib import Path
 from typing import Any
 from rich.console import Console
 from django.db import transaction
 from django.conf import settings
 from django.core.management import call_command
 from django.db.models.query import QuerySet
+from django.core.management import CommandError
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
@@ -21,8 +20,9 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
     View,
+    FormView,
 )
-from .models import Order, DistribHub, Status, Team, Article, Client, Upload
+from .models import Order, Status, Team, Article, Client
 from .forms import TeamForm, ArticleForm, OrderForm, ClientForm, UploadForm
 
 cons: Console = Console()
@@ -47,34 +47,34 @@ class HomePageView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class CreatePageView(LoginRequiredMixin, View):
-    """Createpage View"""
+class CreatePageView(LoginRequiredMixin, FormView):
+    """Createpage View using FormView"""
 
     template_name = f"{APP_URL}/create/create.html"
+    form_class = UploadForm
+    success_url = reverse_lazy("createpage")
 
-    def get(self, request, *args, **kwargs):
-        form = UploadForm()
-        context = {
-            "form": form,
-            "active": "create",
-        }
-        return render(request, self.template_name, context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # --- navigace
+        context["active"] = "create"
+        return context
 
-    def post(self, request, *args, **kwargs):
-        form = UploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            upload = form.save()
+    def form_valid(self, form) -> HttpResponse:
+        """Voláno, když je formulář validní."""
+        upload = form.save()
+        try:
             call_command("import_data", upload.file.path)
+            messages.success(self.request, "Import dokončen.")
+            return super().form_valid(form)
+        except CommandError:
+            messages.error(self.request, "Špatný typ souboru CSV")
+            return self.form_invalid(form)  # Voláme form_invalid pro zobrazení chyb
 
-            messages.success(request, "Import dokončen.")
-            return redirect("createpage")
-
-        context = {
-            "form": form,
-            "active": "create",
-        }
-
-        return render(request, self.template_name, context)
+    def form_invalid(self, form):
+        """Voláno, když formulář není validní."""
+        messages.error(self.request, "Špatný typ souboru CSV")
+        return super().form_invalid(form)
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
