@@ -70,11 +70,11 @@ class CreatePageView(LoginRequiredMixin, FormView):
 
         except CommandError:
             messages.error(self.request, "Špatný typ souboru CSV")
-            return self.form_invalid(form)
+            return redirect("createpage")
 
     def form_invalid(self, form):
         """Voláno, když formulář není validní."""
-        messages.error(self.request, "Špatný typ souboru CSV")
+        messages.error(self.request, "Chyba formuláře!")
         return super().form_invalid(form)
 
 
