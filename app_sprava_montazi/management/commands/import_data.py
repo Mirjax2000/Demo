@@ -1,14 +1,16 @@
 """Custom commands"""
 
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 from typing import TypedDict
-from django.db import transaction
-from rich.console import Console
-from pandas import DataFrame, read_csv
+
 from django.core.management.base import BaseCommand, CommandParser
+from django.db import transaction
 from django.utils.text import slugify
-from app_sprava_montazi.models import DistribHub, Order, Client, TeamType
+from pandas import DataFrame, read_csv
+from rich.console import Console
+
+from app_sprava_montazi.models import Client, DistribHub, Order
 
 
 class ClientRecord(TypedDict):
@@ -33,20 +35,14 @@ cons: Console = Console()
 class Command(BaseCommand):
     """Custom command"""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # ---
-        self.counter: dict[str, int] = {
-            "by_assembly_crew_count": 0,
-            "by_customer_count": 0,
-            "client_count": 0,
-            "duplicit_count": 0,
-        }
+    counter: dict[str, int] = {
+        "by_assembly_crew_count": 0,
+        "by_customer_count": 0,
+        "client_count": 0,
+        "duplicit_count": 0,
+    }
 
-    def create_orders_from_dataset(
-        self,
-        dataset: DataFrame,
-    ) -> None:
+    def create_orders_from_dataset(self, dataset: DataFrame) -> None:
         """create orders form dataset with progress bar"""
 
         for item in dataset.to_dict(orient="records"):
@@ -67,21 +63,19 @@ class Command(BaseCommand):
                     distrib_hub,
                     client["client"],
                 )
+
                 # =========================================
-                if (
-                    order["order"].team_type == "By_assembly_crew"
-                    and order["order_created"]
-                ):
-                    self.counter["by_assembly_crew_count"] += 1
+                order_inst = order["order"]
 
-                elif (
-                    order["order"].team_type == "By_customer" and order["order_created"]
-                ):
-                    self.counter["by_customer_count"] += 1
-
+                if order["order_created"]:
+                    if order_inst.team_type == "By_assembly_crew":
+                        self.counter["by_assembly_crew_count"] += 1
+                    elif order_inst.team_type == "By_customer":
+                        self.counter["by_customer_count"] += 1
                 else:
                     self.counter["duplicit_count"] += 1
                 # =========================================
+
             except DistribHub.DoesNotExist:
                 cons.log(
                     f"Chybi DistribHub pro objednavku: \n"
