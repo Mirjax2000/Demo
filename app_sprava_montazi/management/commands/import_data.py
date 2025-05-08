@@ -68,7 +68,7 @@ class Command(BaseCommand):
         """create orders form dataset with progress bar"""
         total_items = len(dataset)
 
-        with Progress(TimeElapsedColumn()) as progress:
+        with Progress(SpinnerColumn(), TimeElapsedColumn()) as progress:
             task = progress.add_task("[cyan]Creating orders...", total=total_items)
 
             for item in dataset.to_dict(orient="records"):
