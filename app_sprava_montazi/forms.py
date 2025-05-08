@@ -14,8 +14,8 @@ class OrderForm(forms.ModelForm):
             "distrib_hub",
             "mandant",
             "status",
-            "delivery_termin",
             "evidence_termin",
+            "delivery_termin",
             "montage_termin",
             "team_type",
             "team",
@@ -55,14 +55,14 @@ class OrderForm(forms.ModelForm):
                     "class": "L-form__select",
                 }
             ),
-            "delivery_termin": forms.DateInput(
+            "evidence_termin": forms.DateInput(
                 attrs={
                     "class": "L-form__date",
                     "type": "date",
                 },
                 format="%Y-%m-%d",
             ),
-            "evidence_termin": forms.DateInput(
+            "delivery_termin": forms.DateInput(
                 attrs={
                     "class": "L-form__date",
                     "type": "date",
@@ -100,13 +100,13 @@ class OrderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields["delivery_termin"].input_formats = [
+        self.fields["evidence_termin"].input_formats = [
             "%Y-%m-%d",
             "%d.%m.%Y",
             "%d/%m/%Y",
         ]
 
-        self.fields["evidence_termin"].input_formats = [
+        self.fields["delivery_termin"].input_formats = [
             "%Y-%m-%d",
             "%d.%m.%Y",
             "%d/%m/%Y",
