@@ -68,16 +68,16 @@ class CreatePageView(LoginRequiredMixin, FormView):
             messages.success(self.request, "Import dokončen.")
             return super().form_valid(form)
         # ---
-        except KeyError:
+        except KeyError as e:
             if settings.DEBUG:
-                cons.log("Chyba: spatny CSV soubor", style="red")
-            messages.error(self.request, "Špatný typ souboru CSV")
+                cons.log(f"Chyba: {str(e)}", style="red")
+            messages.error(self.request, "Špatný soubor CSV")
             return redirect("createpage")
         # ---
         except DistribHub.DoesNotExist:
             if settings.DEBUG:
                 cons.log("Chyba DistribHub neexistuje", style="red")
-            messages.error(self.request, "Neexistujicí místo určení!")
+            messages.error(self.request, "Neexistujicí místo určení v CSV souboru!")
             return redirect("createpage")
         # ---
         except ValueError as e:
