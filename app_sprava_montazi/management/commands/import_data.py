@@ -44,6 +44,24 @@ class Command(BaseCommand):
             "duplicit_count": 0,
         }
 
+    def update_counters(self, client: ClientRecord, order: OrderRecord) -> None:
+        """Updating self.counter"""
+        client_created = client["client_created"]
+        order_instance = order["order"]
+        order_created = order["order_created"]
+
+        if client_created:
+            self.counter["client_count"] += 1
+
+        if order_created:
+            if order_instance.team_type == "By_assembly_crew":
+                self.counter["by_assembly_crew_count"] += 1
+            elif order_instance.team_type == "By_customer":
+                self.counter["by_customer_count"] += 1
+
+        else:
+            self.counter["duplicit_count"] += 1
+
     def create_orders_from_dataset(self, dataset: DataFrame) -> None:
         """create orders form dataset with progress bar"""
 
@@ -57,26 +75,12 @@ class Command(BaseCommand):
                 client: ClientRecord = CreateRecords.create_client(
                     item["prijmeni"], item["krestni-jmeno"], item["psc"]
                 )
-                if client["client_created"]:
-                    self.counter["client_count"] += 1
                 # vytvarim Order
                 order: OrderRecord = CreateRecords.create_order(
                     item, distrib_hub, client["client"]
                 )
 
-                # =========================================
-                order_instance = order["order"]
-                order_created = order["order_created"]
-
-                if order_created:
-                    if order_instance.team_type == "By_assembly_crew":
-                        self.counter["by_assembly_crew_count"] += 1
-                    elif order_instance.team_type == "By_customer":
-                        self.counter["by_customer_count"] += 1
-
-                else:
-                    self.counter["duplicit_count"] += 1
-                # =========================================
+                self.update_counters(client, order)
 
             except DistribHub.DoesNotExist:
                 cons.log(
@@ -123,9 +127,6 @@ class Command(BaseCommand):
             cons.log("Zadna data z tohoto souboru nebyla ulozena.", style="red")
             raise
 
-        finally:
-            self.counter.clear()
-
 
 class DatasetTools:
     """Utility class"""
@@ -165,7 +166,7 @@ class DatasetTools:
         return dataset
 
     @staticmethod
-    def create_datetime(source):
+    def create_datetime(source: str):
         if not source or source.strip().lower() == "nan":
             return None
         try:
