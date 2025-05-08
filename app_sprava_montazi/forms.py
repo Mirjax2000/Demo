@@ -356,11 +356,10 @@ class UploadForm(forms.ModelForm):
         widgets = {
             "file": forms.FileInput(
                 attrs={
-                    "class": "form-control",
+                    "class": "form-control mt-1",
                     "id": "formFile",
                     "type": "file",
                     "accept": ".csv",
-                    "style": "background-color: var(--bck-table-head); color: var(--txt-default); border-color: var(--border);",
                 }
             ),
         }
