@@ -121,7 +121,7 @@ class Command(BaseCommand):
                     self.create_orders_from_dataset(df, team_type, counter_type)
 
                 # pokud vse probehlo bez chyby, vypiseme logy
-                DatasetTools.logs(dataset, self.counter)
+                Utility.logs(dataset, self.counter)
 
         except Exception as e:
             cons.log(f"Dataset se nezpracoval kvuli chybe: {e}", style="red bold")
@@ -165,6 +165,7 @@ class DatasetTools:
         dataset["avizovany-termin"] = dataset["avizovany-termin"].fillna(False)
         dataset["poznamka-mandanta"] = dataset["poznamka-mandanta"].fillna("")
         dataset["cislo-zakazky"] = dataset["cislo-zakazky"].apply(slugify)
+
         return dataset
 
     @staticmethod
@@ -175,36 +176,18 @@ class DatasetTools:
         return None
 
     @staticmethod
-    def logs(dataset: DataFrame, counter: dict[str, int]) -> None:
-        """Vypis logu"""
-        small_break: str = "------\n"
-        big_break: str = "-" * 40 + "\n"
-        order_sum = counter["extend_order_count"] + counter["basic_order_count"]
-        cons.log(
-            big_break
-            + f"celkovy pocet zaznamu v datasetu je: {len(dataset)}\n"
-            + f"clientu vytvoreno: {counter['client_count']}\n"
-            + small_break
-            + f"zakazek basic vytvoreno: {counter['basic_order_count']}\n"
-            + f"zakazek extend vytvoreno: {counter['extend_order_count']}\n"
-            + small_break
-            + f"zakazek celkem vytvoreno: {order_sum}\n"
-            + small_break
-            + f"Duplicitni zakazky: {counter['duplicit_count']}\n"
-            + big_break,
-            style="blue",
-        )
-
-    @staticmethod
-    def dataset_filter(dataset: DataFrame) -> dict[str, DataFrame]:
+    def dataset_filter(dataset: DataFrame) -> DataFrame:
         """dataset filter"""
-        datasets: dict[str, DataFrame] = {
-            "basic_dataset": dataset[dataset["montaz"] == 1],
-            "extend_dataset": dataset[
-                (dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-r"))
-            ],
-        }
-        return datasets
+
+        dataset = dataset[
+            (dataset["montaz"] == 1)
+            | ((dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-r")))
+        ].copy()
+
+        dataset["team_type"] = "By_customer"
+        dataset.loc[dataset["montaz"] == 1, "team_type"] = "By_assembly_crew"
+
+        return dataset
 
 
 class CreateRecords:
@@ -260,3 +243,28 @@ class CreateRecords:
         }
 
         return result
+
+
+class Utility:
+    """Utility"""
+
+    @staticmethod
+    def logs(dataset: DataFrame, counter: dict[str, int]) -> None:
+        """Vypis logu"""
+        small_break: str = "------\n"
+        big_break: str = "-" * 40 + "\n"
+        order_sum = counter["extend_order_count"] + counter["basic_order_count"]
+        cons.log(
+            big_break
+            + f"celkovy pocet zaznamu v datasetu je: {len(dataset)}\n"
+            + f"clientu vytvoreno: {counter['client_count']}\n"
+            + small_break
+            + f"zakazek basic vytvoreno: {counter['basic_order_count']}\n"
+            + f"zakazek extend vytvoreno: {counter['extend_order_count']}\n"
+            + small_break
+            + f"zakazek celkem vytvoreno: {order_sum}\n"
+            + small_break
+            + f"Duplicitni zakazky: {counter['duplicit_count']}\n"
+            + big_break,
+            style="blue",
+        )
