@@ -61,18 +61,17 @@ class Command(BaseCommand):
                     self.counter["client_count"] += 1
                 # vytvarim Order
                 order: OrderRecord = CreateRecords.create_order(
-                    item,
-                    distrib_hub,
-                    client["client"],
+                    item, distrib_hub, client["client"]
                 )
 
                 # =========================================
-                order_inst = order["order"]
+                order_instance = order["order"]
+                order_created = order["order_created"]
 
-                if order["order_created"]:
-                    if order_inst.team_type == "By_assembly_crew":
+                if order_created:
+                    if order_instance.team_type == "By_assembly_crew":
                         self.counter["by_assembly_crew_count"] += 1
-                    elif order_inst.team_type == "By_customer":
+                    elif order_instance.team_type == "By_customer":
                         self.counter["by_customer_count"] += 1
 
                 else:
@@ -134,31 +133,32 @@ class DatasetTools:
     @staticmethod
     def create_dataset(file_path) -> DataFrame:
         """Create dataset"""
-        dataset: DataFrame = read_csv(
-            file_path,
-            encoding="cp1250",
-            delimiter=";",
-        ).dropna(how="all")
-        #
+        expected_cols: list[str] = [
+            "misto-urceni",
+            "cislo-zakazky",
+            "mandant",
+            "prijmeni",
+            "krestni-jmeno",
+            "psc",
+            "montaz",
+            "avizovany-termin",
+            "erfassungstermin",
+            "poznamka-mandanta",
+        ]
+        dataset: DataFrame = read_csv(file_path, encoding="cp1250", delimiter=";")
         dataset.columns = dataset.columns.str.strip()
         dataset.columns = [slugify(col) for col in dataset.columns]
-        dataset = dataset[
-            [
-                "misto-urceni",
-                "cislo-zakazky",
-                "mandant",
-                "prijmeni",
-                "krestni-jmeno",
-                "psc",
-                "montaz",
-                "avizovany-termin",
-                "erfassungstermin",
-                "poznamka-mandanta",
-            ]
-        ]
+        # kontrola sloupcu
+        missing = set(expected_cols) - set(dataset.columns)
+        if missing:
+            cons.log(f"chybi pozadovane sloupce: {missing}")
+            raise KeyError(f"CSV soubor postrádá požadované sloupce: {missing}")
+        # tvorba datasetu s pozadovanyma sloupcema
+        dataset = dataset[expected_cols]
         # cisteni datasetu
         dataset["krestni-jmeno"] = dataset["krestni-jmeno"].fillna("")
-        dataset["avizovany-termin"] = dataset["avizovany-termin"].fillna(False)
+        dataset["avizovany-termin"] = dataset["avizovany-termin"].fillna("").astype(str)
+        dataset["erfassungstermin"] = dataset["erfassungstermin"].fillna("").astype(str)
         dataset["poznamka-mandanta"] = dataset["poznamka-mandanta"].fillna("")
         dataset["cislo-zakazky"] = dataset["cislo-zakazky"].apply(slugify)
 
@@ -166,10 +166,13 @@ class DatasetTools:
 
     @staticmethod
     def create_datetime(source):
-        """Format pro delivery/evidence termin"""
-        if source:
-            return datetime.strptime(str(source), "%d.%m.%Y").date()
-        return None
+        if not source or source.strip().lower() == "nan":
+            return None
+        try:
+            return datetime.strptime(source.strip(), "%d.%m.%Y").date()
+        except ValueError:
+            cons.log(f"Chybný formát data: '{source}'", style="yellow")
+            return None
 
     @staticmethod
     def dataset_filter(dataset: DataFrame) -> DataFrame:
