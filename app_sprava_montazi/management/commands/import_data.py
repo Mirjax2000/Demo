@@ -3,12 +3,14 @@
 from datetime import datetime
 from pathlib import Path
 from typing import TypedDict
+from time import sleep
 
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import transaction
 from django.utils.text import slugify
 from pandas import DataFrame, read_csv
 from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 
 from app_sprava_montazi.models import Client, DistribHub, Order
 
@@ -64,47 +66,54 @@ class Command(BaseCommand):
 
     def create_orders_from_dataset(self, dataset: DataFrame) -> None:
         """create orders form dataset with progress bar"""
+        total_items = len(dataset)
 
-        for item in dataset.to_dict(orient="records"):
-            try:
-                # ziskavam FK DistribHubu
-                distrib_hub: DistribHub = DistribHub.objects.get(
-                    code=item["misto-urceni"]
-                )
-                # vytvarim FK clienta
-                client: ClientRecord = CreateRecords.create_client(
-                    item["prijmeni"], item["krestni-jmeno"], item["psc"]
-                )
-                # vytvarim Order
-                order: OrderRecord = CreateRecords.create_order(
-                    item, distrib_hub, client["client"]
-                )
+        with Progress(TimeElapsedColumn()) as progress:
+            task = progress.add_task("[cyan]Creating orders...", total=total_items)
 
-                self.update_counters(client, order)
+            for item in dataset.to_dict(orient="records"):
+                try:
+                    # ziskavam FK DistribHubu
+                    distrib_hub: DistribHub = DistribHub.objects.get(
+                        code=item["misto-urceni"]
+                    )
+                    # vytvarim FK clienta
+                    client: ClientRecord = CreateRecords.create_client(
+                        item["prijmeni"], item["krestni-jmeno"], item["psc"]
+                    )
+                    # vytvarim Order
+                    order: OrderRecord = CreateRecords.create_order(
+                        item, distrib_hub, client["client"]
+                    )
 
-            except DistribHub.DoesNotExist:
-                cons.log(
-                    f"Chybi DistribHub pro objednavku: \n"
-                    f"{item.get('cislo-zakazky', 'N/A')}",
-                    style="red",
-                )
-                raise
+                    self.update_counters(client, order)
 
-            except ValueError as e:
-                cons.log(
-                    f"spatna data ve sloupcich CSV souboru \n"
-                    f"'{item.get('cislo-zakazky', 'N/A')}': {e}",
-                    style="red",
-                )
-                raise
+                except DistribHub.DoesNotExist:
+                    cons.log(
+                        f"Chybi DistribHub pro objednavku: \n"
+                        f"{item.get('cislo-zakazky', 'N/A')}",
+                        style="red",
+                    )
+                    raise
 
-            except Exception as e:
-                cons.log(
-                    f"Neocekavana chyba u objednavky: \n"
-                    f"{item.get('cislo-zakazky', 'N/A')} {str(e)}",
-                    style="red",
-                )
-                raise
+                except ValueError as e:
+                    cons.log(
+                        f"spatna data ve sloupcich CSV souboru \n"
+                        f"'{item.get('cislo-zakazky', 'N/A')}': {e}",
+                        style="red",
+                    )
+                    raise
+
+                except Exception as e:
+                    cons.log(
+                        f"Neocekavana chyba u objednavky: \n"
+                        f"{item.get('cislo-zakazky', 'N/A')} {str(e)}",
+                        style="red",
+                    )
+                    raise
+
+                finally:
+                    progress.update(task, advance=1)
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("file", type=str, help="pridej soubor csv")
