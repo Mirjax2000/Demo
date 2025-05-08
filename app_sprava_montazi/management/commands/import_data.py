@@ -1,14 +1,16 @@
 """Custom commands"""
 
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 from typing import TypedDict
-from django.db import transaction
-from rich.console import Console
-from pandas import DataFrame, read_csv
+
 from django.core.management.base import BaseCommand, CommandParser
+from django.db import transaction
 from django.utils.text import slugify
-from app_sprava_montazi.models import DistribHub, Order, Client, TeamType
+from pandas import DataFrame, read_csv
+from rich.console import Console
+
+from app_sprava_montazi.models import Client, DistribHub, Order
 
 
 class ClientRecord(TypedDict):
@@ -35,7 +37,6 @@ class Command(BaseCommand):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # ---
         self.counter: dict[str, int] = {
             "by_assembly_crew_count": 0,
             "by_customer_count": 0,
@@ -43,10 +44,25 @@ class Command(BaseCommand):
             "duplicit_count": 0,
         }
 
-    def create_orders_from_dataset(
-        self,
-        dataset: DataFrame,
-    ) -> None:
+    def update_counters(self, client: ClientRecord, order: OrderRecord) -> None:
+        """Updating self.counter"""
+        client_created = client["client_created"]
+        order_instance = order["order"]
+        order_created = order["order_created"]
+
+        if client_created:
+            self.counter["client_count"] += 1
+
+        if order_created:
+            if order_instance.team_type == "By_assembly_crew":
+                self.counter["by_assembly_crew_count"] += 1
+            elif order_instance.team_type == "By_customer":
+                self.counter["by_customer_count"] += 1
+
+        else:
+            self.counter["duplicit_count"] += 1
+
+    def create_orders_from_dataset(self, dataset: DataFrame) -> None:
         """create orders form dataset with progress bar"""
 
         for item in dataset.to_dict(orient="records"):
@@ -59,29 +75,13 @@ class Command(BaseCommand):
                 client: ClientRecord = CreateRecords.create_client(
                     item["prijmeni"], item["krestni-jmeno"], item["psc"]
                 )
-                if client["client_created"]:
-                    self.counter["client_count"] += 1
                 # vytvarim Order
                 order: OrderRecord = CreateRecords.create_order(
-                    item,
-                    distrib_hub,
-                    client["client"],
+                    item, distrib_hub, client["client"]
                 )
-                # =========================================
-                if (
-                    order["order"].team_type == "By_assembly_crew"
-                    and order["order_created"]
-                ):
-                    self.counter["by_assembly_crew_count"] += 1
 
-                elif (
-                    order["order"].team_type == "By_customer" and order["order_created"]
-                ):
-                    self.counter["by_customer_count"] += 1
+                self.update_counters(client, order)
 
-                else:
-                    self.counter["duplicit_count"] += 1
-                # =========================================
             except DistribHub.DoesNotExist:
                 cons.log(
                     f"Chybi DistribHub pro objednavku: \n"
@@ -97,10 +97,11 @@ class Command(BaseCommand):
                     style="red",
                 )
                 raise
+
             except Exception as e:
                 cons.log(
                     f"Neocekavana chyba u objednavky: \n"
-                    f"{item.get('cislo-zakazky', 'N/A')} {e}",
+                    f"{item.get('cislo-zakazky', 'N/A')} {str(e)}",
                     style="red",
                 )
                 raise
@@ -122,12 +123,9 @@ class Command(BaseCommand):
                 Utility.logs(dataset, self.counter)
 
         except Exception as e:
-            cons.log(f"Dataset se nezpracoval kvuli chybe: {e}", style="red bold")
+            cons.log(f"Dataset se nezpracoval kvuli chybe: {str(e)}", style="red bold")
             cons.log("Zadna data z tohoto souboru nebyla ulozena.", style="red")
             raise
-
-        finally:
-            self.counter.clear()
 
 
 class DatasetTools:
@@ -136,42 +134,46 @@ class DatasetTools:
     @staticmethod
     def create_dataset(file_path) -> DataFrame:
         """Create dataset"""
-        dataset: DataFrame = read_csv(
-            file_path,
-            encoding="cp1250",
-            delimiter=";",
-        ).dropna(how="all")
-        #
+        expected_cols: list[str] = [
+            "misto-urceni",
+            "cislo-zakazky",
+            "mandant",
+            "prijmeni",
+            "krestni-jmeno",
+            "psc",
+            "montaz",
+            "avizovany-termin",
+            "erfassungstermin",
+            "poznamka-mandanta",
+        ]
+        dataset: DataFrame = read_csv(file_path, encoding="cp1250", delimiter=";")
         dataset.columns = dataset.columns.str.strip()
         dataset.columns = [slugify(col) for col in dataset.columns]
-        dataset = dataset[
-            [
-                "misto-urceni",
-                "cislo-zakazky",
-                "mandant",
-                "prijmeni",
-                "krestni-jmeno",
-                "psc",
-                "montaz",
-                "avizovany-termin",
-                "erfassungstermin",
-                "poznamka-mandanta",
-            ]
-        ]
+        # kontrola sloupcu
+        missing = set(expected_cols) - set(dataset.columns)
+        if missing:
+            cons.log(f"chybi pozadovane sloupce: {missing}")
+            raise KeyError(f"CSV soubor postrádá požadované sloupce: {missing}")
+        # tvorba datasetu s pozadovanyma sloupcema
+        dataset = dataset[expected_cols]
         # cisteni datasetu
         dataset["krestni-jmeno"] = dataset["krestni-jmeno"].fillna("")
-        dataset["avizovany-termin"] = dataset["avizovany-termin"].fillna(False)
+        dataset["avizovany-termin"] = dataset["avizovany-termin"].fillna("").astype(str)
+        dataset["erfassungstermin"] = dataset["erfassungstermin"].fillna("").astype(str)
         dataset["poznamka-mandanta"] = dataset["poznamka-mandanta"].fillna("")
         dataset["cislo-zakazky"] = dataset["cislo-zakazky"].apply(slugify)
 
         return dataset
 
     @staticmethod
-    def create_datetime(source):
-        """Format pro delivery/evidence termin"""
-        if source:
-            return datetime.strptime(str(source), "%d.%m.%Y").date()
-        return None
+    def create_datetime(source: str):
+        if not source or source.strip().lower() == "nan":
+            return None
+        try:
+            return datetime.strptime(source.strip(), "%d.%m.%Y").date()
+        except ValueError:
+            cons.log(f"Chybný formát data: '{source}'", style="yellow")
+            return None
 
     @staticmethod
     def dataset_filter(dataset: DataFrame) -> DataFrame:
