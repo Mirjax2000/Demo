@@ -35,12 +35,14 @@ cons: Console = Console()
 class Command(BaseCommand):
     """Custom command"""
 
-    counter: dict[str, int] = {
-        "by_assembly_crew_count": 0,
-        "by_customer_count": 0,
-        "client_count": 0,
-        "duplicit_count": 0,
-    }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.counter: dict[str, int] = {
+            "by_assembly_crew_count": 0,
+            "by_customer_count": 0,
+            "client_count": 0,
+            "duplicit_count": 0,
+        }
 
     def create_orders_from_dataset(self, dataset: DataFrame) -> None:
         """create orders form dataset with progress bar"""
@@ -72,6 +74,7 @@ class Command(BaseCommand):
                         self.counter["by_assembly_crew_count"] += 1
                     elif order_inst.team_type == "By_customer":
                         self.counter["by_customer_count"] += 1
+
                 else:
                     self.counter["duplicit_count"] += 1
                 # =========================================
@@ -91,10 +94,11 @@ class Command(BaseCommand):
                     style="red",
                 )
                 raise
+
             except Exception as e:
                 cons.log(
                     f"Neocekavana chyba u objednavky: \n"
-                    f"{item.get('cislo-zakazky', 'N/A')} {e}",
+                    f"{item.get('cislo-zakazky', 'N/A')} {str(e)}",
                     style="red",
                 )
                 raise
@@ -116,7 +120,7 @@ class Command(BaseCommand):
                 Utility.logs(dataset, self.counter)
 
         except Exception as e:
-            cons.log(f"Dataset se nezpracoval kvuli chybe: {e}", style="red bold")
+            cons.log(f"Dataset se nezpracoval kvuli chybe: {str(e)}", style="red bold")
             cons.log("Zadna data z tohoto souboru nebyla ulozena.", style="red")
             raise
 
