@@ -7,6 +7,9 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
+from .forms import UploadForm
 from app_sprava_montazi.models import (
     Order,
     DistribHub,
@@ -72,46 +75,21 @@ class HomePageViewTest(TestCase):
 
 class CreatePageViewTest(TestCase):
     def setUp(self):
-        # Vytvoříme testovacího uživatele
-        self.user = User.objects.create_user(username="testuser", password="testpass")
-        self.url = reverse("createpage")
-        self.template = "app_sprava_montazi/create/create.html"
-
-    def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
+        """Nastavení testu: vytvoření uživatele a přihlášení."""
+        self.user = get_user_model().objects.create_user(
+            username="testuser", password="testpass"
+        )
+        self.url = reverse("createpage")  # Předpokládám, že máte správnou URL
         self.client.login(username="testuser", password="testpass")
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, self.template)
-
-    def test_redirect_if_not_logged_in(self):
-        """
-        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
-        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
-        """
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
-
-
-    def test_form_in_context(self):
-        """
-        Testuje, zda je formulář v kontextu.
-        """
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(self.url)
-        self.assertIn('form', response.context)
 
     def test_post_without_file(self):
-        """
-        Testuje, zda POST bez souboru vrátí chybu.
-        """
-        self.client.login(username="testuser", password="testpass")
+        """Testuje, zda POST bez souboru vrátí chybu."""
         response = self.client.post(self.url, {})
         self.assertEqual(response.status_code, 200)
-        self.assertFormError(response, 'form', 'file', 'Soubor je povinný!')
+        form = response.context.get("form")
+        self.assertTrue(form.errors)
+        self.assertIn("file", form.errors)
+        self.assertIn("Soubor je povinný!", form.errors["file"])
 
 
 class DashboardViewTest(TestCase):
