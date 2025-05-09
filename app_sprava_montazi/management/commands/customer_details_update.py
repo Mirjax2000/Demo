@@ -11,18 +11,19 @@ class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.incomplete_customers: dict = {}
+        self.incomplete_customers: list[str] = self.incomplete_customers_query()
+        self.complete_customers: list[str] = self.complete_customers_query()
 
-    def incomplete_customers_query(self):
+    def incomplete_customers_query(self) -> list[str]:
         qs = Order.objects.filter(client__incomplete=True)
-        seznam: list = []
+        seznam: list[str] = []
 
         for record in qs:
             seznam.append(record.order_number.upper())
 
         return seznam
 
-    def complete_customers_query(self):
+    def complete_customers_query(self) -> list[str]:
         qs = Order.objects.filter(client__incomplete=False)
         seznam: list = []
 
@@ -36,8 +37,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         call_foo: dict = {
-            "complete": self.complete_customers_query,
-            "incomplete": self.incomplete_customers_query,
+            "complete": self.complete_customers,
+            "incomplete": self.incomplete_customers,
         }
 
         status = kwargs["status"]
@@ -45,4 +46,4 @@ class Command(BaseCommand):
         if status not in call_foo:
             raise CommandError("Status musí být 'complete' nebo 'incomplete'.")
 
-        cons.log(call_foo[status]())
+        cons.log(call_foo[status])
