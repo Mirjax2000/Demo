@@ -327,6 +327,16 @@ class ClientUpdateViewTest(TestCase):
         self.assertEqual(self.customer.phone, "234234234")
         self.assertEqual(self.customer.email, "karel@seznam.cz")
 
+    def test_order_not_found(self):
+        url = reverse("order_detail", kwargs={"pk": 99999})  # neexistující ID
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_order_found(self):
+        url = reverse("order_detail", kwargs={"pk": self.order.id})  # neexistující ID
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
 
 class OrderCreateViewTest(TestCase):
     def setUp(self):
@@ -629,6 +639,67 @@ class OrdersAllViewTest(TestCase):
         """
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+
+class OrderUpdateViewTests(TestCase):
+    def setUp(self):
+        # Vytvoříme usera a přihlásíme ho
+
+        self.user = get_user_model().objects.create_user(
+            username="testuser", password="testpass"
+        )
+        self.client.login(username="testuser", password="testpass")
+        self.status_key = Status.NEW
+        self.team_type_key = TeamType.BY_ASSEMBLY_CREW
+        self.hub = DistribHub.objects.create(code="111", city="Praha")
+        self.customer = Client.objects.create(name="Pedro Pascal", zip_code="12345")
+        self.team = Team.objects.create(
+            name="Test Company",
+            city="Praha",
+            region="Střední Čechy",
+            phone="123456789",
+            email="test@company.cz",
+            active=True,
+            price_per_hour=150.50,
+            price_per_km=12.30,
+            notes="Toto je testovací poznámka.",
+        )
+
+        # Vytvoříme zakázku
+        self.order = Order.objects.create(
+            order_number="ORD123",
+            distrib_hub=self.hub,
+            mandant="X001",
+            status=self.status_key,
+            client=self.customer,
+            evidence_termin="2024-06-01",
+            team=self.team,
+        )
+
+        self.url = reverse("order_update", kwargs={"pk": self.order.pk})
+        self.template = "app_sprava_montazi/orders/order_update_order-form.html"
+
+    def test_get_update_view(self):
+        """spravny logovani a zobrazeni"""
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "ORD123")  # kontrola, že se zakázka zobrazila
+        self.assertTemplateUsed(response, self.template)
+
+    def test_redirect_if_not_logged_in(self):
+        """
+        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
+        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
+        """
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_order_not_found(self):
+        url = reverse("order_update", kwargs={"pk": 99999})  # neexistující ID
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
 
 
 class TeamsViewTest(TestCase):
