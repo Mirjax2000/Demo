@@ -2,23 +2,29 @@
 
 from datetime import date
 from unittest.mock import patch
-from django.test import TestCase, Client as CL
+
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import Client as CL
+from django.test import TestCase
+from django.contrib.messages import get_messages
 from django.urls import reverse
 from django.utils import timezone
-from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model
-from django.core.files.uploadedfile import SimpleUploadedFile
-from .forms import UploadForm
+
 from app_sprava_montazi.models import (
-    Order,
-    DistribHub,
     Article,
     Client,
+    DistribHub,
+    Order,
+    Status,
     Team,
     TeamType,
-    Status,
+    Upload,
 )
+
+from .forms import UploadForm
 
 
 class IndexViewTest(TestCase):
@@ -27,13 +33,13 @@ class IndexViewTest(TestCase):
         self.user = User.objects.create_user(username="testuser", password="testpass")
         self.url = reverse("index")
         self.template = "base.html"
+        self.client.login(username="testuser", password="testpass")
 
     def test_logged_in(self):
         """
         Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
         a je použita správná šablona.
         """
-        self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
@@ -43,6 +49,7 @@ class IndexViewTest(TestCase):
         Testuje, zda je uživatel přesměrován na přihlašovací stránku,
         pokud není přihlášen a pokusí se zobrazit indexovou stránku.
         """
+        self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
 
@@ -74,37 +81,23 @@ class HomePageViewTest(TestCase):
 
 
 class CreatePageViewTest(TestCase):
-    def setUp(self):
-        """Nastavení testu: vytvoření uživatele a přihlášení."""
-        self.user = get_user_model().objects.create_user(
-            username="testuser", password="testpass"
-        )
-        self.url = reverse("createpage")  # Předpokládám, že máte správnou URL
-        self.client.login(username="testuser", password="testpass")
+    """Nastavení testu: vytvoření uživatele a přihlášení."""
 
-    def test_post_without_file(self):
-        """Testuje, zda POST bez souboru vrátí chybu."""
-        response = self.client.post(self.url, {})
-        self.assertEqual(response.status_code, 200)
-        form = response.context.get("form")
-        self.assertTrue(form.errors)
-        self.assertIn("file", form.errors)
-        self.assertIn("Soubor je povinný!", form.errors["file"])
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="testuser", password="testpass")
 
-
-class DashboardViewTest(TestCase):
     def setUp(self):
         # Vytvoříme testovacího uživatele
-        self.user = User.objects.create_user(username="testuser", password="testpass")
-        self.url = reverse("dashboard")
-        self.template = "app_sprava_montazi/dashboard/dashboard.html"
+        self.url = reverse("createpage")
+        self.template = "app_sprava_montazi/create/create.html"
+        self.client.login(username="testuser", password="testpass")
 
     def test_logged_in(self):
         """
         Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
         a je použita správná šablona.
         """
-        self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
@@ -114,6 +107,112 @@ class DashboardViewTest(TestCase):
         Testuje, zda je uživatel přesměrován na přihlašovací stránku,
         pokud není přihlášen a pokusí se zobrazit indexovou stránku.
         """
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_valid_form_submission(self):
+        # Simulujeme upload CSV souboru
+        csv_file = SimpleUploadedFile(
+            "test.csv", b"col1,col2\nval1,val2", content_type="text/csv"
+        )
+        response = self.client.post(
+            reverse("createpage"), {"file": csv_file}, follow=True
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Upload.objects.count(), 1)
+
+    def test_invalid_form_submission(self):
+        """bez zadani souboru do formulare"""
+
+        response = self.client.post(reverse("createpage"), {}, follow=True)
+
+        # Měla by se objevit chybová hláška
+        self.assertContains(response, "Soubor je povinný!")
+        self.assertEqual(Upload.objects.count(), 0)
+
+    def test_upload_creates_db_entry(self):
+        initial_count = Upload.objects.count()
+
+        csv_file = SimpleUploadedFile(
+            "valid.csv", b"header1,header2\n1,2", content_type="text/csv"
+        )
+        response = self.client.post(
+            reverse("createpage"), {"file": csv_file}, follow=True
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Upload.objects.count(), initial_count + 1)
+
+    @patch(
+        "app_sprava_montazi.views.call_command", side_effect=KeyError("missing column")
+    )
+    def test_key_error_handling(self, mock_command):
+        csv_file = SimpleUploadedFile(
+            "bad.csv", b"wrong,format\n1,2", content_type="text/csv"
+        )
+        response = self.client.post(
+            reverse("createpage"), {"file": csv_file}, follow=True
+        )
+
+        self.assertContains(response, "Špatný soubor CSV")
+
+    @patch(
+        "app_sprava_montazi.views.call_command",
+        side_effect=Exception("unexpected error"),
+    )
+    def test_unknown_exception_handling(self, mock_command):
+        csv_file = SimpleUploadedFile("bad.csv", b"ok", content_type="text/csv")
+        response = self.client.post(
+            reverse("createpage"), {"file": csv_file}, follow=True
+        )
+
+        self.assertContains(response, "Neznamá chyba!")
+
+    @patch(
+        "app_sprava_montazi.views.call_command", side_effect=ValueError("wrong value")
+    )
+    def test_value_error_handling(self, mock_command):
+        csv_file = SimpleUploadedFile("bad.csv", b"ok", content_type="text/csv")
+        response = self.client.post(
+            reverse("createpage"), {"file": csv_file}, follow=True
+        )
+
+        self.assertContains(response, "Chyba hodnoty v souboru CSV! wrong value")
+
+    @patch("app_sprava_montazi.views.call_command", side_effect=DistribHub.DoesNotExist)
+    def test_distribhub_doesnotexist_handling(self, mock_command):
+        csv_file = SimpleUploadedFile("bad.csv", b"ok", content_type="text/csv")
+        response = self.client.post(
+            reverse("createpage"), {"file": csv_file}, follow=True
+        )
+        self.assertContains(response, "Neexistujicí místo určení v CSV souboru!")
+
+
+class DashboardViewTest(TestCase):
+    def setUp(self):
+        # Vytvoříme testovacího uživatele
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.url = reverse("dashboard")
+        self.template = "app_sprava_montazi/dashboard/dashboard.html"
+        self.client.login(username="testuser", password="testpass")
+
+    def test_logged_in(self):
+        """
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
+
+    def test_redirect_if_not_logged_in(self):
+        """
+        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
+        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
+        """
+        self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
 
@@ -121,7 +220,9 @@ class DashboardViewTest(TestCase):
 class ClientUpdateViewTest(TestCase):
     def setUp(self):
         # Vytvoříme testovacího uživatele
+
         self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client.login(username="testuser", password="testpass")
         self.template = "app_sprava_montazi/orders/order_update_client-form.html"
         self.hub = DistribHub.objects.create(code="626", city="Chrastany")
         self.customer = Client.objects.create(name="franta", zip_code="11111")
@@ -148,7 +249,7 @@ class ClientUpdateViewTest(TestCase):
         Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
         a je použita správná šablona.
         """
-        self.client.login(username="testuser", password="testpass")
+
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
@@ -158,8 +259,73 @@ class ClientUpdateViewTest(TestCase):
         Testuje, zda je uživatel přesměrován na přihlašovací stránku,
         pokud není přihlášen a pokusí se zobrazit indexovou stránku.
         """
+        self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_context_data(self):
+        """test spravneho zobrazeni"""
+        response = self.client.get(self.url)
+        self.assertEqual(response.context["form_type"], "update")
+        self.assertEqual(response.context["order"], self.order)
+        self.assertQuerySetEqual(
+            response.context["articles"],
+            Article.objects.filter(order=self.order.pk),
+            transform=lambda x: x,
+        )
+        self.assertEqual(response.context["active"], "orders_all")
+
+    def test_success_message_displayed(self):
+        data = {
+            "name": "Karel",
+            "zip_code": "12345",
+        }
+        response = self.client.post(self.url, data, follow=True)
+        messages = [msg.message for msg in get_messages(response.wsgi_request)]
+        self.assertIn("Zákazník: Karel aktualizován.", messages)
+
+    def test_post_invalid_data_name(self):
+        data = {
+            "name": "",  # jméno je povinné
+            "zip_code": "12345",
+        }
+        response = self.client.post(self.url, data)
+
+        form = response.context["form"]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Jméno je povinné!", str(form.errors["name"]))
+
+    def test_post_invalid_data_zip_code(self):
+        data = {
+            "name": "ferda",  # jméno je povinné
+            "zip_code": "",
+        }
+        response = self.client.post(self.url, data)
+
+        form = response.context["form"]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("PSČ je povinné!", str(form.errors["zip_code"]))
+
+    def test_post_valid_data(self):
+        data = {
+            "name": "Karel",
+            "zip_code": "12345",
+            "street": "Kopretinova 15",
+            "city": "Kolin",
+            "phone": "234234234",
+            "email": "karel@seznam.cz",
+        }
+        response = self.client.post(self.url, data, follow=True)
+        self.assertRedirects(
+            response, reverse("order_detail", kwargs={"pk": self.order.pk})
+        )
+        self.customer.refresh_from_db()
+        self.assertEqual(self.customer.name, "Karel")
+        self.assertEqual(self.customer.zip_code, "12345")
+        self.assertEqual(self.customer.street, "Kopretinova 15")
+        self.assertEqual(self.customer.city, "Kolin")
+        self.assertEqual(self.customer.phone, "234234234")
+        self.assertEqual(self.customer.email, "karel@seznam.cz")
 
 
 class OrderCreateViewTest(TestCase):
@@ -168,6 +334,7 @@ class OrderCreateViewTest(TestCase):
         self.template = "app_sprava_montazi/orders/order_form.html"
         self.url = reverse("order_create")
         self.client = CL()
+        self.client.login(username="testuser", password="testpass")
         self.valid_status_key = Status.NEW
         self.valid_team_type_key = TeamType.BY_ASSEMBLY_CREW
         self.hub = DistribHub.objects.create(code="111", city="Praha")
@@ -242,7 +409,7 @@ class OrderCreateViewTest(TestCase):
         Testuje, zda přihlášený uživatel úspěšně získá GET stránku
         a je použita správná šablona a formuláře v kontextu.
         """
-        self.client.login(username="testuser", password="testpass")
+
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
@@ -260,6 +427,7 @@ class OrderCreateViewTest(TestCase):
         Testuje, zda je uživatel přesměrován na přihlašovací stránku,
         pokud není přihlášen a pokusí se zobrazit indexovou stránku.
         """
+        self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
 
@@ -268,7 +436,6 @@ class OrderCreateViewTest(TestCase):
         """
         Testuje úspěšné vytvoření objednávky s klientem a články při validních datech.
         """
-        self.client.login(username="testuser", password="testpass")
         initial_order_count = Order.objects.count()
         initial_client_count = Client.objects.count()
         initial_article_count = Article.objects.count()
@@ -323,7 +490,6 @@ class OrderCreateViewTest(TestCase):
 
     @patch("django.contrib.messages.error")
     def test_invalid_order_data_shows_errors(self, mock_error_message):
-        self.client.login(username="testuser", password="testpass")
         invalid_data = self.valid_order_data.copy()
         invalid_data["order_number"] = ""
         invalid_data["evidence_termin"] = ""
@@ -353,7 +519,6 @@ class OrderCreateViewTest(TestCase):
 
     @patch("django.contrib.messages.error")
     def test_unique_order_data_shows_errors(self, mock_error_message):
-        self.client.login(username="testuser", password="testpass")
         invalid_data = self.valid_order_data.copy()
         invalid_data["order_number"] = "703777143100437749-R"
         post_data = {
@@ -377,7 +542,7 @@ class OrderCreateViewTest(TestCase):
         Testuje úspěšné vytvoření objednávky s klientem, ale bez článků.
         Používá validní data vytvořená v setUp.
         """
-        self.client.login(username="testuser", password="testpass")
+
         initial_order_count = Order.objects.count()
         initial_client_count = Client.objects.count()
         initial_article_count = Article.objects.count()
