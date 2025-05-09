@@ -117,7 +117,7 @@ class Client(Model):
 
     def save(self, *args, **kwargs):
         self.incomplete = not all([self.street, self.city, self.phone])
-        self.slug = slugify(f"{self.name}{self.city}{self.street}")
+        self.slug = slugify(f"{self.name}{self.city}{self.zip_code}")
         super().save(*args, **kwargs)
 
     def first_15(self):

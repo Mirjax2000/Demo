@@ -47,3 +47,20 @@ class Command(BaseCommand):
             raise CommandError("Status musí být 'complete' nebo 'incomplete'.")
 
         cons.log(call_foo[status])
+
+
+class SeleniumFunction(Command):
+    recieved = [
+        "SDFSDFSDFS":{"name": "franta",
+                      "zip_code":"12345",
+                      },
+        "708809617500494793-O",
+        "708807379000495388-R",
+        "708806960800494870-R",
+        "708804205600494935-O",
+    ]
+
+
+
+    def selenium_1(self):
+        customers_incomplete = Command.incomplete_customers
