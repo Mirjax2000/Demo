@@ -3,6 +3,7 @@
 from django.db import models
 from django.db.models import (
     PROTECT,
+    SET_NULL,
     BooleanField,
     CharField,
     DateField,
@@ -16,9 +17,17 @@ from django.db.models import (
     TextChoices,
     TextField,
     PositiveIntegerField,
+    JSONField,
 )
+from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from phonenumber_field.modelfields import PhoneNumberField
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+
+# ---
+User = get_user_model()
+# ---
 
 
 class Status(TextChoices):
@@ -74,6 +83,10 @@ class Team(Model):
         verbose_name="Cena za km",
     )
     notes = TextField(blank=True, verbose_name="Poznámka")
+    created_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, null=True, verbose_name="Vytvoreno kym"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Vytvoreno kdy")
     slug = SlugField(unique=True, blank=True)
 
     def price_per_km_float(self) -> float:
@@ -113,6 +126,10 @@ class Client(Model):
     phone = PhoneNumberField(max_length=17, blank=True, verbose_name="Telefon")
     email = EmailField(blank=True, verbose_name="E-mail")
     incomplete = BooleanField(default=True, verbose_name="Neúplný záznam")
+    created_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, null=True, verbose_name="Vytvoreno kym"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Vytvoreno kdy")
     slug = SlugField(blank=True)
 
     def save(self, *args, **kwargs):
@@ -132,6 +149,10 @@ class Client(Model):
 class DistribHub(Model):
     code = CharField(max_length=3, unique=True)
     city = CharField(max_length=32)
+    created_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, null=True, verbose_name="Vytvoreno kym"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Vytvoreno kdy")
     slug = SlugField(blank=True, unique=True)
 
     def save(self, *args, **kwargs):
@@ -201,13 +222,14 @@ class Order(Model):
         verbose_name="Montážní tým",
     )
     notes = models.TextField(blank=True, verbose_name="Poznámky")
-    created = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Vytvořeno",
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, verbose_name="Kdo to vytvoril"
     )
-    updated = models.DateTimeField(
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Vytvoreno kdy")
+
+    updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name="Upraveno",
+        verbose_name="Upraveno kdy",
     )
 
     def notes_first_10(self) -> str:
@@ -246,6 +268,10 @@ class Article(Model):
     )
     quantity = PositiveIntegerField(default=1, verbose_name="Množství")
     note = TextField(blank=True, verbose_name="Popis")
+    created_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, null=True, verbose_name="Vytvoreno kym"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Vytvoreno kdy")
 
     def first_15(self) -> str:
         if self.note:
@@ -260,10 +286,22 @@ class Article(Model):
 
 class Upload(models.Model):
     file = models.FileField(upload_to="uploads/")
-    created = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, null=True, verbose_name="Vytvoreno kym"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Vytvoreno kdy")
 
     def __str__(self) -> str:
         return f"{self.file}"
 
     class Meta:
         ordering = ["-created"]
+
+
+class LogEntry(models.Model):
+    action = models.CharField(max_length=100)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField()
