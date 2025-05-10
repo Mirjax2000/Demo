@@ -3,6 +3,7 @@
 from django.db import models
 from django.db.models import (
     PROTECT,
+    SET_NULL,
     BooleanField,
     CharField,
     DateField,
