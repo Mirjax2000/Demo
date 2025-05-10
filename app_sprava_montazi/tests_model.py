@@ -90,7 +90,7 @@ class ClientModelTests(TestCase):
         customer = Client.objects.create(
             name="Jan Novák", street="Hlavní", city="Praha", zip_code="10000"
         )
-        expected_slug = slugify("Jan NovákPrahaHlavní")
+        expected_slug = slugify("Jan Novák Praha 10000")
         self.assertEqual(customer.slug, expected_slug)
 
     def test_first_15_short_name(self):
