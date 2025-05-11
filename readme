@@ -1,20 +1,6 @@
-## Uzivatele ##
-### User creation bude v prohlizeci ###
-- dispecer - Admin
-- ucetni - user
-- SuperUser - SuperUser
+## nahled aplikace ##
+![alt text]({29993479-509B-45EA-AC59-DD52D0BA1918}.png)
 
-## TODO ##
-- uchovat v pameti theme
+## detail objednavky ##
 
-## info ##
-- max width 1140px
-- min width 720px
-- include templates, budou v partials adresarich
-- hx-target: "id"  pro include elementy musi byt ve stejnym templatu aby bylo videt kam se to targetuje
-
-
-## db model ##
-
-- misto urceni:
-    -   
+![alt text]({1D989D01-D632-4D76-9E9D-DA2360F6DFE1}.png)
