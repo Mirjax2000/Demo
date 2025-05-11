@@ -20,6 +20,7 @@ from app_sprava_montazi.views import (
     ClientUpdateView as ClientUpdate,
     CreatePageView as CreatePage,
     OrderUpdateView as OrderUpdate,
+    ClientsOrdersView as ClientsOrders,
 )
 
 # --- typove zkratky
@@ -46,6 +47,7 @@ app_sprava_montazi: list = [
         name="client_update",
     ),
     path(f"order/detail/{PK}/", OrderDetail.as_view(), name="order_detail"),
+    path(f"order/client_orders/{SLUG}/", ClientsOrders.as_view(), name="client_orders"),
     #
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),

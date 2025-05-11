@@ -379,3 +379,22 @@ class TeamDetailView(LoginRequiredMixin, DetailView):
         # --- navigace
         context["active"] = "teams"
         return context
+
+
+class ClientsOrdersView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = f"{APP_URL}/orders/client_orders.html"
+    context_object_name = "orders"
+
+    def get_queryset(self):
+        slug = self.kwargs["slug"]
+        return Order.objects.filter(client__slug=slug)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        slug = self.kwargs["slug"]
+        context["client"] = Client.objects.get(slug=slug)
+
+        # --- navigace
+        context["active"] = "orders_all"
+        return context

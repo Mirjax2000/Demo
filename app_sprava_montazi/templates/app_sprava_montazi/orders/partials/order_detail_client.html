@@ -64,13 +64,14 @@
     <!---->
     <div class="{% if form_type == "update" %}d-none {% endif %}">
         <div>
-            <a href="#" class="btn btn-primary d-block mb-2 ms-5 me-5">
-                <i class="fa-solid fa-phone me-2"></i>Volat zákazníka</a>
+            <a href="{% url "client_orders" order.client.slug %}"
+               class="btn btn-primary d-block mb-2 ms-5 me-5">
+                <i class="fa-solid fa-table-list me-2"></i><span>Objednávky zákazníka</span></a>
         </div>
         <div>
             <a href="{% url 'client_update' order.client.slug order.pk %}"
                class="btn btn-primary d-block ms-5 me-5">
-                <i class="fa-solid fa-pen-to-square me-2"></i>Upravit zákazníka</a>
+                <i class="fa-solid fa-pen-to-square me-2"></i><span>Upravit zákazníka</span></a>
         </div>
     </div>
 </section>

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}
+    detail objednavky
+{% endblock title %}
+{% block content %}
+    <h2>Zakázky pro klienta: {{ client.name }}</h2>
+    <ul>
+        {% for order in orders %}
+            <li>{{ order.order_number }} - {{ order.status }}</li>
+        {% empty %}
+            <li>Žádné zakázky pro tohoto klienta.</li>
+        {% endfor %}
+    </ul>
+    <div>
+        <a href="#" class="btn btn-primary d-block mb-2 ms-5 me-5">
+            <i class="fa-solid fa-phone me-2"></i>Volat zákazníka</a>
+    </div>
+{% endblock content %}
