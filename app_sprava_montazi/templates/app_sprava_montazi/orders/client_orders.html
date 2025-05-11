@@ -3,16 +3,15 @@
     detail objednavky
 {% endblock title %}
 {% block content %}
-    <h2>Zakázky pro klienta: {{ client.name }}</h2>
-    <ul>
-        {% for order in orders %}
-            <li>{{ order.order_number }} - {{ order.status }}</li>
-        {% empty %}
-            <li>Žádné zakázky pro tohoto klienta.</li>
-        {% endfor %}
-    </ul>
-    <div>
-        <a href="#" class="btn btn-primary d-block mb-2 ms-5 me-5">
-            <i class="fa-solid fa-phone me-2"></i>Volat zákazníka</a>
-    </div>
+    <section class="L-table">
+        <h3>
+            Zakázky pro klienta:
+            <span class="ms-2">
+                <a href="#">{{ client.name }}</a>
+            </span>
+            <span class="ms-5">{{ client.phone }}</span>
+        </h3>
+        <hr>
+        {% include "app_sprava_montazi/orders/partials/orders_all_table.html" %}
+    </section>
 {% endblock content %}
