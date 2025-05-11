@@ -6,11 +6,6 @@ from .models import Order, Team, DistribHub, Upload, Client, Article
 class OrderAdmin(admin.ModelAdmin):
     search_fields = [
         "order_number",
-        "distrib_hub",
-        "mandant",
-        "client",
-        "team_type",
-        "team",
     ]
     list_filter = ["status"]
     list_display = [
