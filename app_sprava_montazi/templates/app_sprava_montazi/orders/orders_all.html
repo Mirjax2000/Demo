@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}
+  zakazky
+{% endblock title %}
+<!---->
+{% block content %}
+  <div class="L-table">
+    <h3 class="mb-3">
+      <i class="bi bi-list-ul L-table__icon"></i> Seznam zakázek
+    </h3>
+    <!---->
+    <div class="L-table__nav-panel">
+      <form class="l_table__nav-panel__form" action="{% url 'orders' %}">
+        <p class="mb-1">Filter status</p>
+        <div class="input-group">
+          <select name="status" class="form-select L-table__select" id="status">
+            <option value="">Všechny</option>
+            {% for status in statuses %}
+              <!---->
+              <option value="{{ status.value }}">{{ status.label }}</option>
+              <!---->
+            {% endfor %}
+          </select>
+          <!---->
+          <button class="btn btn-primary" type="submit">
+            <span class="me-2">Hledej</span>
+            <i class="bi bi-search"></i>
+          </button>
+          <!---->
+        </div>
+      </form>
+      <!---->
+      <div class="L-table__nav-panel__buttons">
+        <a href="{% url "order_create" %}" class="btn btn-primary">
+          <i class="fa-solid fa-circle-plus me-2"></i>
+          <span>Vytvořit zakázku</span>
+        </a>
+      </div>
+    </div>
+    <hr />
+    <!--table-->
+    {% include "app_sprava_montazi/orders/partials/orders_all_table.html" %}
+    <!---->
+  </div>
+{% endblock content %}

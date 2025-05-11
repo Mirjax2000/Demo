@@ -2,12 +2,14 @@
 @use "../base/placeholders" as *;
 
 .P-body {
+  @extend %transition-theme;
+
   background-color: var(--bck-body);
   color: var(--txt-default);
 }
 
 .P-container {
-  @include container(720px, 1140px, 1em);
+  @include container(64rem, 90%, 1%);
 }
 
 .P-wrapper {
@@ -15,7 +17,15 @@
 }
 
 .P-main {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
   flex: 1;
+  position: relative;
+  isolation: isolate;
+}
+
+.P-main.visible {
+  opacity: 1;
 }
 
 .P-sidebar {

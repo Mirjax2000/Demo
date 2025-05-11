@@ -1,0 +1,88 @@
+@use "../utils/" as *;
+@use "../base/placeholders" as *;
+
+.L-table {
+  @extend %transition-theme;
+
+  width: clamp(30rem, 100%, 87.5rem);
+  margin-top: $header-margin;
+  margin-inline-start: 2%;
+
+  &__nav-panel {
+    @include flex(space-around, flex-end);
+
+    &__form {
+      flex: 0;
+    }
+
+    &__buttons {
+      flex: 1;
+      text-align: right;
+    }
+  }
+
+  &__table {
+    font-size: 0.75rem;
+
+    thead th {
+      @extend %transition-theme;
+
+      color: var(--txt-default);
+      background-color: var(--bck-table-head);
+    }
+  }
+
+  &__body {
+    &__row {
+      border-color: var(--border);
+      border-left: 3px solid transparent;
+      border-right: 3px solid transparent;
+
+      &:hover {
+        border-left: 3px solid var(--success);
+        border-right: 3px solid var(--success);
+      }
+    }
+  }
+
+  &__icon {
+    font-size: 80%;
+  }
+
+  &__select {
+    width: 9.625rem !important;
+    padding-right: 1rem;
+    cursor: pointer;
+  }
+
+  &__link {
+    color: var(--txt-default);
+  }
+
+  &__update {
+    text-align: center;
+
+    i {
+      cursor: pointer;
+      color: var(--success-lighter);
+      text-shadow: 1px 1px 2px #00000084;
+      transition: transform 0.1s ease-in-out;
+
+      &:hover {
+        transform: scale(1.2);
+      }
+
+      &:active {
+        transform: scale(0.9);
+      }
+    }
+  }
+}
+
+.L-table .dt-input {
+  @extend %transition-theme;
+
+  background-color: var(--bck-table-head) !important;
+  color: var(--txt-default) !important;
+  border-color: var(--border) !important;
+}

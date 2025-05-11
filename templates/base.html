@@ -1,77 +1,115 @@
 <!DOCTYPE html>
 {% load static %}
-<html lang="cs" data-theme="dark">
+<html lang="cs" data-theme="dark" class="dark">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description"
+              content="Rhenus HD - Asset Management System for maintenance and repair operations" />
+        <meta name="keywords"
+              content="rhenus, asset management, maintenance, repair, operations" />
         <title>
             {% block title %}
-                Default Title
+                Rhenus
             {% endblock title %}
         </title>
-        <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}" />
-        <link rel="stylesheet"
-              href="{% static "fonts/fontAwesome_css/all.min.css" %}" />
-        <link rel="stylesheet"
-              href="{% static "fonts/fontAwesome_css/fontawesome.min.css" %}" />
-        <link rel="stylesheet"
-              href="{% static "fonts/bootstrap_icons/font/bootstrap-icons.min.css" %}" />
-        <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+        {% include "includes/css.html" %}
+        {% block css %}
+            <!-- css files go here -->
+        {% endblock css %}
     </head>
+    <script>
+        (function () {
+        const savedTheme = localStorage.getItem("theme");
+        const html = document.documentElement;
+        if (savedTheme) {
+            document.documentElement.setAttribute("data-theme", savedTheme);
+            html.classList.add(savedTheme);
+        }
+    })();
+    </script>
+    <!---->
     <body class="P-body">
         <div class="P-container">
             <div class="P-wrapper">
                 <!-- Left side navigation -->
-                <aside class="L-sidebar P-sidebar">
+                <aside class="L-sidebar P-sidebar" id="leftSide">
                     <header class="L-sidebar__header">
-                        <i class="bi bi-wrench-adjustable-circle"></i><span class="L-sidebar__span">Rhenus HD - AMS</span>
+                        <a href="{% url "index" %}" class="L-sidebar__header__link">
+                            <i class="bi bi-wrench-adjustable-circle"></i>
+                            <span class="L-sidebar__header__logo">Rhenus HD - AMS</span>
+                        </a>
                     </header>
-                    <nav class="L-sidebar__nav">
+                    <!---->
+                    <nav class="L-sidebar__nav" id="nav">
                         <ul class="L-sidebar__list">
                             <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link"><i class="bi bi-house"></i><span class="L-sidebar__span">Home</span></a>
+                                <a href="{% url "homepage" %}"
+                                   class="L-sidebar__nav-link link {% if active == 'homepage' %}L-active{% endif %}">
+                                    <i class="bi bi-house"></i>
+                                    <span class="L-sidebar__span">Home</span>
+                                </a>
+                            </li>
+                            <!---->
+                            <li class="L-sidebar__list__item">
+                                <a a
+                                   href="{% url "dashboard" %}"
+                                   class="L-sidebar__nav-link link {% if active == 'dashboard' %}L-active{% endif %}">
+                                    <i class="bi bi-speedometer2"></i>
+                                    <span class="L-sidebar__span">Dashboard</span>
+                                </a>
+                            </li>
+                            <!---->
+                            <li class="L-sidebar__list__item">
+                                <a href="{% url "createpage" %}"
+                                   class="L-sidebar__nav-link link {% if active == 'create' %}L-active{% endif %}">
+                                    <i class="bi bi-tools"></i>
+                                    <span class="L-sidebar__span">Vytvořit</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link L-active"><i class="bi bi-speedometer2"></i><span class="L-sidebar__span">Dashboard</span></a>
+                                <a href="{% url "orders" %}"
+                                   class="L-sidebar__nav-link link {% if active == 'orders_all' %}L-active{% endif %}">
+                                    <i class="bi bi-table"></i>
+                                    <span class="L-sidebar__span">Zakázky</span></a>
                             </li>
                             <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link"><i class="bi bi-tools"></i><span class="L-sidebar__span">Vytvořit</span></a>
-                            </li>
-                            <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link"><i class="bi bi-table"></i><span class="L-sidebar__span">Zakázky</span></a>
-                            </li>
-                            <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link"><i class="bi bi-grid"></i><span class="L-sidebar__span">Sestavy</span></a>
-                            </li>
-                            <li class="L-sidebar__list__item">
-                                <a href="#" class="L-sidebar__nav-link"><i class="bi bi-people"></i><span class="L-sidebar__span">Týmy</span></a>
-                            </li>
-                            <li class="L-sidebar__list__item">
-                                <a href="{% url "logout" %}" class="L-sidebar__nav-link"><i class="bi bi-box-arrow-left"></i><span class="L-sidebar__span">Logout</span></a>
-                            </li>
-                        </ul>
-                    </nav>
-                    <footer class="L-sidebar__footer">
-                        <p>DaliborZ-tech ©2025</p>
-                    </footer>
-                </aside>
-                <!-- Right side content -->
-                <main class="P-main">
-                    <div class="container">
-                        {% block content %}
-                            <!-- Main content will go here -->
-                        {% endblock content %}
-                    </div>
-                </main>
-            </div>
-            <button id="themeToggler" class="btn btn-primary">
-                <i class="fa-solid fa-toggle-off"></i><span class="ms-2">Přepnout motiv</span>
-            </button>
-        </div>
-        {% block scripts %}
-            <!-- JavaScript files go here -->
-            <script src="{% static "js/bootstrap.bundle.min.js " %}"></script>
-            <script src="{% static "js/script.js " %}"></script>
-        {% endblock scripts %}
-    </body>
+                            <a href="#" class="L-sidebar__nav-link link"><i class="bi bi-grid"></i>
+                            <span class="L-sidebar__span">Sestavy</span></a>
+                    </li>
+                    <li class="L-sidebar__list__item">
+                    <a href="{% url "teams" %}"
+                       class="L-sidebar__nav-link link {% if active == 'teams' %}L-active{% endif %}"><i class="bi bi-people"></i>
+                    <span class="L-sidebar__span">Týmy</span></a>
+            </li>
+            <li class="L-sidebar__list__item">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="L-sidebar__btn">
+                        <i class="bi bi-box-arrow-left"></i><span class="L-sidebar__span">Logout</span>
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+    <button id="themeToggler" class="L-sidebar__btn">
+        <i class="fa-solid fa-toggle-off"></i><span class="L-sidebar__span">Theme</span>
+    </button>
+    {% include "app_sprava_montazi/partials/spinner.html" %}
+    <footer class="L-sidebar__footer">
+        <p>DaliborZ-tech ©2025</p>
+    </footer>
+</aside>
+<!-- Right side content -->
+<main class="P-main">
+    {% include "includes/message.html" %}
+    {% block content %}
+    {% endblock content %}
+</main>
+</div>
+</div>
+{% include "includes/scripts.html" %}
+{% block scripts %}
+    <!-- JavaScript files go here -->
+{% endblock scripts %}
+</body>
 </html>

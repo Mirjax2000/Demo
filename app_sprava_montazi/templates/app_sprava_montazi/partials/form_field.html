@@ -1,0 +1,14 @@
+{% for field in form %}
+    <div class="L-form__group">
+        {{ field.label_tag }}
+        {{ field }}
+    </div>
+    <div class="L-form__error">
+        {% if field.errors %}{{ field.errors }}{% endif %}
+    </div>
+{% endfor %}
+{% if form_type == "create" %}
+    <div class="u-txt-right">
+        <button class="btn btn-outline-secondary form__delete C-clear-form">Vyčistit</button>
+    </div>
+{% endif %}

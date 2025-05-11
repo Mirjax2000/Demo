@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}
+    detail objednavky
+{% endblock title %}
+{% block content %}
+    <section class="L-detail">
+        <div class="L-detail__body">
+            <!--objednavka-->
+            {% include "app_sprava_montazi/orders/partials/order_detail_order.html" %}
+            <!--zakaznik-->
+            {% include "app_sprava_montazi/orders/partials/order_detail_client.html" %}
+            <!--artikl-->
+            {% include "app_sprava_montazi/orders/partials/order_detail_article.html" %}
+        </div>
+        <!---->
+        <p class="mt-3">
+            <a href="{% url 'orders' %}">Zpět na seznam objednávek</a>
+        </p>
+    </section>
+{% endblock content %}

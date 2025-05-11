@@ -1,0 +1,8 @@
+{% for article in articles %}
+    <tr class="L-table__body__row">
+        <td>{{ article.name }}</td>
+        <td>{{ article.price }} Kč</td>
+        <td>{{ article.quantity }}</td>
+        <td title="{{ article.note }}">{{ article.first_15 }}</td>
+    </tr>
+{% endfor %}

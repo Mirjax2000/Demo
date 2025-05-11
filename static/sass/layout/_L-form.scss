@@ -1,2 +1,111 @@
 @use "../utils/" as *;
 @use "../base/placeholders" as *;
+
+.L-form {
+  @extend %transition-theme;
+
+  margin-inline-start: 2%;
+  margin-top: $header-margin;
+  color: var(--txt-default);
+
+  &__body {
+    @include flex(flex-start, stretch, 2%);
+  }
+
+  &__group {
+    margin-bottom: 0.3em;
+
+    label {
+      user-select: none;
+      display: block;
+    }
+
+    .L-form__input,
+    input {
+      @extend %border-radius;
+      @extend %transition-theme;
+
+      display: block;
+      width: 100%;
+      color: var(--txt-default);
+      background-color: var(--bck-table-head);
+      padding: 0.3em 0.5em;
+      border: 1px solid var(--border);
+      box-shadow: 1px 1px 1px #00000069;
+    }
+
+    .L-form__checkbox {
+      display: block;
+      width: 1.875rem;
+      aspect-ratio: 1/1;
+      margin-inline: 4em;
+      margin-bottom: 0.3em;
+    }
+
+    .L-form__select {
+      @extend %border-radius;
+      @extend %transition-theme;
+
+      display: block;
+      width: 100%;
+      color: var(--success-lighter);
+      background-color: var(--bck-table-head);
+      font-weight: bold;
+      padding: 0.3em 0.5em;
+
+      option {
+        color: var(--success-lighter);
+        font-weight: bold;
+      }
+    }
+
+    .L-form__date {
+      @extend %border-radius;
+      @extend %transition-theme;
+
+      width: 100%;
+      display: block;
+      color: var(--txt-default);
+      background-color: var(--bck-table-head);
+      padding: 0.3em 0.5em;
+      border: 1px solid var(--border);
+      box-shadow: 1px 1px 1px #00000069;
+      cursor: pointer;
+    }
+  }
+
+  &__fieldset {
+    flex-grow: 1;
+    max-width: 22rem;
+    min-width: 20rem;
+    flex-shrink: 0;
+
+    &__header {
+      font-size: 1.5rem;
+      font-weight: 400;
+    }
+  }
+
+  &__error {
+    ul {
+      padding: 0;
+      margin: 0;
+
+      li {
+        color: var(--error);
+        list-style: none;
+        line-height: 1;
+        margin: 0;
+        padding: 0.3em;
+      }
+    }
+  }
+
+  &__articles {
+    display: none;
+
+    label {
+      display: inline-block;
+    }
+  }
+}

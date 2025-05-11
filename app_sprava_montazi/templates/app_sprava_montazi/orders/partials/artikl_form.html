@@ -1,0 +1,58 @@
+{% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+    </div>
+{% endif %}
+<div class="row mb-2"
+     data-form-index="{{ form.prefix|default:'__prefix__' }}">
+    {{ form.id }}
+    <div class="L-form__group">
+        {{ form.name.label_tag }}
+        {{ form.name }}
+        {% for error in form.name.errors %}<span class="text-danger">{{ error }}</span>{% endfor %}
+    </div>
+    <div class="u-flex-row">
+        <div>
+            <!-- Price -->
+            <div class="L-form__group">
+                {{ form.price.label_tag }}
+                {{ form.price }}
+            </div>
+            <div class="L-form__error">
+                {% if form.price.errors %}{{ form.price.errors }}{% endif %}
+            </div>
+        </div>
+        <div>
+            <!-- Quantity -->
+            <div class="L-form__group">
+                {{ form.quantity.label_tag }}
+                {{ form.quantity }}
+            </div>
+            <div class="L-form__error">
+                {% if form.quantity.errors %}{{ form.quantity.errors }}{% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="L-form__group">
+        {{ form.note.label_tag }}
+        {{ form.note }}
+    </div>
+    <!---->
+    {% if form_type == "create" %}
+        <span class="d-none">{{ form.DELETE }}</span>
+        <div class="u-flex-row-between-start">
+            {% if article_formset.can_delete %}
+                <button type="button"
+                        class="remove-article-button btn btn-danger btn-sm mb-2">Odebrat artikl</button>
+            {% endif %}
+            <button class="btn btn-outline-secondary form__delete C-clear-form">Vyčistit</button>
+        </div>
+    {% else %}
+        <span class="d-none">{{ form.DELETE }}</span>
+        <div class="u-flex-row-between-start">
+            {% if article_formset.can_delete %}
+                <button type="button" class="remove-article-button btn btn-danger btn-sm">Odebrat artikl</button>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

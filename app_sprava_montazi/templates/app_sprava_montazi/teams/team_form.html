@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}
+    tym formular
+{% endblock title %}
+<!---->
+{% block content %}
+    <section class="L-form">
+        <div>
+            <form method="post" class="L-form__form" novalidate>
+                {% csrf_token %}
+                    {% include "app_sprava_montazi/teams/partials/team_form_partial.html" with form=form %}
+            </form>
+        </div>
+    </section>
+{% endblock content %}

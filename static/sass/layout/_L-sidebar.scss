@@ -3,21 +3,34 @@
 
 .L-sidebar {
   @extend %select-none;
+  @extend %transition-theme;
   @include flex(flex-start, flex-start);
 
   flex-direction: column;
   min-height: 100dvh;
-  width: 12.5rem;
+  width: 11.25rem;
   background-color: var(--bck-sidebar);
   box-shadow: 1px 0 1px var(--shadow);
-  padding: 1em;
+  padding: 0.5em;
 
   &__header {
     flex: 0 0 auto;
     width: 100%;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 1em;
     padding-bottom: 0.5em;
+    margin-bottom: 1em;
+
+    &__link {
+      @extend %transition-theme;
+      @include flex(space-between, center);
+
+      color: var(--txt-default);
+      text-decoration: none;
+    }
+
+    &__logo {
+      font-weight: lighter;
+    }
   }
 
   &__nav {
@@ -26,13 +39,27 @@
   }
 
   &__nav-link {
+    &.link {
+      @extend %transition;
+
+      &:hover {
+        border-left: 3px solid var(--success);
+      }
+
+      &:active {
+        transform: translateX(1px);
+      }
+    }
+
+    @extend %transition-theme;
+
     width: 100%;
     display: block;
     text-decoration: none;
     color: var(--txt-default);
-    padding: 0.5em 1em;
+    padding: 0.3em 0.5em;
     border-left: 3px solid transparent;
-    transition: 0.1s all ease-in-out;
+    cursor: pointer;
 
     &:hover {
       border-left: 3px solid var(--success);
@@ -47,6 +74,28 @@
     margin-left: 1em;
   }
 
+  &__btn {
+    @extend %transition-theme;
+
+    width: 100%;
+    display: block;
+    text-align: left;
+    padding: 0.3em 0.5em;
+    background-color: var(--bck-sidebar);
+    color: var(--txt-default);
+    text-decoration: none;
+    border: none;
+    border-left: 3px solid transparent;
+
+    &:hover {
+      border-left: 3px solid var(--success);
+    }
+
+    &:active {
+      transform: translateX(1px);
+    }
+  }
+
   &__list {
     width: 100%;
     padding: 0;
@@ -55,11 +104,10 @@
 
     &__item {
       width: 100%;
-      margin-bottom: 0.3em;
+      margin-bottom: 1em;
 
       &:last-child {
-        margin-top: 3em;
-        margin-bottom: 0;
+        margin-block: 3em 0;
       }
     }
   }
@@ -83,4 +131,9 @@
     margin-top: 1em;
     padding-top: 0.5em;
   }
+}
+
+.bi-wrench-adjustable-circle {
+  color: var(--success);
+  font-size: 1.8rem;
 }

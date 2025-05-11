@@ -1,0 +1,92 @@
+<fieldset class="L-form__fieldset">
+    <legend class="L-form__legend">Montážní tým</legend>
+    <!--name-->
+    <div class="L-form__group">
+        {{ form.name.label_tag }}
+        {{ form.name }}
+    </div>
+    <div class="L-form__error">
+        {% if form.name.errors %}{{ form.name.errors }}{% endif %}
+    </div>
+    <!--city-->
+    <div class="L-form__group">
+        {{ form.city.label_tag }}
+        {{ form.city }}
+    </div>
+    <div class="L-form__error">
+        {% if form.city.errors %}{{ form.city.errors }}{% endif %}
+    </div>
+    <!--region-->
+    <div class="L-form__group">
+        {{ form.region.label_tag }}
+        {{ form.region }}
+    </div>
+    <div class="L-form__error">
+        {% if form.region.errors %}{{ form.region.errors }}{% endif %}
+    </div>
+    <!--phone-->
+    <div class="L-form__group">
+        {{ form.phone.label_tag }}
+        {{ form.phone }}
+    </div>
+    <div class="L-form__error">
+        {% if form.phone.errors %}{{ form.phone.errors }}{% endif %}
+    </div>
+    <!--email-->
+    <div class="L-form__group">
+        {{ form.email.label_tag }}
+        {{ form.email }}
+    </div>
+    <div class="L-form__error">
+        {% if form.email.errors %}{{ form.email.errors }}{% endif %}
+    </div>
+    <!---->
+    <div class="u-flex-row">
+        <!--active-->
+        <div>
+            <label class="form-check-label" for="id_active">{{ form.active.label }}</label>
+            {{ form.active }}
+        </div>
+        <div>
+            <!--perhour-->
+            <div class="L-form__group">
+                {{ form.price_per_hour.label_tag }}
+                {{ form.price_per_hour }}
+            </div>
+            <div class="L-form__error">
+                {% if form.price_per_hour.errors %}{{ form.price_per_hour.errors }}{% endif %}
+            </div>
+        </div>
+        <div>
+            <!--perkm-->
+            <div class="L-form__group">
+                {{ form.price_per_km.label_tag }}
+                {{ form.price_per_km }}
+            </div>
+            <div class="L-form__error">
+                {% if form.price_per_km.errors %}{{ form.price_per_km.errors }}{% endif %}
+            </div>
+        </div>
+    </div>
+    <!--notes-->
+    <div class="L-form__group">
+        {{ form.notes.label_tag }}
+        {{ form.notes }}
+    </div>
+    <div class="L-form__error">
+        {% if form.notes.errors %}{{ form.notes.errors }}{% endif %}
+    </div>
+    <!---->
+    {% if form_type == "create" %}
+        <div class="u-txt-right">
+            <button class="btn btn-outline-secondary form__delete C-clear-form">Vyčistit</button>
+        </div>
+    {% endif %}
+    {% if form.non_field_errors %}<div class="L-form__error">{{ form.non_field_errors }}</div>{% endif %}
+    <!---->
+    <div class="u-txt-right mt-3">
+        <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-plus me-2"></i>Uložit tým
+        </button>
+    </div>
+</fieldset>

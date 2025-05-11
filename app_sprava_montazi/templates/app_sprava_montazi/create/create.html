@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}
+    Vytvořit
+{% endblock title %}
+<!---->
+{% block content %}
+    <section class="L-form">
+        <div>
+            <fieldset class="L-form__fieldset">
+                <legend>Import dat z CSV souboru</legend>
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    <div class="L-form__group">
+                        <label for="{{ form.file.id_for_label }}">Vyberte CSV soubor pro import</label>
+                        {{ form.file }}
+                        <div class="L-form__error">
+                            {% if form.file.errors %}{{ form.file.errors }}{% endif %}
+                        </div>
+                    </div>
+                    <!---->
+                    <div class="u-txt-right mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-plus me-2"></i>importovat data
+                        </button>
+                    </div>
+                </form>
+            </fieldset>
+            <hr class="mb-5 mt-5">
+            <!---->
+            <div class="L-form__fieldset C-create-menu">
+                <h3 class="L-form__fieldset__header">Další možnosti</h3>
+                <ul class="C-create-menu__list">
+                    <li class="C-create-menu__item">
+                        <a href="{% url 'order_create' %}" class="link">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            <span>Vytvořit zakázku</span>
+                        </a>
+                    </li>
+                    <li class="C-create-menu__item">
+                        <a href="{% url 'team_create' %}" class="link">
+                            <i class="bi bi-people me-2"></i>
+                            <span>Vytvořit tým</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

@@ -3,6 +3,7 @@ $theme: (
   "accent": #fd7e14,
   "success": #0d6efd,
   "success-darker": #004ec3,
+  "success-lighter": #428cfc,
   "info": #198754,
   "error": #dc3545,
 );
@@ -12,11 +13,17 @@ $light-theme: (
   "border": #2125294a,
   "shadow": #2125292f,
   "bck": (
+    "list-item": white,
     "sidebar": #f8f9fa,
     "body": #f8f9fa,
+    "table-head": #cfcfcf,
+    "table-row-even": #f3f3f3,
+    "table-row-odd": #fff,
+    "table-row-hover": #e5e5e5,
   ),
   "txt": (
     "default": #212529,
+    "muted": #d6d6d6,
   ),
 );
 
@@ -25,10 +32,16 @@ $dark-theme: (
   "border": #f8f9fa3d,
   "shadow": #f8f9fa12,
   "bck": (
+    "list-item": black,
     "sidebar": #212529,
     "body": #212529,
+    "table-head": #212529,
+    "table-row-odd": #2c2c2c,
+    "table-row-even": #212529,
+    "table-row-hover": #4f4f4f,
   ),
   "txt": (
     "default": #f8f9fa,
+    "muted": #a8a8a8,
   ),
 );
