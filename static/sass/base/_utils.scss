@@ -16,6 +16,10 @@
   font-size: 80%;
 }
 
+.u-txt-bigger {
+  font-size: 120% !important;
+}
+
 .u-txt-success {
   color: var(--success) !important;
   -webkit-text-stroke: 1px var(--success);
@@ -88,6 +92,13 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+}
+
+.u-flex-column-left-top {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .u-flex-grow {
