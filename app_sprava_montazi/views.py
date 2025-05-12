@@ -135,6 +135,28 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return reverse("order_detail", kwargs={"pk": self.kwargs["order_pk"]})
 
 
+class ClientUpdateSecondaryView(LoginRequiredMixin, UpdateView):
+    model = Client
+    template_name = f"{APP_URL}/orders/client_update_secondary.html"
+    form_class = ClientForm
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        # --- vycistit btn update/create
+        context["form_type"] = "update"
+        # --- navigace
+        context["active"] = "orders_all"
+
+        return context
+
+    def form_valid(self, form) -> HttpResponse:
+        messages.success(self.request, f"Zákazník: {self.object} aktualizován.")
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse("client_orders", kwargs={"slug": self.object.slug})
+
+
 class OrderCreateView(LoginRequiredMixin, View):
     """Vytvor novou zakazku"""
 
