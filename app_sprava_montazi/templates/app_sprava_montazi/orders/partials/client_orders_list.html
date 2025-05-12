@@ -1,0 +1,69 @@
+<section class="L-detail__fieldset">
+    <div>
+        <h3 class="L-detail__fieldset__header">Zákazník</h3>
+        <ul class="L-detail__list">
+            <!--client name-->
+            <li class="L-detail__item">
+                <strong>Zákazník:</strong>
+                <span class="ms-1">{{ client.name }}</span>
+            </li>
+            <!--street-->
+            {% if client.street %}
+                <li class="L-detail__item">
+                    <strong>Ulice:</strong>
+                    <span class="ms-1">{{ client.street }}</span>
+                </li>
+            {% else %}
+                <li class="L-detail__item">
+                    <strong>Ulice:</strong>
+                    <span class="u-txt-warning ms-1">Nevyplněno</span>
+                </li>
+            {% endif %}
+            <!--city-->
+            {% if client.city %}
+                <li class="L-detail__item">
+                    <strong>Město:</strong>
+                    <span class="ms-1">{{ client.city }}</span>
+                </li>
+            {% else %}
+                <li class="L-detail__item">
+                    <strong>Město:</strong>
+                    <span class="u-txt-warning ms-1">Nevyplněno</span>
+                </li>
+            {% endif %}
+            <!--PSC-->
+            <li class="L-detail__item">
+                <strong>PSČ:</strong>
+                <span class="ms-1">{{ client.zip_code }}</span>
+            </li>
+            <!--phone-->
+            {% if client.phone %}
+                <li class="L-detail__item">
+                    <strong>Telefon:</strong>
+                    <span class="ms-1">{{ client.phone }}</span>
+                </li>
+            {% else %}
+                <li class="L-detail__item">
+                    <strong>Telefon:</strong>
+                    <span class="u-txt-warning ms-1">Nevyplněno</span>
+                </li>
+            {% endif %}
+            {% if client.email %}
+                <li class="L-detail__item">
+                    <strong>E-mail:</strong>
+                    <span class="ms-1">{{ client.email }}</span>
+                </li>
+            {% else %}
+                <li class="L-detail__item">
+                    <strong>E-mail:</strong>
+                    <span class="u-txt-warning ms-1">Nevyplněno</span>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    <!---->
+    <div>
+        <a href="#" class="btn btn-primary d-block ms-5 me-5">
+            <i class="fa-solid fa-pen-to-square me-2"></i><span>Upravit zákazníka</span></a>
+    </div>
+</section>

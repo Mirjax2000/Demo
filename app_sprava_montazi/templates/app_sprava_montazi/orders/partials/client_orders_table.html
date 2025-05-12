@@ -1,0 +1,21 @@
+<table class="L-table__table nowrap hover order-column display"
+       id="orderTable"
+       data-opacity="full">
+    <thead>
+        <tr>
+            <th>Číslo zakázky</th>
+            <th>Místo určení</th>
+            <th>Mandant</th>
+            <th>Termín doručení</th>
+            <th>Realizace kým</th>
+            <th>Montážní tým</th>
+            <th>Termín montáže</th>
+            <th>Status</th>
+            <th>Artikly</th>
+            <th>Poznámka</th>
+        </tr>
+    </thead>
+    <tbody class="L-table__body">
+        {% include "app_sprava_montazi/orders/partials/client_orders_row.html" %}
+    </tbody>
+</table>

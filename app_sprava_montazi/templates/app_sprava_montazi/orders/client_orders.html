@@ -2,16 +2,23 @@
 {% block title %}
     detail objednavky
 {% endblock title %}
+<!---->
 {% block content %}
     <section class="L-table">
-        <h3>
-            Zakázky pro klienta:
-            <span class="ms-2">
-                <a href="#">{{ client.name }}</a>
-            </span>
-            <span class="ms-5">{{ client.phone }}</span>
-        </h3>
+        <div class="u-flex-row">
+            {% include "app_sprava_montazi/orders/partials/client_orders_list.html" %}
+            <section class="L-detail__fieldset u-flex-column-left-top">
+                <div class="mt-3">
+                    <h1>{{ client.name }}</h1>
+                    {% if client.phone %}
+                        <h1>{{ client.phone }}</h1>
+                    {% else %}
+                        <h2 class="u-txt-warning">Chybí Telefon</h2>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
         <hr>
-        {% include "app_sprava_montazi/orders/partials/orders_all_table.html" %}
+        {% include "app_sprava_montazi/orders/partials/client_orders_table.html" %}
     </section>
 {% endblock content %}
