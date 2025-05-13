@@ -150,6 +150,13 @@ body.home {
   gap: 2%;
 }
 
+.u-flex-row-start {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 2%;
+}
+
 .u-flex-column {
   display: flex;
   flex-direction: column;
@@ -457,9 +464,9 @@ body.home {
   min-width: 20rem;
   flex-shrink: 0;
 }
-.L-detail__fieldset.overflow {
-  max-height: 40dvh;
+.L-detail__fieldset.right {
   overflow: auto;
+  max-height: 100%;
 }
 .L-detail__fieldset__header {
   font-size: 1.5rem;

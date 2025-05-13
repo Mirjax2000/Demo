@@ -18,9 +18,9 @@
     min-width: 20rem;
     flex-shrink: 0;
 
-    &.overflow {
-      max-height: 40dvh;
+    &.right {
       overflow: auto;
+      max-height: 100%;
     }
 
     &__header {

@@ -13,8 +13,8 @@
     const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
     const emptyFormHtml = $('#empty-form-template');
 
-    // prechod pri nahrani stranky
     window.addEventListener("load", () => {
+        syncHeight();
         P_main.classList.add("visible");
     });
     // messages
@@ -186,4 +186,14 @@
         }
     });
     // ----
+    function syncHeight() {
+        const left = document.querySelector('.left');
+        const right = document.querySelector('.right');
+        if (left && right) {
+            console.log(left, right)
+            right.style.maxHeight = left.offsetHeight + 50 + 'px';
+        }
+    }
+
+
 })();
