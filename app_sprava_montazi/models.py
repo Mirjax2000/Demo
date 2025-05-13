@@ -232,9 +232,7 @@ class Order(Model):
 
 class Article(Model):
     order = ForeignKey(
-        Order,
-        on_delete=PROTECT,
-        related_name="articles",
+        Order, on_delete=PROTECT, related_name="articles", verbose_name="zakazka"
     )
     name = CharField(max_length=32, verbose_name="Název artiklu")
     price = DecimalField(
@@ -267,3 +265,18 @@ class Upload(models.Model):
 
     class Meta:
         ordering = ["-created"]
+
+
+class CallLog(models.Model):
+    client = models.ForeignKey(
+        Client,
+        on_delete=models.PROTECT,
+        related_name="calls",
+        verbose_name="Zákazník",
+    )
+    called_at = models.DateTimeField(auto_now_add=True, verbose_name="Čas volání")
+    note = models.TextField(blank=True, verbose_name="Poznámka")
+    was_successful = models.BooleanField(default=False, verbose_name="Dovoláno")
+
+    def __str__(self):
+        return f"{self.client.name} - {self.called_at.strftime('%Y-%m-%d %H:%M')}"

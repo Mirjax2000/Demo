@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Order, Team, DistribHub, Upload, Client, Article
+from .models import Order, Team, DistribHub, Upload, Client, Article, CallLog
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -51,9 +51,18 @@ class ArticleAdmin(admin.ModelAdmin):
     list_per_page = 15
 
 
+class CallLogAdmin(admin.ModelAdmin):
+    list_display = ("client", "called_at", "was_successful")
+    fields = ("client", "called_at", "was_successful", "note")
+    readonly_fields = ("called_at",)
+    list_filter = ["was_successful"]
+    list_per_page = 15
+
+
 admin.site.register(DistribHub, DistribHubAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Team, TeamAdmin)
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Upload)
+admin.site.register(CallLog, CallLogAdmin)

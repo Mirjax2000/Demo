@@ -2,8 +2,19 @@
 
 from django import forms
 from django.utils.text import slugify
+from django.forms import inlineformset_factory
 from django.core.exceptions import ValidationError
-from .models import Order, Article, DistribHub, Team, Client, TeamType, Status, Upload
+from .models import (
+    Order,
+    Article,
+    DistribHub,
+    Team,
+    Client,
+    TeamType,
+    Status,
+    Upload,
+    CallLog,
+)
 
 
 class OrderForm(forms.ModelForm):
@@ -368,3 +379,32 @@ class UploadForm(forms.ModelForm):
                 "required": "Soubor je povinný!",
             },
         }
+
+
+class CallLogForm(forms.ModelForm):
+    WAS_SUCCESSFUL_CHOICES = [
+        (True, "Ano"),
+        (False, "Ne"),
+    ]
+
+    was_successful = forms.ChoiceField(
+        choices=WAS_SUCCESSFUL_CHOICES,
+        widget=forms.Select,
+        label="Dovoláno",
+    )
+
+    class Meta:
+        model = CallLog
+        fields = ["note", "was_successful"]
+        widgets = {
+            "note": forms.Textarea(attrs={"rows": 2}),
+        }
+
+
+CallLogFormSet = inlineformset_factory(
+    Client,
+    CallLog,
+    form=CallLogForm,
+    extra=1,
+    can_delete=True,
+)

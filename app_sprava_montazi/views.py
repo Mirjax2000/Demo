@@ -6,7 +6,6 @@ from django.db import transaction
 from django.conf import settings
 from django.core.management import call_command
 from django.db.models.query import QuerySet
-from django.core.management import CommandError
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
@@ -22,8 +21,16 @@ from django.views.generic import (
     View,
     FormView,
 )
-from .models import Order, Status, Team, Article, Client
-from .forms import TeamForm, ArticleForm, OrderForm, ClientForm, UploadForm, DistribHub
+from .models import CallLog, Order, Status, Team, Article, Client
+from .forms import (
+    TeamForm,
+    ArticleForm,
+    OrderForm,
+    ClientForm,
+    UploadForm,
+    DistribHub,
+    CallLogFormSet,
+)
 
 cons: Console = Console()
 APP_URL = "app_sprava_montazi"
@@ -403,20 +410,61 @@ class TeamDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class ClientsOrdersView(LoginRequiredMixin, ListView):
-    model = Order
+# class ClientsOrdersView(LoginRequiredMixin, ListView):
+#     model = Order
+#     template_name = f"{APP_URL}/orders/client_orders.html"
+#     context_object_name = "orders"
+
+#     def get_queryset(self):
+#         slug = self.kwargs["slug"]
+#         return Order.objects.filter(client__slug=slug)
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         slug = self.kwargs["slug"]
+#         context["client"] = Client.objects.get(slug=slug)
+
+#         # --- navigace
+#         context["active"] = "orders_all"
+#         return context
+
+
+class ClientsOrdersView(LoginRequiredMixin, View):
     template_name = f"{APP_URL}/orders/client_orders.html"
-    context_object_name = "orders"
 
-    def get_queryset(self):
-        slug = self.kwargs["slug"]
-        return Order.objects.filter(client__slug=slug)
+    def get(self, request, slug):
+        client = get_object_or_404(Client, slug=slug)
+        orders = Order.objects.filter(client=client)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        slug = self.kwargs["slug"]
-        context["client"] = Client.objects.get(slug=slug)
+        formset = CallLogFormSet(queryset=CallLog.objects.none())
+        context = {
+            "client": client,
+            "orders": orders,
+            "formset": formset,
+            # -- navigace
+            "active": "orders_all",
+        }
+        return render(request, self.template_name, context)
 
-        # --- navigace
-        context["active"] = "orders_all"
-        return context
+    def post(self, request, slug):
+        client = get_object_or_404(Client, slug=slug)
+        orders = Order.objects.filter(client=client)
+
+        formset = CallLogFormSet(request.POST)
+
+        context = {
+            "client": client,
+            "orders": orders,
+            "formset": formset,
+            # -- navigace
+            "active": "orders_all",
+        }
+
+        if formset.is_valid():
+            instances = formset.save(commit=False)
+            for instance in instances:
+                instance.client = client
+                instance.save()
+            return redirect("client_orders", slug=slug)
+
+        return render(request, self.template_name, context)

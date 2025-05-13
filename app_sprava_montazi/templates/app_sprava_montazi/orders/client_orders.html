@@ -21,4 +21,20 @@
         <hr>
         {% include "app_sprava_montazi/orders/partials/client_orders_table.html" %}
     </section>
+    <section>
+        <h2>Hovory pro zakázku {{ order.order_number }}</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ formset.management_form }}
+            <table>
+                {% for form in formset %}
+                    <tr>
+                        <td>{{ form.note }}</td>
+                        <td>{{ form.was_successful }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <button type="submit">Uložit hovory</button>
+        </form>
+    </section>
 {% endblock content %}
