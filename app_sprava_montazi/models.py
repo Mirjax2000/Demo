@@ -276,7 +276,9 @@ class CallLog(models.Model):
     )
     called_at = models.DateTimeField(auto_now_add=True, verbose_name="Čas volání")
     note = models.TextField(blank=True, verbose_name="Poznámka")
-    was_successful = models.BooleanField(default=False, verbose_name="Dovoláno")
+    was_successful = models.CharField(
+        choices=AdviceStatus, default=AdviceStatus.FAILED, verbose_name="Dovoláno"
+    )
 
     def __str__(self):
         return f"{self.client.name} - {self.called_at.strftime('%Y-%m-%d %H:%M')}"

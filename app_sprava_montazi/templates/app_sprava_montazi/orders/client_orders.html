@@ -7,34 +7,10 @@
     <section class="L-table">
         <div class="u-flex-row">
             {% include "app_sprava_montazi/orders/partials/client_orders_list.html" %}
-            <section class="L-detail__fieldset u-flex-column-left-top">
-                <div class="mt-3">
-                    <h1>{{ client.name }}</h1>
-                    {% if client.phone %}
-                        <h1>{{ client.phone }}</h1>
-                    {% else %}
-                        <h2 class="u-txt-warning">Chybí Telefon</h2>
-                    {% endif %}
-                </div>
-            </section>
+            {% include "app_sprava_montazi/orders/partials/client_formset_call.html" %}
+            {% include "app_sprava_montazi/orders/partials/client_call_log.html" %}
         </div>
         <hr>
         {% include "app_sprava_montazi/orders/partials/client_orders_table.html" %}
-    </section>
-    <section>
-        <h2>Hovory pro zakázku {{ order.order_number }}</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ formset.management_form }}
-            <table>
-                {% for form in formset %}
-                    <tr>
-                        <td>{{ form.note }}</td>
-                        <td>{{ form.was_successful }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-            <button type="submit">Uložit hovory</button>
-        </form>
     </section>
 {% endblock content %}

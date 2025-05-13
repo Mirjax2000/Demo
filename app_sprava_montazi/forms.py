@@ -382,22 +382,22 @@ class UploadForm(forms.ModelForm):
 
 
 class CallLogForm(forms.ModelForm):
-    WAS_SUCCESSFUL_CHOICES = [
-        (True, "Ano"),
-        (False, "Ne"),
-    ]
-
-    was_successful = forms.ChoiceField(
-        choices=WAS_SUCCESSFUL_CHOICES,
-        widget=forms.Select,
-        label="Dovoláno",
-    )
-
     class Meta:
         model = CallLog
         fields = ["note", "was_successful"]
         widgets = {
-            "note": forms.Textarea(attrs={"rows": 2}),
+            "note": forms.Textarea(
+                attrs={
+                    "class": "L-form__input",
+                    "rows": 2,
+                    "placeholder": "Poznámky",
+                }
+            ),
+            "was_successful": forms.Select(
+                attrs={
+                    "class": "L-form__select",
+                }
+            ),
         }
 
 
@@ -406,5 +406,4 @@ CallLogFormSet = inlineformset_factory(
     CallLog,
     form=CallLogForm,
     extra=1,
-    can_delete=True,
 )

@@ -1,0 +1,16 @@
+<section class="L-detail__fieldset">
+    <h3 class="L-detail__fieldset__header">Záznamy</h3>
+    {% for log in call_logs %}
+        <ul class="L-detail__list mb-2">
+            <li class="L-detail__item">
+                <span>{{ log.called_at }}</span>
+                {% if log.was_successful == "Success" %}
+                    <span class="u-txt-success">{{ log.get_was_successful_display }}</span>
+                {% else %}
+                    <span class="u-txt-warning">{{ log.get_was_successful_display }}</span>
+                {% endif %}
+                <span class="d-block">{{ log.note }}</span>
+            </li>
+        </ul>
+    {% endfor %}
+</section>

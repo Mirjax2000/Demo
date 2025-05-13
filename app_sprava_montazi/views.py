@@ -410,35 +410,18 @@ class TeamDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-# class ClientsOrdersView(LoginRequiredMixin, ListView):
-#     model = Order
-#     template_name = f"{APP_URL}/orders/client_orders.html"
-#     context_object_name = "orders"
-
-#     def get_queryset(self):
-#         slug = self.kwargs["slug"]
-#         return Order.objects.filter(client__slug=slug)
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         slug = self.kwargs["slug"]
-#         context["client"] = Client.objects.get(slug=slug)
-
-#         # --- navigace
-#         context["active"] = "orders_all"
-#         return context
-
-
 class ClientsOrdersView(LoginRequiredMixin, View):
     template_name = f"{APP_URL}/orders/client_orders.html"
 
     def get(self, request, slug):
         client = get_object_or_404(Client, slug=slug)
         orders = Order.objects.filter(client=client)
-
+        call_logs = CallLog.objects.filter(client=client)
         formset = CallLogFormSet(queryset=CallLog.objects.none())
+
         context = {
             "client": client,
+            "call_logs": call_logs,
             "orders": orders,
             "formset": formset,
             # -- navigace
@@ -449,6 +432,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
     def post(self, request, slug):
         client = get_object_or_404(Client, slug=slug)
         orders = Order.objects.filter(client=client)
+        call_logs = CallLog.objects.filter(client=client)
 
         formset = CallLogFormSet(request.POST)
 
@@ -456,6 +440,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
             "client": client,
             "orders": orders,
             "formset": formset,
+            "call_logs": call_logs,
             # -- navigace
             "active": "orders_all",
         }
