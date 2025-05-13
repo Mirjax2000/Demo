@@ -18,6 +18,11 @@
     min-width: 20rem;
     flex-shrink: 0;
 
+    &.overflow {
+      max-height: 40dvh;
+      overflow: auto;
+    }
+
     &__header {
       font-size: 1.5rem;
       font-weight: 400;

@@ -417,6 +417,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
         client = get_object_or_404(Client, slug=slug)
         orders = Order.objects.filter(client=client)
         call_logs = CallLog.objects.filter(client=client)
+
         formset = CallLogFormSet(queryset=CallLog.objects.none())
 
         context = {
@@ -446,10 +447,13 @@ class ClientsOrdersView(LoginRequiredMixin, View):
         }
 
         if formset.is_valid():
-            instances = formset.save(commit=False)
-            for instance in instances:
-                instance.client = client
-                instance.save()
+            for form in formset.forms:
+                instance = form.save(commit=False)
+
+                if instance._state.adding:
+                    instance.client = client
+                    instance.save()
+
             return redirect("client_orders", slug=slug)
 
         return render(request, self.template_name, context)

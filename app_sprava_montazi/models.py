@@ -280,5 +280,8 @@ class CallLog(models.Model):
         choices=AdviceStatus, default=AdviceStatus.FAILED, verbose_name="Dovoláno"
     )
 
+    class Meta:
+        ordering = ["-called_at"]
+
     def __str__(self):
         return f"{self.client.name} - {self.called_at.strftime('%Y-%m-%d %H:%M')}"

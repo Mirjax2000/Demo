@@ -3,7 +3,7 @@
         {% csrf_token %}
         {{ formset.management_form }}
         <fieldset class="L-form__fieldset">
-            <legend>Hovory</legend>
+            <legend class="L-form__header mb-0">Telefonát</legend>
             {% for form in formset %}
                 {% if form.non_field_errors %}
                     <div class="alert alert-danger">

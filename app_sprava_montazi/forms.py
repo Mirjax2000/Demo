@@ -402,8 +402,5 @@ class CallLogForm(forms.ModelForm):
 
 
 CallLogFormSet = inlineformset_factory(
-    Client,
-    CallLog,
-    form=CallLogForm,
-    extra=1,
+    Client, CallLog, form=CallLogForm, extra=1, can_delete=True
 )
