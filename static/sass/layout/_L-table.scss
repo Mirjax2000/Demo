@@ -13,6 +13,8 @@
       @include flex(flex-start, center, 2%);
 
       &__group {
+        width: 9.625rem;
+
         label {
           user-select: none;
           display: block;
@@ -24,17 +26,16 @@
           @extend %transition-theme;
 
           display: block;
-          width: 9.625rem;
           padding: 0.3em 0.5em;
           border: 1px solid var(--border);
           box-shadow: 1px 1px 1px #00000069;
           cursor: pointer;
         }
-      }
-    }
 
-    &__buttons {
-      text-align: right;
+        button {
+          width: 100%;
+        }
+      }
     }
   }
 
