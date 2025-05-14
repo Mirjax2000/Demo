@@ -312,9 +312,20 @@ class OrdersView(LoginRequiredMixin, ListView):
 
     def get_queryset(self) -> QuerySet[Any]:
         orders = Order.objects.exclude(status="Hidden")
+        # Filtrace podle statusu
         status: str = self.request.GET.get("status", "").strip()
         if status:
-            orders = Order.objects.filter(status=status)
+            orders = orders.filter(status=status)
+
+        start_date = self.request.GET.get("start_date")
+        end_date = self.request.GET.get("end_date")
+
+        if start_date:
+            orders = orders.filter(evidence_termin__gte=start_date)
+
+        if end_date:
+            orders = orders.filter(evidence_termin__lte=end_date)
+
         return orders
 
     def get_context_data(self, **kwargs) -> dict:

@@ -9,14 +9,31 @@
   margin-inline-start: 2%;
 
   &__nav-panel {
-    @include flex(space-around, flex-end);
-
     &__form {
-      flex: 0;
+      @include flex(flex-start, flex-end, 2%);
+
+      &__group {
+        label {
+          user-select: none;
+          display: block;
+        }
+
+        input,
+        select {
+          @extend %border-radius;
+          @extend %transition-theme;
+
+          display: block;
+          width: 9.625rem;
+          padding: 0.3em 0.5em;
+          border: 1px solid var(--border);
+          box-shadow: 1px 1px 1px #00000069;
+          cursor: pointer;
+        }
+      }
     }
 
     &__buttons {
-      flex: 1;
       text-align: right;
     }
   }
@@ -47,12 +64,6 @@
 
   &__icon {
     font-size: 80%;
-  }
-
-  &__select {
-    width: 9.625rem !important;
-    padding-right: 1rem;
-    cursor: pointer;
   }
 
   &__link {

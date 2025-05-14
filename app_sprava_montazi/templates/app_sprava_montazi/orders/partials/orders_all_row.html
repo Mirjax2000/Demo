@@ -8,9 +8,15 @@
         <td>{{ order.distrib_hub }}</td>
         <!--mandant-->
         <td>{{ order.mandant }}</td>
+        <!--Termin evidence-->
+        {% if order.evidence_termin %}
+            <td>{{ order.evidence_termin|date:"d.m.Y" }}</td>
+        {% else %}
+            <td class="u-txt-center">-</td>
+        {% endif %}
         <!--Termin doruceni-->
         {% if order.delivery_termin %}
-            <td>{{ order.delivery_termin }}</td>
+            <td>{{ order.delivery_termin|date:"d.m.Y" }}</td>
         {% else %}
             <td class="u-txt-center">-</td>
         {% endif %}
@@ -40,7 +46,9 @@
         {% endif %}
         <!--termin montaze-->
         {% if order.montage_termin %}
-            <td class="u-s-none">{{ order.montage_termin }}</td>
+            <td class="u-s-none">
+                <strong>{{ order.montage_termin|date:"d.m.Y H:i" }}</strong>
+            </td>
         {% elif order.team_type != "By_assembly_crew" %}
             <td class="u-s-none">–</td>
         {% else %}
