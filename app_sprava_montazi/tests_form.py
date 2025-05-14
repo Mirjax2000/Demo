@@ -1,8 +1,15 @@
 """Form testy"""
 
 from django.test import TestCase
-from .forms import ClientForm, DistribHubForm, OrderForm, ArticleForm, TeamForm
-from .models import DistribHub, Order, Team, Status, TeamType
+from .forms import (
+    ClientForm,
+    DistribHubForm,
+    OrderForm,
+    ArticleForm,
+    TeamForm,
+    CallLogForm,
+)
+from .models import DistribHub, Order, Team, Status, TeamType, CallLog
 
 
 class ClientFormTest(TestCase):
@@ -340,3 +347,23 @@ class TeamFormTest(TestCase):
         form = TeamForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn("name", form.errors)
+
+
+class CallLogFormTest(TestCase):
+    def test_valid_calllog_form(self):
+        form_data = {"note": "123456-R", "was_successful": "Success"}
+        form = CallLogForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_invalid_colllog_form_missing_required_fields(self):
+        form_data: dict = {}
+        form = CallLogForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_invalid_calllog_form_missing_was_successful(self):
+        form_data = {"note": "Some note"}
+        form = CallLogForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("was_successful", form.errors)
+        self.assertEqual(form.errors["was_successful"], ["Zadat výsledek hovoru!"])
+        self.assertNotIn("note", form.errors)

@@ -718,3 +718,31 @@ class TeamUpdateViewTest(TestCase):
         """
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+
+class ClientOrdersViewTest(TestCase):
+    def setUp(self):
+        # Vytvoříme testovacího uživatele
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.customer = Client.objects.create(name="Franta Pina", zip_code="12345")
+        self.url = reverse("client_orders", kwargs={"slug": self.customer.slug})
+        self.template = "app_sprava_montazi/orders/client_orders.html"
+        self.client.login(username="testuser", password="testpass")
+
+    def test_logged_in(self):
+        """
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
+
+    def test_redirect_if_not_logged_in(self):
+        """
+        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
+        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
+        """
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")

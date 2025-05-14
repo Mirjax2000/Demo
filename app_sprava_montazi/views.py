@@ -435,7 +435,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
         orders = Order.objects.filter(client=client)
         call_logs = CallLog.objects.filter(client=client)
 
-        formset = CallLogFormSet(request.POST)
+        formset = CallLogFormSet(request.POST, instance=client)
 
         context = {
             "client": client,
@@ -448,9 +448,8 @@ class ClientsOrdersView(LoginRequiredMixin, View):
 
         if formset.is_valid():
             for form in formset.forms:
-                instance = form.save(commit=False)
-
-                if instance._state.adding:
+                if form.has_changed():
+                    instance = form.save(commit=False)
                     instance.client = client
                     instance.save()
 

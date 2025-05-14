@@ -1,5 +1,6 @@
 """Forms"""
 
+from rich.console import Console
 from django import forms
 from django.utils.text import slugify
 from django.forms import inlineformset_factory
@@ -15,6 +16,8 @@ from .models import (
     Upload,
     CallLog,
 )
+
+cons: Console = Console()
 
 
 class OrderForm(forms.ModelForm):
@@ -394,11 +397,23 @@ class CallLogForm(forms.ModelForm):
                 }
             ),
             "was_successful": forms.Select(
-                attrs={
-                    "class": "L-form__select",
-                }
+                attrs={"class": "L-form__select", "required": True}
             ),
         }
+        error_messages = {
+            "was_successful": {
+                "required": "Zadat výsledek hovoru!",
+            },
+            "note": {
+                "required": "Nějaké info.",
+            },
+        }
+
+    def clean_was_successful(self):
+        value = self.cleaned_data.get("was_successful")
+        if not value:
+            raise forms.ValidationError("Zadat výsledek hovoru!")
+        return value
 
 
 CallLogFormSet = inlineformset_factory(

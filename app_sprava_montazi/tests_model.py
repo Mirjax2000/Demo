@@ -1,12 +1,13 @@
 """Model testy"""
 
 from datetime import date
+from django.forms import ValidationError
 from django.test import TestCase
 from django.db import IntegrityError
 from django.utils.text import slugify
 from django.utils import timezone
 from .models import DistribHub, Client, Order, Team, Status, TeamType
-from .models import Article
+from .models import Article, CallLog
 
 
 class DistribHubModelTest(TestCase):
@@ -555,3 +556,88 @@ class OrderModelTestV2(TestCase):
         self.assertEqual(
             list(orders.values_list("order_number", flat=True)), ["300", "200", "100"]
         )
+
+
+class CallLogModelTest(TestCase):
+    def setUp(self):
+        """
+        Create a Client instance to be used in CallLog tests.
+        """
+        self.customer = Client.objects.create(name="Franta Pina test", zip_code="12345")
+
+    def test_calllog_creation_success(self):
+        """
+        Test if a CallLog instance can be created successfully with required fields and an optional note.
+        """
+        call_log = CallLog.objects.create(
+            client=self.customer,
+            note="Called about the delivery.",
+            was_successful="Success",
+        )
+
+        self.assertTrue(isinstance(call_log, CallLog))
+        self.assertEqual(call_log.client, self.customer)
+        self.assertEqual(call_log.note, "Called about the delivery.")
+        self.assertEqual(call_log.was_successful, "Success")
+        self.assertIsNotNone(call_log.called_at)
+
+    def test_calllog_creation_optional_note(self):
+        """
+        Test if a CallLog instance can be created successfully without providing the optional 'note'.
+        """
+        call_log = CallLog.objects.create(
+            client=self.customer,
+            was_successful="Failed",  # Use another valid choice
+        )
+
+        self.assertTrue(isinstance(call_log, CallLog))
+        self.assertEqual(call_log.client, self.customer)
+        self.assertEqual(
+            call_log.note, ""
+        )  # Check that blank=True results in an empty string default
+        self.assertEqual(call_log.was_successful, "Failed")
+        self.assertIsNotNone(call_log.called_at)
+
+    def test_calllog_required_fields(self):
+        # Test missing 'client' (ForeignKey is strictly required)
+        with self.assertRaises(Exception) as cm:
+            CallLog.objects.create(
+                note="This should fail",
+                was_successful="Success",
+                # client is missing
+            )
+
+    def test_calllog_invalid_was_successful_choice(self):
+        """
+        Test that creating a CallLog with an invalid choice for 'was_successful' fails validation.
+        """
+        with self.assertRaises(ValidationError) as cm:
+            call_log = CallLog(
+                client=self.customer,
+                note="Trying invalid choice",
+                was_successful="InvalidChoice",  # Not in AdviceStatus
+            )
+            call_log.full_clean()  # Use full_clean to trigger model validation before saving
+            call_log.save()  # This save might not even be reached if full_clean fails
+
+        # Check the error message content
+        self.assertIn("was_successful", cm.exception.message_dict)
+        # The error message for invalid choice is usually standard Django message
+        error_message = cm.exception.message_dict["was_successful"][0]
+
+    def test_calllog_str_method(self):
+        """
+        Test if the __str__ method returns the expected string format.
+        """
+        # Create a CallLog instance. auto_now_add will set called_at
+        call_log = CallLog.objects.create(
+            client=self.customer, was_successful="Success"
+        )
+
+        # Get the expected formatted time string
+        local_called_at_str = call_log.called_at.strftime(
+            "%Y-%m-%d %H:%M"
+        )
+        expected_str = f"{self.customer.name} - {local_called_at_str}"
+
+        self.assertEqual(str(call_log), expected_str)
