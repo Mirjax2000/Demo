@@ -396,6 +396,9 @@ body.home {
 .L-table__nav-panel__form__group {
   width: 9.625rem;
 }
+.L-table__nav-panel__form__group.od {
+  width: 11.5rem;
+}
 .L-table__nav-panel__form__group label {
   user-select: none;
   display: block;

@@ -17,6 +17,7 @@
                       {% if raw_status == status.value %}selected{% endif %}>{{ status.label }}</option>
             {% endfor %}
           </select>
+          <!---->
           {% if get_status %}
             Status:<span class="ms-2 u-txt-success-light">{{ get_status }}</span>
           {% else %}
@@ -31,6 +32,7 @@
                  id="start_date"
                  class="form-control"
                  value="{{ get_start|date:"Y-m-d" }}" />
+          <!---->
           {% if get_start %}
             OD:<span class="ms-2 u-txt-success-light">{{ get_start|date:"d.m.Y" }}</span>
           {% else %}
@@ -45,6 +47,7 @@
                  id="end_date"
                  class="form-control"
                  value="{{ get_end|date:"Y-m-d" }}" />
+          <!---->
           {% if get_end %}
             DO:<span class="ms-2 u-txt-success-light">{{ get_end|date:"d.m.Y" }}</span>
           {% else %}
@@ -52,16 +55,17 @@
           {% endif %}
         </div>
         <!-- obchodni dum-->
-        <div class="L-table__nav-panel__form__group">
+        <div class="L-table__nav-panel__form__group od">
           <label for="od">Obchodní dům</label>
           <select name="od" class="form-select L-table__select" id="od">
-            <option value="" {% if not selected_od %}selected{% endif %}>Všechny</option>
+            <option value="" {% if not raw_od %}selected{% endif %}>Všechny OD</option>
             {% for kod, nazev in od_choices %}
-              <option value="{{ kod }}" {% if selected_od == kod %}selected{% endif %}>{{ nazev }}</option>
+              <option value="{{ kod }}" {% if raw_od == kod %}selected{% endif %}>{{ nazev }}</option>
             {% endfor %}
           </select>
-          {% if selected_od %}
-            OD:<span class="ms-2 u-txt-success-light"></span>
+          <!---->
+          {% if od_value %}
+            <span class="u-txt-success-light">{{ od_value }}</span>
           {% else %}
             <span>Všechny OD:</span>
           {% endif %}

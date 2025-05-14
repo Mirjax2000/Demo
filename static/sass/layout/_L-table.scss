@@ -13,6 +13,10 @@
       @include flex(flex-start, center, 2%);
 
       &__group {
+        &.od {
+          width: 11.5rem;
+        }
+
         width: 9.625rem;
 
         label {

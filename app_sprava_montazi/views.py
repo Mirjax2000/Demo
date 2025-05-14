@@ -45,6 +45,7 @@ OD_CHOICES = [
     ("708", "OD Hradec Králové"),
     ("709", "OD Plzeň"),
 ]
+OD_DICT = dict(OD_CHOICES)
 # ---
 
 
@@ -347,9 +348,10 @@ class OrdersView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        get_status_value = self.request.GET.get("status", "")
+        get_status_value = self.request.GET.get("status", "").strip()
         get_start_str = self.request.GET.get("start_date", "")
         get_end_str = self.request.GET.get("end_date", "")
+        od_value = self.request.GET.get("od", "").strip()
         get_start = None
         get_end = None
 
@@ -366,6 +368,8 @@ class OrdersView(LoginRequiredMixin, ListView):
         context["od_choices"] = OD_CHOICES
         context["get_start"] = get_start
         context["get_end"] = get_end
+        context["raw_od"] = od_value
+        context["od_value"] = OD_DICT.get(od_value, "")
         # --- navigace
         context["active"] = "orders_all"
 
