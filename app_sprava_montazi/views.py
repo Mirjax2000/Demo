@@ -34,7 +34,18 @@ from .forms import (
 )
 
 cons: Console = Console()
+# ---
 APP_URL = "app_sprava_montazi"
+OD_CHOICES = [
+    ("701", "OD Stodůlky"),
+    ("703", "OD Černý Most"),
+    ("705", "OD Liberec"),
+    ("706", "OD Ústí nad Labem"),
+    ("707", "OD Č. Budějovice"),
+    ("708", "OD Hradec Králové"),
+    ("709", "OD Plzeň"),
+]
+# ---
 
 
 class IndexView(LoginRequiredMixin, TemplateView):
@@ -315,6 +326,8 @@ class OrdersView(LoginRequiredMixin, ListView):
         orders = Order.objects.exclude(status="Hidden")
         # Filtrace podle statusu
         status: str = self.request.GET.get("status", "").strip()
+        # filtrace podle prvnich tri pismen
+        od_value = self.request.GET.get("od", "").strip()
         if status:
             orders = orders.filter(status=status)
         # Filtrace podle casoveho rozsahu
@@ -327,6 +340,9 @@ class OrdersView(LoginRequiredMixin, ListView):
         if end_date:
             orders = orders.filter(evidence_termin__lte=end_date)
 
+        if od_value:
+            orders = orders.filter(order_number__startswith=od_value)
+
         return orders
 
     def get_context_data(self, **kwargs) -> dict:
@@ -336,6 +352,7 @@ class OrdersView(LoginRequiredMixin, ListView):
         get_end_str = self.request.GET.get("end_date", "")
         get_start = None
         get_end = None
+
         if get_start_str:
             get_start = datetime.strptime(get_start_str, "%Y-%m-%d")
         if get_end_str:
@@ -346,6 +363,7 @@ class OrdersView(LoginRequiredMixin, ListView):
         context["get_status"] = (
             Status(get_status_value).label if get_status_value else ""
         )
+        context["od_choices"] = OD_CHOICES
         context["get_start"] = get_start
         context["get_end"] = get_end
         # --- navigace

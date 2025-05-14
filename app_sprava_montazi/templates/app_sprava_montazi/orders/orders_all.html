@@ -7,6 +7,7 @@
   <section class="L-table">
     <div class="L-table__nav-panel">
       <form class="L-table__nav-panel__form" action="{% url 'orders' %}">
+        <!--status-->
         <div class="L-table__nav-panel__form__group">
           <label for="status">Filter status</label>
           <select name="status" class="form-select L-table__select" id="status">
@@ -50,7 +51,22 @@
             <span>Do dnes</span>
           {% endif %}
         </div>
-        <!---->
+        <!-- obchodni dum-->
+        <div class="L-table__nav-panel__form__group">
+          <label for="od">Obchodní dům</label>
+          <select name="od" class="form-select L-table__select" id="od">
+            <option value="" {% if not selected_od %}selected{% endif %}>Všechny</option>
+            {% for kod, nazev in od_choices %}
+              <option value="{{ kod }}" {% if selected_od == kod %}selected{% endif %}>{{ nazev }}</option>
+            {% endfor %}
+          </select>
+          {% if selected_od %}
+            OD:<span class="ms-2 u-txt-success-light"></span>
+          {% else %}
+            <span>Všechny OD:</span>
+          {% endif %}
+        </div>
+        <!-- search btn-->
         <div class="L-table__nav-panel__form__group">
           <button class="btn btn-primary" type="submit">
             <span class="me-2">Hledej</span>
