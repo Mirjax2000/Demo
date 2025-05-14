@@ -16,6 +16,11 @@
                       {% if raw_status == status.value %}selected{% endif %}>{{ status.label }}</option>
             {% endfor %}
           </select>
+          {% if get_status %}
+            Status:<span class="ms-2 u-txt-success-light">{{ get_status }}</span>
+          {% else %}
+            <span>Všechny záznamy:</span>
+          {% endif %}
         </div>
         <!-- Input pro datum "od" -->
         <div class="L-table__nav-panel__form__group">
@@ -25,6 +30,11 @@
                  id="start_date"
                  class="form-control"
                  value="{{ get_start|date:"Y-m-d" }}" />
+          {% if get_start %}
+            OD:<span class="ms-2 u-txt-success-light">{{ get_start|date:"d.m.Y" }}</span>
+          {% else %}
+            <span>Od počátku</span>
+          {% endif %}
         </div>
         <!-- Input pro datum "do" -->
         <div class="L-table__nav-panel__form__group">
@@ -34,6 +44,11 @@
                  id="end_date"
                  class="form-control"
                  value="{{ get_end|date:"Y-m-d" }}" />
+          {% if get_end %}
+            DO:<span class="ms-2 u-txt-success-light">{{ get_end|date:"d.m.Y" }}</span>
+          {% else %}
+            <span>Do konce</span>
+          {% endif %}
         </div>
         <!---->
         <div>
@@ -44,30 +59,17 @@
         </div>
         <!---->
       </form>
-      <div class="u-flex-row-between mt-3 mb-0">
-        <div>
-          <h4>
-            {% if get_status %}
-              Status:<span class="ms-2 u-txt-success-light">{{ get_status }}</span>
-            {% else %}
-              <span>Všechny záznamy:</span>
-            {% endif %}
-            {% if get_start %}OD:<span class="ms-2 u-txt-success-light">{{ get_start|date:"d.m.Y" }}</span>{% endif %}
-            {% if get_end %}DO:<span class="ms-2 u-txt-success-light">{{ get_end|date:"d.m.Y" }}</span>{% endif %}
-          </h4>
-        </div>
-        <div class="L-table__nav-panel__buttons">
-          <a href="{% url "order_create" %}" class="btn btn-primary">
-            <i class="fa-solid fa-circle-plus me-2"></i>
-            <span>Vytvořit zakázku</span>
-          </a>
-        </div>
-      </div>
       <!---->
     </div>
     <hr />
     <!--table-->
     {% include "app_sprava_montazi/orders/partials/orders_all_table.html" %}
     <!---->
+    <div class="L-table__nav-panel__buttons">
+      <a href="{% url "order_create" %}" class="btn btn-primary">
+        <i class="fa-solid fa-circle-plus me-2"></i>
+        <span>Vytvořit zakázku</span>
+      </a>
+    </div>
   </section>
 {% endblock content %}
