@@ -342,6 +342,7 @@ class OrdersView(LoginRequiredMixin, ListView):
             get_end = datetime.strptime(get_end_str, "%Y-%m-%d")
 
         context["statuses"] = Status
+        context["raw_status"] = get_status_value
         context["get_status"] = (
             Status(get_status_value).label if get_status_value else ""
         )

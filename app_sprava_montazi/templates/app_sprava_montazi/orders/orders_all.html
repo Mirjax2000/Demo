@@ -10,11 +10,10 @@
         <div class="L-table__nav-panel__form__group">
           <label for="status">Filter status</label>
           <select name="status" class="form-select L-table__select" id="status">
-            <option value="">Všechny</option>
+            <option value="" {% if not raw_status %}selected{% endif %}>Všechny</option>
             {% for status in statuses %}
-              <!---->
-              <option value="{{ status.value }}">{{ status.label }}</option>
-              <!---->
+              <option value="{{ status.value }}"
+                      {% if raw_status == status.value %}selected{% endif %}>{{ status.label }}</option>
             {% endfor %}
           </select>
         </div>
@@ -25,7 +24,7 @@
                  name="start_date"
                  id="start_date"
                  class="form-control"
-                 value="{{ get_start }}" />
+                 value="{{ get_start|date:"Y-m-d" }}" />
         </div>
         <!-- Input pro datum "do" -->
         <div class="L-table__nav-panel__form__group">
@@ -34,7 +33,7 @@
                  name="end_date"
                  id="end_date"
                  class="form-control"
-                 value="{{ get_end }}" />
+                 value="{{ get_end|date:"Y-m-d" }}" />
         </div>
         <!---->
         <div>
