@@ -319,6 +319,7 @@ class OrdersView(LoginRequiredMixin, ListView):
 
         start_date = self.request.GET.get("start_date")
         end_date = self.request.GET.get("end_date")
+        cons.log(start_date, end_date)
 
         if start_date:
             orders = orders.filter(evidence_termin__gte=start_date)
