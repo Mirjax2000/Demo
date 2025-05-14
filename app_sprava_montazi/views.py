@@ -2,6 +2,7 @@
 
 from typing import Any
 from rich.console import Console
+from datetime import datetime
 from django.db import transaction
 from django.conf import settings
 from django.core.management import call_command
@@ -316,10 +317,9 @@ class OrdersView(LoginRequiredMixin, ListView):
         status: str = self.request.GET.get("status", "").strip()
         if status:
             orders = orders.filter(status=status)
-
+        # Filtrace podle casoveho rozsahu
         start_date = self.request.GET.get("start_date")
         end_date = self.request.GET.get("end_date")
-        cons.log(start_date, end_date)
 
         if start_date:
             orders = orders.filter(evidence_termin__gte=start_date)
@@ -331,7 +331,22 @@ class OrdersView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
+        get_status_value = self.request.GET.get("status", "")
+        get_start_str = self.request.GET.get("start_date", "")
+        get_end_str = self.request.GET.get("end_date", "")
+        get_start = None
+        get_end = None
+        if get_start_str:
+            get_start = datetime.strptime(get_start_str, "%Y-%m-%d")
+        if get_end_str:
+            get_end = datetime.strptime(get_end_str, "%Y-%m-%d")
+
         context["statuses"] = Status
+        context["get_status"] = (
+            Status(get_status_value).label if get_status_value else ""
+        )
+        context["get_start"] = get_start
+        context["get_end"] = get_end
         # --- navigace
         context["active"] = "orders_all"
 

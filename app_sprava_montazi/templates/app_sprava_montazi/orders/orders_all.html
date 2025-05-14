@@ -5,14 +5,10 @@
 <!---->
 {% block content %}
   <section class="L-table">
-    <h3 class="mb-3">
-      <i class="bi bi-list-ul L-table__icon"></i> Seznam zakázek
-    </h3>
-    <!---->
     <div class="L-table__nav-panel">
       <form class="L-table__nav-panel__form" action="{% url 'orders' %}">
         <div class="L-table__nav-panel__form__group">
-          <label for="status" class="form-label">Filter status</label>
+          <label for="status">Filter status</label>
           <select name="status" class="form-select L-table__select" id="status">
             <option value="">Všechny</option>
             {% for status in statuses %}
@@ -25,12 +21,20 @@
         <!-- Input pro datum "od" -->
         <div class="L-table__nav-panel__form__group">
           <label for="start_date">Od:</label>
-          <input type="date" name="start_date" id="start_date" class="form-control" />
+          <input type="date"
+                 name="start_date"
+                 id="start_date"
+                 class="form-control"
+                 value="{{ get_start }}" />
         </div>
         <!-- Input pro datum "do" -->
         <div class="L-table__nav-panel__form__group">
           <label for="end_date">Do:</label>
-          <input type="date" name="end_date" id="end_date" class="form-control" />
+          <input type="date"
+                 name="end_date"
+                 id="end_date"
+                 class="form-control"
+                 value="{{ get_end }}" />
         </div>
         <!---->
         <div>
@@ -41,11 +45,24 @@
         </div>
         <!---->
       </form>
-      <div class="L-table__nav-panel__buttons">
-        <a href="{% url "order_create" %}" class="btn btn-primary">
-          <i class="fa-solid fa-circle-plus me-2"></i>
-          <span>Vytvořit zakázku</span>
-        </a>
+      <div class="u-flex-row-between mt-3 mb-0">
+        <div>
+          <h4>
+            {% if get_status %}
+              Status:<span class="ms-2 u-txt-success-light">{{ get_status }}</span>
+            {% else %}
+              <span>Všechny záznamy:</span>
+            {% endif %}
+            {% if get_start %}OD:<span class="ms-2 u-txt-success-light">{{ get_start|date:"d.m.Y" }}</span>{% endif %}
+            {% if get_end %}DO:<span class="ms-2 u-txt-success-light">{{ get_end|date:"d.m.Y" }}</span>{% endif %}
+          </h4>
+        </div>
+        <div class="L-table__nav-panel__buttons">
+          <a href="{% url "order_create" %}" class="btn btn-primary">
+            <i class="fa-solid fa-circle-plus me-2"></i>
+            <span>Vytvořit zakázku</span>
+          </a>
+        </div>
       </div>
       <!---->
     </div>

@@ -22,7 +22,9 @@
         {% endif %}
         <!--zakaznik-->
         {% if order.client.incomplete %}
-            <td title="{{ order.client }}" class="u-txt-warning">⚠️&nbsp;{{ order.client.first_15 }}</td>
+            <td title="{{ order.client }}" class="u-txt-warning">
+                ⚠️<span class="ms-2">{{ order.client.first_15 }}</span>
+            </td>
         {% else %}
             <td title="{{ order.client }}" class="u-txt-success">
                 <i class="fa-solid fa-check me-1"></i>{{ order.client.first_15 }}
