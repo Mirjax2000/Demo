@@ -390,7 +390,7 @@ body.home {
 .L-table__nav-panel__form {
   display: flex;
   justify-content: flex-start;
-  align-items: flex-end;
+  align-items: center;
   gap: 2%;
 }
 .L-table__nav-panel__form__group label {

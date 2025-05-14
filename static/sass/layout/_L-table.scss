@@ -10,7 +10,7 @@
 
   &__nav-panel {
     &__form {
-      @include flex(flex-start, flex-end, 2%);
+      @include flex(flex-start, center, 2%);
 
       &__group {
         label {
