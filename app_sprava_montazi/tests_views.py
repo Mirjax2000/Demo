@@ -187,7 +187,7 @@ class CreatePageViewTest(TestCase):
         response = self.client.post(
             reverse("createpage"), {"file": csv_file}, follow=True
         )
-        self.assertContains(response, "Neexistujicí místo určení v CSV souboru!")
+        self.assertContains(response, "Chybné místo určení. Chyba:")
 
 
 class DashboardViewTest(TestCase):
@@ -771,13 +771,13 @@ class TeamCreateTest(TestCase):
         self.user = User.objects.create_user(username="testuser", password="testpass")
         self.url = reverse("team_create")
         self.template = "app_sprava_montazi/teams/team_form.html"
+        self.client.login(username="testuser", password="testpass")
 
     def test_logged_in(self):
         """
         Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
         a je použita správná šablona.
         """
-        self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
@@ -787,6 +787,45 @@ class TeamCreateTest(TestCase):
         Testuje, zda je uživatel přesměrován na přihlašovací stránku,
         pokud není přihlášen a pokusí se zobrazit indexovou stránku.
         """
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+
+class TeamDetailViewTest(TestCase):
+    def setUp(self):
+        # Vytvoříme testovacího uživatele
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.template = "app_sprava_montazi/teams/team_detail.html"
+        self.team = Team.objects.create(
+            name="Test Company",
+            city="Praha",
+            region="Střední Čechy",
+            phone="123456789",
+            email="test@company.cz",
+            active=True,
+            price_per_hour=150.50,
+            price_per_km=12.30,
+            notes="Toto je testovací poznámka.",
+        )
+        self.url = reverse("team_detail", kwargs={"slug": self.team.slug})
+        self.client.login(username="testuser", password="testpass")
+
+    def test_logged_in(self):
+        """
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
+
+    def test_redirect_if_not_logged_in(self):
+        """
+        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
+        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
+        """
+        self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
 

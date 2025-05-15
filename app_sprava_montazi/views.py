@@ -94,10 +94,10 @@ class CreatePageView(LoginRequiredMixin, FormView):
             messages.error(self.request, "Špatný soubor CSV")
             return redirect("createpage")
         # ---
-        except DistribHub.DoesNotExist:
+        except DistribHub.DoesNotExist as e:
             if settings.DEBUG:
-                cons.log("Chyba DistribHub neexistuje", style="red")
-            messages.error(self.request, "Neexistujicí místo určení v CSV souboru!")
+                cons.log(f"Chyba DistribHub neexistuje. Chyba: {str(e)}", style="red")
+            messages.error(self.request, f"Chybné místo určení. Chyba: {str(e)}")
             return redirect("createpage")
         # ---
         except ValueError as e:

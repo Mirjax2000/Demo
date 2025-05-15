@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import TypedDict
 from time import sleep
 
+from dill.tests.test_classdef import Z
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import transaction
 from django.utils.text import slugify
@@ -88,13 +89,15 @@ class Command(BaseCommand):
 
                     self.update_counters(client, order)
 
-                except DistribHub.DoesNotExist:
+                except DistribHub.DoesNotExist as e:
+                    zakazka = item.get("cislo-zakazky", "N/A")
                     cons.log(
-                        f"Chybi DistribHub pro objednavku: \n"
-                        f"{item.get('cislo-zakazky', 'N/A')}",
+                        f"Chybi DistribHub pro objednavku: \n{zakazka}",
                         style="red",
                     )
-                    raise
+                    raise DistribHub.DoesNotExist(
+                        f"DistribHub neexistuje pro zakázku: {zakazka}"
+                    ) from e
 
                 except ValueError as e:
                     cons.log(
