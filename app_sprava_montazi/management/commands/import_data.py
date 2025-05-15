@@ -276,7 +276,7 @@ class Utility:
             + small_break
             + f"zakazek celkem vytvoreno: {order_sum}\n"
             + small_break
-            + f"Duplicitni zakazky: {counter['duplicit_count']}\n"
+            + f"Duplicitni zakazky: {counter['duplicit_count']} preskoceno.\n"
             + big_break,
             style="blue",
         )
