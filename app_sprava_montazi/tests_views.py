@@ -148,46 +148,165 @@ class CreatePageViewTest(TestCase):
     @patch(
         "app_sprava_montazi.views.call_command", side_effect=KeyError("missing column")
     )
-    def test_key_error_handling(self, mock_command):
+    @patch("app_sprava_montazi.views.DistribHub.objects.filter")
+    def test_key_error_handling(self, mock_filter, mock_call_command):
+        """
+        Testuje, zda je KeyError při importu správně zachycen a zobrazena chybová zpráva.
+        """
+        mock_filter.return_value.exists.return_value = True
+
         csv_file = SimpleUploadedFile(
             "bad.csv", b"wrong,format\n1,2", content_type="text/csv"
         )
-        response = self.client.post(
-            reverse("createpage"), {"file": csv_file}, follow=True
-        )
 
-        self.assertContains(response, "Špatný soubor CSV")
+        response = self.client.post(self.url, {"file": csv_file}, follow=True)
+
+        self.assertEqual(Upload.objects.count(), 1)
+        upload = Upload.objects.get()
+        expected_path = upload.file.path
+
+        mock_call_command.assert_called_once_with("import_data", expected_path)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
+
+        messages = list(response.context["messages"])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Špatný soubor CSV")
 
     @patch(
         "app_sprava_montazi.views.call_command",
         side_effect=Exception("unexpected error"),
     )
-    def test_unknown_exception_handling(self, mock_command):
-        csv_file = SimpleUploadedFile("bad.csv", b"ok", content_type="text/csv")
-        response = self.client.post(
-            reverse("createpage"), {"file": csv_file}, follow=True
-        )
+    @patch("app_sprava_montazi.views.DistribHub.objects.filter")
+    def test_unknown_exception_handling(self, mock_filter, mock_command):
+        """
+        Testuje, zda je obecná Exception při importu správně zachycena
+        a zobrazena chybová zpráva "Neznamá chyba!".
+        """
+        mock_filter.return_value.exists.return_value = True
 
-        self.assertContains(response, "Neznamá chyba!")
+        csv_file = SimpleUploadedFile("bad.csv", b"ok", content_type="text/csv")
+
+        response = self.client.post(self.url, {"file": csv_file}, follow=True)
+
+        self.assertEqual(Upload.objects.count(), 1)
+        upload = Upload.objects.get()
+        expected_path = upload.file.path
+
+        mock_command.assert_called_once_with("import_data", expected_path)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
+
+        messages = list(response.context["messages"])
+        self.assertEqual(len(messages), 1)  # Měla by být jen jedna zpráva
+        self.assertEqual(str(messages[0]), "Neznamá chyba!")
 
     @patch(
         "app_sprava_montazi.views.call_command", side_effect=ValueError("wrong value")
     )
-    def test_value_error_handling(self, mock_command):
-        csv_file = SimpleUploadedFile("bad.csv", b"ok", content_type="text/csv")
-        response = self.client.post(
-            reverse("createpage"), {"file": csv_file}, follow=True
-        )
+    @patch("app_sprava_montazi.views.DistribHub.objects.filter")
+    def test_value_error_handling(self, mock_filter, mock_command):
+        """
+        Testuje, zda je ValueError při importu správně zachycen
+        a zobrazena chybová zpráva.
+        """
 
-        self.assertContains(response, "Chyba hodnoty v souboru CSV! wrong value")
+        mock_filter.return_value.exists.return_value = True
+        csv_file = SimpleUploadedFile("bad.csv", b"ok", content_type="text/csv")
+
+        response = self.client.post(self.url, {"file": csv_file}, follow=True)
+
+        self.assertEqual(Upload.objects.count(), 1)
+        upload = Upload.objects.get()
+        expected_path = upload.file.path
+
+        mock_command.assert_called_once_with("import_data", expected_path)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
+
+        messages = list(response.context["messages"])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Chyba hodnoty v souboru CSV! wrong value")
 
     @patch("app_sprava_montazi.views.call_command", side_effect=DistribHub.DoesNotExist)
-    def test_distribhub_doesnotexist_handling(self, mock_command):
+    @patch("app_sprava_montazi.views.DistribHub.objects.filter")
+    def test_distribhub_doesnotexist_handling(self, mock_filter, mock_command):
+        """
+        Testuje, zda je DistribHub.DoesNotExist při importu správně zachycena
+        a zobrazena chybová zpráva.
+        """
+
+        mock_filter.return_value.exists.return_value = True
+
         csv_file = SimpleUploadedFile("bad.csv", b"ok", content_type="text/csv")
-        response = self.client.post(
-            reverse("createpage"), {"file": csv_file}, follow=True
+
+        response = self.client.post(self.url, {"file": csv_file}, follow=True)
+
+        self.assertEqual(Upload.objects.count(), 1)
+        upload = Upload.objects.get()
+        expected_path = upload.file.path
+
+        mock_command.assert_called_once_with("import_data", expected_path)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
+
+        messages = list(response.context["messages"])
+        self.assertEqual(len(messages), 1)  #
+
+        self.assertEqual(
+            str(messages[0]).startswith("Chybné místo určení. Chyba:"), True
         )
-        self.assertContains(response, "Chybné místo určení. Chyba:")
+
+    @patch("app_sprava_montazi.views.call_command")
+    def test_distribhub_command_called_if_not_exist(self, mock_call_command):
+        # Ujistíme se, že DistribHub je prázdný
+        DistribHub.objects.all().delete()
+
+        # Vytvoření falešného souboru pro formulář
+        upload_file = SimpleUploadedFile(
+            "test.csv", b"some,test,data\n1,2,3", content_type="text/csv"
+        )
+        response = self.client.post(self.url, data={"file": upload_file})
+
+        # Ověření, že se command zavolal
+        mock_call_command.assert_any_call("distrib_hub")
+        mock_call_command.assert_any_call(
+            "import_data", mock_call_command.call_args_list[1][0][1]
+        )  # volání s file path
+
+        # Úspěšné přesměrování
+        self.assertRedirects(response, self.url)
+
+        # Ověření zprávy
+        messages = list(get_messages(response.wsgi_request))
+        self.assertIn("Import dokončen.", str(messages[0]))
+
+    @patch("app_sprava_montazi.views.call_command")
+    def test_distribhub_command_not_called_if_exists(self, mock_call_command):
+        # Vytvoříme záznam, takže DistribHub už existuje
+        DistribHub.objects.create(code="652", city="Brno")
+
+        upload_file = SimpleUploadedFile(
+            "test.csv", b"some,test,data\n1,2,3", content_type="text/csv"
+        )
+        response = self.client.post(self.url, data={"file": upload_file})
+
+        # Ověříme, že distrib_hub NEBYL zavolán
+        command_names = [call[0][0] for call in mock_call_command.call_args_list]
+        self.assertNotIn("distrib_hub", command_names)
+
+        # Ale import_data ano
+        self.assertIn("import_data", command_names)
+
+        # Přesměrování
+        self.assertRedirects(response, self.url)
+
+        # Zpráva
+        messages = list(get_messages(response.wsgi_request))
+        self.assertIn("Import dokončen.", str(messages[0]))
 
 
 class DashboardViewTest(TestCase):

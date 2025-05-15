@@ -84,9 +84,10 @@ class CreatePageView(LoginRequiredMixin, FormView):
     def form_valid(self, form) -> HttpResponse:
         """Voláno, když je formulář validní."""
         upload = form.save()
-        
+
         distrib_hubs = DistribHub.objects.filter().exists()
         if not distrib_hubs:
+            cons.log("Vytvarim Distrib_huby.", style="blue bold")
             call_command("distrib_hub")
 
         try:
