@@ -76,6 +76,7 @@ class CreatePageView(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         # --- navigace
         context["active"] = "create"
         return context
@@ -83,6 +84,11 @@ class CreatePageView(LoginRequiredMixin, FormView):
     def form_valid(self, form) -> HttpResponse:
         """Voláno, když je formulář validní."""
         upload = form.save()
+        
+        distrib_hubs = DistribHub.objects.filter().exists()
+        if not distrib_hubs:
+            call_command("distrib_hub")
+
         try:
             call_command("import_data", upload.file.path)
             messages.success(self.request, "Import dokončen.")
