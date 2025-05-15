@@ -1,6 +1,6 @@
 """View tests"""
 
-from datetime import date
+from datetime import date, datetime
 from unittest.mock import patch
 
 from django.conf import settings
@@ -593,22 +593,129 @@ class OrdersAllViewTest(TestCase):
         self.url = reverse("orders")
         self.hub = DistribHub.objects.create(code="626", city="Chrastany")
         self.template = "app_sprava_montazi/orders/orders_all.html"
+        self.client.login(username="testuser", password="testpass")
+        self.range: int = 50
 
-        # Vytvoříme 20 objednávek
-        for i in range(20):
+        # Vytvoříme  objednávky
+        # status new
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Franta test-{i}", zip_code=f"123{i:02}"
+            )
             Order.objects.create(
                 order_number=f"{i:05}-R",
                 distrib_hub=self.hub,
                 mandant="SCCZ",
-                evidence_termin=date.today(),
+                client=customer,
+                evidence_termin=date(2024, 1, 1),
+                delivery_termin=date(2024, 4, 10),
+                montage_termin=timezone.make_aware(datetime(2024, 5, 20, 8, 0)),
+                status=Status.NEW,
+                team_type=TeamType.BY_ASSEMBLY_CREW,
             )
+        # status adviced
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Ferda test-{i}", zip_code=f"123{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"{i:06}-R",
+                distrib_hub=self.hub,
+                mandant="SCCZ",
+                client=customer,
+                evidence_termin=date(2024, 2, 2),
+                delivery_termin=date(2024, 3, 4),
+                montage_termin=timezone.make_aware(datetime(2024, 4, 10, 10, 0)),
+                status=Status.ADVICED,
+                team_type=TeamType.BY_ASSEMBLY_CREW,
+            )
+        # OD 701
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Karel test-{i}", zip_code=f"321{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"701{i:05}-R",
+                distrib_hub=self.hub,
+                mandant="SCCZ",
+                client=customer,
+                evidence_termin=date(2024, 2, 2),
+                delivery_termin=date(2024, 3, 4),
+                montage_termin=timezone.make_aware(datetime(2024, 4, 10, 10, 0)),
+                status=Status.REALIZED,
+                team_type=TeamType.BY_ASSEMBLY_CREW,
+            )
+
+    def test_filter_by_status_new(self):
+        """filtruje status NEW"""
+        response = self.client.get(self.url, {"status": "New"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["orders"]), self.range)
+        self.assertNotEqual(len(response.context["orders"]), 20)
+        for order in response.context["orders"]:
+            self.assertEqual(order.status, "New")
+
+    def test_filter_by_status_adviced(self):
+        """filtruje status Adviced"""
+        response = self.client.get(self.url, {"status": "Adviced"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["orders"]), self.range)
+        self.assertNotEqual(len(response.context["orders"]), 20)
+        for order in response.context["orders"]:
+            self.assertEqual(order.status, "Adviced")
+
+    def test_filter_by_status_realized(self):
+        """Filtruje status Realized"""
+        response = self.client.get(self.url, {"status": "Realized"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["orders"]), self.range)
+        self.assertNotEqual(len(response.context["orders"]), 20)
+        for order in response.context["orders"]:
+            self.assertEqual(order.status, "Realized")
+
+    def test_filter_by_status_od_701(self):
+        """Filtruje OD 701"""
+        response = self.client.get(self.url, {"od": "701"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["orders"]), self.range)
+        for order in response.context["orders"]:
+            self.assertTrue(order.order_number.startswith("701"))
+
+    def test_filter_by_start_date(self):
+        response = self.client.get(self.url, {"start_date": "2024-01-10"})
+        self.assertEqual(response.status_code, 200)
+        for order in response.context["orders"]:
+            self.assertGreaterEqual(order.evidence_termin, date(2024, 1, 10))
+
+    def test_filter_by_end_date(self):
+        response = self.client.get(self.url, {"end_date": "2024-01-10"})
+        self.assertEqual(response.status_code, 200)
+        for order in response.context["orders"]:
+            self.assertLessEqual(order.evidence_termin, date(2024, 1, 10))
+
+    def test_combined_filters(self):
+        response = self.client.get(
+            self.url,
+            {
+                "status": "New",
+                "od": "703",
+                "start_date": "2024-01-01",
+                "end_date": "2024-01-30",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        for order in response.context["orders"]:
+            self.assertEqual(order.status, "New")
+            self.assertTrue(order.order_number.startswith("703"))
+            self.assertGreaterEqual(order.evidence_termin, date(2024, 1, 1))
+            self.assertLessEqual(order.evidence_termin, date(2024, 1, 30))
 
     def test_logged_in(self):
         """
         Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
         a je použita správná šablona.
         """
-        self.client.login(username="testuser", password="testpass")
+
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
@@ -617,7 +724,7 @@ class OrdersAllViewTest(TestCase):
         """
         Test pro zobrazení všech objednávek.
         """
-        self.client.login(username="testuser", password="testpass")
+
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
@@ -627,6 +734,7 @@ class OrdersAllViewTest(TestCase):
         Testuje, zda je uživatel přesměrován na přihlašovací stránku,
         pokud není přihlášen a pokusí se zobrazit indexovou stránku.
         """
+        self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
 
