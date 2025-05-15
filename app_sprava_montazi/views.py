@@ -329,11 +329,11 @@ class OrdersView(LoginRequiredMixin, ListView):
         status: str = self.request.GET.get("status", "").strip()
         # filtrace podle prvnich tri pismen
         od_value = self.request.GET.get("od", "").strip()
-        if status:
-            orders = orders.filter(status=status)
         # Filtrace podle casoveho rozsahu
         start_date = self.request.GET.get("start_date")
         end_date = self.request.GET.get("end_date")
+        if status:
+            orders = orders.filter(status=status)
 
         if start_date:
             orders = orders.filter(evidence_termin__gte=start_date)
