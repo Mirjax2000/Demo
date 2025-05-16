@@ -85,19 +85,13 @@
                     <span class="ms-1">{{ order.notes }}</span>
                 </li>
             {% endif %}
-            <!--created-->
-            <li class="L-detail__item">
-                <strong>Vytvořeno:</strong>
-                <span class="ms-1">{{ order.created|date:"d. m. Y H:i" }}</span>
-            </li>
-            <!--updated-->
-            <li class="L-detail__item">
-                <strong>Upraveno:</strong>
-                <span class="ms-1">{{ order.updated|date:"d. m. Y H:i" }}</span>
-            </li>
         </ul>
     </div>
     <!---->
+    <div>
+        <a href="#" class="btn btn-primary d-block ms-5 me-5 mb-2">
+            <i class="fa-solid fa-timeline me-2"></i>Zobrazit historii</a>
+    </div>
     <div>
         <a href="{% url 'order_update' order.pk %}"
            class="btn btn-primary d-block ms-5 me-5">
