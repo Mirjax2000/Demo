@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import Order, Team, DistribHub, Upload, Client, Article, CallLog
+from simple_history.admin import SimpleHistoryAdmin
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -29,7 +30,6 @@ class ClientAdmin(admin.ModelAdmin):
     search_fields = ["name", "email"]
     list_display = ("name", "street", "city", "zip_code", "incomplete")
     list_filter = ["incomplete"]
-
     list_per_page = 15
 
 
@@ -59,10 +59,34 @@ class CallLogAdmin(admin.ModelAdmin):
     list_per_page = 15
 
 
-admin.site.register(DistribHub, DistribHubAdmin)
-admin.site.register(Client, ClientAdmin)
-admin.site.register(Order, OrderAdmin)
-admin.site.register(Team, TeamAdmin)
-admin.site.register(Article, ArticleAdmin)
-admin.site.register(Upload)
-admin.site.register(CallLog, CallLogAdmin)
+class OrderHistoryAdmin(SimpleHistoryAdmin, OrderAdmin):
+    pass
+
+
+class DistribHubHistoryAdmin(SimpleHistoryAdmin, DistribHubAdmin):
+    pass
+
+
+class ClientHistoryAdmin(SimpleHistoryAdmin, ClientAdmin):
+    pass
+
+
+class TeamHistoryAdmin(SimpleHistoryAdmin, TeamAdmin):
+    pass
+
+
+class ArticleHistoryAdmin(SimpleHistoryAdmin, ArticleAdmin):
+    pass
+
+
+class CallLogHistoryAdmin(SimpleHistoryAdmin, CallLogAdmin):
+    pass
+
+
+admin.site.register(DistribHub, DistribHubHistoryAdmin)
+admin.site.register(Client, ClientHistoryAdmin)
+admin.site.register(Order, OrderHistoryAdmin)
+admin.site.register(Team, TeamHistoryAdmin)
+admin.site.register(Article, ArticleHistoryAdmin)
+admin.site.register(Upload, SimpleHistoryAdmin)  # Pro model bez vlastní Admin třídy
+admin.site.register(CallLog, CallLogHistoryAdmin)

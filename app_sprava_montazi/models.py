@@ -1,6 +1,7 @@
 """app_sprava_montazi_models"""
 
 from django.db import models
+from simple_history.models import HistoricalRecords
 from django.db.models import (
     PROTECT,
     BooleanField,
@@ -74,6 +75,7 @@ class Team(Model):
         verbose_name="Cena za km",
     )
     notes = TextField(blank=True, verbose_name="Poznámka")
+    history = HistoricalRecords()
     slug = SlugField(unique=True, blank=True)
 
     def price_per_km_float(self) -> float:
@@ -113,6 +115,7 @@ class Client(Model):
     phone = PhoneNumberField(max_length=17, blank=True, verbose_name="Telefon")
     email = EmailField(blank=True, verbose_name="E-mail")
     incomplete = BooleanField(default=True, verbose_name="Neúplný záznam")
+    history = HistoricalRecords()
     slug = SlugField(blank=True)
 
     def save(self, *args, **kwargs):
@@ -132,6 +135,7 @@ class Client(Model):
 class DistribHub(Model):
     code = CharField(max_length=3, unique=True)
     city = CharField(max_length=32)
+    history = HistoricalRecords()
     slug = SlugField(blank=True, unique=True)
 
     def save(self, *args, **kwargs):
@@ -201,14 +205,8 @@ class Order(Model):
         verbose_name="Montážní tým",
     )
     notes = models.TextField(blank=True, verbose_name="Poznámky")
-    created = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Vytvořeno",
-    )
-    updated = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Upraveno",
-    )
+
+    history = HistoricalRecords()
 
     def notes_first_10(self) -> str:
         if self.notes:
@@ -244,6 +242,7 @@ class Article(Model):
     )
     quantity = PositiveIntegerField(default=1, verbose_name="Množství")
     note = TextField(blank=True, verbose_name="Popis")
+    history = HistoricalRecords()
 
     def first_15(self) -> str:
         if self.note:
@@ -259,9 +258,10 @@ class Article(Model):
 class Upload(models.Model):
     file = models.FileField(upload_to="uploads/")
     created = models.DateTimeField(auto_now_add=True)
+    history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return f"{self.file}"
+        return f"{self.file.name if self.file else 'No file'}"
 
     class Meta:
         ordering = ["-created"]
@@ -276,7 +276,10 @@ class CallLog(models.Model):
     )
     called_at = models.DateTimeField(auto_now_add=True, verbose_name="Čas volání")
     note = models.TextField(blank=True, verbose_name="Poznámka")
-    was_successful = models.CharField(choices=AdviceStatus, verbose_name="Dovoláno")
+    was_successful = models.CharField(
+        max_length=10, choices=AdviceStatus, verbose_name="Dovoláno"
+    )
+    history = HistoricalRecords()
 
     class Meta:
         ordering = ["-called_at"]
