@@ -17,11 +17,12 @@ from app_sprava_montazi.views import (
     TeamDetailView as TeamDetail,
     OrderDetailView as OrderDetail,
     OrderCreateView as OrderCreate,
-    ClientUpdateView as ClientUpdate,
+    ClientUpdateView as CUV,
     CreatePageView as CreatePage,
     OrderUpdateView as OrderUpdate,
     ClientsOrdersView as ClientsOrders,
-    ClientUpdateSecondaryView as ClientUpdateSecondary,
+    OrderHistoryView as OrderHistory,
+    ClientUpdateSecondaryView as CUS,
 )
 
 # --- typove zkratky
@@ -42,18 +43,11 @@ app_sprava_montazi: list = [
     path("orders/", Orders.as_view(), name="orders"),
     path("order/create/", OrderCreate.as_view(), name="order_create"),
     path(f"order/order_update/{PK}/", OrderUpdate.as_view(), name="order_update"),
-    path(
-        f"order/client_update/{SLUG}/{OPK}/",
-        ClientUpdate.as_view(),
-        name="client_update",
-    ),
-    path(
-        f"order/client_update_secondary/{SLUG}/",
-        ClientUpdateSecondary.as_view(),
-        name="client_update_secondary",
-    ),
+    path(f"order/client_update/{SLUG}/{OPK}/", CUV.as_view(), name="client_update"),
+    path(f"order/client_update_sec/{SLUG}/", CUS.as_view(), name="client_update_sec"),
     path(f"order/detail/{PK}/", OrderDetail.as_view(), name="order_detail"),
     path(f"order/client_orders/{SLUG}/", ClientsOrders.as_view(), name="client_orders"),
+    path(f"order/history/{PK}/", OrderHistory.as_view(), name="order_history"),
     #
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),

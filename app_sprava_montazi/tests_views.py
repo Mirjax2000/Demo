@@ -24,8 +24,6 @@ from app_sprava_montazi.models import (
     Upload,
 )
 
-from .forms import UploadForm
-
 
 class IndexViewTest(TestCase):
     def setUp(self):
@@ -60,13 +58,13 @@ class HomePageViewTest(TestCase):
         self.user = User.objects.create_user(username="testuser", password="testpass")
         self.url = reverse("homepage")
         self.template = "app_sprava_montazi/homepage/homepage.html"
+        self.client.login(username="testuser", password="testpass")
 
     def test_logged_in(self):
         """
         Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
         a je použita správná šablona.
         """
-        self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
@@ -76,8 +74,14 @@ class HomePageViewTest(TestCase):
         Testuje, zda je uživatel přesměrován na přihlašovací stránku,
         pokud není přihlášen a pokusí se zobrazit indexovou stránku.
         """
+        self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_active_context_variable(self):
+        response = self.client.get(self.url)
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "homepage")
 
 
 class CreatePageViewTest(TestCase):
@@ -334,6 +338,11 @@ class DashboardViewTest(TestCase):
         self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_active_context_variable(self):
+        response = self.client.get(self.url)
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "dashboard")
 
 
 class ClientUpdateViewTest(TestCase):
@@ -704,6 +713,11 @@ class OrderCreateViewTest(TestCase):
         args, kwargs = mock_success_message.call_args
         self.assertEqual(args[1], "Objednávka vytvořena.")
 
+    def test_active_context_variable(self):
+        response = self.client.get(self.url)
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")
+
 
 class OrdersAllViewTest(TestCase):
     def setUp(self):
@@ -857,6 +871,11 @@ class OrdersAllViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
 
+    def test_active_context_variable(self):
+        response = self.client.get(self.url)
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")
+
 
 class TeamsViewTest(TestCase):
     def setUp(self):
@@ -864,13 +883,13 @@ class TeamsViewTest(TestCase):
         self.user = User.objects.create_user(username="testuser", password="testpass")
         self.url = reverse("teams")
         self.template = "app_sprava_montazi/teams/teams_all.html"
+        self.client.login(username="testuser", password="testpass")
 
     def test_logged_in(self):
         """
         Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
         a je použita správná šablona.
         """
-        self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
@@ -880,8 +899,14 @@ class TeamsViewTest(TestCase):
         Testuje, zda je uživatel přesměrován na přihlašovací stránku,
         pokud není přihlášen a pokusí se zobrazit indexovou stránku.
         """
+        self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_active_context_variable(self):
+        response = self.client.get(self.url)
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "teams")
 
 
 class TeamCreateTest(TestCase):
@@ -909,6 +934,11 @@ class TeamCreateTest(TestCase):
         self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_active_context_variable(self):
+        response = self.client.get(self.url)
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "teams")
 
 
 class TeamDetailViewTest(TestCase):
@@ -948,6 +978,11 @@ class TeamDetailViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
 
+    def test_active_context_variable(self):
+        response = self.client.get(self.url)
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "teams")
+
 
 class TeamUpdateViewTest(TestCase):
     def setUp(self):
@@ -966,13 +1001,13 @@ class TeamUpdateViewTest(TestCase):
         )
         self.url = reverse("team_update", kwargs={"slug": self.team.slug})
         self.template = "app_sprava_montazi/teams/team_form.html"
+        self.client.login(username="testuser", password="testpass")
 
     def test_logged_in(self):
         """
         Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
         a je použita správná šablona.
         """
-        self.client.login(username="testuser", password="testpass")
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
@@ -982,8 +1017,14 @@ class TeamUpdateViewTest(TestCase):
         Testuje, zda je uživatel přesměrován na přihlašovací stránku,
         pokud není přihlášen a pokusí se zobrazit indexovou stránku.
         """
+        self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_active_context_variable(self):
+        response = self.client.get(self.url)
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "teams")
 
 
 class ClientOrdersViewTest(TestCase):
@@ -1012,3 +1053,98 @@ class ClientOrdersViewTest(TestCase):
         self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_active_context_variable(self):
+        response = self.client.get(self.url)
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")
+
+
+class OrderHistoryViewTest(TestCase):
+    def setUp(self):
+        # Vytvoříme testovacího uživatele
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.template = "app_sprava_montazi/orders/order_detail_history.html"
+        self.client.login(username="testuser", password="testpass")
+        self.hub = DistribHub.objects.create(code="626", city="Chrastany")
+        self.customer = Client.objects.create(name="Franta test", zip_code="12345")
+        self.order = Order.objects.create(
+            order_number="12345-R",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            evidence_termin=date(2024, 1, 1),
+            delivery_termin=date(2024, 4, 10),
+            montage_termin=timezone.make_aware(datetime(2024, 5, 20, 8, 0)),
+            status=Status.NEW,
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+        )
+        self.url = reverse("order_history", kwargs={"pk": self.order.pk})
+
+    def test_logged_in(self):
+        """
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
+
+    def test_redirect_if_not_logged_in(self):
+        """
+        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
+        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
+        """
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_active_context_variable(self):
+        response = self.client.get(self.url)
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")
+
+
+class OrderDetailViewTest(TestCase):
+    def setUp(self):
+        # Vytvoříme testovacího uživatele
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.template = "app_sprava_montazi/orders/order_detail.html"
+        self.client.login(username="testuser", password="testpass")
+        self.hub = DistribHub.objects.create(code="626", city="Chrastany")
+        self.customer = Client.objects.create(name="Franta test", zip_code="12345")
+        self.order = Order.objects.create(
+            order_number="12345-R",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            evidence_termin=date(2024, 1, 1),
+            delivery_termin=date(2024, 4, 10),
+            montage_termin=timezone.make_aware(datetime(2024, 5, 20, 8, 0)),
+            status=Status.NEW,
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+        )
+        self.url = reverse("order_detail", kwargs={"pk": self.order.pk})
+
+    def test_logged_in(self):
+        """
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
+
+    def test_redirect_if_not_logged_in(self):
+        """
+        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
+        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
+        """
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_active_context_variable(self):
+        response = self.client.get(self.url)
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")

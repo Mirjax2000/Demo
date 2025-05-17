@@ -22,7 +22,7 @@ from django.views.generic import (
     View,
     FormView,
 )
-from .models import CallLog, Order, Status, Team, Article, Client
+from .models import CallLog, Order, Status, Team, Article, Client, TeamType
 from .forms import (
     TeamForm,
     ArticleForm,
@@ -513,3 +513,99 @@ class ClientsOrdersView(LoginRequiredMixin, View):
             return redirect("client_orders", slug=slug)
 
         return render(request, self.template_name, context)
+
+
+class OrderHistoryView(LoginRequiredMixin, ListView):
+    template_name = f"{APP_URL}/orders/order_detail_history.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.order_instance = get_object_or_404(Order, pk=self.kwargs["pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.order_instance.history.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["order"] = self.order_instance
+
+        processed_history_data = []
+
+        for entry in self.object_list:
+            entry_info = {
+                "id": entry.history_id,
+                "date": entry.history_date,
+                "type": entry.history_type,
+                "user": entry.history_user,
+                "status": entry.get_status_display(),
+                "team_type": entry.get_team_type_display(),
+                "changes": [],
+            }
+
+            if entry.history_type == "~":
+                prev_record = entry.prev_record
+                if prev_record:
+                    delta = entry.diff_against(prev_record)
+
+                    for change in delta.changes:
+                        field_name = change.field
+                        old_val = change.old
+                        new_val = change.new
+
+                        # Překlad statusu pomocí TextChoices
+                        choice_fields = {
+                            "team_type": TeamType,
+                            "status": Status,
+                        }
+                        if field_name in choice_fields:
+                            choices = choice_fields[field_name]
+                            try:
+                                old_val_obj = choices(old_val)
+                                new_val_obj = choices(new_val)
+                                old_val = getattr(
+                                    old_val_obj, "label", str(old_val_obj)
+                                )
+                                new_val = getattr(
+                                    new_val_obj, "label", str(new_val_obj)
+                                )
+                            except ValueError:
+                                pass
+
+                        # Pokus o převod FK na string (přes __str__)
+                        try:
+                            field_object = entry.instance._meta.get_field(field_name)
+                            if field_object.is_relation and field_object.related_model:
+                                model_class = field_object.related_model
+
+                                if old_val:
+                                    try:
+                                        old_val = str(
+                                            model_class.objects.get(pk=old_val)
+                                        )
+                                    except model_class.DoesNotExist:
+                                        pass
+
+                                if new_val:
+                                    try:
+                                        new_val = str(
+                                            model_class.objects.get(pk=new_val)
+                                        )
+                                    except model_class.DoesNotExist:
+                                        pass
+                        except Exception:
+                            pass
+
+                        entry_info["changes"].append(
+                            {
+                                "field": field_name,
+                                "old": old_val,
+                                "new": new_val,
+                            }
+                        )
+
+            processed_history_data.append(entry_info)
+
+        context["history_data"] = processed_history_data
+        # --- navigace
+        context["active"] = "orders_all"
+        return context
