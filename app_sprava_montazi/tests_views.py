@@ -1148,3 +1148,28 @@ class OrderDetailViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertIn("active", response.context)
         self.assertEqual(response.context["active"], "orders_all")
+
+    def test_non_existent_order_returns_404(self):
+        url = reverse("order_detail", kwargs={"pk": 9999})  # Neexistující PK
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_order_in_context(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.context["order"], self.order)
+
+    def test_order_number_rendered_in_template(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, "12345-R")
+
+    def test_articles_in_context(self):
+        # Vytvoříme články (Articles) pro tuto objednávku
+        Article.objects.create(order=self.order, name="Test Article 1")
+        Article.objects.create(order=self.order, name="Test Article 2")
+
+        response = self.client.get(self.url)
+
+        # Zkontrolujeme, že v kontextu jsou 2 články
+        self.assertEqual(len(response.context["articles"]), 2)
+        self.assertEqual(response.context["articles"][0].name, "Test Article 1")
+        self.assertEqual(response.context["articles"][1].name, "Test Article 2")
