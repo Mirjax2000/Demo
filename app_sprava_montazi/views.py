@@ -23,6 +23,7 @@ from django.views.generic import (
     FormView,
 )
 from .models import CallLog, Order, Status, Team, Article, Client, TeamType
+from .models import HistoricalArticle
 from .forms import (
     TeamForm,
     ArticleForm,
@@ -531,12 +532,21 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["order"] = self.order_instance
 
-        all_history = list(self.object_list)
-        # ---
-        for article in self.order_instance.articles.all():
-            all_history.extend(article.history.all())
+        order_history = list(self.order_instance.history.all())
+
+        try:
+            article_history = list(
+                HistoricalArticle.objects.filter(order=self.order_instance)
+            )
+        except Exception as e:
+            cons.log(
+                f"Chyba při načítání historie HistoricalArticle pro zakázku {self.order_instance.pk}: {e}"
+            )
+            article_history = []
+
+        all_history = order_history + article_history
         all_history.sort(key=lambda x: x.history_date, reverse=True)
-        # ---
+
         processed_history_data = []
 
         for entry in all_history:
@@ -546,16 +556,21 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
                 "type": entry.history_type,
                 "user": entry.history_user,
                 "status": Status(entry.status).label
-                if hasattr(entry, "status") and entry.status
+                if hasattr(entry, "status")
+                and entry.status is not None
+                and entry.status != ""
                 else None,
                 "team_type": TeamType(entry.team_type).label
-                if hasattr(entry, "team_type") and entry.team_type
+                if hasattr(entry, "team_type")
+                and entry.team_type is not None
+                and entry.team_type != ""
                 else None,
-                "model": "Article" if isinstance(entry.instance, Article) else "Order",
+                "model": "Article" if isinstance(entry, HistoricalArticle) else "Order",
                 "changes": [],
             }
-            if isinstance(entry.instance, Article):
-                entry_info["name"] = str(entry.instance.name)
+
+            if isinstance(entry, HistoricalArticle):
+                entry_info["name"] = str(getattr(entry, "name", "(neznámý)"))
 
             if entry.history_type == "~":
                 prev_record = entry.prev_record
@@ -567,7 +582,6 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
                         old_val = change.old
                         new_val = change.new
 
-                        # Překlad statusu pomocí TextChoices
                         choice_fields = {
                             "team_type": TeamType,
                             "status": Status,
@@ -575,38 +589,51 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
                         if field_name in choice_fields:
                             choices = choice_fields[field_name]
                             try:
-                                old_val_obj = choices(old_val)
-                                new_val_obj = choices(new_val)
-                                old_val = getattr(
-                                    old_val_obj, "label", str(old_val_obj)
+                                old_val_label = (
+                                    getattr(choices(old_val), "label", str(old_val))
+                                    if old_val is not None and old_val != ""
+                                    else "-"
                                 )
-                                new_val = getattr(
-                                    new_val_obj, "label", str(new_val_obj)
+                                new_val_label = (
+                                    getattr(choices(new_val), "label", str(new_val))
+                                    if new_val is not None and new_val != ""
+                                    else "-"
                                 )
+                                old_val = old_val_label
+                                new_val = new_val_label
                             except ValueError:
                                 pass
 
-                        # Pokus o převod FK na string (přes __str__)
                         try:
-                            field_object = entry.instance._meta.get_field(field_name)
-                            if field_object.is_relation and field_object.related_model:
-                                model_class = field_object.related_model
+                            original_field = entry._meta.model._meta.get_field(
+                                field_name
+                            )
+                            if (
+                                original_field.is_relation
+                                and original_field.related_model
+                            ):
+                                model_class = original_field.related_model
 
-                                if old_val:
+                                if old_val is not None and old_val != "":
                                     try:
-                                        old_val = str(
-                                            model_class.objects.get(pk=old_val)
-                                        )
+                                        old_obj = model_class.objects.get(pk=old_val)
+                                        old_val_str = str(old_obj)
                                     except model_class.DoesNotExist:
-                                        pass
+                                        old_val_str = f"ID:{old_val} (smazáno)"
+                                    except Exception:
+                                        old_val_str = str(old_val)
+                                    old_val = old_val_str if old_val_str else "-"
 
-                                if new_val:
+                                if new_val is not None and new_val != "":
                                     try:
-                                        new_val = str(
-                                            model_class.objects.get(pk=new_val)
-                                        )
+                                        new_obj = model_class.objects.get(pk=new_val)
+                                        new_val_str = str(new_obj)
                                     except model_class.DoesNotExist:
-                                        pass
+                                        new_val_str = f"ID:{new_val} (smazáno)"
+                                    except Exception:
+                                        new_val_str = str(new_val)
+                                    new_val = new_val_str if new_val_str else "-"
+
                         except Exception:
                             pass
 
@@ -621,6 +648,6 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
             processed_history_data.append(entry_info)
 
         context["history_data"] = processed_history_data
-        # --- navigace
+        # --- navigace ---
         context["active"] = "orders_all"
         return context

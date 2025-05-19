@@ -7,56 +7,75 @@
     <h4 class="mt-3">Historie zakázky: {{ order.order_number|upper }}</h4>
     <hr>
     {% if history_data %}
-        <ul class="list-unstyled">
+        <div>
             {% for entry in history_data %}
-                <li>
-                    <p class="mb-2">
-                        Záznam ID: <strong>{{ entry.id }}</strong>
-                    </p>
-                    <!---->
-                    <p class="mb-2">
-                        Uživatel: <strong>{{ entry.user|default:"Neznámý" }}</strong>
-                    </p>
-                    <!---->
-                    <p class="mb-2">
-                        před: <strong class="ms-2 me-2">{{ entry.date|timesince }}</strong>
-                        Datum změny: <strong>{{ entry.date }}</strong>
-                    </p>
-                    <!---->
-                    <p class="mb-2">
-                        Typ změny:
-                        {% if entry.type == '+' %}
-                            <span class="u-txt-success ms-2">Vytvoření</span>
-                        {% elif entry.type == '~' %}
-                            <span class="u-txt-warning ms-2">Úprava</span>
-                        {% elif entry.type == '-' %}
-                            <span class="u-txt-error ms-2">Smazání</span>
+                <div>
+                    <div>
+                        {% if entry.model == 'Order' %}
+                            <h5>
+                                <i class="fa-solid fa-truck-fast me-2"></i>
+                                <span class="text-decoration-underline">Změna v Zakázce</span>
+                            </h5>
+                        {% else %}
+                            <h5>
+                                <i class="fas fa-clipboard-list me-2"></i>
+                                <span class="text-decoration-underline">Změna v Artiklu:</span>
+                                <span class="ms-2">{{ entry.name|default:"(neznámý)" }}</span>
+                            </h5>
                         {% endif %}
-                    </p>
-                    <!---->
-                    <p class="mb-2">
-                        <strong>
-                            {% if entry.model == "Article" %}Artikl – {{ entry.name|default:"(neznámý)" }}{% endif %}
-                        </strong>
-                    </p>
-                    <!---->
-                    {% if entry.changes %}
-                        <h4>Změněná pole:</h4>
-                        <ol>
-                            {% for change in entry.changes %}
-                                <li>
-                                    Pole:
-                                    <strong>{{ change.field }}</strong>: z
-                                    <span class="u-txt-warning">{{ change.old }}</span> na
-                                    <span class="u-txt-success">{{ change.new }}</span>
-                                </li>
-                            {% endfor %}
-                        </ol>
-                    {% endif %}
-                    <hr>
-                </li>
+                    </div>
+                    <div>
+                        <p>
+                            Uživatel: <strong>{{ entry.user|default:"Neznámý" }}</strong>
+                            <br>
+                            Datum změny: <strong>{{ entry.date }}</strong> (před {{ entry.date|timesince }} )
+                            <br>
+                            Typ změny:
+                            {% if entry.type == '+' %}
+                                <span class="u-txt-success"><i class="fa-regular fa-square-plus"></i> Vytvoření</span>
+                            {% elif entry.type == '~' %}
+                                <span class="u-txt-warning"><i class="fa-regular fa-pen-to-square"></i> Úprava</span>
+                            {% elif entry.type == '-' %}
+                                <span class="u-txt-error"><i class="fa-regular fa-square-minus"></i> Smazání</span>
+                            {% else %}
+                                {{ entry.type }}
+                            {% endif %}
+                        </p>
+                        {% if entry.type == '~' %}
+                            {% if entry.changes %}
+                                <h6>Změněná pole:</h6>
+                                <ul>
+                                    {% for change in entry.changes %}
+                                        <li>
+                                            <strong>{{ change.field }}</strong>: z <span class="text-danger">{{ change.old|default:"-" }}</span> na <span class="text-success">{{ change.new|default:"-" }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p>Byl upraven Artikl, nebo prázdné uložení.</p>
+                            {% endif %}
+                        {% elif entry.type == '+' %}
+                            {% if entry.model == 'Order' %}
+                                <p>Zakázka byla vytvořena.</p>
+                            {% elif entry.model == 'Article' %}
+                                <p>
+                                    Artikl " <strong>{{ entry.name|default:'(neznámý)' }}</strong> " byl vytvořen v rámci této zakázky.
+                                </p>
+                            {% endif %}
+                        {% elif entry.type == '-' %}
+                            {% if entry.model == 'Order' %}
+                                <p>Zakázka byla smazána.</p>
+                            {% elif entry.model == 'Article' %}
+                                <p>
+                                    Artikl " <strong>{{ entry.name|default:'(neznámý)' }}</strong> " byl smazán z této zakázky.
+                                </p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                <hr>
             {% endfor %}
-        </ul>
+        </div>
     {% else %}
         <p>Pro tuto zakázku neexistuje žádná historie.</p>
     {% endif %}
