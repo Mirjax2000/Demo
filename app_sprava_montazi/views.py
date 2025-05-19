@@ -348,16 +348,18 @@ class OrdersView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        # --- utils.py
 
-        get_start = None
-        get_end = None
+        get_start = (
+            datetime.strptime(self.filters["start_date"], "%Y-%m-%d")
+            if self.filters["start_date"]
+            else None
+        )
 
-        if self.filters["start_date"]:
-            get_start = datetime.strptime(self.filters["start_date"], "%Y-%m-%d")
-
-        if self.filters["end_date"]:
-            get_end = datetime.strptime(self.filters["end_date"], "%Y-%m-%d")
+        get_end = (
+            datetime.strptime(self.filters["end_date"], "%Y-%m-%d")
+            if self.filters["end_date"]
+            else None
+        )
 
         context.update(
             {
@@ -652,6 +654,7 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
 
 class ExportOrdersExcelView(View):
     def get(self, request, *args, **kwargs):
+        # --- utils.py
         filters = parse_order_filters(request)
         orders = filter_orders(filters)
 
@@ -678,9 +681,9 @@ class ExportOrdersExcelView(View):
             team = str(order.team) if order.team else ""
             team_type = order.get_team_type_display() if order.team_type else ""
             status = order.get_status_display()
-            evidence_termin = format_date(order.evidence_termin)
-            delivery_termin = format_date(order.delivery_termin)
-            montage_termin = format_date(order.montage_termin)
+            evidence_termin = format_date(order.evidence_termin)  # utils.py
+            delivery_termin = format_date(order.delivery_termin)  # utils.py
+            montage_termin = format_date(order.montage_termin)  # utils.py
 
             ws.append(
                 [
