@@ -7,8 +7,9 @@ from django.db import models
 from django.db import IntegrityError
 from django.utils.text import slugify
 from django.utils import timezone
+from phonenumber_field.modelfields import PhoneNumberField
 from .models import DistribHub, Client, Order, Team, Status, TeamType
-from .models import Article, CallLog
+from .models import Article, CallLog, Upload, AdviceStatus
 
 
 class DistribHubModelTest(TestCase):
@@ -43,7 +44,7 @@ class DistribHubModelTest(TestCase):
         special = DistribHub.objects.create(code="222", city="České Budějovice")
         self.assertEqual(special.slug, "222-ceske-budejovice")
 
-    def test_model_field_types(self):
+    def test_model_field_types(self) -> None:
         """Ověří, že pole jsou typu CharField."""
         code_field = DistribHub._meta.get_field("code")
         city_field = DistribHub._meta.get_field("city")
@@ -52,24 +53,30 @@ class DistribHubModelTest(TestCase):
         self.assertIsInstance(city_field, models.CharField)
         self.assertIsInstance(slug_field, models.SlugField)
 
-    def test_field_max_lengths(self):
+    def test_field_max_lengths(self) -> None:
         """Ověří max_length u jednotlivých polí."""
         self.assertEqual(DistribHub._meta.get_field("code").max_length, 3)
         self.assertEqual(DistribHub._meta.get_field("city").max_length, 32)
 
-    def test_unique_constraints(self):
+    def test_unique_constraints(self) -> None:
         """Ověří, že pole code a slug mají unique=True."""
         code_field = DistribHub._meta.get_field("code")
         slug_field = DistribHub._meta.get_field("slug")
         self.assertTrue(code_field.unique)
         self.assertTrue(slug_field.unique)
 
-    def test_slug_autogeneration_on_change(self):
+    def test_slug_autogeneration_on_change(self) -> None:
         """Slug se změní, když se změní code nebo city."""
         self.hub.code = "222"
         self.hub.city = "Brno"
         self.hub.save()
         self.assertEqual(self.hub.slug, "222-brno")
+
+    def test_blank_fields(self) -> None:
+        """Strukturalni test"""
+        self.assertFalse(DistribHub._meta.get_field("code").blank)
+        self.assertFalse(DistribHub._meta.get_field("city").blank)
+        self.assertTrue(DistribHub._meta.get_field("slug").blank)
 
     def test_str_method(self):
         """Test __str__ metody."""
@@ -77,6 +84,48 @@ class DistribHubModelTest(TestCase):
 
 
 class ClientModelTests(TestCase):
+    def test_field_types(self):
+        """Strukturalni test"""
+        self.assertIsInstance(Client._meta.get_field("name"), models.CharField)
+        self.assertIsInstance(Client._meta.get_field("street"), models.CharField)
+        self.assertIsInstance(Client._meta.get_field("city"), models.CharField)
+        self.assertIsInstance(Client._meta.get_field("zip_code"), models.CharField)
+        self.assertIsInstance(Client._meta.get_field("phone"), PhoneNumberField)
+        self.assertIsInstance(Client._meta.get_field("email"), models.EmailField)
+        self.assertIsInstance(Client._meta.get_field("incomplete"), models.BooleanField)
+        self.assertIsInstance(Client._meta.get_field("slug"), models.SlugField)
+
+    def test_max_length_constraints(self):
+        """Strukturalni test"""
+        self.assertEqual(Client._meta.get_field("name").max_length, 75)
+        self.assertEqual(Client._meta.get_field("street").max_length, 50)
+        self.assertEqual(Client._meta.get_field("city").max_length, 32)
+        self.assertEqual(Client._meta.get_field("zip_code").max_length, 5)
+        self.assertEqual(Client._meta.get_field("phone").max_length, 17)
+
+    def test_blank_fields(self):
+        """Strukturalni test"""
+        self.assertFalse(Client._meta.get_field("name").blank)
+        self.assertTrue(Client._meta.get_field("street").blank)
+        self.assertTrue(Client._meta.get_field("city").blank)
+        self.assertFalse(Client._meta.get_field("zip_code").blank)
+        self.assertTrue(Client._meta.get_field("phone").blank)
+        self.assertTrue(Client._meta.get_field("email").blank)
+        self.assertFalse(Client._meta.get_field("incomplete").blank)
+        self.assertTrue(Client._meta.get_field("slug").blank)
+
+    def test_verbose_names(self):
+        """Strukturalni test"""
+        self.assertEqual(Client._meta.get_field("name").verbose_name, "Jméno zákazníka")
+        self.assertEqual(Client._meta.get_field("street").verbose_name, "Ulice")
+        self.assertEqual(Client._meta.get_field("city").verbose_name, "Město")
+        self.assertEqual(Client._meta.get_field("zip_code").verbose_name, "PSČ")
+        self.assertEqual(Client._meta.get_field("phone").verbose_name, "Telefon")
+        self.assertEqual(Client._meta.get_field("email").verbose_name, "E-mail")
+        self.assertEqual(
+            Client._meta.get_field("incomplete").verbose_name, "Neúplný záznam"
+        )
+
     def test_client_creation(self):
         """
         Testuje vytvoření nové instance modelu Client a ověřuje, že hodnoty polí jsou správně nastaveny.
@@ -269,6 +318,47 @@ class ArticleModelTestV1(TestCase):
             team=None,
         )
 
+    def test_name_field(self):
+        """Strukturlani test"""
+        field = Article._meta.get_field("name")
+        self.assertEqual(field.max_length, 32)
+
+    def test_quantity_field(self):
+        """Strukturalni test"""
+        field = Article._meta.get_field("quantity")
+        self.assertEqual(field.default, 1)
+
+    def test_note_field(self):
+        """Strukturalni test"""
+        field = Article._meta.get_field("note")
+        self.assertTrue(field.blank)
+
+    def test_price_field(self):
+        field = Article._meta.get_field("price")
+        self.assertEqual(field.max_digits, 10)
+        self.assertEqual(field.decimal_places, 2)
+        self.assertTrue(field.null)
+        self.assertTrue(field.blank)
+
+    def test_order_field(self):
+        """Strukturalni test"""
+        field = Article._meta.get_field("order")
+        self.assertEqual(field.related_model, Order)
+        self.assertEqual(field.remote_field.on_delete, models.PROTECT)
+        self.assertEqual(field.related_query_name(), "articles")
+
+    def test_field_types(self):
+        """Strukturalni test"""
+        model = Article()
+
+        self.assertIsInstance(model._meta.get_field("order"), models.ForeignKey)
+        self.assertIsInstance(model._meta.get_field("name"), models.CharField)
+        self.assertIsInstance(model._meta.get_field("price"), models.DecimalField)
+        self.assertIsInstance(
+            model._meta.get_field("quantity"), models.PositiveIntegerField
+        )
+        self.assertIsInstance(model._meta.get_field("note"), models.TextField)
+
     def test_article_creation(self):
         """
         Testuje vytvoření instance modelu Article.
@@ -348,6 +438,45 @@ class TeamModelTest(TestCase):
             price_per_km=12.30,
             notes="Toto je testovací poznámka.",
         )
+
+    def test_field_attributes(self):
+        """Strukturalni test"""
+        field = Team._meta.get_field("name")
+        self.assertTrue(field.unique)
+        self.assertEqual(field.max_length, 32)
+
+        self.assertEqual(Team._meta.get_field("city").max_length, 32)
+        self.assertEqual(Team._meta.get_field("region").max_length, 32)
+
+        self.assertEqual(Team._meta.get_field("phone").max_length, 17)
+        self.assertEqual(Team._meta.get_field("email").max_length, 64)
+
+        self.assertEqual(Team._meta.get_field("price_per_hour").max_digits, 6)
+        self.assertEqual(Team._meta.get_field("price_per_hour").decimal_places, 2)
+
+        self.assertEqual(Team._meta.get_field("price_per_km").max_digits, 6)
+        self.assertEqual(Team._meta.get_field("price_per_km").decimal_places, 2)
+
+        self.assertTrue(Team._meta.get_field("slug").unique)
+
+    def test_field_types(self):
+        """Strukturalni test"""
+        model = Team()
+
+        self.assertIsInstance(model._meta.get_field("name"), models.CharField)
+        self.assertIsInstance(model._meta.get_field("city"), models.CharField)
+        self.assertIsInstance(model._meta.get_field("region"), models.CharField)
+        self.assertIsInstance(model._meta.get_field("phone"), PhoneNumberField)
+        self.assertIsInstance(model._meta.get_field("email"), models.EmailField)
+        self.assertIsInstance(model._meta.get_field("active"), models.BooleanField)
+        self.assertIsInstance(
+            model._meta.get_field("price_per_hour"), models.DecimalField
+        )
+        self.assertIsInstance(
+            model._meta.get_field("price_per_km"), models.DecimalField
+        )
+        self.assertIsInstance(model._meta.get_field("notes"), models.TextField)
+        self.assertIsInstance(model._meta.get_field("slug"), models.SlugField)
 
     def test_team_creation(self):
         """Team creation"""
@@ -598,6 +727,58 @@ class CallLogModelTest(TestCase):
         """
         self.customer = Client.objects.create(name="Franta Pina test", zip_code="12345")
 
+        self.call_log = CallLog.objects.create(
+            client=self.customer,
+            note="Called about the delivery.",
+            was_successful="Success",
+        )
+
+    def test_field_types(self):
+        """Strukturalni test"""
+        self.assertIsInstance(CallLog._meta.get_field("client"), models.ForeignKey)
+        self.assertIsInstance(
+            CallLog._meta.get_field("called_at"), models.DateTimeField
+        )
+        self.assertIsInstance(CallLog._meta.get_field("note"), models.TextField)
+        self.assertIsInstance(
+            CallLog._meta.get_field("was_successful"), models.CharField
+        )
+
+    def test_called_at_auto_now_add(self):
+        """Strukturalni test"""
+        field = CallLog._meta.get_field("called_at")
+        self.assertTrue(field.auto_now_add)
+
+    def test_note_blank_allowed(self):
+        """Strukturlani test"""
+        field = CallLog._meta.get_field("note")
+        self.assertTrue(field.blank)
+
+    def test_client_relation(self):
+        """Strukturlani test"""
+        field = CallLog._meta.get_field("client")
+        self.assertEqual(field.related_model, Client)
+        self.assertEqual(field.remote_field.on_delete, models.PROTECT)
+
+    def test_str_method(self):
+        """Strukturalni testy"""
+        str_value = str(self.call_log)
+        expected_prefix = f"{self.customer.name} - "
+        self.assertTrue(str_value.startswith(expected_prefix))
+        self.assertIn(
+            str(self.call_log.called_at.strftime("%Y-%m-%d %H:%M")), str_value
+        )
+
+    def test_meta_ordering(self):
+        """Strukturalni testy"""
+        self.assertEqual(CallLog._meta.ordering, ["-called_at"])
+
+    def test_was_successful_choices(self):
+        """Strukturalni test"""
+        field = CallLog._meta.get_field("was_successful")
+        self.assertEqual(field.choices, AdviceStatus.choices)
+        self.assertEqual(field.max_length, 10)
+
     def test_calllog_creation_success(self):
         """
         Test if a CallLog instance can be created successfully with required fields and an optional note.
@@ -672,3 +853,94 @@ class CallLogModelTest(TestCase):
         expected_str = f"{self.customer.name} - {local_called_at_str}"
 
         self.assertEqual(str(call_log), expected_str)
+
+
+class UploadModelStructureTest(TestCase):
+    """Strukturlani testy"""
+
+    def test_field_types(self):
+        model = Upload()
+
+        self.assertIsInstance(model._meta.get_field("file"), models.FileField)
+        self.assertIsInstance(model._meta.get_field("created"), models.DateTimeField)
+
+    def test_file_field_upload_to(self):
+        field = Upload._meta.get_field("file")
+        self.assertEqual(field.upload_to, "uploads/")
+
+    def test_created_field_auto_now_add(self):
+        field = Upload._meta.get_field("created")
+        self.assertTrue(field.auto_now_add)
+
+    def test_str_method_with_file(self):
+        instance = Upload(file="uploads/test_file.txt")
+        self.assertEqual(str(instance), "uploads/test_file.txt")
+
+    def test_str_method_without_file(self):
+        instance = Upload(file=None)
+        self.assertEqual(str(instance), "No file")
+
+    def test_meta_ordering(self):
+        self.assertEqual(Upload._meta.ordering, ["-created"])
+
+
+class OrderModelStructuralTest(TestCase):
+    def test_fields(self):
+        model = Order
+        fields = model._meta.fields_map
+        distrib_hub_field = model._meta.get_field("distrib_hub")
+
+        self.assertIsInstance(model._meta.get_field("order_number"), models.CharField)
+        self.assertTrue(model._meta.get_field("order_number").unique)
+        self.assertEqual(
+            model._meta.get_field("order_number").verbose_name, "Číslo zakázky"
+        )
+
+        self.assertIsInstance(model._meta.get_field("distrib_hub"), models.ForeignKey)
+        self.assertEqual(distrib_hub_field.remote_field.on_delete, models.PROTECT)
+
+        self.assertEqual(model._meta.get_field("mandant").verbose_name, "Mandant")
+        self.assertEqual(model._meta.get_field("mandant").max_length, 4)
+
+        self.assertEqual(model._meta.get_field("status").choices, Status.choices)
+        self.assertEqual(model._meta.get_field("status").default, Status.NEW)
+
+        self.assertIsInstance(model._meta.get_field("client"), models.ForeignKey)
+        self.assertTrue(model._meta.get_field("client").null)
+        self.assertTrue(model._meta.get_field("client").blank)
+
+        self.assertIsInstance(
+            model._meta.get_field("delivery_termin"), models.DateField
+        )
+        self.assertTrue(model._meta.get_field("delivery_termin").null)
+        self.assertTrue(model._meta.get_field("delivery_termin").blank)
+
+        self.assertIsInstance(
+            model._meta.get_field("evidence_termin"), models.DateField
+        )
+        self.assertFalse(model._meta.get_field("evidence_termin").null)
+
+        self.assertIsInstance(
+            model._meta.get_field("montage_termin"), models.DateTimeField
+        )
+        self.assertTrue(model._meta.get_field("montage_termin").null)
+        self.assertTrue(model._meta.get_field("montage_termin").blank)
+
+        self.assertEqual(model._meta.get_field("team_type").choices, TeamType.choices)
+        self.assertEqual(
+            model._meta.get_field("team_type").default, TeamType.BY_ASSEMBLY_CREW
+        )
+
+        self.assertIsInstance(model._meta.get_field("team"), models.ForeignKey)
+        self.assertTrue(model._meta.get_field("team").null)
+        self.assertTrue(model._meta.get_field("team").blank)
+
+        self.assertIsInstance(model._meta.get_field("notes"), models.TextField)
+        self.assertTrue(model._meta.get_field("notes").blank)
+
+    def test_str_method(self):
+        obj = Order(order_number="ZK2025001")
+        self.assertEqual(str(obj), "ZK2025001")
+
+    def test_meta_ordering(self):
+        self.assertEqual(Order._meta.ordering, ["-order_number"])
