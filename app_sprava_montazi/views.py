@@ -25,7 +25,7 @@ from django.views.generic import (
 )
 from .models import CallLog, Order, Status, Team, Article, Client, TeamType
 
-from .models import HistoricalArticle
+from .models import HistoricalArticle  # vim o tom je to imaginarni classa
 from .forms import (
     TeamForm,
     ArticleForm,
@@ -149,12 +149,16 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         order = Order.objects.get(pk=order_pk)
         articles = Article.objects.filter(order=order_pk)
 
-        context["order"] = order
-        context["articles"] = articles
-        # --- vycistit btn update/create
-        context["form_type"] = "update"
-        # --- navigace
-        context["active"] = "orders_all"
+        context.update(
+            {
+                "order": order,
+                "articles": articles,
+                # --- vycistit btn update/create
+                "form_type": "update",
+                # --- navigace
+                "active": "orders_all",
+            }
+        )
 
         return context
 
@@ -334,37 +338,40 @@ class OrdersView(LoginRequiredMixin, ListView):
     template_name = f"{APP_URL}/orders/orders_all.html"
     context_object_name = "orders"
 
+    def dispatch(self, request, *args, **kwargs):
+        self.filters = parse_order_filters(request)  # pylint: disable=W0201
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         # --- utils.py
-        filters = parse_order_filters(self.request)
-        return filter_orders(filters)
+        return filter_orders(self.filters)
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         # --- utils.py
-        filters = parse_order_filters(self.request)
 
         get_start = None
         get_end = None
 
-        if filters["start_date"]:
-            get_start = datetime.strptime(filters["start_date"], "%Y-%m-%d")
+        if self.filters["start_date"]:
+            get_start = datetime.strptime(self.filters["start_date"], "%Y-%m-%d")
 
-        if filters["end_date"]:
-            get_end = datetime.strptime(filters["end_date"], "%Y-%m-%d")
+        if self.filters["end_date"]:
+            get_end = datetime.strptime(self.filters["end_date"], "%Y-%m-%d")
 
         context.update(
             {
                 "statuses": Status,
-                "raw_status": filters["status"],
-                "get_status": Status(filters["status"]).label
-                if filters["status"]
+                "raw_status": self.filters["status"],
+                "get_status": Status(self.filters["status"]).label
+                if self.filters["status"]
                 else "",
                 "od_choices": OD_CHOICES,
-                "raw_od": filters["od"],
-                "od_value": OD_DICT.get(filters["od"], ""),
+                "raw_od": self.filters["od"],
+                "od_value": OD_DICT.get(self.filters["od"], ""),
                 "get_start": get_start,
                 "get_end": get_end,
+                # --- navigace
                 "active": "orders_all",
             }
         )
