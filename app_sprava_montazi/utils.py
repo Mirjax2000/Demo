@@ -36,3 +36,7 @@ def filter_orders(filters: dict) -> QuerySet:
         orders = orders.filter(order_number__startswith=od_value)
 
     return orders
+
+
+def format_date(date_obj):
+    return date_obj.strftime("%Y-%m-%d") if date_obj else ""

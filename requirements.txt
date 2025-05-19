@@ -12,6 +12,7 @@ django-simple-history==3.8.0
 djangorestframework==3.16.0
 djlint==1.36.4
 EditorConfig==0.17.0
+et_xmlfile==2.0.0
 isort==6.0.1
 jsbeautifier==1.15.4
 json5==0.12.0
@@ -21,6 +22,7 @@ mdurl==0.1.2
 mypy==1.15.0
 mypy-extensions==1.0.0
 numpy==2.2.4
+openpyxl==3.1.5
 pandas==2.2.3
 pathspec==0.12.1
 phonenumbers==9.0.3

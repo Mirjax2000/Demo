@@ -2,7 +2,7 @@
 
 from typing import Any
 from datetime import datetime
-
+from openpyxl import Workbook
 from rich.console import Console
 from django.db import transaction
 from django.conf import settings
@@ -35,7 +35,7 @@ from .forms import (
     DistribHub,
     CallLogFormSet,
 )
-from .utils import filter_orders, parse_order_filters
+from .utils import filter_orders, parse_order_filters, format_date
 
 cons: Console = Console()
 # ---
@@ -371,6 +371,7 @@ class OrdersView(LoginRequiredMixin, ListView):
                 "od_value": OD_DICT.get(self.filters["od"], ""),
                 "get_start": get_start,
                 "get_end": get_end,
+                "request": self.request,
                 # --- navigace
                 "active": "orders_all",
             }
@@ -647,3 +648,59 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
         # --- navigace ---
         context["active"] = "orders_all"
         return context
+
+
+class ExportOrdersExcelView(View):
+    def get(self, request, *args, **kwargs):
+        filters = parse_order_filters(request)
+        orders = filter_orders(filters)
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Objednávky"
+
+        headers = [
+            "Číslo zakázky",
+            "Místo určení",
+            "Mandant",
+            "Stav",
+            "Zákazník",
+            "Termín evidence",
+            "Termín doručení",
+            "Termín montáže",
+            "Realizace kým",
+            "Montážní tým",
+            "Poznámky",
+        ]
+        ws.append(headers)
+
+        for order in orders:
+            team = str(order.team) if order.team else ""
+            team_type = order.get_team_type_display() if order.team_type else ""
+            status = order.get_status_display()
+            evidence_termin = format_date(order.evidence_termin)
+            delivery_termin = format_date(order.delivery_termin)
+            montage_termin = format_date(order.montage_termin)
+
+            ws.append(
+                [
+                    order.order_number,
+                    str(order.distrib_hub),
+                    str(order.mandant),
+                    str(status),
+                    str(order.client),
+                    evidence_termin,
+                    delivery_termin,
+                    montage_termin,
+                    team_type,
+                    team,
+                    order.notes,
+                ]
+            )
+
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = "attachment; filename=objednavky.xlsx"
+        wb.save(response)
+        return response

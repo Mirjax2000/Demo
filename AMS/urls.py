@@ -7,22 +7,23 @@ from django.urls import path
 from django.urls.conf import include
 from accounts.views import RegisterView
 from app_sprava_montazi.views import (
-    DashboardView as Dashboard,
     IndexView as Index,
-    HomePageView as HomePage,
-    OrdersView as Orders,
     TeamsView as Teams,
+    OrdersView as Orders,
+    ClientUpdateView as CUV,
+    HomePageView as HomePage,
+    DashboardView as Dashboard,
+    CreatePageView as CreatePage,
     TeamCreateView as TeamCreate,
     TeamUpdateView as TeamUpdate,
     TeamDetailView as TeamDetail,
     OrderDetailView as OrderDetail,
     OrderCreateView as OrderCreate,
-    ClientUpdateView as CUV,
-    CreatePageView as CreatePage,
     OrderUpdateView as OrderUpdate,
-    ClientsOrdersView as ClientsOrders,
-    OrderHistoryView as OrderHistory,
     ClientUpdateSecondaryView as CUS,
+    OrderHistoryView as OrderHistory,
+    ClientsOrdersView as ClientsOrders,
+    ExportOrdersExcelView as ExportOrdersExcel,
 )
 
 # --- typove zkratky
@@ -48,6 +49,7 @@ app_sprava_montazi: list = [
     path(f"order/detail/{PK}/", OrderDetail.as_view(), name="order_detail"),
     path(f"order/client_orders/{SLUG}/", ClientsOrders.as_view(), name="client_orders"),
     path(f"order/history/{PK}/", OrderHistory.as_view(), name="order_history"),
+    path("order/export", ExportOrdersExcel.as_view(), name="order_export"),
     #
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),
