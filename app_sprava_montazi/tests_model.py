@@ -3,6 +3,7 @@
 from datetime import date
 from django.forms import ValidationError
 from django.test import TestCase
+from django.db import models
 from django.db import IntegrityError
 from django.utils.text import slugify
 from django.utils import timezone
@@ -41,6 +42,38 @@ class DistribHubModelTest(TestCase):
         """Test správného vytvoření slug hodnoty obsahující diakritiku."""
         special = DistribHub.objects.create(code="222", city="České Budějovice")
         self.assertEqual(special.slug, "222-ceske-budejovice")
+
+    def test_model_field_types(self):
+        """Ověří, že pole jsou typu CharField."""
+        code_field = DistribHub._meta.get_field("code")
+        city_field = DistribHub._meta.get_field("city")
+        slug_field = DistribHub._meta.get_field("slug")
+        self.assertIsInstance(code_field, models.CharField)
+        self.assertIsInstance(city_field, models.CharField)
+        self.assertIsInstance(slug_field, models.SlugField)
+
+    def test_field_max_lengths(self):
+        """Ověří max_length u jednotlivých polí."""
+        self.assertEqual(DistribHub._meta.get_field("code").max_length, 3)
+        self.assertEqual(DistribHub._meta.get_field("city").max_length, 32)
+
+    def test_unique_constraints(self):
+        """Ověří, že pole code a slug mají unique=True."""
+        code_field = DistribHub._meta.get_field("code")
+        slug_field = DistribHub._meta.get_field("slug")
+        self.assertTrue(code_field.unique)
+        self.assertTrue(slug_field.unique)
+
+    def test_slug_autogeneration_on_change(self):
+        """Slug se změní, když se změní code nebo city."""
+        self.hub.code = "222"
+        self.hub.city = "Brno"
+        self.hub.save()
+        self.assertEqual(self.hub.slug, "222-brno")
+
+    def test_str_method(self):
+        """Test __str__ metody."""
+        self.assertEqual(str(self.hub), "111-Praha")
 
 
 class ClientModelTests(TestCase):
@@ -635,9 +668,7 @@ class CallLogModelTest(TestCase):
         )
 
         # Get the expected formatted time string
-        local_called_at_str = call_log.called_at.strftime(
-            "%Y-%m-%d %H:%M"
-        )
+        local_called_at_str = call_log.called_at.strftime("%Y-%m-%d %H:%M")
         expected_str = f"{self.customer.name} - {local_called_at_str}"
 
         self.assertEqual(str(call_log), expected_str)
