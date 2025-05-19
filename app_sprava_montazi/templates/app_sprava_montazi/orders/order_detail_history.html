@@ -9,31 +9,37 @@
     {% if history_data %}
         <ul class="list-unstyled">
             {% for entry in history_data %}
-                <li class="lis">
+                <li>
                     <p class="mb-2">
                         Záznam ID: <strong>{{ entry.id }}</strong>
                     </p>
+                    <!---->
                     <p class="mb-2">
                         Uživatel: <strong>{{ entry.user|default:"Neznámý" }}</strong>
                     </p>
+                    <!---->
                     <p class="mb-2">
-                        pred:<strong class="ms-2 me-2">{{ entry.date|timesince }}</strong>Datum změny: <strong>{{ entry.date }}</strong>
+                        před: <strong class="ms-2 me-2">{{ entry.date|timesince }}</strong>
+                        Datum změny: <strong>{{ entry.date }}</strong>
                     </p>
+                    <!---->
                     <p class="mb-2">
                         Typ změny:
                         {% if entry.type == '+' %}
-                            <!---->
                             <span class="u-txt-success ms-2">Vytvoření</span>
-                        {% endif %}
-                        {% if entry.type == '~' %}
-                            <!---->
+                        {% elif entry.type == '~' %}
                             <span class="u-txt-warning ms-2">Úprava</span>
-                        {% endif %}
-                        {% if entry.type == '-' %}
-                            <!---->
+                        {% elif entry.type == '-' %}
                             <span class="u-txt-error ms-2">Smazání</span>
                         {% endif %}
                     </p>
+                    <!---->
+                    <p class="mb-2">
+                        <strong>
+                            {% if entry.model == "Article" %}Artikl – {{ entry.name|default:"(neznámý)" }}{% endif %}
+                        </strong>
+                    </p>
+                    <!---->
                     {% if entry.changes %}
                         <h4>Změněná pole:</h4>
                         <ol>

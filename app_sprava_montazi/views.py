@@ -513,6 +513,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
             messages.success(request, "Hovor zpracován a uložen.")
             return redirect("client_orders", slug=slug)
 
+        messages.error(request, "Hovor nebyl uložen do databáze!")
         return render(request, self.template_name, context)
 
 
@@ -530,18 +531,31 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["order"] = self.order_instance
 
+        all_history = list(self.object_list)
+        # ---
+        for article in self.order_instance.articles.all():
+            all_history.extend(article.history.all())
+        all_history.sort(key=lambda x: x.history_date, reverse=True)
+        # ---
         processed_history_data = []
 
-        for entry in self.object_list:
+        for entry in all_history:
             entry_info = {
                 "id": entry.history_id,
                 "date": entry.history_date,
                 "type": entry.history_type,
                 "user": entry.history_user,
-                "status": entry.get_status_display(),
-                "team_type": entry.get_team_type_display(),
+                "status": Status(entry.status).label
+                if hasattr(entry, "status") and entry.status
+                else None,
+                "team_type": TeamType(entry.team_type).label
+                if hasattr(entry, "team_type") and entry.team_type
+                else None,
+                "model": "Article" if isinstance(entry.instance, Article) else "Order",
                 "changes": [],
             }
+            if isinstance(entry.instance, Article):
+                entry_info["name"] = str(entry.instance.name)
 
             if entry.history_type == "~":
                 prev_record = entry.prev_record
