@@ -510,6 +510,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
                     instance.client = client
                     instance.save()
 
+            messages.success(request, "Hovor zpracován a uložen.")
             return redirect("client_orders", slug=slug)
 
         return render(request, self.template_name, context)
