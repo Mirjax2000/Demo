@@ -1,8 +1,9 @@
 """app_sprava_montazi View"""
 
 from typing import Any
-from rich.console import Console
 from datetime import datetime
+
+from rich.console import Console
 from django.db import transaction
 from django.conf import settings
 from django.core.management import call_command
@@ -23,6 +24,7 @@ from django.views.generic import (
     FormView,
 )
 from .models import CallLog, Order, Status, Team, Article, Client, TeamType
+
 from .models import HistoricalArticle
 from .forms import (
     TeamForm,
@@ -33,6 +35,7 @@ from .forms import (
     DistribHub,
     CallLogFormSet,
 )
+from .utils import filter_orders, parse_order_filters
 
 cons: Console = Console()
 # ---
@@ -331,55 +334,40 @@ class OrdersView(LoginRequiredMixin, ListView):
     template_name = f"{APP_URL}/orders/orders_all.html"
     context_object_name = "orders"
 
-    def get_queryset(self) -> QuerySet[Any]:
-        orders = Order.objects.exclude(status="Hidden")
-        # Filtrace podle statusu
-        status: str = self.request.GET.get("status", "").strip()
-        # filtrace podle prvnich tri pismen
-        od_value = self.request.GET.get("od", "").strip()
-        # Filtrace podle casoveho rozsahu
-        start_date = self.request.GET.get("start_date")
-        end_date = self.request.GET.get("end_date")
-        if status:
-            orders = orders.filter(status=status)
-
-        if start_date:
-            orders = orders.filter(evidence_termin__gte=start_date)
-
-        if end_date:
-            orders = orders.filter(evidence_termin__lte=end_date)
-
-        if od_value:
-            orders = orders.filter(order_number__startswith=od_value)
-
-        return orders
+    def get_queryset(self):
+        # --- utils.py
+        filters = parse_order_filters(self.request)
+        return filter_orders(filters)
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        get_status_value = self.request.GET.get("status", "").strip()
-        get_start_str = self.request.GET.get("start_date", "")
-        get_end_str = self.request.GET.get("end_date", "")
-        od_value = self.request.GET.get("od", "").strip()
+        # --- utils.py
+        filters = parse_order_filters(self.request)
+
         get_start = None
         get_end = None
 
-        if get_start_str:
-            get_start = datetime.strptime(get_start_str, "%Y-%m-%d")
-        if get_end_str:
-            get_end = datetime.strptime(get_end_str, "%Y-%m-%d")
+        if filters["start_date"]:
+            get_start = datetime.strptime(filters["start_date"], "%Y-%m-%d")
 
-        context["statuses"] = Status
-        context["raw_status"] = get_status_value
-        context["get_status"] = (
-            Status(get_status_value).label if get_status_value else ""
+        if filters["end_date"]:
+            get_end = datetime.strptime(filters["end_date"], "%Y-%m-%d")
+
+        context.update(
+            {
+                "statuses": Status,
+                "raw_status": filters["status"],
+                "get_status": Status(filters["status"]).label
+                if filters["status"]
+                else "",
+                "od_choices": OD_CHOICES,
+                "raw_od": filters["od"],
+                "od_value": OD_DICT.get(filters["od"], ""),
+                "get_start": get_start,
+                "get_end": get_end,
+                "active": "orders_all",
+            }
         )
-        context["od_choices"] = OD_CHOICES
-        context["get_start"] = get_start
-        context["get_end"] = get_end
-        context["raw_od"] = od_value
-        context["od_value"] = OD_DICT.get(od_value, "")
-        # --- navigace
-        context["active"] = "orders_all"
 
         return context
 
@@ -586,7 +574,7 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
                             "team_type": TeamType,
                             "status": Status,
                         }
-                        
+
                         if field_name in choice_fields:
                             choices = choice_fields[field_name]
                             try:
