@@ -586,6 +586,7 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
                             "team_type": TeamType,
                             "status": Status,
                         }
+                        
                         if field_name in choice_fields:
                             choices = choice_fields[field_name]
                             try:
