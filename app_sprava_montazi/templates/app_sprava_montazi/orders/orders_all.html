@@ -85,11 +85,20 @@
     <!--table-->
     {% include "app_sprava_montazi/orders/partials/orders_all_table.html" %}
     <!---->
-    <div class="L-table__nav-panel__buttons">
-      <a href="{% url "order_create" %}" class="btn btn-primary">
-        <i class="fa-solid fa-circle-plus me-2"></i>
-        <span>Vytvořit zakázku</span>
-      </a>
+    <hr>
+    <div class="u-flex-row-between">
+      <div class="L-table__nav-panel__buttons">
+        <a href="{% url "order_create" %}" class="btn btn-primary">
+          <i class="fa-solid fa-circle-plus me-2"></i>
+          <span>Vytvořit zakázku</span>
+        </a>
+      </div>
+      <div class="L-table__nav-panel__buttons">
+        <a href="{% url "order_create" %}" class="btn btn-primary">
+          <i class="fa-regular fa-file-excel me-2"></i>
+          <span>Excel export</span>
+        </a>
+      </div>
     </div>
   </section>
 {% endblock content %}
