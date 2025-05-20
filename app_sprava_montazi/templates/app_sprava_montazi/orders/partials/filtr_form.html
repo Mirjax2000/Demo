@@ -1,0 +1,80 @@
+<div class="L-table__nav-panel">
+    <form class="L-table__nav-panel__form" action="{% url filtr_url %}">
+        <!--status-->
+        <div class="L-table__nav-panel__form__group">
+            <label for="status">Filter status</label>
+            <select name="status" class="form-select L-table__select" id="status">
+                <option value="" {% if not raw_status %}selected{% endif %}>Všechny</option>
+                {% for status in statuses %}
+                    <option value="{{ status.value }}"
+                            {% if raw_status == status.value %}selected{% endif %}>{{ status.label }}</option>
+                {% endfor %}
+            </select>
+            <!---->
+            {% if get_status %}
+                Status:<span class="ms-2 u-txt-success-light">{{ get_status }}</span>
+            {% else %}
+                <span>Všechny záznamy:</span>
+            {% endif %}
+        </div>
+        <!-- Input pro datum "od" -->
+        <div class="L-table__nav-panel__form__group">
+            <label for="start_date">Od:</label>
+            <input type="date"
+                   name="start_date"
+                   id="start_date"
+                   class="form-control"
+                   value="{{ get_start|date:"Y-m-d" }}" />
+            <!---->
+            {% if get_start %}
+                OD:<span class="ms-2 u-txt-success-light">{{ get_start|date:"d.m.Y" }}</span>
+            {% else %}
+                <span>Od počátku</span>
+            {% endif %}
+        </div>
+        <!-- Input pro datum "do" -->
+        <div class="L-table__nav-panel__form__group">
+            <label for="end_date">Do:</label>
+            <input type="date"
+                   name="end_date"
+                   id="end_date"
+                   class="form-control"
+                   value="{{ get_end|date:"Y-m-d" }}" />
+            <!---->
+            {% if get_end %}
+                DO:<span class="ms-2 u-txt-success-light">{{ get_end|date:"d.m.Y" }}</span>
+            {% else %}
+                <span>Do dnes</span>
+            {% endif %}
+        </div>
+        <!-- obchodni dum-->
+        <div class="L-table__nav-panel__form__group od">
+            <label for="od">Obchodní dům</label>
+            <select name="od" class="form-select L-table__select" id="od">
+                <option value="" {% if not raw_od %}selected{% endif %}>Všechny OD</option>
+                {% for kod, nazev in od_choices %}
+                    <option value="{{ kod }}" {% if raw_od == kod %}selected{% endif %}>{{ nazev }}</option>
+                {% endfor %}
+            </select>
+            <!---->
+            {% if od_value %}
+                <span class="u-txt-success-light">{{ od_value }}</span>
+            {% else %}
+                <span>Všechny OD:</span>
+            {% endif %}
+        </div>
+        <!-- search btn-->
+        <div class="L-table__nav-panel__form__group">
+            <button class="btn btn-primary mt-4" type="submit">
+                <span class="me-2">Hledej</span>
+                <i class="bi bi-search"></i>
+            </button>
+            <div class="u-txt-right">
+                <a href="{% url "orders" %}"
+                   class="btn btn-sm btn-primary p-0 ps-1 pe-1 lh-sm">reset</a>
+            </div>
+        </div>
+        <!---->
+    </form>
+    <!---->
+</div>
