@@ -321,7 +321,7 @@ class OrderUpdateView(LoginRequiredMixin, View):
                     order.save()
                     article_formset.instance = order
                     article_formset.save()
-                end_status = order.status
+                    end_status = order.status
 
                 if start_status == Status.NEW and end_status == Status.ADVICED:
                     messages.success(
