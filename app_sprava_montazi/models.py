@@ -228,7 +228,8 @@ class Order(Model):
 
     def zaterminovano(self) -> None:
         ready = (
-            not self.is_missing_team()
+            self.team
+            and self.team_type == TeamType.BY_ASSEMBLY_CREW
             and self.status == Status.NEW
             and self.client
             and not self.client.incomplete
@@ -242,7 +243,6 @@ class Order(Model):
                     f"zakazka: {self.order_number} presla do stavu: {Status.ADVICED}",
                     style="blue",
                 )
-        
 
     def __str__(self) -> str:
         return str(self.order_number)

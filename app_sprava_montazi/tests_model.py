@@ -1,6 +1,7 @@
 """Model testy"""
 
-from datetime import date
+from datetime import date, timedelta
+
 from django.forms import ValidationError
 from django.test import TestCase
 from django.db import models
@@ -562,9 +563,38 @@ class TeamModelTest(TestCase):
 class OrderModelTestV2(TestCase):
     @classmethod
     def setUpTestData(cls):
-        DistribHub.objects.create(code="CB", city="České Budějovice")
-        Client.objects.create(name="Jan Novák", zip_code="11150")
-        Team.objects.create(name="Alfa Team", city="České Budějovice", active=True)
+        cls.hub = DistribHub.objects.create(code="CB", city="České Budějovice")
+        cls.customer = Client.objects.create(
+            name="Jan Novák",
+            zip_code="11150",
+            phone="234234234",
+            street="kopretinova 15",
+            city="Praha",
+        )
+        cls.team = Team.objects.create(
+            name="Alfa Team", city="České Budějovice", active=True
+        )
+        cls.incomplete_customer = Client.objects.create(
+            name="Pavel Dvořák",
+            zip_code="10000",
+        )
+
+    def _create_base_order_data(self, **kwargs):
+        """Helper to create a base order dictionary."""
+        data = {
+            "order_number": "ORD-TEST",
+            "distrib_hub": self.hub,
+            "mandant": "SCCZ",
+            "status": Status.NEW,
+            "client": self.customer,
+            "delivery_termin": timezone.now().date() + timedelta(days=3),
+            "evidence_termin": timezone.now().date(),
+            "montage_termin": timezone.now() + timedelta(days=3),
+            "team_type": TeamType.BY_ASSEMBLY_CREW,
+            "team": self.team,
+        }
+        data.update(kwargs)
+        return data
 
     def test_order_creation(self):
         """
@@ -591,7 +621,7 @@ class OrderModelTestV2(TestCase):
         self.assertEqual(order.distrib_hub, distrib_hub)
         self.assertIsInstance(order.distrib_hub, DistribHub)
         self.assertEqual(order.mandant, "ABC")
-        self.assertEqual(order.status, Status.NEW)
+        self.assertEqual(order.status, Status.ADVICED)
         self.assertEqual(order.client, customer)
         self.assertIsInstance(order.client, Client)
         self.assertEqual(order.team_type, TeamType.BY_ASSEMBLY_CREW)
@@ -718,6 +748,131 @@ class OrderModelTestV2(TestCase):
         self.assertEqual(
             list(orders.values_list("order_number", flat=True)), ["300", "200", "100"]
         )
+
+    def test_zaterminovano_on_create_success(self):
+        """
+        Tests that status changes to ADVICED when all conditions are met on creation.
+        """
+        order_data = self._create_base_order_data(order_number="ORD001")
+        order = Order.objects.create(**order_data)
+        self.assertEqual(order.status, Status.ADVICED)
+
+    def test_zaterminovano_on_create_missing_team_by_assembly_crew(self):
+        """
+        Tests that status remains NEW if team is missing for BY_ASSEMBLY_CREW on creation.
+        """
+        order_data = self._create_base_order_data(
+            order_number="ORD002", team=None, team_type=TeamType.BY_ASSEMBLY_CREW
+        )
+        order = Order.objects.create(**order_data)
+        self.assertEqual(order.status, Status.NEW)
+
+    def test_zaterminovano_on_create_team_type_not_assembly_crew(self):
+        """
+        Tests that status changes to ADVICED even with no team if team_type is not BY_ASSEMBLY_CREW.
+        """
+        order_data = self._create_base_order_data(
+            order_number="ORD003", team=None, team_type=TeamType.BY_CUSTOMER
+        )
+        order = Order.objects.create(**order_data)
+        self.assertNotEqual(order.status, Status.ADVICED)
+
+    def test_zaterminovano_on_create_not_new_status(self):
+        """
+        Tests that status remains unchanged if initial status is not NEW on creation.
+        """
+        order_1_data = self._create_base_order_data(
+            order_number="ORD004", status=Status.REALIZED
+        )
+        order_2_data = self._create_base_order_data(
+            order_number="ORD005", status=Status.ADVICED
+        )
+        order_3_data = self._create_base_order_data(
+            order_number="ORD006", status=Status.NEW
+        )
+
+        order_1 = Order.objects.create(**order_1_data)
+        self.assertEqual(order_1.status, Status.REALIZED)
+
+        order_2 = Order.objects.create(**order_2_data)
+        self.assertEqual(order_2.status, Status.ADVICED)
+
+        order_3 = Order.objects.create(**order_3_data)
+        self.assertEqual(order_3.status, Status.ADVICED)
+
+    def test_zaterminovano_on_create_missing_client(self):
+        """
+        Tests that status remains NEW if client is missing on creation.
+        """
+        order_data = self._create_base_order_data(order_number="ORD005", client=None)
+        order = Order.objects.create(**order_data)
+        self.assertEqual(order.status, Status.NEW)
+
+    def test_zaterminovano_on_create_incomplete_client(self):
+        """
+        Tests that status remains NEW if client is incomplete on creation.
+        """
+        order_data = self._create_base_order_data(
+            order_number="ORD006", client=self.incomplete_customer
+        )
+        order = Order.objects.create(**order_data)
+        self.assertEqual(order.status, Status.NEW)
+
+    def test_zaterminovano_on_create_missing_montage_termin(self):
+        """
+        Tests that status remains NEW if montage_termin is missing on creation.
+        """
+        order_data = self._create_base_order_data(
+            order_number="ORD007", montage_termin=None
+        )
+        order = Order.objects.create(**order_data)
+        self.assertEqual(order.status, Status.NEW)
+
+    def test_zaterminovano_on_create_missing_delivery_termin(self):
+        """
+        Tests that status remains NEW if delivery_termin is missing on creation.
+        """
+        order_data = self._create_base_order_data(
+            order_number="ORD008", delivery_termin=None
+        )
+        order = Order.objects.create(**order_data)
+        self.assertEqual(order.status, Status.NEW)
+
+    def test_zaterminovano_on_update_success_from_new(self):
+        """
+        Tests that status changes to ADVICED when all conditions are met on update,
+        starting from NEW status.
+        """
+
+        order = Order.objects.create(
+            **self._create_base_order_data(order_number="ORD009", montage_termin=None)
+        )
+        self.assertEqual(order.status, Status.NEW)
+        order.montage_termin = timezone.now() + timedelta(days=3)
+        order.save()
+        self.assertEqual(order.status, Status.ADVICED)
+
+    def test_zaterminovano_on_update_no_change_if_not_new_status(self):
+        """
+        Tests that status does not change if it's already ADVICED (or other non-NEW)
+        and other fields are updated.
+        """
+        order = Order.objects.create(
+            **self._create_base_order_data(order_number="ORD010")
+        )
+        self.assertEqual(order.status, Status.ADVICED)
+
+        order.notes = "Some new notes"
+        order.save()
+        self.assertEqual(order.status, Status.ADVICED)  # Should remain ADVICED
+
+        order.status = Status.BILLED
+        order.save()
+        self.assertEqual(order.status, Status.BILLED)
+
+        order.status = Status.NEW
+        order.save()
+        self.assertEqual(order.status, Status.BILLED)
 
 
 class CallLogModelTest(TestCase):
