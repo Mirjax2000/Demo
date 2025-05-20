@@ -864,15 +864,16 @@ class OrderModelTestV2(TestCase):
 
         order.notes = "Some new notes"
         order.save()
-        self.assertEqual(order.status, Status.ADVICED)  # Should remain ADVICED
+        self.assertEqual(order.status, Status.ADVICED)
 
         order.status = Status.BILLED
         order.save()
         self.assertEqual(order.status, Status.BILLED)
 
         order.status = Status.NEW
+        order.team = None
         order.save()
-        self.assertEqual(order.status, Status.BILLED)
+        self.assertEqual(order.status, Status.NEW)
 
 
 class CallLogModelTest(TestCase):

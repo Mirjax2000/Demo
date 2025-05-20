@@ -244,6 +244,7 @@ class Order(Model):
                     style="blue",
                 )
 
+
     def __str__(self) -> str:
         return str(self.order_number)
 
