@@ -652,7 +652,7 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
         return context
 
 
-class ExportOrdersExcelView(View):
+class ExportOrdersExcelView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         # --- utils.py
         filters = parse_order_filters(request)
@@ -679,7 +679,7 @@ class ExportOrdersExcelView(View):
 
         for order in orders:
             team = str(order.team) if order.team else ""
-            team_type = order.get_team_type_display() if order.team_type else ""
+            team_type = order.get_team_type_display()
             status = order.get_status_display()
             evidence_termin = format_date(order.evidence_termin)  # utils.py
             delivery_termin = format_date(order.delivery_termin)  # utils.py
@@ -700,10 +700,17 @@ class ExportOrdersExcelView(View):
                     order.notes,
                 ]
             )
-
+        # ---
+        suffix: str = (
+            f"{filters['status']}_{filters['od']}_"
+            f"{filters['start_date']}_{filters['end_date']}"
+        )
+        # ---
         response = HttpResponse(
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-        response["Content-Disposition"] = "attachment; filename=objednavky.xlsx"
+        response["Content-Disposition"] = (
+            f"attachment; filename=objednavky-{suffix}.xlsx"
+        )
         wb.save(response)
         return response
