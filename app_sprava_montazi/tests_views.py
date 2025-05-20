@@ -1,9 +1,11 @@
 """View tests"""
 
+import io
 from datetime import date, datetime
 from unittest.mock import patch
 
 from django.conf import settings
+from openpyxl import load_workbook
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -12,7 +14,7 @@ from django.test import TestCase
 from django.contrib.messages import get_messages
 from django.urls import reverse
 from django.utils import timezone
-
+from .utils import format_date, parse_order_filters, filter_orders
 from app_sprava_montazi.models import (
     Article,
     Client,
@@ -706,7 +708,7 @@ class OrderCreateViewTest(TestCase):
         self.assertEqual(created_order.articles.count(), 0)
         self.assertEqual(created_order.distrib_hub, self.hub)
         self.assertEqual(created_order.team, self.team)
-        self.assertEqual(created_order.status, self.valid_status_key)
+        self.assertEqual(created_order.status, Status.ADVICED)
         self.assertEqual(created_order.team_type, self.valid_team_type_key)
 
         mock_success_message.assert_called_once()
@@ -1173,3 +1175,317 @@ class OrderDetailViewTest(TestCase):
         self.assertEqual(len(response.context["articles"]), 2)
         self.assertEqual(response.context["articles"][0].name, "Test Article 1")
         self.assertEqual(response.context["articles"][1].name, "Test Article 2")
+
+
+class ExportOrdersExcelViewTest(TestCase):
+    def setUp(self):
+        # Vytvoříme testovacího uživatele
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client.login(username="testuser", password="testpass")
+        self.hub = DistribHub.objects.create(code="626", city="Chrastany")
+        self.customer = Client.objects.create(
+            name="Franta test",
+            street="Testovací 1",
+            city="TestMesto",
+            zip_code="12345",
+            phone="+420123456789",
+            email="franta@example.com",
+        )
+        self.team = Team.objects.create(
+            name="Montazni Spolecnost A",
+            city="Praha",
+            phone="+420987654321",
+            price_per_hour=350.00,
+            active=True,
+        )
+
+        # První objednávka s kompletními daty
+        self.order1 = Order.objects.create(
+            order_number="12345-R",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            evidence_termin=date(2024, 1, 1),
+            delivery_termin=date(2024, 4, 10),
+            montage_termin=timezone.make_aware(datetime(2024, 5, 20, 8, 0)),
+            status=Status.NEW,
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+            team=self.team,
+            notes="Nějaké poznámky k zakázce 1.",
+        )
+        self.order1.refresh_from_db()  # Získání aktuálního stavu z DB (status by měl být ADVICED)
+
+        # Druhá objednávka s chybějícími daty pro testování prázdných buněk
+        self.customer2 = Client.objects.create(
+            name="Petra Nova",
+            zip_code="67890",
+            street="Testovací 2",
+            city="Brno",
+            phone="+420111222333",
+            email="petra@example.com",
+            incomplete=False,
+        )
+        self.order2 = Order.objects.create(
+            order_number="67890-S",
+            distrib_hub=self.hub,
+            mandant="OtherMandant",
+            client=self.customer2,
+            evidence_termin=date(2023, 6, 15),
+            delivery_termin=None,  # Test None values
+            montage_termin=None,  # Test None values
+            status=Status.REALIZED,
+            team_type=TeamType.BY_DELIVERY_CREW,
+            team=None,
+            notes="",
+        )
+        self.order2.refresh_from_db()
+
+        # Objednávka, která bude zrušena a má být ignorována `filter_orders` defaultně (protože má status 'Hidden')
+        self.order_hidden = Order.objects.create(
+            order_number="HIDDEN-Y",
+            distrib_hub=self.hub,
+            mandant="XYZ",
+            client=self.customer,
+            evidence_termin=date(2024, 2, 1),
+            status=Status.HIDDEN,  # Status, který je defaultně filtrován
+            team_type=TeamType.BY_CUSTOMER,
+        )
+
+        # Objednávka se status 'CANCELED', která bude viditelná, pokud není explicitně filtrována
+        self.order_canceled = Order.objects.create(
+            order_number="CANCELED-X",
+            distrib_hub=self.hub,
+            mandant="ABC",
+            client=self.customer,
+            evidence_termin=date(2024, 3, 1),
+            status=Status.CANCELED,
+            team_type=TeamType.BY_CUSTOMER,
+        )
+
+        self.url = reverse("order_export")
+
+    def test_logged_in(self):
+        """
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_redirect_if_not_logged_in(self):
+        """
+        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
+        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
+        """
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_excel_response_headers(self):
+        """
+        Testuje, zda jsou hlavičky HTTP odpovědi správně nastaveny pro Excel soubor.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response["Content-Type"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        # Test Content-Disposition filename structure
+        self.assertTrue(
+            response["Content-Disposition"].startswith(
+                "attachment; filename=objednavky-"
+            )
+        )
+        self.assertTrue(response["Content-Disposition"].endswith(".xlsx"))
+        self.assertTrue(
+            response["Content-Disposition"].endswith(
+                "filename=objednavky-__None_None.xlsx"
+            )
+        )
+
+    def test_excel_file_content_all_visible_orders(self):
+        """
+        Testuje obsah vygenerovaného Excel souboru včetně hlaviček a dat pro všechny
+        viditelné objednávky (které nejsou 'Hidden').
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        excel_file = io.BytesIO(response.content)
+        wb = load_workbook(excel_file)
+        ws = wb.active  # Aktivní list
+
+        # Test Hlaviček (stejné jako předtím)
+        expected_headers = [
+            "Číslo zakázky",
+            "Místo určení",
+            "Mandant",
+            "Stav",
+            "Zákazník",
+            "PSC",
+            "Termín evidence",
+            "Termín doručení",
+            "Termín montáže",
+            "Realizace kým",
+            "Montážní tým",
+            "Poznámky",
+        ]
+        actual_headers = [cell.value for cell in ws[1]]
+        self.assertEqual(actual_headers, expected_headers)
+
+        # Získání viditelných objednávek z DB a jejich seřazení pro ověření
+        visible_orders = Order.objects.exclude(status=Status.HIDDEN).order_by(
+            "-order_number"
+        )
+        self.assertEqual(len(visible_orders), 3)
+
+        # Test datových řádků
+
+        # Řádek 2 (první viditelná objednávka: self.order_canceled)
+        current_order = visible_orders[0]
+        row_values = [cell.value for cell in ws[2]]
+        self.assertEqual(row_values[0], current_order.order_number)
+        self.assertEqual(row_values[1], str(current_order.distrib_hub))
+        self.assertEqual(row_values[2], current_order.mandant)
+        self.assertEqual(row_values[3], current_order.get_status_display())
+        self.assertEqual(row_values[4], str(current_order.client))
+        self.assertEqual(row_values[5], current_order.client.zip_code)
+        self.assertEqual(row_values[6], format_date(current_order.evidence_termin))
+        # ZMĚNA: Pokud je delivery_termin None, očekáváme None z Excelu
+        self.assertEqual(
+            row_values[7],
+            None
+            if current_order.delivery_termin is None
+            else format_date(current_order.delivery_termin),
+        )
+        # ZMĚNA: Pokud je montage_termin None, očekáváme None z Excelu
+        self.assertEqual(
+            row_values[8],
+            None
+            if current_order.montage_termin is None
+            else format_date(current_order.montage_termin),
+        )
+        self.assertEqual(row_values[9], current_order.get_team_type_display())
+        self.assertEqual(
+            row_values[10], str(current_order.team) if current_order.team else None
+        )  # Může být None
+        self.assertEqual(
+            row_values[11], current_order.notes if current_order.notes else None
+        )  # "" read as None
+
+        # Řádek 3 (druhá viditelná objednávka: self.order2)
+        current_order = visible_orders[1]
+        row_values = [cell.value for cell in ws[3]]
+        self.assertEqual(row_values[0], current_order.order_number)
+        self.assertEqual(row_values[1], str(current_order.distrib_hub))
+        self.assertEqual(row_values[2], current_order.mandant)
+        self.assertEqual(row_values[3], current_order.get_status_display())
+        self.assertEqual(row_values[4], str(current_order.client))
+        self.assertEqual(row_values[5], current_order.client.zip_code)
+        self.assertEqual(row_values[6], format_date(current_order.evidence_termin))
+        # ZMĚNA
+        self.assertEqual(
+            row_values[7],
+            None
+            if current_order.delivery_termin is None
+            else format_date(current_order.delivery_termin),
+        )
+        # ZMĚNA
+        self.assertEqual(
+            row_values[8],
+            None
+            if current_order.montage_termin is None
+            else format_date(current_order.montage_termin),
+        )
+        self.assertEqual(row_values[9], current_order.get_team_type_display())
+        self.assertEqual(
+            row_values[10], str(current_order.team) if current_order.team else None
+        )  # Může být None
+        self.assertEqual(
+            row_values[11], current_order.notes if current_order.notes else None
+        )  # "" read as None
+
+        # Řádek 4 (třetí viditelná objednávka: self.order1)
+        current_order = visible_orders[2]
+        row_values = [cell.value for cell in ws[4]]
+        self.assertEqual(row_values[0], current_order.order_number)
+        self.assertEqual(row_values[1], str(current_order.distrib_hub))
+        self.assertEqual(row_values[2], current_order.mandant)
+        self.assertEqual(row_values[3], current_order.get_status_display())
+        self.assertEqual(row_values[4], str(current_order.client))
+        self.assertEqual(row_values[5], current_order.client.zip_code)
+        self.assertEqual(row_values[6], format_date(current_order.evidence_termin))
+        self.assertEqual(row_values[7], format_date(current_order.delivery_termin))
+        self.assertEqual(row_values[8], format_date(current_order.montage_termin))
+        self.assertEqual(row_values[9], current_order.get_team_type_display())
+        self.assertEqual(
+            row_values[10], str(current_order.team) if current_order.team else None
+        )
+        self.assertEqual(
+            row_values[11], current_order.notes if current_order.notes else None
+        )
+
+        # Zajistíme správný počet řádků (1 hlavička + 3 datové řádky)
+        self.assertEqual(ws.max_row, 4)
+
+    def test_excel_file_no_matching_orders(self):
+        """
+        Testuje generování Excelu, když žádná objednávka neodpovídá filtru.
+        Měl by obsahovat pouze hlavičky.
+        """
+        response = self.client.get(self.url, {"status": Status.NEW, "od": "NO-MATCH"})
+        self.assertEqual(response.status_code, 200)
+
+        excel_file = io.BytesIO(response.content)
+        wb = load_workbook(excel_file)
+        ws = wb.active
+
+        self.assertEqual(ws.max_row, 1)  # Only headers
+        expected_headers = [
+            "Číslo zakázky",
+            "Místo určení",
+            "Mandant",
+            "Stav",
+            "Zákazník",
+            "PSC",
+            "Termín evidence",
+            "Termín doručení",
+            "Termín montáže",
+            "Realizace kým",
+            "Montážní tým",
+            "Poznámky",
+        ]
+        actual_headers = [cell.value for cell in ws[1]]
+        self.assertEqual(actual_headers, expected_headers)
+        # ZDE JE ZMĚNA: Očekávaný suffix je nyní "New_NO-MATCH_None_None"
+        self.assertTrue(
+            response["Content-Disposition"].endswith(
+                f"filename=objednavky-{Status.NEW.value}_NO-MATCH_None_None.xlsx"
+            )
+        )
+
+    def test_excel_file_with_status_filter(self):
+        """
+        Testuje generování Excelu s použitím filtru 'status'.
+        Měl by obsahovat pouze objednávky s daným statusem (zde ADVICED).
+        """
+        response = self.client.get(self.url, {"status": Status.ADVICED})
+        self.assertEqual(response.status_code, 200)
+
+        excel_file = io.BytesIO(response.content)
+        wb = load_workbook(excel_file)
+        ws = wb.active
+
+        # Měl by obsahovat hlavičky + 1 řádek dat (order1 je ADVICED)
+        self.assertEqual(ws.max_row, 2)
+
+        # Zkontrolujeme, zda se jedná o správnou objednávku
+        order_row_values = [cell.value for cell in ws[2]]
+        self.assertEqual(order_row_values[0], self.order1.order_number)
+        self.assertEqual(
+            order_row_values[3], self.order1.get_status_display()
+        )  # ADVICED
+        self.assertEqual(order_row_values[6], format_date(self.order1.evidence_termin))
+
+    

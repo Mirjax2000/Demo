@@ -3,11 +3,14 @@
     {% for log in call_logs %}
         <ul class="L-detail__list mb-2">
             <li class="L-detail__item">
+                <p class="m-0">
+                    <strong>{{ log.user }}</strong> provedl
+                </p>
                 <span>{{ log.called_at }}</span>
                 {% if log.was_successful == "Success" %}
-                    <span class="u-txt-success ms-2">{{ log.get_was_successful_display }}</span>
+                    <span class="u-txt-success ms-2">{{ log.get_was_successful_display }} hovor</span>
                 {% else %}
-                    <span class="u-txt-warning ms-2">{{ log.get_was_successful_display }}</span>
+                    <span class="u-txt-warning ms-2">{{ log.get_was_successful_display }} hovor</span>
                 {% endif %}
                 <hr class="mb-1 mt-1">
                 <span class="d-block">{{ log.note }}</span>

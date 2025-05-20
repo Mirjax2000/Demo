@@ -95,8 +95,17 @@
         <i class="fa-solid fa-toggle-off"></i><span class="L-sidebar__span">Theme</span>
     </button>
     {% include "app_sprava_montazi/partials/spinner.html" %}
+    <!---->
+    <div>
+        {% if user.is_authenticated %}
+            Přihlášen: <strong>{{ user.username }}</strong>
+        {% else %}
+            Nejste přihlášen.
+        {% endif %}
+    </div>
+    <!---->
     <footer class="L-sidebar__footer">
-        <p>DaliborZ-tech ©2025</p>
+        <p>ZaVi Code ©2025</p>
     </footer>
 </aside>
 <!-- Right side content -->

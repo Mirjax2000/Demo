@@ -507,6 +507,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
                 if form.has_changed():
                     instance = form.save(commit=False)
                     instance.client = client
+                    instance.user = request.user
                     instance.save()
 
             messages.success(request, "Hovor zpracován a uložen.")

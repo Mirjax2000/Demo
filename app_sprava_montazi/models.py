@@ -1,10 +1,11 @@
 """app_sprava_montazi_models"""
 
-import django
 from rich.console import Console
-from django.db import models
-from django.conf import settings
 from simple_history.models import HistoricalRecords
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.db import models
 from django.db.models import (
     PROTECT,
     BooleanField,
@@ -13,17 +14,18 @@ from django.db.models import (
     DateTimeField,
     DecimalField,
     EmailField,
+    FileField,
     ForeignKey,
-    IntegerField,
     Model,
+    PositiveIntegerField,
     SlugField,
     TextChoices,
     TextField,
-    PositiveIntegerField,
 )
 from django.utils.text import slugify
 from phonenumber_field.modelfields import PhoneNumberField
 
+User = get_user_model()
 cons: Console = Console()
 
 
@@ -244,7 +246,6 @@ class Order(Model):
                     style="blue",
                 )
 
-
     def __str__(self) -> str:
         return str(self.order_number)
 
@@ -284,8 +285,8 @@ class Article(Model):
 
 
 class Upload(models.Model):
-    file = models.FileField(upload_to="uploads/")
-    created = models.DateTimeField(auto_now_add=True)
+    file = FileField(upload_to="uploads/")
+    created = DateTimeField(auto_now_add=True)
     history = HistoricalRecords()
 
     def __str__(self) -> str:
@@ -295,16 +296,17 @@ class Upload(models.Model):
         ordering = ["-created"]
 
 
-class CallLog(models.Model):
-    client = models.ForeignKey(
+class CallLog(Model):
+    client = ForeignKey(
         Client,
-        on_delete=models.PROTECT,
+        on_delete=PROTECT,
         related_name="calls",
         verbose_name="Zákazník",
     )
-    called_at = models.DateTimeField(auto_now_add=True, verbose_name="Čas volání")
-    note = models.TextField(blank=True, verbose_name="Poznámka")
-    was_successful = models.CharField(
+    user = ForeignKey(User, on_delete=PROTECT, verbose_name="Uživatel")
+    called_at = DateTimeField(auto_now_add=True, verbose_name="Čas volání")
+    note = TextField(blank=True, verbose_name="Poznámka")
+    was_successful = CharField(
         max_length=10, choices=AdviceStatus, verbose_name="Dovoláno"
     )
     history = HistoricalRecords()
