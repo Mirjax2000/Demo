@@ -698,7 +698,7 @@ class ExportOrdersExcelView(LoginRequiredMixin, View):
 
             ws.append(
                 [
-                    order.order_number,
+                    str(order.order_number).upper(),
                     str(order.distrib_hub),
                     str(order.mandant),
                     str(status),
