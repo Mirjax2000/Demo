@@ -72,10 +72,14 @@
         </div>
         <!-- search btn-->
         <div class="L-table__nav-panel__form__group">
-          <button class="btn btn-primary" type="submit">
+          <button class="btn btn-primary mt-4" type="submit">
             <span class="me-2">Hledej</span>
             <i class="bi bi-search"></i>
           </button>
+          <div class="u-txt-right">
+            <a href="{% url "orders" %}"
+               class="btn btn-sm btn-primary p-0 ps-1 pe-1 lh-sm">reset</a>
+          </div>
         </div>
         <!---->
       </form>
@@ -93,6 +97,7 @@
           <span>Vytvořit zakázku</span>
         </a>
       </div>
+      <!---->
       <div class="L-table__nav-panel__buttons">
         <a href="{% url 'order_export' %}?{{ request.GET.urlencode }}"
            class="btn btn-primary">
