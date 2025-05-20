@@ -98,9 +98,11 @@
     <!---->
     <div>
         {% if user.is_authenticated %}
-            Přihlášen: <strong>{{ user.username }}</strong>
+            <p class="m-0">
+                User: <strong>{{ user.username }}</strong>
+            </p>
         {% else %}
-            Nejste přihlášen.
+            <p class="m-0 u-txt-error">Nejste přihlášen.</p>
         {% endif %}
     </div>
     <!---->
