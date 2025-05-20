@@ -315,12 +315,21 @@ class OrderUpdateView(LoginRequiredMixin, View):
 
         if order_form.is_valid() and article_formset.is_valid():
             try:
+                start_status = order.status
                 with transaction.atomic():
                     order = order_form.save(commit=False)
                     order.save()
                     article_formset.instance = order
                     article_formset.save()
-                messages.success(request, "Objednávka upravena.")
+                end_status = order.status
+
+                if start_status == Status.NEW and end_status == Status.ADVICED:
+                    messages.success(
+                        request,
+                        f"Objednávka změnila status na {Status.ADVICED.label}",
+                    )
+                else:
+                    messages.success(request, "Objednávka upravena.")
                 return redirect(reverse("order_detail", kwargs={"pk": order.id}))
 
             except Exception as e:
