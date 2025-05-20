@@ -1,6 +1,9 @@
 """app_sprava_montazi_models"""
 
+import django
+from rich.console import Console
 from django.db import models
+from django.conf import settings
 from simple_history.models import HistoricalRecords
 from django.db.models import (
     PROTECT,
@@ -20,6 +23,8 @@ from django.db.models import (
 )
 from django.utils.text import slugify
 from phonenumber_field.modelfields import PhoneNumberField
+
+cons: Console = Console()
 
 
 class Status(TextChoices):
@@ -221,8 +226,30 @@ class Order(Model):
         """
         return self.team is None and self.team_type == TeamType.BY_ASSEMBLY_CREW
 
+    def zaterminovano(self) -> None:
+        ready = (
+            not self.is_missing_team()
+            and self.status == Status.NEW
+            and self.client
+            and not self.client.incomplete
+            and self.montage_termin
+            and self.delivery_termin
+        )
+        if ready:
+            self.status = Status.ADVICED
+            if settings.DEBUG:
+                cons.log(
+                    f"zakazka: {self.order_number} presla do stavu: {Status.ADVICED}",
+                    style="blue",
+                )
+        
+
     def __str__(self) -> str:
         return str(self.order_number)
+
+    def save(self, *args, **kwargs):
+        self.zaterminovano()
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ["-order_number"]
