@@ -875,6 +875,10 @@ class OrderModelTestV2(TestCase):
         order.save()
         self.assertEqual(order.status, Status.NEW)
 
+        order.team = self.team
+        order.save()
+        self.assertEqual(order.status, Status.ADVICED)
+
 
 class CallLogModelTest(TestCase):
     def setUp(self):
