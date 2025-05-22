@@ -11,6 +11,7 @@ from app_sprava_montazi.views import (
     TeamsView as Teams,
     OrdersView as Orders,
     ClientUpdateView as CUV,
+    OrderPdfView as OrderPdf,
     HomePageView as HomePage,
     DashboardView as Dashboard,
     CreatePageView as CreatePage,
@@ -59,6 +60,9 @@ app_sprava_montazi: list = [
     path("teams/create/", TeamCreate.as_view(), name="team_create"),
     path(f"teams/detail/{SLUG}/", TeamDetail.as_view(), name="team_detail"),
     path(f"teams/update/{SLUG}/", TeamUpdate.as_view(), name="team_update"),
+    #
+    # --- pdf ---
+    path(f"order/pdf/{PK}/", OrderPdf.as_view(), name="order_pdf"),
 ]
 
 app_accounts_urls: list = [

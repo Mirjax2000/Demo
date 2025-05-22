@@ -1,13 +1,15 @@
 """app_sprava_montazi View"""
 
 from typing import Any
+from io import BytesIO
 from datetime import datetime
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 from openpyxl import Workbook
 from rich.console import Console
 from django.db import transaction
 from django.conf import settings
 from django.core.management import call_command
-from django.db.models.query import QuerySet
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
@@ -725,4 +727,47 @@ class ExportOrdersExcelView(LoginRequiredMixin, View):
             f"attachment; filename=objednavky-{suffix}.xlsx"
         )
         wb.save(response)
+        return response
+
+
+class OrderPdfView(LoginRequiredMixin, DetailView):
+    model = Order
+
+    def render_to_response(self, context, **response_kwargs):
+        order = context["object"]
+
+        # PDF buffer
+        buffer = BytesIO()
+        p = canvas.Canvas(buffer, pagesize=A4)
+        width, height = A4
+
+        # === PDF kreslení ===
+        p.setFont("Helvetica-Bold", 16)
+        p.drawString(50, height - 50, f"Objednávka č. {order.order_number}")
+
+        p.setFont("Helvetica", 12)
+        p.drawString(50, height - 100, f"Zákazník: {order.client.name}")
+        p.drawString(50, height - 120, f"Tým: {order.team.name}")
+        p.drawString(
+            50, height - 140, f"Vytvořeno: {order.delivery_termin.strftime('%d.%m.%Y')}"
+        )
+
+        # Položky (pokud máš)
+        y = height - 180
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(50, y, "Položky:")
+        y -= 20
+        p.setFont("Helvetica", 11)
+
+        p.showPage()
+        p.save()
+
+        # Vložení do HTTP response
+        pdf = buffer.getvalue()
+        buffer.close()
+
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            f'filename="objednavka_{order.order_number}.pdf"'
+        )
         return response

@@ -66,61 +66,68 @@
                                     <i class="bi bi-tools"></i>
                                     <span class="L-sidebar__span">Vytvořit</span></a>
                             </li>
+                            <!---->
                             <li class="L-sidebar__list__item">
                                 <a href="{% url "orders" %}"
                                    class="L-sidebar__nav-link link {% if active == 'orders_all' %}L-active{% endif %}">
                                     <i class="bi bi-table"></i>
                                     <span class="L-sidebar__span">Zakázky</span></a>
                             </li>
+                            <!---->
                             <li class="L-sidebar__list__item">
-                            <a href="#" class="L-sidebar__nav-link link"><i class="bi bi-grid"></i>
-                            <span class="L-sidebar__span">Sestavy</span></a>
-                    </li>
-                    <li class="L-sidebar__list__item">
-                    <a href="{% url "teams" %}"
-                       class="L-sidebar__nav-link link {% if active == 'teams' %}L-active{% endif %}"><i class="bi bi-people"></i>
-                    <span class="L-sidebar__span">Týmy</span></a>
-            </li>
-            <li class="L-sidebar__list__item">
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="L-sidebar__btn">
-                        <i class="bi bi-box-arrow-left"></i><span class="L-sidebar__span">Logout</span>
+                                <a href="#" class="L-sidebar__nav-link link">
+                                    <i class="bi bi-grid"></i>
+                                    <span class="L-sidebar__span">Sestavy</span></a>
+                            </li>
+                            <!---->
+                            <li class="L-sidebar__list__item">
+                                <a href="{% url "teams" %}"
+                                   class="L-sidebar__nav-link link {% if active == 'teams' %}L-active{% endif %}">
+                                    <i class="bi bi-people"></i>
+                                    <span class="L-sidebar__span">Týmy</span></a>
+                            </li>
+                            <!---->
+                            <li class="L-sidebar__list__item">
+                                <form method="post" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="L-sidebar__btn">
+                                        <i class="bi bi-box-arrow-left"></i>
+                                        <span class="L-sidebar__span">Logout</span>
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </nav>
+                    <button id="themeToggler" class="L-sidebar__btn">
+                        <i class="fa-solid fa-toggle-off"></i><span class="L-sidebar__span">Theme</span>
                     </button>
-                </form>
-            </li>
-        </ul>
-    </nav>
-    <button id="themeToggler" class="L-sidebar__btn">
-        <i class="fa-solid fa-toggle-off"></i><span class="L-sidebar__span">Theme</span>
-    </button>
-    {% include "app_sprava_montazi/partials/spinner.html" %}
-    <!---->
-    <div>
-        {% if user.is_authenticated %}
-            <p class="m-0">
-                User: <strong>{{ user.username }}</strong>
-            </p>
-        {% else %}
-            <p class="m-0 u-txt-error">Nejste přihlášen.</p>
-        {% endif %}
-    </div>
-    <!---->
-    <footer class="L-sidebar__footer">
-        <p>ZaVi Code ©2025</p>
-    </footer>
-</aside>
-<!-- Right side content -->
-<main class="P-main">
-    {% include "includes/message.html" %}
-    {% block content %}
-    {% endblock content %}
-</main>
-</div>
-</div>
-{% include "includes/scripts.html" %}
-{% block scripts %}
-    <!-- JavaScript files go here -->
-{% endblock scripts %}
-</body>
+                    {% include "app_sprava_montazi/partials/spinner.html" %}
+                    <!---->
+                    <div>
+                        {% if user.is_authenticated %}
+                            <p class="m-0">
+                                User: <strong>{{ user.username }}</strong>
+                            </p>
+                        {% else %}
+                            <p class="m-0 u-txt-error">Nejste přihlášen.</p>
+                        {% endif %}
+                    </div>
+                    <!---->
+                    <footer class="L-sidebar__footer">
+                        <p>{ ZaVi Code } © 2025</p>
+                    </footer>
+                </aside>
+                <!-- Right side content -->
+                <main class="P-main">
+                    {% include "includes/message.html" %}
+                    {% block content %}
+                    {% endblock content %}
+                </main>
+            </div>
+        </div>
+        {% include "includes/scripts.html" %}
+        {% block scripts %}
+            <!-- JavaScript files go here -->
+        {% endblock scripts %}
+    </body>
 </html>
