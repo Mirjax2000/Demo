@@ -734,8 +734,8 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
 
     def render_to_response(self, context, **response_kwargs):
         order = context["object"]
-        pdf_generator = PdfGenerator()
-        pdf = pdf_generator.generate_order_sconto(order)
+        pdf_generator = PdfGenerator(order)
+        pdf = pdf_generator.generate_order_sconto()
 
         response = HttpResponse(pdf, content_type="application/pdf")
         response["Content-Disposition"] = (
