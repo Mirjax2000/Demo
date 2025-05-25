@@ -1,21 +1,19 @@
 """app_sprava_montazi View"""
 
 from typing import Any
-from io import BytesIO
 from datetime import datetime
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
+
 from openpyxl import Workbook
 from rich.console import Console
-from django.db import transaction
 from django.conf import settings
-from django.core.management import call_command
+from django.db import transaction
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
+from django.core.management import call_command
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import BaseModelForm, inlineformset_factory
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import (
     CreateView,
     DetailView,
@@ -27,7 +25,7 @@ from django.views.generic import (
 )
 from .models import CallLog, Order, Status, Team, Article, Client, TeamType
 
-from .models import HistoricalArticle  # vim o tom je to imaginarni classa
+from .models import HistoricalArticle  # vim o tom je to abstract classa
 from .forms import (
     TeamForm,
     ArticleForm,
@@ -38,6 +36,7 @@ from .forms import (
     CallLogFormSet,
 )
 from .utils import filter_orders, parse_order_filters, format_date
+from .protokols_OOP import PdfGenerator
 
 cons: Console = Console()
 # ---
@@ -735,36 +734,8 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
 
     def render_to_response(self, context, **response_kwargs):
         order = context["object"]
-
-        # PDF buffer
-        buffer = BytesIO()
-        p = canvas.Canvas(buffer, pagesize=A4)
-        width, height = A4
-
-        # === PDF kreslení ===
-        p.setFont("Helvetica-Bold", 16)
-        p.drawString(50, height - 50, f"Objednávka č. {order.order_number}")
-
-        p.setFont("Helvetica", 12)
-        p.drawString(50, height - 100, f"Zákazník: {order.client.name}")
-        p.drawString(50, height - 120, f"Tým: {order.team.name}")
-        p.drawString(
-            50, height - 140, f"Vytvořeno: {order.delivery_termin.strftime('%d.%m.%Y')}"
-        )
-
-        # Položky (pokud máš)
-        y = height - 180
-        p.setFont("Helvetica-Bold", 12)
-        p.drawString(50, y, "Položky:")
-        y -= 20
-        p.setFont("Helvetica", 11)
-
-        p.showPage()
-        p.save()
-
-        # Vložení do HTTP response
-        pdf = buffer.getvalue()
-        buffer.close()
+        pdf_generator = PdfGenerator()
+        pdf = pdf_generator.generate_order_sconto(order)
 
         response = HttpResponse(pdf, content_type="application/pdf")
         response["Content-Disposition"] = (

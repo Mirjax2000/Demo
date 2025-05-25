@@ -154,3 +154,5 @@ LOGOUT_REDIRECT_URL = "/accounts/login/"
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
+
+
