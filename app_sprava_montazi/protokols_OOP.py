@@ -26,6 +26,7 @@ class PdfConfig:
     width: float = A4[0]
     height: float = A4[1]
     files: Path = settings.BASE_DIR / "files"
+    border_clr: str = "#ABABAB"
 
 
 @dataclass(frozen=True)
@@ -81,12 +82,11 @@ class Section:
     class SubSection:
         """Subsections"""
 
-        def __init__(self, parent) -> None:
+        def __init__(self, parent: "Section") -> None:
             self.parent = parent
             self.cfg = parent.cfg
             self.draw_text = parent.draw_text
             self.cvs = parent.cvs
-            self.cvs.setStrokeColor(HexColor("#ABABAB"))
 
         def customer_info(self) -> None:
             self.draw_text(
@@ -102,6 +102,7 @@ class Section:
             self.draw_text("Telefon:", y_offset=176)
             self.draw_text("E-mail:", y_offset=190)
             # --- border
+            self.cvs.setDash([])
             self.cvs.roundRect(37, 604, 183, 90, radius=4, stroke=1, fill=0)
 
         def team_info(self) -> None:
@@ -118,12 +119,91 @@ class Section:
             # --- border
             self.cvs.roundRect(375, 604, 183, 48, radius=4, stroke=1, fill=0)
 
+        def polozky_k_montazi(self) -> None:
+            self.draw_text(
+                "Položky k montáži uhrazené dle kupní smlouvy na OD Sconto:",
+                y_offset=310,
+                font="Roboto-Regular",
+                font_size=self.cfg.font_size_normal,
+            )
+            self.cvs.setDash([])
+            self.cvs.roundRect(37, 389, 521, 100, radius=4, stroke=1, fill=0)
+
+        def polozky_materialu(self) -> None:
+            self.draw_text(
+                "Použitý nadstandardní spotřební materiál:",
+                y_offset=430,
+                font="Roboto-Regular",
+                font_size=self.cfg.font_size_normal,
+            )
+            self.cvs.setDash([])
+            self.cvs.roundRect(37, 299, 521, 70, radius=4, stroke=1, fill=0)
+
+        def predavaci_protokol(self) -> None:
+            self.draw_text(
+                "Použitý nadstandardní spotřební materiál:",
+                y_offset=430,
+                font="Roboto-Regular",
+                font_size=self.cfg.font_size_normal,
+            )
+            self.cvs.setDash([])
+            self.cvs.roundRect(37, 299, 521, 70, radius=4, stroke=1, fill=0)
+
+        # self.draw_text(
+        #     "Montáž byla provedena v určeném rozsahu, dle montážního návodu a nejsou třeba další zásahy montážního týmu",
+        #     y_offset=22,
+        #     font="Roboto-Regular",
+        #     font_size=self.cfg.font_size_normal,
+        # )
+        # self.draw_text(
+        #     "Montáž nebyla provedena v určeném rozsahu",
+        #     y_offset=22,
+        #     font="Roboto-Regular",
+        #     font_size=self.cfg.font_size_normal,
+        # )
+        # self.draw_text(
+        #     f"Čas začátku montáže: {'.' * 30}",
+        #     y_offset=22,
+        #     font="Roboto-Regular",
+        #     font_size=self.cfg.font_size_normal,
+        # )
+        # self.draw_text(
+        #     f"Čas dokončení montáže: {'.' * 30}",
+        #     x_offset=200,
+        #     y_offset=0,
+        #     font="Roboto-Regular",
+        #     font_size=self.cfg.font_size_normal,
+        # )
+        # self.draw_text(
+        #     "Montáž s vrtáním a kotvením do zdi",
+        #     y_offset=22,
+        #     font="Roboto-Regular",
+        #     font_size=self.cfg.font_size_normal,
+        # )
+        # self.draw_text(
+        #     "Reklamace nebo poznámka k montáži:",
+        #     y_offset=22,
+        #     font="Roboto-Regular",
+        #     font_size=self.cfg.font_size_normal,
+        # )
+
+        # # self.cvs.roundRect(
+        # #     37,
+        # #     self.from_top_offset(73),
+        # #     self.cfg.width - (37 * 2),
+        # #     70,
+        # #     radius=4,
+        # #     stroke=1,
+        # #     fill=0,
+        # # )
+
     def __init__(self, parent: PdfGenerator) -> None:
         self.parent: PdfGenerator = parent
         self.cfg: PdfConfig = self.parent.cfg
         self.cvs: Canvas = self.parent.cvs
         self.model = self.parent.model
         self.company: CompanyInfo = CompanyInfo()
+        self.cvs.setStrokeColor(HexColor(self.cfg.border_clr))
         self.subsection = self.SubSection(self)
 
     def draw_text(
@@ -213,98 +293,18 @@ class Section:
         self.draw_text(text_2, y_offset=231, font_size=self.cfg.font_size_small)
         self.draw_text(text_3, y_offset=242, font_size=self.cfg.font_size_small)
         # --- podpis zakaznika
-        right_margin: float = self.cfg.width - 110 - self.cfg.x_offset
         self.draw_text("podpis zákazníka", x_offset=415, y_offset=281)
         self.draw_dotted_line(x1=365, y1=530, x2=525, y2=530)
-        # # ---
-        # self.draw_text(
-        #     "MONTÁŽ NÁBYTKU",
-        #     y_offset=11,
-        #     font="Roboto-Semibold",
-        #     font_size=self.cfg.font_size_bigger,
-        # )
-        # # --- polozky k montazi
-        # self.draw_text(
-        #     "Položky k montáži uhrazené dle kupní smlouvy na OD Sconto",
-        #     y_offset=20,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-        # self.cvs.setDash([])
-        # # self.cvs.roundRect(
-        # #     37,
-        # #     self.from_top_offset(103),
-        # #     self.cfg.width - (37 * 2),
-        # #     100,
-        # #     radius=4,
-        # #     stroke=1,
-        # #     fill=0,
-        # # )
-        # # --- Material
-        # self.draw_text(
-        #     "Použitý nadstandardní spotřební materiál:",
-        #     y_offset=20,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-        # # self.cvs.roundRect(
-        # #     37,
-        # #     self.from_top_offset(73),
-        # #     self.cfg.width - (37 * 2),
-        # #     70,
-        # #     radius=4,
-        # #     stroke=1,
-        # #     fill=0,
-        # # )
-        # # --- Predavaci  protokol
-
-        # self.draw_text(
-        #     "Montáž byla provedena v určeném rozsahu, dle montážního návodu a nejsou třeba další zásahy montážního týmu",
-        #     y_offset=22,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-        # self.draw_text(
-        #     "Montáž nebyla provedena v určeném rozsahu",
-        #     y_offset=22,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-        # self.draw_text(
-        #     f"Čas začátku montáže: {'.' * 30}",
-        #     y_offset=22,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-        # self.draw_text(
-        #     f"Čas dokončení montáže: {'.' * 30}",
-        #     x_offset=200,
-        #     y_offset=0,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-        # self.draw_text(
-        #     "Montáž s vrtáním a kotvením do zdi",
-        #     y_offset=22,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-        # self.draw_text(
-        #     "Reklamace nebo poznámka k montáži:",
-        #     y_offset=22,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-
-        # # self.cvs.roundRect(
-        # #     37,
-        # #     self.from_top_offset(73),
-        # #     self.cfg.width - (37 * 2),
-        # #     70,
-        # #     radius=4,
-        # #     stroke=1,
-        # #     fill=0,
-        # # )
+        # ---
+        self.draw_text(
+            "MONTÁŽ NÁBYTKU",
+            y_offset=285,
+            font="Roboto-Semibold",
+            font_size=self.cfg.font_size_bigger,
+        )
+        self.subsection.polozky_k_montazi()
+        self.subsection.polozky_materialu()
+        self.subsection.predavaci_protokol()
 
     def general(self) -> None:
         """general pdf section"""
