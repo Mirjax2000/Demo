@@ -38,7 +38,7 @@ class PdfGenerator:
         self.cvs: Canvas = Canvas(self.buffer, pagesize=A4)
         self.section: Section = Section(self)
 
-    def generate_pdf_sconto(self):
+    def generate_pdf_sconto(self) -> bytes:
         self.section.header()  # --- header ---
         # self.section.sconto()  # --- body sconto ---
         self.section.footer()  # --- footer ---
@@ -50,7 +50,17 @@ class PdfGenerator:
         self.buffer.close()
         return pdf
 
-    def generate_pdf_general(self, order): ...
+    def generate_pdf_general(self) -> bytes:
+        self.section.header()  # --- header ---
+        # self.section.general()  # --- body general ---
+        self.section.footer()  # --- footer ---
+        # ---
+        self.cvs.showPage()
+        self.cvs.save()
+        # ---
+        pdf = self.buffer.getvalue()
+        self.buffer.close()
+        return pdf
 
 
 class Section:
@@ -77,44 +87,31 @@ class Section:
         y_offset: float = self.cfg.y_offset
         return y_offset + self.bottom_offset
 
+    def draw_text(
+        self, text: str, y_offset: float, font="Roboto-Regular", font_size=None
+    ) -> None:
+        """Vykresluje text"""
+        if font_size is None:
+            font_size = self.cfg.font_size_normal
+        self.cvs.setFont(font, font_size)
+        self.cvs.drawString(self.cfg.x_offset, self.from_top_offset(y_offset), text)
+
     def header(self) -> None:
         """header section"""
-        self.cvs.setFont("Roboto-Semibold", self.cfg.font_size_normal)
-        self.cvs.drawString(
-            self.cfg.y_offset,
-            self.from_top_offset(0),
-            "RHENUS Home Delivery s.r.o.",
-        )
-        # ---
-        self.cvs.setFont("Roboto-Regular", self.cfg.font_size_normal)
-        self.cvs.drawString(
-            self.cfg.x_offset,
-            self.from_top_offset(15),
-            "Plzeňská 256, 252 19 Chrášťany ",
-        )
-        # ---
-        self.cvs.drawString(
-            self.cfg.x_offset,
-            self.from_top_offset(11),
-            "IČO: 27629325",
-        )
-        # ---
-        self.cvs.drawString(
-            self.cfg.x_offset,
-            self.from_top_offset(11),
-            "DIČ: CZ27629325",
-        )
-        # ---
-        self.cvs.drawString(
-            self.cfg.x_offset,
-            self.from_top_offset(11),
+        self.draw_text("RHENUS Home Delivery s.r.o.", 0, "Roboto-Semibold")
+        self.draw_text("Plzeňská 256, 252 19 Chrášťany", 15, "Roboto-Regular")
+        self.draw_text("IČO: 27629325", 11)
+        self.draw_text("DIČ: CZ27629325", 11)
+        self.draw_text(
             "Společnost je zapsaná v OR pod spisovou značkou C 120048 vedená u Městského soudu v Praze",
+            11,
         )
 
     def footer(self) -> None:
         """Footer section"""
         # --- podpis montera
         text_width: float = 60
+        self.cvs.setFont("Roboto-Regular", self.cfg.font_size_normal)
         # ---
         self.cvs.drawString(self.cfg.x_offset + 50, self.cfg.x_offset, "podpis montéra")
         # --- podpis zakaznika
@@ -142,7 +139,7 @@ class Section:
         # --- ujednani
         text_1 = "Zákazník svým podpisem na konci strany tohoto protokolu potvrzujete správnost všech uvedených údajů a akceptujete všeobecné obchodní podmínky."
         text_2 = "Ústní vedlejší ujednání nejsou platná."
-        self.cvs.setFont("Roboto-Regular", self.cfg.font_size_small)
+        self.cvs.setFont("Roboto-Regular", self.cfg.font_size_normal)
         self.cvs.drawString(self.cfg.x_offset, self.from_bottom_offset(42), text_2)
         self.cvs.drawString(self.cfg.x_offset, self.from_bottom_offset(11), text_1)
 
