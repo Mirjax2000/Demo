@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from rich.console import Console
 from django.conf import settings
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.lib.colors import HexColor
+from reportlab.lib.colors import HexColor, Color
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -26,7 +26,8 @@ class PdfConfig:
     width: float = A4[0]
     height: float = A4[1]
     files: Path = settings.BASE_DIR / "files"
-    border_clr: str = "#ABABAB"
+    border_clr: Color = HexColor("#ABABAB")
+    fill_clr: Color = HexColor("#E8E8E8")
 
 
 @dataclass(frozen=True)
@@ -86,6 +87,7 @@ class Section:
             self.parent = parent
             self.cfg = parent.cfg
             self.draw_text = parent.draw_text
+            self.draw_checkbox = parent.draw_checkbox
             self.cvs = parent.cvs
 
         def customer_info(self) -> None:
@@ -126,6 +128,7 @@ class Section:
                 font="Roboto-Regular",
                 font_size=self.cfg.font_size_normal,
             )
+            # --- border
             self.cvs.setDash([])
             self.cvs.roundRect(37, 389, 521, 100, radius=4, stroke=1, fill=0)
 
@@ -136,66 +139,60 @@ class Section:
                 font="Roboto-Regular",
                 font_size=self.cfg.font_size_normal,
             )
+            # --- border
             self.cvs.setDash([])
             self.cvs.roundRect(37, 299, 521, 70, radius=4, stroke=1, fill=0)
 
         def predavaci_protokol(self) -> None:
             self.draw_text(
-                "Použitý nadstandardní spotřební materiál:",
-                y_offset=430,
+                f"Čas začátku montáže: {'.' * 30}",
+                y_offset=530,
                 font="Roboto-Regular",
                 font_size=self.cfg.font_size_normal,
             )
+            self.draw_text(
+                f"Čas dokončení montáže: {'.' * 30}",
+                x_offset=200,
+                y_offset=530,
+                font="Roboto-Regular",
+                font_size=self.cfg.font_size_normal,
+            )
+            self.draw_text(
+                "Montáž byla provedena v určeném rozsahu, dle montážního návodu a nejsou třeba další zásahy montážního týmu",
+                y_offset=550,
+                font="Roboto-Regular",
+                font_size=self.cfg.font_size_normal,
+            )
+            self.draw_checkbox("ano", 500, 249, 485, 550)
+            self.draw_checkbox("ne", 545, 249, 534, 550)
+            # ---
+            self.draw_text(
+                "Montáž nebyla provedena v určeném rozsahu",
+                y_offset=570,
+                font="Roboto-Regular",
+                font_size=self.cfg.font_size_normal,
+            )
+            self.draw_checkbox("ano", 500, 228, 485, 570)
+            self.draw_checkbox("ne", 545, 228, 534, 570)
+            # ---
+            self.draw_text(
+                "Montáž s vrtáním a kotvením do zdi",
+                y_offset=590,
+                font="Roboto-Regular",
+                font_size=self.cfg.font_size_normal,
+            )
+            self.draw_checkbox("ano", 500, 208, 485, 590)
+            self.draw_checkbox("ne", 545, 208, 534, 590)
+            # ---
+            self.draw_text(
+                "Reklamace nebo poznámka k montáži:",
+                y_offset=610,
+                font="Roboto-Regular",
+                font_size=self.cfg.font_size_normal,
+            )
+            # --- border
             self.cvs.setDash([])
-            self.cvs.roundRect(37, 299, 521, 70, radius=4, stroke=1, fill=0)
-
-        # self.draw_text(
-        #     "Montáž byla provedena v určeném rozsahu, dle montážního návodu a nejsou třeba další zásahy montážního týmu",
-        #     y_offset=22,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-        # self.draw_text(
-        #     "Montáž nebyla provedena v určeném rozsahu",
-        #     y_offset=22,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-        # self.draw_text(
-        #     f"Čas začátku montáže: {'.' * 30}",
-        #     y_offset=22,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-        # self.draw_text(
-        #     f"Čas dokončení montáže: {'.' * 30}",
-        #     x_offset=200,
-        #     y_offset=0,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-        # self.draw_text(
-        #     "Montáž s vrtáním a kotvením do zdi",
-        #     y_offset=22,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-        # self.draw_text(
-        #     "Reklamace nebo poznámka k montáži:",
-        #     y_offset=22,
-        #     font="Roboto-Regular",
-        #     font_size=self.cfg.font_size_normal,
-        # )
-
-        # # self.cvs.roundRect(
-        # #     37,
-        # #     self.from_top_offset(73),
-        # #     self.cfg.width - (37 * 2),
-        # #     70,
-        # #     radius=4,
-        # #     stroke=1,
-        # #     fill=0,
-        # # )
+            self.cvs.roundRect(37, 119, 521, 70, radius=4, stroke=1, fill=0)
 
     def __init__(self, parent: PdfGenerator) -> None:
         self.parent: PdfGenerator = parent
@@ -203,7 +200,7 @@ class Section:
         self.cvs: Canvas = self.parent.cvs
         self.model = self.parent.model
         self.company: CompanyInfo = CompanyInfo()
-        self.cvs.setStrokeColor(HexColor(self.cfg.border_clr))
+        self.cvs.setStrokeColor(self.cfg.border_clr)
         self.subsection = self.SubSection(self)
 
     def draw_text(
@@ -231,6 +228,17 @@ class Section:
         self.cvs.setLineWidth(width)
         self.cvs.setDash(1, 2)
         self.cvs.line(x1, y1, x2, y2)
+
+    def draw_checkbox(
+        self, text: str, x: float, y: float, x_txt: float, y_txt: float
+    ) -> None:
+        self.cvs.setStrokeColor(HexColor("#707070"))
+        self.cvs.setFillColor(self.cfg.fill_clr)
+        self.cvs.roundRect(x, y, 12, 12, radius=2, stroke=1, fill=1)
+        # --- reset na default
+        self.cvs.setStrokeColor(self.cfg.border_clr)
+        self.cvs.setFillColor(HexColor("#000000"))
+        self.draw_text(text, x_txt, y_txt, font_size=self.cfg.font_size_small)
 
     def place_image(
         self, img_name: str, img_width: float, img_height: float, x: float, y: float
