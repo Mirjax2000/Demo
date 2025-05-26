@@ -732,17 +732,17 @@ class ExportOrdersExcelView(LoginRequiredMixin, View):
 class OrderPdfView(LoginRequiredMixin, DetailView):
     model = Order
 
-    def render_to_response(self, context, **response_kwargs):
-        order = context["object"]
-        pdf_generator = PdfGenerator(order)
-
-        if order.mandant == "SCCZ":
-            pdf = pdf_generator.generate_pdf_sconto()
-        else:
-            pdf = pdf_generator.generate_pdf_general()
+    def render_to_response(self, context, **response_kwargs) -> HttpResponse:
+        order: Order = context["object"]
+        pdf_generator: PdfGenerator = PdfGenerator(order)
+        pdf_generators: dict = {
+            "SCCZ": pdf_generator.generate_pdf_sconto,
+            "default": pdf_generator.generate_pdf_general,
+        }
+        pdf = pdf_generators.get(order.mandant, pdf_generators["default"])()
 
         response = HttpResponse(pdf, content_type="application/pdf")
         response["Content-Disposition"] = (
-            f'filename="objednavka_{order.order_number}.pdf"'
+            f'filename="objednavka_{order.order_number.upper()}.pdf"'
         )
         return response

@@ -66,8 +66,8 @@ class PdfGenerator:
 
     def generate_pdf_general(self) -> bytes:
         self.section.header()  # --- header ---
-        # self.section.general()  # --- body general ---
-        # self.section.footer()  # --- footer ---
+        self.section.general()  # --- body general ---
+        self.section.footer()  # --- footer ---
         # ---
         self.cvs.showPage()
         self.cvs.save()
@@ -198,9 +198,9 @@ class Section:
         self.parent: PdfGenerator = parent
         self.cfg: PdfConfig = self.parent.cfg
         self.cvs: Canvas = self.parent.cvs
+        self.cvs.setStrokeColor(self.cfg.border_clr)
         self.model = self.parent.model
         self.company: CompanyInfo = CompanyInfo()
-        self.cvs.setStrokeColor(self.cfg.border_clr)
         self.subsection = self.SubSection(self)
 
     def draw_text(
@@ -291,9 +291,10 @@ class Section:
             font="Roboto-Semibold",
             font_size=self.cfg.font_size_bigger,
         )
+        # ---
         self.subsection.customer_info()
         self.subsection.team_info()
-
+        # ---
         text_1 = "Zákazník prohlašuje, že má-li být zboží připevněno či zavěšeno na stěně, že se ujistil před zahájením prací o povaze a průběhu rozvodů předmětných médií, "
         text_2 = "o nosnosti stěn a případných místních specifikách. Zákazník je povinen informovat Společnost o všech těchto skutečnostech významných pro montáž"
         text_3 = "před zahájením montážních prací."
@@ -310,6 +311,7 @@ class Section:
             font="Roboto-Semibold",
             font_size=self.cfg.font_size_bigger,
         )
+        # ---
         self.subsection.polozky_k_montazi()
         self.subsection.polozky_materialu()
         self.subsection.predavaci_protokol()
