@@ -1,6 +1,6 @@
 """Model testy"""
 
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 from django.forms import ValidationError
 from django.contrib.auth import get_user_model
@@ -305,6 +305,41 @@ class OrderModelTestV1(TestCase):
             notes="",
         )
         self.assertEqual(order.notes_first_10(), "-")
+
+    def test_format_datetime_none(self):
+        """Test: Pokud je hodnota None, vrátí prázdný řetězec."""
+        order = Order()
+        self.assertEqual(order.format_datetime(None), "")
+
+    def test_format_datetime_valid(self):
+        """Test: Pokud je zadán validní datetime, vrátí správně naformátovaný text."""
+        order = Order()
+        dt = datetime(2024, 12, 24, 14, 30)  # Štědrý den odpoledne
+        self.assertEqual(order.format_datetime(dt), "24.12.2024 / 14:30")
+
+    def test_format_datetime_midnight(self):
+        """Test: Kontrola půlnoci."""
+        order = Order()
+        dt = datetime(2025, 1, 1, 0, 0)
+        self.assertEqual(order.format_datetime(dt), "01.01.2025 / 00:00")
+
+    def test_datetime_from_order(self):
+        montage_str = "01.01.2025 / 00:00"
+        montage_dt = datetime.strptime(montage_str, "%d.%m.%Y / %H:%M")
+        order = Order.objects.create(
+            order_number="703777143100431151-R",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            status=Status.NEW,
+            client=self.customer,
+            delivery_termin=date.today(),
+            evidence_termin=date.today(),
+            montage_termin=montage_dt,
+            notes="",
+        )
+        self.assertEqual(
+            order.format_datetime(order.montage_termin), "01.01.2025 / 00:00"
+        )
 
 
 class ArticleModelTestV1(TestCase):
