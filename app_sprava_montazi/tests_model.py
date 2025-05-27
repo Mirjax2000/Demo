@@ -204,6 +204,49 @@ class ClientModelTests(TestCase):
         self.assertEqual(str(customer), "Alena Testovka")
 
 
+class ClientMethodTests(TestCase):
+    def setUp(self) -> None:
+        self.customer = Client.objects.create(
+            name="Franta Pina", zip_code="11155", phone="602234234"
+        )
+
+    def test_format_psc_and_phone_from_db(self):
+        self.assertEqual(self.customer.format_psc(), "111 55")
+        self.assertEqual(self.customer.format_phone(), "+420 602 234 234")
+
+    def test_format_psc_with_valid_zip(self):
+        client = Client(name="Ferda", zip_code="12345")
+        self.assertEqual(client.format_psc(), "123 45")
+
+    def test_format_psc_with_invalid_zip(self):
+        client = Client(name="Ferda", zip_code="1234")
+        self.assertEqual(client.format_psc(), "1234")
+
+    def test_format_psc_with_empty_zip(self):
+        client = Client(name="Ferda", zip_code="")
+        self.assertEqual(client.format_psc(), "")
+
+    def test_format_psc_with_none(self):
+        client = Client(name="Ferda", zip_code=None)
+        self.assertEqual(client.format_psc(), "")
+
+    def test_format_phone_with_valid_number(self):
+        client = Client(name="Ferda", phone="+420123456789")
+        self.assertEqual(client.format_phone(), "+420 123 456 789")
+
+    def test_format_phone_with_invalid_number(self):
+        client = Client(name="Ferda", phone="123456789")
+        self.assertEqual(client.format_phone(), "123456789")
+
+    def test_format_phone_with_empty_number(self):
+        client = Client(name="Ferda", phone="")
+        self.assertEqual(client.format_phone(), "")
+
+    def test_format_phone_with_none(self):
+        client = Client(name="Ferda", phone=None)
+        self.assertEqual(client.format_phone(), "")
+
+
 class OrderModelTestV1(TestCase):
     def setUp(self):
         # Základní DistribHub pro testy
