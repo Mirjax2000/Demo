@@ -28,9 +28,10 @@ from app_sprava_montazi.views import (
 )
 
 # --- typove zkratky
-SLUG = "<slug:slug>"
-OPK = "<int:order_pk>"
 PK = "<int:pk>"
+OPK = "<int:order_pk>"
+SLUG = "<slug:slug>"
+MANDANT = "<str:mandant>"
 # ---
 urlpatterns: list = [
     path("admin/", admin.site.urls),
@@ -63,6 +64,7 @@ app_sprava_montazi: list = [
     #
     # --- pdf ---
     path(f"order/pdf/{PK}/", OrderPdf.as_view(), name="order_pdf"),
+    path(f"order/pdf/{MANDANT}/", OrderPdf.as_view(), name="mandant_pdf"),
 ]
 
 app_accounts_urls: list = [

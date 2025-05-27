@@ -736,18 +736,30 @@ class ExportOrdersExcelView(LoginRequiredMixin, View):
 class OrderPdfView(LoginRequiredMixin, DetailView):
     model = Order
 
-    def render_to_response(self, context, **response_kwargs) -> HttpResponse:
-        order: Order = context["object"]
-        pdf_generator: PdfGenerator = PdfGenerator(model=order)
-        pdf_generators: PdfGeneratorsDict = {
+    def get_object(self, queryset=None):
+        """Ziskej GET z URL"""
+        pk = self.kwargs.get("pk")
+        if pk:
+            return super().get_object(queryset)
+
+        return Order(
+            mandant=self.kwargs.get("mandant", "default"), order_number="template"
+        )
+
+    def render_to_response(self, context, **response_kwargs):
+        order = context["object"]
+        mandant = self.kwargs.get("mandant") or order.mandant or "default"
+
+        pdf_generator = PdfGenerator(model=order)
+        pdf_generators = {
             "default": pdf_generator.generate_pdf_general,
             "SCCZ": pdf_generator.generate_pdf_sconto,
         }
-        # ---
-        pdf: bytes = pdf_generators.get(order.mandant, pdf_generators["default"])()
-        # ---
+
+        pdf_func = pdf_generators.get(mandant, pdf_generators["default"])
+        pdf = pdf_func()
+
+        filename = f"objednavka_{order.order_number.upper()}.pdf"
         response = HttpResponse(content=pdf, content_type="application/pdf")
-        response["Content-Disposition"] = (
-            f'filename="objednavka_{order.order_number.upper()}.pdf"'
-        )
+        response["Content-Disposition"] = f'filename="{filename}"'
         return response
