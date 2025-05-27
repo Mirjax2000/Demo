@@ -3,6 +3,7 @@
 import io
 from datetime import date, datetime
 from unittest.mock import patch
+from io import BytesIO
 
 from django.conf import settings
 from openpyxl import load_workbook
@@ -1488,4 +1489,71 @@ class ExportOrdersExcelViewTest(TestCase):
         )  # ADVICED
         self.assertEqual(order_row_values[6], format_date(self.order1.evidence_termin))
 
-    
+
+class OrderPdfViewTestV1(TestCase):
+    def setUp(self):
+        # Vytvoříme testovacího uživatele
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client.login(username="testuser", password="testpass")
+        self.hub = DistribHub.objects.create(code="626", city="Chrastany")
+        self.customer = Client.objects.create(name="Franta test", zip_code="12345")
+        self.order = Order.objects.create(
+            order_number="12345-R",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            evidence_termin=date(2024, 1, 1),
+            delivery_termin=date(2024, 4, 10),
+            montage_termin=timezone.make_aware(datetime(2024, 5, 20, 8, 0)),
+            status=Status.ADVICED,
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+        )
+        self.url_1 = reverse("order_pdf", kwargs={"pk": self.order.pk})
+        self.url_2 = reverse("mandant_pdf", kwargs={"mandant": self.order.mandant})
+
+    def test_logged_in(self):
+        """
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
+        """
+        response_1 = self.client.get(self.url_1)
+        response_2 = self.client.get(self.url_2)
+        self.assertEqual(response_1.status_code, 200)
+        self.assertEqual(response_2.status_code, 200)
+
+    def test_redirect_if_not_logged_in(self):
+        """
+        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
+        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
+        """
+        self.client.logout()
+        response_1 = self.client.get(self.url_1)
+        response_2 = self.client.get(self.url_2)
+        self.assertRedirects(response_1, f"{settings.LOGIN_URL}?next={self.url_1}")
+        self.assertRedirects(response_2, f"{settings.LOGIN_URL}?next={self.url_2}")
+
+    def test_pdf_view_returns_pdf(self):
+        url = reverse("order_pdf", kwargs={"pk": self.order.pk})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertIn("filename=", response["Content-Disposition"])
+        self.assertGreater(len(response.content), 100)  # nějaký obsah
+        self.assertTrue(response.content.startswith(b"%PDF"))
+        self.assertIn(
+            f"objednavka_{self.order.order_number.upper()}.pdf",
+            response["Content-Disposition"],
+        )
+
+    def test_pdf_view_with_mandant_only(self):
+        url = reverse("mandant_pdf", kwargs={"mandant": "default"})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertTrue(response.content.startswith(b"%PDF"))
+        self.assertIn(
+            "objednavka_DEFAULT.pdf",
+            response["Content-Disposition"],
+        )
