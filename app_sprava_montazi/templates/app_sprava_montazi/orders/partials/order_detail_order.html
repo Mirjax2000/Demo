@@ -100,7 +100,7 @@
     </div>
     {% if order.status == "Adviced" %}
         <div>
-            <a href="{% url 'order_update' order.pk %}"
+            <a href="{% url 'order_pdf' order.pk %}"
                class="btn btn-primary d-block ms-5 me-5">
                 <i class="fa-solid fa-paper-plane me-2"></i>Montážní protokol</a>
         </div>
