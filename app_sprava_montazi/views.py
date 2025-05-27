@@ -742,24 +742,24 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
         if pk:
             return super().get_object(queryset)
 
-        return Order(
-            mandant=self.kwargs.get("mandant", "default"), order_number="template"
-        )
+        mandant = self.kwargs.get("mandant", "default")
+        return Order(mandant=mandant, order_number=mandant)
 
     def render_to_response(self, context, **response_kwargs):
         order = context["object"]
         mandant = self.kwargs.get("mandant") or order.mandant or "default"
-
+        # ---
         pdf_generator = PdfGenerator(model=order)
         pdf_generators = {
             "default": pdf_generator.generate_pdf_general,
             "SCCZ": pdf_generator.generate_pdf_sconto,
         }
-
+        # ---
         pdf_func = pdf_generators.get(mandant, pdf_generators["default"])
         pdf = pdf_func()
-
+        # ---
         filename = f"objednavka_{order.order_number.upper()}.pdf"
         response = HttpResponse(content=pdf, content_type="application/pdf")
         response["Content-Disposition"] = f'filename="{filename}"'
+        # ---
         return response
