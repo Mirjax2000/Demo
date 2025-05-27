@@ -368,7 +368,9 @@ class OrderModelTestV1(TestCase):
 
     def test_datetime_from_order(self):
         montage_str = "01.01.2025 / 00:00"
-        montage_dt = datetime.strptime(montage_str, "%d.%m.%Y / %H:%M")
+        montage_dt = timezone.make_aware(
+            datetime.strptime(montage_str, "%d.%m.%Y / %H:%M")
+        )
         order = Order.objects.create(
             order_number="703777143100431151-R",
             distrib_hub=self.hub,

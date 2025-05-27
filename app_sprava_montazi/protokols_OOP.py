@@ -1,15 +1,18 @@
 """protokols to pdf"""
 
+from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
-from dataclasses import dataclass
-from rich.console import Console
+
 from django.conf import settings
-from reportlab.pdfgen.canvas import Canvas
-from reportlab.lib.colors import HexColor, Color
+from reportlab.lib.colors import Color, HexColor
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
+from reportlab.graphics.barcode import code128
+from reportlab.pdfgen.canvas import Canvas
+from rich.console import Console
 
 # ---
 cons: Console = Console()
@@ -57,29 +60,35 @@ class PdfGenerator:
         self.section: Section = Section(self)
 
     def generate_pdf_sconto(self) -> bytes:
+        self.utils.vodoznak(CompanyInfo.name)  # --- vodoznak ---
         self.section.header()  # --- header ---
         self.section.sconto()  # --- body sconto ---
-        if self.data_layer:
-            self.section.sconto_data(self.model)  # --- data layer ---
         self.section.footer()  # --- footer ---
+
+        if self.data_layer:
+            self.utils.generate_barcode(self.model.order_number.upper(), 365, 685)
+            self.section.sconto_data(self.model)  # --- data layer ---
         # ---
         self.cvs.showPage()
         self.cvs.save()
         # ---
         pdf = self.buffer.getvalue()
         self.buffer.close()
+        cons.log(f"pdf: {self.model.order_number} sestaven")
         return pdf
 
     def generate_pdf_general(self) -> bytes:
         self.section.header()  # --- header ---
         self.section.general()  # --- body general ---
         self.section.footer()  # --- footer ---
+        self.utils.vodoznak(CompanyInfo.name)  # --- vodoznak ---
         # ---
         self.cvs.showPage()
         self.cvs.save()
         # ---
         pdf = self.buffer.getvalue()
         self.buffer.close()
+        cons.log(f"pdf: {self.model.order_number} sestaven")
         return pdf
 
 
@@ -364,6 +373,29 @@ class Utility:
             x=x,
             y=y,
         )
+
+    def vodoznak(self, text):
+        self.cvs.saveState()
+        self.cvs.translate(self.cfg.width / 2, self.cfg.height / 2)
+        self.cvs.rotate(45)
+
+        self.cvs.setFont("Roboto-Regular", 55)
+        self.cvs.setFillColorRGB(0.97, 0.97, 0.97)
+        self.cvs.drawCentredString(25, 25, text)
+
+        self.cvs.restoreState()
+
+    def generate_barcode(self, data_string: str, x: float, y: float) -> BytesIO:
+        buffer = BytesIO()
+        barcode: code128.Code128 = code128.Code128(
+            data_string,
+            barHeight=25,
+            barWidth=1,
+            humanReadable=False,
+        )
+        barcode.drawOn(self.cvs, x, y)
+        buffer.seek(0)
+        return buffer
 
 
 if __name__ == "__main__":
