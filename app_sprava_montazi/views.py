@@ -1,6 +1,6 @@
 """app_sprava_montazi View"""
 
-from typing import Any
+from typing import Any, Callable
 from datetime import datetime
 
 from openpyxl import Workbook
@@ -37,6 +37,10 @@ from .forms import (
 )
 from .utils import filter_orders, parse_order_filters, format_date
 from .protokols_OOP import PdfGenerator
+
+# --- alias types
+PdfGeneratorFunc = Callable[[], bytes]
+PdfGeneratorsDict = dict[str, PdfGeneratorFunc]
 
 cons: Console = Console()
 # ---
@@ -734,14 +738,15 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
 
     def render_to_response(self, context, **response_kwargs) -> HttpResponse:
         order: Order = context["object"]
-        pdf_generator: PdfGenerator = PdfGenerator(order)
-        pdf_generators: dict = {
-            "SCCZ": pdf_generator.generate_pdf_sconto,
+        pdf_generator: PdfGenerator = PdfGenerator(model=order)
+        pdf_generators: PdfGeneratorsDict = {
             "default": pdf_generator.generate_pdf_general,
+            "SCCZ": pdf_generator.generate_pdf_sconto,
         }
-        pdf = pdf_generators.get(order.mandant, pdf_generators["default"])()
-
-        response = HttpResponse(pdf, content_type="application/pdf")
+        # ---
+        pdf: bytes = pdf_generators.get(order.mandant, pdf_generators["default"])()
+        # ---
+        response = HttpResponse(content=pdf, content_type="application/pdf")
         response["Content-Disposition"] = (
             f'filename="objednavka_{order.order_number.upper()}.pdf"'
         )

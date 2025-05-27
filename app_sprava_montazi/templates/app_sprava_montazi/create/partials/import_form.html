@@ -1,0 +1,21 @@
+<fieldset class="L-form__fieldset">
+    <legend>
+        <i class="fa-solid fa-file-import me-2"></i>Import dat z CSV souboru
+    </legend>
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <div class="L-form__group">
+            <label for="{{ form.file.id_for_label }}">Vyberte CSV soubor pro import</label>
+            {{ form.file }}
+            <div class="L-form__error">
+                {% if form.file.errors %}{{ form.file.errors }}{% endif %}
+            </div>
+        </div>
+        <!---->
+        <div class="u-txt-right mt-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-plus me-2"></i>importovat data
+            </button>
+        </div>
+    </form>
+</fieldset>

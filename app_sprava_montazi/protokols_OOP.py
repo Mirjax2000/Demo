@@ -277,10 +277,18 @@ class Section:
         self.draw_dotted_line(x1=365, y1=51, x2=525, y2=51)
         # --- ujednani
         self.draw_text(
-            text_1, self.cfg.x_offset, 700, font_size=self.cfg.font_size_small
+            text_1,
+            self.cfg.x_offset,
+            700,
+            font="Roboto-Light",
+            font_size=self.cfg.font_size_small,
         )
         self.draw_text(
-            text_2, self.cfg.x_offset, 710, font_size=self.cfg.font_size_small
+            text_2,
+            self.cfg.x_offset,
+            710,
+            font="Roboto-Light",
+            font_size=self.cfg.font_size_small,
         )
 
     def sconto(self) -> None:
@@ -298,9 +306,24 @@ class Section:
         text_1 = "Zákazník prohlašuje, že má-li být zboží připevněno či zavěšeno na stěně, že se ujistil před zahájením prací o povaze a průběhu rozvodů předmětných médií, "
         text_2 = "o nosnosti stěn a případných místních specifikách. Zákazník je povinen informovat Společnost o všech těchto skutečnostech významných pro montáž"
         text_3 = "před zahájením montážních prací."
-        self.draw_text(text_1, y_offset=220, font_size=self.cfg.font_size_small)
-        self.draw_text(text_2, y_offset=231, font_size=self.cfg.font_size_small)
-        self.draw_text(text_3, y_offset=242, font_size=self.cfg.font_size_small)
+        self.draw_text(
+            text_1,
+            y_offset=220,
+            font="Roboto-Light",
+            font_size=self.cfg.font_size_small,
+        )
+        self.draw_text(
+            text_2,
+            font="Roboto-Light",
+            y_offset=231,
+            font_size=self.cfg.font_size_small,
+        )
+        self.draw_text(
+            text_3,
+            font="Roboto-Light",
+            y_offset=242,
+            font_size=self.cfg.font_size_small,
+        )
         # --- podpis zakaznika
         self.draw_text("podpis zákazníka", x_offset=415, y_offset=281)
         self.draw_dotted_line(x1=365, y1=530, x2=525, y2=530)
