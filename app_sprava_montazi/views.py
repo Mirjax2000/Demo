@@ -749,7 +749,8 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
         order = context["object"]
         mandant = self.kwargs.get("mandant") or order.mandant or "default"
         # ---
-        pdf_generator = PdfGenerator(model=order)
+        pdf_generator = PdfGenerator(order, order.order_number != mandant)
+        # ---
         pdf_generators = {
             "default": pdf_generator.generate_pdf_general,
             "SCCZ": pdf_generator.generate_pdf_sconto,

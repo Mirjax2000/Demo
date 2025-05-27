@@ -126,15 +126,23 @@ class Client(Model):
     history = HistoricalRecords()
     slug = SlugField(blank=True)
 
-    def save(self, *args, **kwargs):
-        self.incomplete = not all([self.street, self.city, self.phone])
-        self.slug = slugify(f"{self.name}{self.city}{self.street}")
-        super().save(*args, **kwargs)
-
     def first_15(self):
         if len(self.name) > 15:
             return f"{str(self.name)[:15]}..."
         return self.name
+
+    def format_phone(self) -> str:
+        if not self.phone:
+            return ""
+        number = str(self.phone)
+        if number.startswith("+") and len(number) == 13:
+            return f"{number[0:4]} {number[4:7]} {number[7:10]} {number[10:]}"
+        return number
+
+    def save(self, *args, **kwargs):
+        self.incomplete = not all([self.street, self.city, self.phone])
+        self.slug = slugify(f"{self.name}{self.city}{self.street}")
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return str(self.name)
@@ -215,6 +223,11 @@ class Order(Model):
     notes = models.TextField(blank=True, verbose_name="Poznámky")
 
     history = HistoricalRecords()
+
+    def format_datetime(self, value) -> str:
+        if value is None:
+            return ""
+        return value.strftime("%d.%m.%Y / %H:%M")
 
     def notes_first_10(self) -> str:
         if self.notes:
