@@ -266,32 +266,28 @@ class Section:
 
     def sconto_data(self, order) -> None:
         """Sconto pdf section with Order data"""
-        x1_offset: float = 75
-        x2_offset: float = 435
+        x1: float = 75
+        x2: float = 435
 
         self.utils.draw_text(
             order.client.name,
-            x_offset=x1_offset,
+            x_offset=x1,
             y_offset=120,
             font="Roboto-Semibold",
         )
-        self.utils.draw_text(order.client.street, x_offset=x1_offset, y_offset=134)
-        self.utils.draw_text(order.client.zip_code, x_offset=x1_offset, y_offset=148)
-        self.utils.draw_text(order.client.city, x_offset=x1_offset, y_offset=162)
-        self.utils.draw_text(
-            order.client.format_phone(), x_offset=x1_offset, y_offset=176
-        )
-        self.utils.draw_text(order.client.email, x_offset=x1_offset, y_offset=190)
+        self.utils.draw_text(order.client.street, x_offset=x1, y_offset=134)
+        self.utils.draw_text(order.client.format_psc(), x_offset=x1, y_offset=148)
+        self.utils.draw_text(order.client.city, x_offset=x1, y_offset=162)
+        self.utils.draw_text(order.client.format_phone(), x_offset=x1, y_offset=176)
+        self.utils.draw_text(order.client.email, x_offset=x1, y_offset=190)
         # ---
-        self.utils.draw_text(
-            order.order_number.upper(), x_offset=x2_offset, y_offset=162
-        )
+        self.utils.draw_text(order.order_number.upper(), x_offset=x2, y_offset=162)
         self.utils.draw_text(
             f"{order.format_datetime(order.montage_termin)}",
-            x_offset=x2_offset,
+            x_offset=x2,
             y_offset=175,
         )
-        self.utils.draw_text(f"{order.team}", x_offset=x2_offset, y_offset=190)
+        self.utils.draw_text(f"{order.team}", x_offset=x2, y_offset=190)
 
     def general(self) -> None:
         """general pdf section"""

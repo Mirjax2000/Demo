@@ -131,6 +131,14 @@ class Client(Model):
             return f"{str(self.name)[:15]}..."
         return self.name
 
+    def format_psc(self) -> str:
+        if not self.zip_code:
+            return ""
+        number = str(self.zip_code)
+        if len(number) == 5:
+            return f"{number[0:3]} {number[3:]}"
+        return number
+
     def format_phone(self) -> str:
         if not self.phone:
             return ""
