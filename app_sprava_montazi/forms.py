@@ -171,7 +171,7 @@ class ArticleForm(forms.ModelForm):
             "note": forms.Textarea(
                 attrs={
                     "class": "L-form__input",
-                    "rows": 4,
+                    "rows": 2,
                     "placeholder": "poznámky...",
                 }
             ),
