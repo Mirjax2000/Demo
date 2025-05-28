@@ -198,25 +198,25 @@ class Section:
                 "Montáž byla provedena v určeném rozsahu, dle montážního návodu a nejsou třeba další zásahy montážního týmu",
                 y_offset=482,
             )
-            self.utils.draw_checkbox("ano", 500, 316, 485, 482)
-            self.utils.draw_checkbox("ne", 545, 316, 534, 482)
+            self.utils.draw_checkbox("ano", 490, 316, 475, 482)
+            self.utils.draw_checkbox("ne", 535, 316, 524, 482)
             # ---
             self.utils.draw_txt(
                 "Montáž nebyla provedena v určeném rozsahu", y_offset=499
             )
-            self.utils.draw_checkbox("ano", 500, 299, 485, 499)
-            self.utils.draw_checkbox("ne", 545, 299, 534, 499)
+            self.utils.draw_checkbox("ano", 490, 299, 475, 499)
+            self.utils.draw_checkbox("ne", 535, 299, 524, 499)
             # ---
             self.utils.draw_txt("Montáž s vrtáním a kotvením do zdi", y_offset=516)
-            self.utils.draw_checkbox("ano", 500, 282, 485, 516)
-            self.utils.draw_checkbox("ne", 545, 282, 534, 516)
+            self.utils.draw_checkbox("ano", 490, 282, 475, 516)
+            self.utils.draw_checkbox("ne", 535, 282, 524, 516)
             # ---
             self.utils.draw_txt(
                 "Montáž slouží k bytové potřebě ve smyslu § 48 zákona 235/2004 Sb. ve znění PP",
                 y_offset=533,
             )
-            self.utils.draw_checkbox("ano", 500, 265, 485, 533)
-            self.utils.draw_checkbox("ne", 545, 265, 534, 533)
+            self.utils.draw_checkbox("ano", 490, 265, 475, 533)
+            self.utils.draw_checkbox("ne", 535, 265, 524, 533)
             reklamace_txt = "Reklamace nebo poznámka k montáži:"
             self.utils.draw_txt_field(reklamace_txt, 550, 37, 200, 521, 50)
 
