@@ -190,35 +190,35 @@ class Section:
 
         def predavaci_protokol_default(self) -> None:
             """Predavaci protokol subsection"""
-            self.utils.draw_txt(f"Čas začátku montáže: {'.' * 30}", y_offset=500)
+            self.utils.draw_txt(f"Čas začátku montáže: {'.' * 30}", y_offset=465)
             self.utils.draw_txt(
-                f"Čas dokončení montáže: {'.' * 30}", x_offset=200, y_offset=500
+                f"Čas dokončení montáže: {'.' * 30}", x_offset=200, y_offset=465
             )
             self.utils.draw_txt(
                 "Montáž byla provedena v určeném rozsahu, dle montážního návodu a nejsou třeba další zásahy montážního týmu",
-                y_offset=517,
+                y_offset=482,
             )
-            self.utils.draw_checkbox("ano", 500, 282, 485, 517)
-            self.utils.draw_checkbox("ne", 545, 282, 534, 517)
+            self.utils.draw_checkbox("ano", 500, 316, 485, 482)
+            self.utils.draw_checkbox("ne", 545, 316, 534, 482)
             # ---
             self.utils.draw_txt(
-                "Montáž nebyla provedena v určeném rozsahu", y_offset=534
+                "Montáž nebyla provedena v určeném rozsahu", y_offset=499
             )
-            self.utils.draw_checkbox("ano", 500, 265, 485, 534)
-            self.utils.draw_checkbox("ne", 545, 265, 534, 534)
+            self.utils.draw_checkbox("ano", 500, 299, 485, 499)
+            self.utils.draw_checkbox("ne", 545, 299, 534, 499)
             # ---
-            self.utils.draw_txt("Montáž s vrtáním a kotvením do zdi", y_offset=551)
-            self.utils.draw_checkbox("ano", 500, 248, 485, 551)
-            self.utils.draw_checkbox("ne", 545, 248, 534, 551)
+            self.utils.draw_txt("Montáž s vrtáním a kotvením do zdi", y_offset=516)
+            self.utils.draw_checkbox("ano", 500, 282, 485, 516)
+            self.utils.draw_checkbox("ne", 545, 282, 534, 516)
             # ---
             self.utils.draw_txt(
                 "Montáž slouží k bytové potřebě ve smyslu § 48 zákona 235/2004 Sb. ve znění PP",
-                y_offset=568,
+                y_offset=533,
             )
-            self.utils.draw_checkbox("ano", 500, 231, 485, 568)
-            self.utils.draw_checkbox("ne", 545, 231, 534, 568)
+            self.utils.draw_checkbox("ano", 500, 265, 485, 533)
+            self.utils.draw_checkbox("ne", 545, 265, 534, 533)
             reklamace_txt = "Reklamace nebo poznámka k montáži:"
-            self.utils.draw_txt_field(reklamace_txt, 590, 37, 158, 521, 50)
+            self.utils.draw_txt_field(reklamace_txt, 550, 37, 200, 521, 50)
 
         # ---
 
@@ -381,100 +381,115 @@ class Section:
         # ---
         self.utils.draw_txt(
             "MONTÁŽ NÁBYTKU",
-            y_offset=230,
+            y_offset=220,
             font="Roboto-Semibold",
             font_size=bigger_font,
         )
-        self.utils.draw_txt("Minimální cena montáže:", x_offset=40, y_offset=250)
+        self.utils.draw_txt("Minimální cena montáže:", x_offset=40, y_offset=240)
         self.utils.draw_txt(
             "454 Kč + doprava montérů",
             x_offset=132,
-            y_offset=250,
+            y_offset=240,
             font="Roboto-Semibold",
         )
         # --- zony ---
-        self.utils.draw_txt("Zóna 1", x_offset=150, y_offset=270)
-        self.utils.draw_txt("Zóna 2", x_offset=195, y_offset=270)
-        self.utils.draw_txt("Zóna 3", x_offset=237, y_offset=270)
-        self.utils.draw_txt("Nad Zónou 3", x_offset=290, y_offset=270)
+        self.utils.draw_txt("Zóna 1", x_offset=150, y_offset=260)
+        self.utils.draw_txt("Zóna 2", x_offset=195, y_offset=260)
+        self.utils.draw_txt("Zóna 3", x_offset=237, y_offset=260)
+        self.utils.draw_txt("Nad Zónou 3", x_offset=290, y_offset=260)
         self.utils.draw_txt(
             "do 10 km",
             x_offset=146,
-            y_offset=278,
+            y_offset=268,
             font="Roboto-Light",
             font_size=small_font,
         )
         self.utils.draw_txt(
             "do 20 km",
             x_offset=191,
-            y_offset=278,
+            y_offset=268,
             font="Roboto-Light",
             font_size=small_font,
         )
         self.utils.draw_txt(
             "do 50 km",
             x_offset=233,
-            y_offset=278,
+            y_offset=268,
             font="Roboto-Light",
             font_size=small_font,
         )
         # --- monteri ---
-        self.utils.draw_txt_field("Doprava montérů*", 278, 37, 485, 521, 35)
+        self.utils.draw_txt_field("Doprava montérů*", 268, 37, 495, 521, 35)
         self.utils.draw_txt(
-            "313,- Kč", x_offset=148, y_offset=293, font="Roboto-Semibold"
+            "313,- Kč", x_offset=148, y_offset=283, font="Roboto-Semibold"
         )
         self.utils.draw_txt(
-            "379,- Kč", x_offset=193, y_offset=293, font="Roboto-Semibold"
+            "379,- Kč", x_offset=193, y_offset=283, font="Roboto-Semibold"
         )
         self.utils.draw_txt(
-            "470,- Kč", x_offset=236, y_offset=293, font="Roboto-Semibold"
+            "470,- Kč", x_offset=236, y_offset=283, font="Roboto-Semibold"
         )
         self.utils.draw_txt(
-            "470 Kč + 20 Kč/km", x_offset=278, y_offset=293, font="Roboto-Semibold"
+            "470 Kč + 20 Kč/km", x_offset=268, y_offset=283, font="Roboto-Semibold"
         )
-        self.utils.draw_txt("km", x_offset=368, y_offset=293)
-        self.utils.draw_txt("." * 22, x_offset=385, y_offset=305, font="Roboto-Light")
-        self.utils.draw_txt("=", x_offset=435, y_offset=293)
-        self.utils.draw_txt("." * 37, x_offset=450, y_offset=305, font="Roboto-Light")
-        self.utils.draw_txt("Kč", x_offset=525, y_offset=293)
+        self.utils.draw_txt("km", x_offset=368, y_offset=290)
+        self.utils.draw_txt("." * 22, x_offset=385, y_offset=295, font="Roboto-Light")
+        self.utils.draw_txt("=", x_offset=435, y_offset=290)
+        self.utils.draw_txt("." * 37, x_offset=450, y_offset=295, font="Roboto-Light")
+        self.utils.draw_txt("Kč", x_offset=525, y_offset=290)
         # --- check boxy ---
-        self.utils.draw_checkbox("", 154, 492, 0, 0)
-        self.utils.draw_checkbox("", 198, 492, 0, 0)
-        self.utils.draw_checkbox("", 240, 492, 0, 0)
-        self.utils.draw_checkbox("", 301, 492, 0, 0)
+        self.utils.draw_checkbox("", 154, 502, 0, 0)
+        self.utils.draw_checkbox("", 198, 502, 0, 0)
+        self.utils.draw_checkbox("", 240, 502, 0, 0)
+        self.utils.draw_checkbox("", 301, 502, 0, 0)
         # --- nabytek ---
-        self.utils.draw_txt_field("Nábytek", 332, 37, 407, 521, 60)
-        self.utils.draw_txt("Montáž **", x_offset=40, y_offset=350)
-        self.utils.draw_txt("12%", x_offset=260, y_offset=350)
+        self.utils.draw_txt_field("Nábytek", 322, 37, 427, 521, 50)
         self.utils.draw_txt(
-            "x", x_offset=280, y_offset=349.5, font="Roboto-Light", font_size=small_font
-        )
-        self.utils.draw_txt("Hodnota zboží", x_offset=290, y_offset=350)
-        self.utils.draw_txt("." * 40, x_offset=350, y_offset=360, font="Roboto-Light")
-        self.utils.draw_txt("=", x_offset=435, y_offset=350)
-        self.utils.draw_txt("." * 37, x_offset=450, y_offset=360, font="Roboto-Light")
-        self.utils.draw_txt("Kč", x_offset=525, y_offset=350)
-        # ---
-        self.utils.draw_txt("Sesazení sedací soupravy:", x_offset=40, y_offset=380)
-        self.utils.draw_txt(
-            "495,-Kč/ks", x_offset=135, y_offset=380, font="Roboto-Semibold"
-        )
-        self.utils.draw_txt("množství", x_offset=348, y_offset=380)
-        self.utils.draw_txt("." * 22, x_offset=385, y_offset=390, font="Roboto-Light")
-        self.utils.draw_txt("=", x_offset=435, y_offset=380)
-        self.utils.draw_txt("." * 37, x_offset=450, y_offset=390, font="Roboto-Light")
-        self.utils.draw_txt("Kč", x_offset=525, y_offset=380)
-        self.utils.draw_txt(
-            "** 12% z hodnoty nábytku bez DPH určeného k montáži",
+            "Montáž: 12% z hodnoty nábytku bez DPH určeného k montáži",
             x_offset=40,
-            y_offset=403,
-            font="Roboto-Light",
-            font_size=small_font,
+            y_offset=340,
         )
+        self.utils.draw_txt("Hodnota zboží", x_offset=295, y_offset=340)
+        self.utils.draw_txt("." * 37, x_offset=354, y_offset=345, font="Roboto-Light")
+        self.utils.draw_txt("=", x_offset=435, y_offset=340)
+        self.utils.draw_txt("." * 37, x_offset=450, y_offset=345, font="Roboto-Light")
+        self.utils.draw_txt("Kč", x_offset=525, y_offset=340)
+        # ---
+        self.utils.draw_txt("Sesazení sedací soupravy:", x_offset=40, y_offset=363)
+        self.utils.draw_txt(
+            "495,-Kč/ks", x_offset=135, y_offset=363, font="Roboto-Semibold"
+        )
+        self.utils.draw_txt("množství", x_offset=348, y_offset=363)
+        self.utils.draw_txt("." * 22, x_offset=385, y_offset=368, font="Roboto-Light")
+        self.utils.draw_txt("=", x_offset=435, y_offset=363)
+        self.utils.draw_txt("." * 37, x_offset=450, y_offset=368, font="Roboto-Light")
+        self.utils.draw_txt("Kč", x_offset=525, y_offset=363)
+        # ---
         self.utils.draw_txt_field(
-            "Použitý nadstandardní spotřební materiál:", 422, 37, 326, 521, 50
+            "Použitý nadstandardní spotřební materiál:", 392, 37, 357, 521, 50
         )
+        # --- predavaci protokol
         self.subsection.predavaci_protokol_default()
+        # --- celkova cena
+        self.utils.draw_txt("Celková cena: ", x_offset=390, y_offset=620)
+        self.utils.draw_txt("." * 37, x_offset=450, y_offset=625, font="Roboto-Light")
+        self.utils.draw_txt("Kč", x_offset=525, y_offset=620)
+        # ---
+        self.utils.draw_txt("Záloha (platba na OD): ", x_offset=360, y_offset=642)
+        self.utils.draw_txt("." * 37, x_offset=450, y_offset=647, font="Roboto-Light")
+        self.utils.draw_txt("Kč", x_offset=525, y_offset=642)
+        # ---
+        self.utils.draw_txt("Sazba DPH: ", x_offset=210, y_offset=664)
+        self.utils.draw_checkbox("15%", 271, 135, 255, 664)
+        self.utils.draw_checkbox("21%", 306, 135, 290, 664)
+        self.utils.draw_checkbox("Přenesená daňová povinnost", 425, 135, 325, 664)
+        self.utils.draw_txt("." * 37, x_offset=450, y_offset=669, font="Roboto-Light")
+        self.utils.draw_txt("Kč", x_offset=525, y_offset=664)
+        # ---
+        self.utils.draw_txt("K úhradě: ", x_offset=405, y_offset=686)
+        self.utils.draw_txt("." * 37, x_offset=450, y_offset=691, font="Roboto-Light")
+        self.utils.draw_txt("Kč", x_offset=525, y_offset=686)
+        # ---
 
     def default_data_section(self, order) -> None:
         pass
