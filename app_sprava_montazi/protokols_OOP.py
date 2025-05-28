@@ -393,55 +393,55 @@ class Section:
             font="Roboto-Semibold",
         )
         # --- zony ---
-        self.utils.draw_txt("Zóna 1", x_offset=150, y_offset=260)
-        self.utils.draw_txt("Zóna 2", x_offset=195, y_offset=260)
-        self.utils.draw_txt("Zóna 3", x_offset=237, y_offset=260)
-        self.utils.draw_txt("Nad Zónou 3", x_offset=290, y_offset=260)
+        self.utils.draw_txt("Zóna 1", x_offset=130, y_offset=260)
+        self.utils.draw_txt("Zóna 2", x_offset=190, y_offset=260)
+        self.utils.draw_txt("Zóna 3", x_offset=250, y_offset=260)
+        self.utils.draw_txt("Nad Zónou 3", x_offset=310, y_offset=260)
         self.utils.draw_txt(
             "do 10 km",
-            x_offset=146,
+            x_offset=126,
             y_offset=268,
             font="Roboto-Light",
             font_size=small_font,
         )
         self.utils.draw_txt(
             "do 20 km",
-            x_offset=191,
+            x_offset=186,
             y_offset=268,
             font="Roboto-Light",
             font_size=small_font,
         )
         self.utils.draw_txt(
             "do 50 km",
-            x_offset=233,
+            x_offset=246,
             y_offset=268,
             font="Roboto-Light",
             font_size=small_font,
         )
         # --- monteri ---
-        self.utils.draw_txt_field("Doprava montérů*", 268, 37, 495, 521, 35)
+        self.utils.draw_txt_field("Doprava montérů", 268, 37, 495, 521, 35)
         self.utils.draw_txt(
-            "313,- Kč", x_offset=148, y_offset=283, font="Roboto-Semibold"
+            "313,- Kč", x_offset=126, y_offset=283, font="Roboto-Semibold"
         )
         self.utils.draw_txt(
-            "379,- Kč", x_offset=193, y_offset=283, font="Roboto-Semibold"
+            "379,- Kč", x_offset=185, y_offset=283, font="Roboto-Semibold"
         )
         self.utils.draw_txt(
-            "470,- Kč", x_offset=236, y_offset=283, font="Roboto-Semibold"
+            "470,- Kč", x_offset=246, y_offset=283, font="Roboto-Semibold"
         )
         self.utils.draw_txt(
-            "470 Kč + 20 Kč/km", x_offset=268, y_offset=283, font="Roboto-Semibold"
+            "470 Kč + 20 Kč/km", x_offset=298, y_offset=283, font="Roboto-Semibold"
         )
-        self.utils.draw_txt("km", x_offset=368, y_offset=290)
-        self.utils.draw_txt("." * 22, x_offset=385, y_offset=295, font="Roboto-Light")
+        self.utils.draw_txt("km", x_offset=382, y_offset=290)
+        self.utils.draw_txt("." * 16, x_offset=397, y_offset=295, font="Roboto-Light")
         self.utils.draw_txt("=", x_offset=435, y_offset=290)
         self.utils.draw_txt("." * 37, x_offset=450, y_offset=295, font="Roboto-Light")
         self.utils.draw_txt("Kč", x_offset=525, y_offset=290)
         # --- check boxy ---
-        self.utils.draw_checkbox("", 154, 502, 0, 0)
-        self.utils.draw_checkbox("", 198, 502, 0, 0)
-        self.utils.draw_checkbox("", 240, 502, 0, 0)
-        self.utils.draw_checkbox("", 301, 502, 0, 0)
+        self.utils.draw_checkbox("", 134, 502, 0, 0)
+        self.utils.draw_checkbox("", 192, 502, 0, 0)
+        self.utils.draw_checkbox("", 253, 502, 0, 0)
+        self.utils.draw_checkbox("", 321, 502, 0, 0)
         # --- nabytek ---
         self.utils.draw_txt_field("Nábytek", 322, 37, 427, 521, 50)
         self.utils.draw_txt(
@@ -459,8 +459,8 @@ class Section:
         self.utils.draw_txt(
             "495,-Kč/ks", x_offset=135, y_offset=363, font="Roboto-Semibold"
         )
-        self.utils.draw_txt("množství", x_offset=348, y_offset=363)
-        self.utils.draw_txt("." * 22, x_offset=385, y_offset=368, font="Roboto-Light")
+        self.utils.draw_txt("množství", x_offset=360, y_offset=363)
+        self.utils.draw_txt("." * 16, x_offset=397, y_offset=368, font="Roboto-Light")
         self.utils.draw_txt("=", x_offset=435, y_offset=363)
         self.utils.draw_txt("." * 37, x_offset=450, y_offset=368, font="Roboto-Light")
         self.utils.draw_txt("Kč", x_offset=525, y_offset=363)
