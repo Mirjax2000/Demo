@@ -29,9 +29,9 @@ class PdfConfig:
     width: float = A4[0]
     height: float = A4[1]
     files: Path = settings.BASE_DIR / "files"
-    border_radius: int = 4
+    border_radius: int = 3
     border_clr: Color = HexColor("#ABABAB")
-    fill_clr: Color = HexColor("#E8E8E8")
+    fill_clr: Color = HexColor("#EAEAEA")
 
 
 @dataclass(frozen=True)
@@ -172,18 +172,18 @@ class Section:
                 "Montáž byla provedena v určeném rozsahu, dle montážního návodu a nejsou třeba další zásahy montážního týmu",
                 y_offset=560,
             )
-            self.utils.draw_checkbox("ano", 500, 239, 485, 560)
-            self.utils.draw_checkbox("ne", 545, 239, 534, 560)
+            self.utils.draw_checkbox("ano", 490, 239, 475, 560)
+            self.utils.draw_checkbox("ne", 535, 239, 524, 560)
             # ---
             self.utils.draw_txt(
                 "Montáž nebyla provedena v určeném rozsahu", y_offset=580
             )
-            self.utils.draw_checkbox("ano", 500, 218, 485, 580)
-            self.utils.draw_checkbox("ne", 545, 218, 534, 580)
+            self.utils.draw_checkbox("ano", 490, 218, 475, 580)
+            self.utils.draw_checkbox("ne", 535, 218, 524, 580)
             # ---
             self.utils.draw_txt("Montáž s vrtáním a kotvením do zdi", y_offset=600)
-            self.utils.draw_checkbox("ano", 500, 198, 485, 600)
-            self.utils.draw_checkbox("ne", 545, 198, 534, 600)
+            self.utils.draw_checkbox("ano", 490, 198, 475, 600)
+            self.utils.draw_checkbox("ne", 535, 198, 524, 600)
             # ---
             reklamace_txt = "Reklamace nebo poznámka k montáži:"
             self.utils.draw_txt_field(reklamace_txt, 620, 37, 109, 521, 70)
@@ -586,7 +586,7 @@ class Utility:
         self.cvs.rotate(45)
 
         self.cvs.setFont("Roboto-Regular", 55)
-        self.cvs.setFillColorRGB(0.97, 0.97, 0.97)
+        self.cvs.setFillColorRGB(0.96, 0.96, 0.96)
         self.cvs.drawCentredString(25, 25, text)
 
         self.cvs.restoreState()
