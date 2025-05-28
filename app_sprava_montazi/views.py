@@ -753,7 +753,7 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
         # ---
         pdf_generators = {
             "default": pdf_generator.generate_pdf_general,
-            "SCCZ": pdf_generator.generate_pdf_sconto,
+            "SCCZ": pdf_generator.generate_pdf_sccz,
         }
         # ---
         pdf_func = pdf_generators.get(mandant, pdf_generators["default"])

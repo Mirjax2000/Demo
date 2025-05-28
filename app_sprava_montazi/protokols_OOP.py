@@ -60,15 +60,15 @@ class PdfGenerator:
         self.utils: Utility = Utility(self.cfg, self.cvs)
         self.section: Section = Section(self)
 
-    def generate_pdf_sconto(self) -> bytes:
-        self.utils.vodoznak(CompanyInfo.name)  # --- vodoznak ---
+    def generate_pdf_sccz(self) -> bytes:
+        self.utils.watermark(CompanyInfo.name)  # --- vodoznak ---
         self.section.header()  # --- header ---
-        self.section.sconto()  # --- body sconto ---
+        self.section.sccz_section()  # --- body sconto ---
         self.section.footer()  # --- footer ---
         # ---
         if self.data_layer:
-            self.utils.generate_barcode(self.model.order_number.upper(), 365, 685)
-            self.section.sconto_data(self.model)  # --- data layer ---
+            self.utils.generate_barcode(self.model.order_number.upper(), 370, 670)
+            self.section.sccz_data_section(self.model)  # --- data layer ---
         # ---
         self.cvs.showPage()
         self.cvs.save()
@@ -79,11 +79,14 @@ class PdfGenerator:
         return pdf
 
     def generate_pdf_general(self) -> bytes:
+        self.utils.watermark(CompanyInfo.name)  # --- vodoznak ---
         self.section.header()  # --- header ---
-        self.section.general()  # --- body general ---
+        self.section.default_section()  # --- body general ---
         self.section.footer()  # --- footer ---
-        self.utils.vodoznak(CompanyInfo.name)  # --- vodoznak ---
         # ---
+        if self.data_layer:
+            self.utils.generate_barcode(self.model.order_number.upper(), 370, 670)
+            self.section.default_data_section(self.model)  # --- data layer ---
         self.cvs.showPage()
         self.cvs.save()
         # ---
@@ -109,53 +112,76 @@ class Section:
             # --- Subclassy
             self.utils = self.parent.utils
 
-        def customer_info_sccz(self) -> None:
-            self.utils.draw_text(
+        def customer_info(self) -> None:
+            self.utils.draw_txt(
                 "Kontaktní údaje zákazníka", y_offset=105, font="Roboto-Semibold"
             )
-            self.utils.draw_text("Jméno:", y_offset=120)
-            self.utils.draw_text("Ulice:", y_offset=134)
-            self.utils.draw_text("PSČ:", y_offset=148)
-            self.utils.draw_text("Město:", y_offset=162)
-            self.utils.draw_text("Telefon:", y_offset=176)
-            self.utils.draw_text("E-mail:", y_offset=190)
+            self.utils.draw_txt("Jméno:", y_offset=120)
+            self.utils.draw_txt("Ulice:", y_offset=134)
+            self.utils.draw_txt("PSČ:", y_offset=148)
+            self.utils.draw_txt("Město:", y_offset=162)
+            self.utils.draw_txt("Telefon:", y_offset=176)
+            self.utils.draw_txt("E-mail:", y_offset=190)
             # --- border
             self.cvs.setDash([])
-            self.cvs.roundRect(37, 604, 183, 90, radius=4, stroke=1, fill=0)
+            self.cvs.roundRect(37, 604, 173, 90, radius=4, stroke=1, fill=0)
 
-        def team_info_sccz(self) -> None:
-            self.utils.draw_text(
+        def team_info(self) -> None:
+            x_offset: float = 388
+            self.utils.draw_txt(
                 "Informace o zakázce",
-                x_offset=378,
+                x_offset=388,
                 y_offset=147,
                 font="Roboto-Semibold",
             )
-            self.utils.draw_text("Číslo zakázky:", x_offset=378, y_offset=162)
-            self.utils.draw_text("Datum / čas:", x_offset=378, y_offset=175)
-            self.utils.draw_text("Montažní tým:", x_offset=378, y_offset=190)
+            self.utils.draw_txt("Číslo zakázky:", x_offset=x_offset, y_offset=162)
+            self.utils.draw_txt("Datum / čas:", x_offset=x_offset, y_offset=175)
+            self.utils.draw_txt("Montažní tým:", x_offset=x_offset, y_offset=190)
             # --- border
-            self.cvs.roundRect(375, 604, 183, 48, radius=4, stroke=1, fill=0)
+            self.cvs.roundRect(385, 604, 173, 48, radius=4, stroke=1, fill=0)
+
+        def faktura_info(self) -> None:
+            x_offset: float = 220
+            self.utils.draw_txt(
+                "Fakturační údaje",
+                x_offset=x_offset,
+                y_offset=105,
+                font="Roboto-Semibold",
+            )
+            self.utils.draw_txt("Název firmy:", x_offset=x_offset, y_offset=120)
+            self.utils.draw_txt("Adresa:", x_offset=x_offset, y_offset=134)
+            self.utils.draw_txt("IČO:", x_offset=x_offset, y_offset=148)
+            self.utils.draw_txt("DIČ:", x_offset=x_offset, y_offset=162)
+            self.utils.draw_txt("Telefon:", x_offset=x_offset, y_offset=176)
+            self.utils.draw_txt("Email:", x_offset=x_offset, y_offset=190)
+            # --- checkbox
+            self.utils.draw_txt("Plátce DPH:", x_offset=x_offset, y_offset=211)
+            self.utils.draw_checkbox("ano", 320, 587, 305, 211)
+            self.utils.draw_checkbox("ne", 350, 587, 338, 211)
+
+            # --- border
+            self.cvs.roundRect(x_offset - 3, 604, 161, 90, radius=4, stroke=1, fill=0)
 
         def predavaci_protokol_sccz(self) -> None:
             """Predavaci protokol subsection"""
-            self.utils.draw_text(f"Čas začátku montáže: {'.' * 30}", y_offset=540)
-            self.utils.draw_text(
+            self.utils.draw_txt(f"Čas začátku montáže: {'.' * 30}", y_offset=540)
+            self.utils.draw_txt(
                 f"Čas dokončení montáže: {'.' * 30}", x_offset=200, y_offset=540
             )
-            self.utils.draw_text(
+            self.utils.draw_txt(
                 "Montáž byla provedena v určeném rozsahu, dle montážního návodu a nejsou třeba další zásahy montážního týmu",
                 y_offset=560,
             )
             self.utils.draw_checkbox("ano", 500, 239, 485, 560)
             self.utils.draw_checkbox("ne", 545, 239, 534, 560)
             # ---
-            self.utils.draw_text(
+            self.utils.draw_txt(
                 "Montáž nebyla provedena v určeném rozsahu", y_offset=580
             )
             self.utils.draw_checkbox("ano", 500, 218, 485, 580)
             self.utils.draw_checkbox("ne", 545, 218, 534, 580)
             # ---
-            self.utils.draw_text("Montáž s vrtáním a kotvením do zdi", y_offset=600)
+            self.utils.draw_txt("Montáž s vrtáním a kotvením do zdi", y_offset=600)
             self.utils.draw_checkbox("ano", 500, 198, 485, 600)
             self.utils.draw_checkbox("ne", 545, 198, 534, 600)
             # ---
@@ -180,12 +206,12 @@ class Section:
 
     def header(self) -> None:
         """header section - mezery jsou zde po 11 pixelech"""
-        self.utils.draw_text(self.company.name, y_offset=11, font="Roboto-Semibold")
-        self.utils.draw_text(self.company.address, y_offset=27, font="Roboto-Regular")
-        self.utils.draw_text(self.company.ico, y_offset=38)
-        self.utils.draw_text(self.company.dic, y_offset=49)
-        self.utils.draw_text(self.company.ref, y_offset=60)
-        self.utils.place_image(
+        self.utils.draw_txt(self.company.name, y_offset=11, font="Roboto-Semibold")
+        self.utils.draw_txt(self.company.address, y_offset=27, font="Roboto-Regular")
+        self.utils.draw_txt(self.company.ico, y_offset=38)
+        self.utils.draw_txt(self.company.dic, y_offset=49)
+        self.utils.draw_txt(self.company.ref, y_offset=60)
+        self.utils.place_img(
             "rhenus_logo.png", img_width=180, img_height=42, x=375, y=760
         )
 
@@ -200,32 +226,32 @@ class Section:
         text_2 = "Ústní vedlejší ujednání nejsou platná."
 
         # --- podpis montera
-        self.utils.draw_text("podpis montéra", 120, 762)
+        self.utils.draw_txt("podpis montéra", 120, 762)
         self.utils.draw_dotted_line(x1=70, y1=51, x2=230, y2=51)
         # --- podpis zakaznika
-        self.utils.draw_text("podpis zákazníka", 415, 762)
+        self.utils.draw_txt("podpis zákazníka", 415, 762)
         self.utils.draw_dotted_line(x1=365, y1=51, x2=525, y2=51)
         # --- ujednani
-        self.utils.draw_text(
+        self.utils.draw_txt(
             text_1, l_margin, 705, font="Roboto-Light", font_size=small_font
         )
-        self.utils.draw_text(
+        self.utils.draw_txt(
             text_2, l_margin, 715, font="Roboto-Light", font_size=small_font
         )
 
-    def sconto(self) -> None:
+    def sccz_section(self) -> None:
         """Sconto section"""
         bigger_font = self.cfg.font_size_bigger
         small_font = self.cfg.font_size_small
-        self.utils.draw_text(
+        self.utils.draw_txt(
             "Předávací protokol provedených prací",
             y_offset=84,
             font="Roboto-Semibold",
             font_size=bigger_font,
         )
         # ---
-        self.subsection.customer_info_sccz()
-        self.subsection.team_info_sccz()
+        self.subsection.customer_info()
+        self.subsection.team_info()
         # --- poznamky k zakazce
         notes_txt: str = "Poznámky k zakázce:"
         self.utils.draw_txt_field(notes_txt, 213, 37, 566, 521, 20)
@@ -233,20 +259,20 @@ class Section:
         text_1 = "Zákazník prohlašuje, že má-li být zboží připevněno či zavěšeno na stěně, že se ujistil před zahájením prací o povaze a průběhu rozvodů předmětných médií, "
         text_2 = "o nosnosti stěn a případných místních specifikách. Zákazník je povinen informovat Společnost o všech těchto skutečnostech významných pro montáž"
         text_3 = "před zahájením montážních prací."
-        self.utils.draw_text(
+        self.utils.draw_txt(
             text_1, y_offset=247, font="Roboto-Light", font_size=small_font
         )
-        self.utils.draw_text(
+        self.utils.draw_txt(
             text_2, font="Roboto-Light", y_offset=256, font_size=small_font
         )
-        self.utils.draw_text(
+        self.utils.draw_txt(
             text_3, font="Roboto-Light", y_offset=266, font_size=small_font
         )
         # --- podpis zakaznika
-        self.utils.draw_text("podpis zákazníka", x_offset=415, y_offset=301)
+        self.utils.draw_txt("podpis zákazníka", x_offset=415, y_offset=301)
         self.utils.draw_dotted_line(x1=365, y1=510, x2=525, y2=510)
         # ---
-        self.utils.draw_text(
+        self.utils.draw_txt(
             "MONTÁŽ NÁBYTKU",
             y_offset=300,
             font="Roboto-Semibold",
@@ -260,50 +286,117 @@ class Section:
         self.utils.draw_txt_field(material_text, 440, 37, 289, 521, 70)
         self.subsection.predavaci_protokol_sccz()
 
-    def sconto_data(self, order) -> None:
+    def sccz_data_section(self, order) -> None:
         """Sconto pdf section with Order data"""
-        x1: float = 75
-        x2: float = 435
+        x1: float = 73
+        x2: float = 442
         # --- client info
-        self.utils.draw_text(
-            order.client.name,
+        self.utils.draw_txt(
+            order.client.name[:30],
             x_offset=x1,
             y_offset=120,
             font="Roboto-Semibold",
         )
-        self.utils.draw_text(order.client.street, x_offset=x1, y_offset=134)
-        self.utils.draw_text(order.client.format_psc(), x_offset=x1, y_offset=148)
-        self.utils.draw_text(order.client.city, x_offset=x1, y_offset=162)
-        self.utils.draw_text(order.client.format_phone(), x_offset=x1, y_offset=176)
-        self.utils.draw_text(order.client.email, x_offset=x1, y_offset=190)
+        self.utils.draw_txt(order.client.street, x_offset=x1, y_offset=134)
+        self.utils.draw_txt(order.client.format_psc(), x_offset=x1, y_offset=148)
+        self.utils.draw_txt(order.client.city, x_offset=x1, y_offset=162)
+        self.utils.draw_txt(order.client.format_phone(), x_offset=x1, y_offset=176)
+        self.utils.draw_txt(order.client.email[:31], x_offset=x1, y_offset=190)
         # --- order info
-        self.utils.draw_text(order.order_number.upper(), x_offset=x2, y_offset=162)
+        self.utils.draw_txt(order.order_number.upper(), x_offset=x2, y_offset=162)
         # --- prevod casu
         local_dt = localtime(order.montage_termin)
-        self.utils.draw_text(
-            f"{order.format_datetime(local_dt)}", x_offset=x2, y_offset=175
+        self.utils.draw_txt(
+            f"{order.format_datetime(local_dt)}",
+            x_offset=x2,
+            y_offset=175,
+            font="Roboto-Semibold",
         )
-        self.utils.draw_text(f"{order.team}", x_offset=x2, y_offset=190)
+        self.utils.draw_txt(
+            f"{order.team}", x_offset=x2, y_offset=190, font="Roboto-Semibold"
+        )
         # --- notes
-        self.utils.draw_text(f"{order.notes[:140]}", y_offset=228, font="Roboto-Light")
+        self.utils.draw_txt(f"{order.notes[:140]}", y_offset=228, font="Roboto-Light")
         # --- articles
         articles = Article.objects.filter(order=order)
         offset: float = 346.0
         for article in articles:
-            self.utils.draw_text(article.name, y_offset=offset, font="Roboto-Semibold")
-            self.utils.draw_text(
+            self.utils.draw_txt(article.name, y_offset=offset, font="Roboto-Semibold")
+            self.utils.draw_txt(
                 f"cena: {article.price} Kč", x_offset=150, y_offset=offset
             )
-            self.utils.draw_text(
+            self.utils.draw_txt(
                 f"qty: {article.quantity} ks", x_offset=240, y_offset=offset
             )
-            self.utils.draw_text(
+            self.utils.draw_txt(
                 f"pzn.: {article.note[:74]}", x_offset=280, y_offset=offset
             )
             offset += 14
 
-    def general(self) -> None:
+    def default_section(self) -> None:
         """general pdf section"""
+        bigger_font = self.cfg.font_size_bigger
+        small_font = self.cfg.font_size_small
+        self.utils.draw_txt(
+            "Vyúčtování provedených prací - daňový doklad",
+            y_offset=84,
+            font="Roboto-Semibold",
+            font_size=bigger_font,
+        )
+        self.subsection.customer_info()
+        self.subsection.faktura_info()
+        self.subsection.team_info()
+        # ---
+        self.utils.draw_txt(
+            "MONTÁŽ NÁBYTKU",
+            y_offset=230,
+            font="Roboto-Semibold",
+            font_size=bigger_font,
+        )
+        # --- zony ---
+        self.utils.draw_txt("Zóna 1", x_offset=180, y_offset=250)
+        self.utils.draw_txt("Zóna 2", x_offset=220, y_offset=250)
+        self.utils.draw_txt("Zóna 3", x_offset=260, y_offset=250)
+        self.utils.draw_txt("Nad Zónou 3", x_offset=310, y_offset=250)
+        self.utils.draw_txt("km", x_offset=398, y_offset=250)
+        self.utils.draw_txt(
+            "do 10 km",
+            x_offset=176,
+            y_offset=258,
+            font="Roboto-Light",
+            font_size=small_font,
+        )
+        self.utils.draw_txt(
+            "do 20 km",
+            x_offset=216,
+            y_offset=258,
+            font="Roboto-Light",
+            font_size=small_font,
+        )
+        self.utils.draw_txt(
+            "do 50 km",
+            x_offset=256,
+            y_offset=258,
+            font="Roboto-Light",
+            font_size=small_font,
+        )
+        # --- monteri ---
+        self.utils.draw_txt_field("Doprava montérů *", 258, 37, 505, 521, 35)
+        self.utils.draw_txt("313,- Kč", x_offset=178, y_offset=273)
+        self.utils.draw_txt("379,- Kč", x_offset=218, y_offset=273)
+        self.utils.draw_txt("470,- Kč", x_offset=258, y_offset=273)
+        self.utils.draw_txt("470 Kč + 20 Kč/km x", x_offset=298, y_offset=273)
+        self.utils.draw_txt("." * 20, x_offset=385, y_offset=285, font="Roboto-Light")
+        self.utils.draw_txt("=", x_offset=430, y_offset=273)
+        self.utils.draw_txt("." * 33, x_offset=443, y_offset=285, font="Roboto-Light")
+        self.utils.draw_txt("Kč", x_offset=515, y_offset=273)
+        # --- check boxy ---
+        self.utils.draw_checkbox("", 184, 512, 0, 0)
+        self.utils.draw_checkbox("", 223, 512, 0, 0)
+        self.utils.draw_checkbox("", 263, 512, 0, 0)
+        self.utils.draw_checkbox("", 321, 512, 0, 0)
+
+    def default_data_section(self, order) -> None:
         pass
 
 
@@ -327,7 +420,7 @@ class Utility:
         for name, path in Utility.FONTS.items():
             pdfmetrics.registerFont(TTFont(name, str(path)))
 
-    def draw_text(
+    def draw_txt(
         self,
         text: str,
         x_offset=None,
@@ -362,12 +455,12 @@ class Utility:
         # --- reset na default
         self.cvs.setStrokeColor(self.cfg.border_clr)
         self.cvs.setFillColor(HexColor("#000000"))
-        self.draw_text(text, x_txt, y_txt, font_size=self.cfg.font_size_small)
+        self.draw_txt(text, x_txt, y_txt, font_size=self.cfg.font_size_small)
 
     def draw_txt_field(
         self, text: str, y_txt: int, x_rect: int, y_rect: int, width: int, height: int
     ) -> None:
-        self.draw_text(text, y_offset=y_txt)
+        self.draw_txt(text, y_offset=y_txt)
         # --- border
         self.cvs.setDash([])
         self.cvs.roundRect(
@@ -380,7 +473,7 @@ class Utility:
             fill=0,
         )
 
-    def place_image(
+    def place_img(
         self, img_name: str, img_width: float, img_height: float, x: float, y: float
     ) -> None:
         """Place image"""
@@ -392,7 +485,7 @@ class Utility:
             y=y,
         )
 
-    def vodoznak(self, text):
+    def watermark(self, text):
         self.cvs.saveState()
         self.cvs.translate(self.cfg.width / 2, self.cfg.height / 2)
         self.cvs.rotate(45)
