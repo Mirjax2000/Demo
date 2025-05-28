@@ -263,7 +263,7 @@ class Section:
         """Sconto pdf section with Order data"""
         x1: float = 75
         x2: float = 435
-
+        # --- client info
         self.utils.draw_text(
             order.client.name,
             x_offset=x1,
@@ -275,7 +275,7 @@ class Section:
         self.utils.draw_text(order.client.city, x_offset=x1, y_offset=162)
         self.utils.draw_text(order.client.format_phone(), x_offset=x1, y_offset=176)
         self.utils.draw_text(order.client.email, x_offset=x1, y_offset=190)
-        # ---
+        # --- order info
         self.utils.draw_text(order.order_number.upper(), x_offset=x2, y_offset=162)
         # --- prevod casu
         local_dt = localtime(order.montage_termin)
@@ -283,6 +283,8 @@ class Section:
             f"{order.format_datetime(local_dt)}", x_offset=x2, y_offset=175
         )
         self.utils.draw_text(f"{order.team}", x_offset=x2, y_offset=190)
+        # --- notes
+        self.utils.draw_text(f"{order.notes[:138]}", x_offset=40, y_offset=228)
 
     def general(self) -> None:
         """general pdf section"""
