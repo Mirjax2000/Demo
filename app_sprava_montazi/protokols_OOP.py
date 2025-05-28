@@ -3,13 +3,12 @@
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
-
+from django.utils.timezone import localtime
 from django.conf import settings
 from reportlab.lib.colors import Color, HexColor
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
 from reportlab.graphics.barcode import code128
 from reportlab.pdfgen.canvas import Canvas
 from rich.console import Console
@@ -64,7 +63,7 @@ class PdfGenerator:
         self.section.header()  # --- header ---
         self.section.sconto()  # --- body sconto ---
         self.section.footer()  # --- footer ---
-
+        # ---
         if self.data_layer:
             self.utils.generate_barcode(self.model.order_number.upper(), 365, 685)
             self.section.sconto_data(self.model)  # --- data layer ---
@@ -291,10 +290,10 @@ class Section:
         self.utils.draw_text(order.client.email, x_offset=x1, y_offset=190)
         # ---
         self.utils.draw_text(order.order_number.upper(), x_offset=x2, y_offset=162)
+        # --- prevod casu
+        local_dt = localtime(order.montage_termin)
         self.utils.draw_text(
-            f"{order.format_datetime(order.montage_termin)}",
-            x_offset=x2,
-            y_offset=175,
+            f"{order.format_datetime(local_dt)}", x_offset=x2, y_offset=175
         )
         self.utils.draw_text(f"{order.team}", x_offset=x2, y_offset=190)
 
@@ -312,11 +311,9 @@ class Utility:
 
     FONT_DIR: Path = settings.BASE_DIR / "files"
     FONTS: dict[str, Path] = {
-        "FiraCode": FONT_DIR / "FiraCode-Regular.ttf",
         "Roboto-Regular": FONT_DIR / "Roboto-Regular.ttf",
         "Roboto-Light": FONT_DIR / "Roboto-Light.ttf",
         "Roboto-Semibold": FONT_DIR / "Roboto-Semibold.ttf",
-        "JetBrainsMono": FONT_DIR / "JetBrainsMono.ttf",
     }
 
     @staticmethod
