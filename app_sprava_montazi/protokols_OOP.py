@@ -12,6 +12,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.graphics.barcode import code128
 from reportlab.pdfgen.canvas import Canvas
 from rich.console import Console
+from .models import Article
 
 # ---
 cons: Console = Console()
@@ -284,7 +285,22 @@ class Section:
         )
         self.utils.draw_text(f"{order.team}", x_offset=x2, y_offset=190)
         # --- notes
-        self.utils.draw_text(f"{order.notes[:138]}", x_offset=40, y_offset=228)
+        self.utils.draw_text(f"{order.notes[:140]}", y_offset=228, font="Roboto-Light")
+        # --- articles
+        articles = Article.objects.filter(order=order)
+        offset: float = 346.0
+        for article in articles:
+            self.utils.draw_text(article.name, y_offset=offset, font="Roboto-Semibold")
+            self.utils.draw_text(
+                f"cena: {article.price} Kč", x_offset=150, y_offset=offset
+            )
+            self.utils.draw_text(
+                f"qty: {article.quantity} ks", x_offset=240, y_offset=offset
+            )
+            self.utils.draw_text(
+                f"pzn.: {article.note[:74]}", x_offset=280, y_offset=offset
+            )
+            offset += 14
 
     def general(self) -> None:
         """general pdf section"""

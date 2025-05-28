@@ -24,6 +24,7 @@ from django.db.models import (
     TextField,
 )
 from django.utils.text import slugify
+from django.core.validators import MaxValueValidator, MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
 
 User = get_user_model()
@@ -291,7 +292,14 @@ class Article(Model):
         blank=True,
         verbose_name="Cena",
     )
-    quantity = PositiveIntegerField(default=1, verbose_name="Množství")
+    quantity = PositiveIntegerField(
+        default=1,
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(99),
+        ],
+        verbose_name="Množství",
+    )
     note = TextField(blank=True, verbose_name="Popis")
     history = HistoricalRecords()
 
