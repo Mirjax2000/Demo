@@ -137,31 +137,29 @@ class Section:
 
         def predavaci_protokol_sccz(self) -> None:
             """Predavaci protokol subsection"""
-            self.utils.draw_text(f"Čas začátku montáže: {'.' * 30}", y_offset=530)
+            self.utils.draw_text(f"Čas začátku montáže: {'.' * 30}", y_offset=540)
             self.utils.draw_text(
-                f"Čas dokončení montáže: {'.' * 30}", x_offset=200, y_offset=530
+                f"Čas dokončení montáže: {'.' * 30}", x_offset=200, y_offset=540
             )
             self.utils.draw_text(
                 "Montáž byla provedena v určeném rozsahu, dle montážního návodu a nejsou třeba další zásahy montážního týmu",
-                y_offset=550,
+                y_offset=560,
             )
-            self.utils.draw_checkbox("ano", 500, 249, 485, 550)
-            self.utils.draw_checkbox("ne", 545, 249, 534, 550)
+            self.utils.draw_checkbox("ano", 500, 239, 485, 560)
+            self.utils.draw_checkbox("ne", 545, 239, 534, 560)
             # ---
             self.utils.draw_text(
-                "Montáž nebyla provedena v určeném rozsahu", y_offset=570
+                "Montáž nebyla provedena v určeném rozsahu", y_offset=580
             )
-            self.utils.draw_checkbox("ano", 500, 228, 485, 570)
-            self.utils.draw_checkbox("ne", 545, 228, 534, 570)
+            self.utils.draw_checkbox("ano", 500, 218, 485, 580)
+            self.utils.draw_checkbox("ne", 545, 218, 534, 580)
             # ---
-            self.utils.draw_text("Montáž s vrtáním a kotvením do zdi", y_offset=590)
-            self.utils.draw_checkbox("ano", 500, 208, 485, 590)
-            self.utils.draw_checkbox("ne", 545, 208, 534, 590)
+            self.utils.draw_text("Montáž s vrtáním a kotvením do zdi", y_offset=600)
+            self.utils.draw_checkbox("ano", 500, 198, 485, 600)
+            self.utils.draw_checkbox("ne", 545, 198, 534, 600)
             # ---
-            self.utils.draw_text("Reklamace nebo poznámka k montáži:", y_offset=610)
-            # --- border
-            self.cvs.setDash([])
-            self.cvs.roundRect(37, 119, 521, 70, radius=4, stroke=1, fill=0)
+            reklamace_txt = "Reklamace nebo poznámka k montáži:"
+            self.utils.draw_txt_field(reklamace_txt, 620, 37, 109, 521, 70)
 
         # ---
 
@@ -194,7 +192,6 @@ class Section:
         """Footer section"""
         l_margin: float = self.cfg.x_offset
         small_font = self.cfg.font_size_small
-
         text_1 = (
             "Zákazník svým podpisem na konci strany tohoto protokolu potvrzujete "
             "správnost všech uvedených údajů a akceptujete všeobecné obchodní podmínky."
@@ -209,10 +206,10 @@ class Section:
         self.utils.draw_dotted_line(x1=365, y1=51, x2=525, y2=51)
         # --- ujednani
         self.utils.draw_text(
-            text_1, l_margin, 700, font="Roboto-Light", font_size=small_font
+            text_1, l_margin, 705, font="Roboto-Light", font_size=small_font
         )
         self.utils.draw_text(
-            text_2, l_margin, 710, font="Roboto-Light", font_size=small_font
+            text_2, l_margin, 715, font="Roboto-Light", font_size=small_font
         )
 
     def sconto(self) -> None:
