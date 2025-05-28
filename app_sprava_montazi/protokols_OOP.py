@@ -28,6 +28,7 @@ class PdfConfig:
     width: float = A4[0]
     height: float = A4[1]
     files: Path = settings.BASE_DIR / "files"
+    border_radius: int = 4
     border_clr: Color = HexColor("#ABABAB")
     fill_clr: Color = HexColor("#E8E8E8")
 
@@ -107,7 +108,7 @@ class Section:
             # --- Subclassy
             self.utils = self.parent.utils
 
-        def customer_info(self) -> None:
+        def customer_info_sccz(self) -> None:
             self.utils.draw_text(
                 "Kontaktní údaje zákazníka", y_offset=105, font="Roboto-Semibold"
             )
@@ -121,7 +122,7 @@ class Section:
             self.cvs.setDash([])
             self.cvs.roundRect(37, 604, 183, 90, radius=4, stroke=1, fill=0)
 
-        def team_info(self) -> None:
+        def team_info_sccz(self) -> None:
             self.utils.draw_text(
                 "Informace o zakázce",
                 x_offset=378,
@@ -134,24 +135,7 @@ class Section:
             # --- border
             self.cvs.roundRect(375, 604, 183, 48, radius=4, stroke=1, fill=0)
 
-        def polozky_k_montazi(self) -> None:
-            self.utils.draw_text(
-                "Položky k montáži uhrazené dle kupní smlouvy na OD Sconto:",
-                y_offset=310,
-            )
-            # --- border
-            self.cvs.setDash([])
-            self.cvs.roundRect(37, 389, 521, 100, radius=4, stroke=1, fill=0)
-
-        def polozky_materialu(self) -> None:
-            self.utils.draw_text(
-                "Použitý nadstandardní spotřební materiál:", y_offset=430
-            )
-            # --- border
-            self.cvs.setDash([])
-            self.cvs.roundRect(37, 299, 521, 70, radius=4, stroke=1, fill=0)
-
-        def predavaci_protokol(self) -> None:
+        def predavaci_protokol_sccz(self) -> None:
             """Predavaci protokol subsection"""
             self.utils.draw_text(f"Čas začátku montáže: {'.' * 30}", y_offset=530)
             self.utils.draw_text(
@@ -242,35 +226,41 @@ class Section:
             font_size=bigger_font,
         )
         # ---
-        self.subsection.customer_info()
-        self.subsection.team_info()
+        self.subsection.customer_info_sccz()
+        self.subsection.team_info_sccz()
+        # --- poznamky k zakazce
+        notes_txt: str = "Poznámky k zakázce:"
+        self.utils.draw_txt_field(notes_txt, 213, 37, 566, 521, 20)
         # ---
         text_1 = "Zákazník prohlašuje, že má-li být zboží připevněno či zavěšeno na stěně, že se ujistil před zahájením prací o povaze a průběhu rozvodů předmětných médií, "
         text_2 = "o nosnosti stěn a případných místních specifikách. Zákazník je povinen informovat Společnost o všech těchto skutečnostech významných pro montáž"
         text_3 = "před zahájením montážních prací."
         self.utils.draw_text(
-            text_1, y_offset=220, font="Roboto-Light", font_size=small_font
+            text_1, y_offset=247, font="Roboto-Light", font_size=small_font
         )
         self.utils.draw_text(
-            text_2, font="Roboto-Light", y_offset=231, font_size=small_font
+            text_2, font="Roboto-Light", y_offset=256, font_size=small_font
         )
         self.utils.draw_text(
-            text_3, font="Roboto-Light", y_offset=242, font_size=small_font
+            text_3, font="Roboto-Light", y_offset=266, font_size=small_font
         )
         # --- podpis zakaznika
-        self.utils.draw_text("podpis zákazníka", x_offset=415, y_offset=281)
-        self.utils.draw_dotted_line(x1=365, y1=530, x2=525, y2=530)
+        self.utils.draw_text("podpis zákazníka", x_offset=415, y_offset=301)
+        self.utils.draw_dotted_line(x1=365, y1=510, x2=525, y2=510)
         # ---
         self.utils.draw_text(
             "MONTÁŽ NÁBYTKU",
-            y_offset=285,
+            y_offset=300,
             font="Roboto-Semibold",
             font_size=bigger_font,
         )
-        # ---
-        self.subsection.polozky_k_montazi()
-        self.subsection.polozky_materialu()
-        self.subsection.predavaci_protokol()
+        # --- polozky k montazi
+        montaz_txt: str = "Položky k montáži uhrazené dle kupní smlouvy na OD Sconto:"
+        self.utils.draw_txt_field(montaz_txt, 330, 37, 379, 521, 90)
+        # --- polozky spotrebniho materialu
+        material_text: str = "Použitý nadstandardní spotřební materiál:"
+        self.utils.draw_txt_field(material_text, 440, 37, 289, 521, 70)
+        self.subsection.predavaci_protokol_sccz()
 
     def sconto_data(self, order) -> None:
         """Sconto pdf section with Order data"""
@@ -358,6 +348,22 @@ class Utility:
         self.cvs.setStrokeColor(self.cfg.border_clr)
         self.cvs.setFillColor(HexColor("#000000"))
         self.draw_text(text, x_txt, y_txt, font_size=self.cfg.font_size_small)
+
+    def draw_txt_field(
+        self, text: str, y_txt: int, x_rect: int, y_rect: int, width: int, height: int
+    ) -> None:
+        self.draw_text(text, y_offset=y_txt)
+        # --- border
+        self.cvs.setDash([])
+        self.cvs.roundRect(
+            x_rect,
+            y_rect,
+            width,
+            height,
+            radius=self.cfg.border_radius,
+            stroke=1,
+            fill=0,
+        )
 
     def place_image(
         self, img_name: str, img_width: float, img_height: float, x: float, y: float
