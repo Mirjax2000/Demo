@@ -492,7 +492,33 @@ class Section:
         # ---
 
     def default_data_section(self, order) -> None:
-        pass
+        x1: float = 73
+        x2: float = 442
+        # --- client info
+        self.utils.draw_txt(
+            order.client.name[:30],
+            x_offset=x1,
+            y_offset=120,
+            font="Roboto-Semibold",
+        )
+        self.utils.draw_txt(order.client.street, x_offset=x1, y_offset=134)
+        self.utils.draw_txt(order.client.format_psc(), x_offset=x1, y_offset=148)
+        self.utils.draw_txt(order.client.city, x_offset=x1, y_offset=162)
+        self.utils.draw_txt(order.client.format_phone(), x_offset=x1, y_offset=176)
+        self.utils.draw_txt(order.client.email[:31], x_offset=x1, y_offset=190)
+        # --- order info
+        self.utils.draw_txt(order.order_number.upper(), x_offset=x2, y_offset=162)
+        # --- prevod casu
+        local_dt = localtime(order.montage_termin)
+        self.utils.draw_txt(
+            f"{order.format_datetime(local_dt)}",
+            x_offset=x2,
+            y_offset=175,
+            font="Roboto-Semibold",
+        )
+        self.utils.draw_txt(
+            f"{order.team}", x_offset=x2, y_offset=190, font="Roboto-Semibold"
+        )
 
 
 class Utility:
