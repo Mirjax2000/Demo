@@ -585,9 +585,9 @@ class Utility:
         self.cvs.translate(self.cfg.width / 2, self.cfg.height / 2)
         self.cvs.rotate(45)
 
-        self.cvs.setFont("Roboto-Regular", 55)
+        self.cvs.setFont("Roboto-Regular", 56)
         self.cvs.setFillColorRGB(0.96, 0.96, 0.96)
-        self.cvs.drawCentredString(25, 25, text)
+        self.cvs.drawCentredString(10, 0, text)
 
         self.cvs.restoreState()
 
