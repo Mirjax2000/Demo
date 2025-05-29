@@ -770,7 +770,7 @@ class OrderProtocolView(LoginRequiredMixin, DetailView):
 
         context["team"] = order.team
         # --- navigace
-        context["active"] = "order_all"
+        context["active"] = "orders_all"
         return context
 
 

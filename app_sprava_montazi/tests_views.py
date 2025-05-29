@@ -1580,7 +1580,7 @@ class OrderPdfViewTestV1(TestCase):
             status=Status.ADVICED,
             team_type=TeamType.BY_ASSEMBLY_CREW,
         )
-        self.url = reverse("order_pdf", kwargs={"pk": self.order.pk})
+        self.url = reverse("protocol_pdf", kwargs={"pk": self.order.pk})
 
     def test_logged_in(self):
         """
