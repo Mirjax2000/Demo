@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
+from typing import Any
 from django.utils.timezone import localtime
 from django.conf import settings
 from reportlab.lib.colors import Color, HexColor
@@ -46,12 +47,13 @@ class CompanyInfo:
 class PdfGenerator:
     """PDF generator"""
 
-    def __init__(self, model, data_layer: bool = True) -> None:
+    def __init__(self, model, data_layer: bool = True, data_form=None) -> None:
         # --- config ---
         self.cfg: PdfConfig = PdfConfig()
         # --- atributes ---
         self.model = model
         self.data_layer = data_layer
+        self.data_form = data_form
         # --- pro reportlab
         Utility.font_register()
         self.buffer = BytesIO()
@@ -69,13 +71,13 @@ class PdfGenerator:
         if self.data_layer:
             self.utils.generate_barcode(self.model.order_number.upper(), 370, 670)
             self.section.sccz_data_section(self.model)  # --- data layer ---
+            cons.log(f"pdf: {self.model.order_number} sestaven")
         # ---
         self.cvs.showPage()
         self.cvs.save()
         # ---
         pdf = self.buffer.getvalue()
         self.buffer.close()
-        cons.log(f"pdf: {self.model.order_number} sestaven")
         return pdf
 
     def generate_pdf_general(self) -> bytes:
@@ -87,12 +89,12 @@ class PdfGenerator:
         if self.data_layer:
             self.utils.generate_barcode(self.model.order_number.upper(), 370, 670)
             self.section.default_data_section(self.model)  # --- data layer ---
+            cons.log(f"pdf: {self.model.order_number} sestaven")
         self.cvs.showPage()
         self.cvs.save()
         # ---
         pdf = self.buffer.getvalue()
         self.buffer.close()
-        cons.log(f"pdf: {self.model.order_number} sestaven")
         return pdf
 
 

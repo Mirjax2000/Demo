@@ -7,11 +7,13 @@ from django.urls import path
 from django.urls.conf import include
 from accounts.views import RegisterView
 from app_sprava_montazi.views import (
+    PdfView as Pdf,
     IndexView as Index,
     TeamsView as Teams,
     OrdersView as Orders,
     ClientUpdateView as CUV,
     OrderPdfView as OrderPdf,
+    SendMailView as SendMail,
     HomePageView as HomePage,
     DashboardView as Dashboard,
     CreatePageView as CreatePage,
@@ -64,7 +66,10 @@ app_sprava_montazi: list = [
     #
     # --- pdf ---
     path(f"order/pdf/{PK}/", OrderPdf.as_view(), name="order_pdf"),
-    path(f"order/pdf/{MANDANT}/", OrderPdf.as_view(), name="mandant_pdf"),
+    path(f"order/pdf/{MANDANT}/", Pdf.as_view(), name="mandant_pdf"),
+    #
+    # --- email ---
+    path("send/", SendMail.as_view(), name="send_mail"),
 ]
 
 app_accounts_urls: list = [

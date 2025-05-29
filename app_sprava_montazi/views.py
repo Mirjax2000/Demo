@@ -37,6 +37,7 @@ from .forms import (
 )
 from .utils import filter_orders, parse_order_filters, format_date
 from .protokols_OOP import PdfGenerator
+from .emails_OOP import CustomEmail
 
 # --- alias types
 PdfGeneratorFunc = Callable[[], bytes]
@@ -733,30 +734,41 @@ class ExportOrdersExcelView(LoginRequiredMixin, View):
         return response
 
 
+class PdfView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        mandant = self.kwargs.get("mandant", "default")
+
+        pdf_generator = PdfGenerator(mandant, False)
+        pdf_generators = {
+            "default": pdf_generator.generate_pdf_general,
+            "SCCZ": pdf_generator.generate_pdf_sccz,
+        }
+
+        pdf_func = pdf_generators.get(mandant, pdf_generators["default"])
+        pdf = pdf_func()
+
+        filename = f"Protokol_{mandant.upper()}.pdf"
+        response = HttpResponse(content=pdf, content_type="application/pdf")
+        response["Content-Disposition"] = f'inline; filename="{filename}"'
+
+        return response
+
+
 class OrderPdfView(LoginRequiredMixin, DetailView):
     model = Order
 
-    def get_object(self, queryset=None):
-        """Ziskej GET z URL"""
-        pk = self.kwargs.get("pk")
-        if pk:
-            return super().get_object(queryset)
-
-        mandant = self.kwargs.get("mandant", "default")
-        return Order(mandant=mandant, order_number=mandant)
-
     def render_to_response(self, context, **response_kwargs):
         order = context["object"]
-        mandant = self.kwargs.get("mandant") or order.mandant or "default"
+        data_form = None
         # ---
-        pdf_generator = PdfGenerator(order, order.order_number != mandant)
+        pdf_generator = PdfGenerator(order, True, data_form)
         # ---
         pdf_generators = {
             "default": pdf_generator.generate_pdf_general,
             "SCCZ": pdf_generator.generate_pdf_sccz,
         }
         # ---
-        pdf_func = pdf_generators.get(mandant, pdf_generators["default"])
+        pdf_func = pdf_generators.get(order.mandant, pdf_generators["default"])
         pdf = pdf_func()
         # ---
         filename = f"objednavka_{order.order_number.upper()}.pdf"
@@ -764,3 +776,12 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
         response["Content-Disposition"] = f'filename="{filename}"'
         # ---
         return response
+
+
+class SendMailView(LoginRequiredMixin, View):
+    def get(self, request):
+        email: CustomEmail = CustomEmail(
+            "Test_1", "Body", ["miroslav.viktorin@seznam.cz"], []
+        )
+        email.send_email()
+        return HttpResponse("Email byl odeslán.")
