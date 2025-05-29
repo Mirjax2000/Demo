@@ -522,6 +522,31 @@ class TeamModelTest(TestCase):
             price_per_km=12.30,
             notes="Toto je testovací poznámka.",
         )
+        self.team_2 = Team.objects.create(
+            name="Test Company 2",
+            city="Praha",
+            region="Střední Čechy",
+            phone="123456789",
+            active=True,
+            price_per_hour=150.50,
+            price_per_km=12.30,
+            notes="Toto je testovací poznámka.",
+        )
+
+    def test_missing_email_raises_validation_error(self):
+        team = Team(
+            name="No Email Team",
+            city="Praha",
+            region="Střední Čechy",
+            phone="123456789",
+            active=True,
+            price_per_hour=150.50,
+            price_per_km=12.30,
+            notes="Bez e-mailu",
+        )
+        with self.assertRaises(ValidationError) as context:
+            team.full_clean()
+        self.assertIn("email", context.exception.message_dict)
 
     def test_field_attributes(self):
         """Strukturalni test"""

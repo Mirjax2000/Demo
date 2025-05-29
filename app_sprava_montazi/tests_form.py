@@ -324,6 +324,20 @@ class TeamFormTest(TestCase):
         form = TeamForm(data=form_data)
         self.assertTrue(form.is_valid())
 
+    def test_invalid_email_team_form(self):
+        """Validni form"""
+        form_data = {
+            "name": "New Team",
+            "city": "Berlin",
+            "region": "Jihoceksy kraj",
+            "active": True,
+            "price_per_hour": 250.00,
+            "price_per_km": 8.00,
+            "notes": "Spolehlivy tym",
+        }
+        form = TeamForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
     def test_invalid_team_form_missing_required_fields(self):
         """Prazdnej form"""
         form_data: dict = {}
@@ -332,6 +346,7 @@ class TeamFormTest(TestCase):
         self.assertIn("name", form.errors)
         self.assertIn("city", form.errors)
         self.assertIn("phone", form.errors)
+        self.assertIn("email", form.errors)
 
     def test_invalid_team_form_long_name_city(self):
         """presah pres max-length"""

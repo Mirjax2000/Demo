@@ -67,7 +67,7 @@ class Team(Model):
     city = CharField(max_length=32, verbose_name="Město")
     region = CharField(max_length=32, blank=True, verbose_name="Region")
     phone = PhoneNumberField(max_length=17, verbose_name="Telefon")
-    email = EmailField(max_length=64, blank=True, verbose_name="E-mail")
+    email = EmailField(max_length=64, verbose_name="E-mail")
     active = BooleanField(default=True, verbose_name="Aktivní")
     price_per_hour = DecimalField(
         max_digits=6,
