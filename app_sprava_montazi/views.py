@@ -747,7 +747,7 @@ class PdfView(LoginRequiredMixin, View):
         pdf_func = pdf_generators.get(mandant, pdf_generators["default"])
         pdf = pdf_func()
 
-        filename = f"Protokol_{mandant.upper()}.pdf"
+        filename = f"Protokol_{mandant}.pdf"
         response = HttpResponse(content=pdf, content_type="application/pdf")
         response["Content-Disposition"] = f'inline; filename="{filename}"'
 
