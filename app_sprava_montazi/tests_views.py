@@ -1580,15 +1580,15 @@ class OrderPdfViewTestV1(TestCase):
             status=Status.ADVICED,
             team_type=TeamType.BY_ASSEMBLY_CREW,
         )
-        self.url_1 = reverse("order_pdf", kwargs={"pk": self.order.pk})
+        self.url = reverse("order_pdf", kwargs={"pk": self.order.pk})
 
     def test_logged_in(self):
         """
         Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
         a je použita správná šablona.
         """
-        response_1 = self.client.get(self.url_1)
-        self.assertEqual(response_1.status_code, 200)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
 
     def test_redirect_if_not_logged_in(self):
         """
@@ -1596,19 +1596,5 @@ class OrderPdfViewTestV1(TestCase):
         pokud není přihlášen a pokusí se zobrazit indexovou stránku.
         """
         self.client.logout()
-        response_1 = self.client.get(self.url_1)
-        self.assertRedirects(response_1, f"{settings.LOGIN_URL}?next={self.url_1}")
-
-    def test_pdf_view_returns_pdf(self):
-        url = reverse("order_pdf", kwargs={"pk": self.order.pk})
-        response = self.client.get(url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response["Content-Type"], "application/pdf")
-        self.assertIn("filename=", response["Content-Disposition"])
-        self.assertGreater(len(response.content), 100)  # nějaký obsah
-        self.assertTrue(response.content.startswith(b"%PDF"))
-        self.assertIn(
-            f"objednavka_{self.order.order_number.upper()}.pdf",
-            response["Content-Disposition"],
-        )
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")

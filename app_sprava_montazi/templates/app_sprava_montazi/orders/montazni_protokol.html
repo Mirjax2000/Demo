@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}
+    montazni protokol
+{% endblock title %}
+<!---->
+{% block content %}
+    <section>
+        <h2 class="mt-1">montazni protokol {{ order.order_number|upper }}</h2>
+        <hr>
+        <div class="u-flex-row-start">
+            {% include "app_sprava_montazi/teams/partials/team_detail_partial.html" %}
+            <!---->
+            {% if order.mandant == "SCCZ" %}
+                {% include "app_sprava_montazi/orders/partials/protocol_sccz.html" %}
+            {% else %}
+                {% include "app_sprava_montazi/orders/partials/protocol_default.html" %}
+            {% endif %}
+        </div>
+    </section>
+{% endblock content %}

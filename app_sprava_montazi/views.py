@@ -1,8 +1,8 @@
 """app_sprava_montazi View"""
 
-from typing import Any, Callable
+from typing import Any
 from datetime import datetime
-
+from django.utils.http import url_has_allowed_host_and_scheme
 from openpyxl import Workbook
 from rich.console import Console
 from django.conf import settings
@@ -465,6 +465,11 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
+        next_url = self.request.POST.get("next") or self.request.GET.get("next")
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url, allowed_hosts={self.request.get_host()}
+        ):
+            return next_url
         return reverse("team_detail", kwargs={"slug": self.object.slug})
 
 
@@ -752,6 +757,21 @@ class PdfView(LoginRequiredMixin, View):
         response["Content-Disposition"] = f'inline; filename="{filename}"'
 
         return response
+
+
+class OrderProtocolView(LoginRequiredMixin, DetailView):
+    model = Order
+    context_object_name = "order"
+    template_name = template_name = f"{APP_URL}/orders/montazni_protokol.html"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        order = context["object"]
+
+        context["team"] = order.team
+        # --- navigace
+        context["active"] = "order_all"
+        return context
 
 
 class OrderPdfView(LoginRequiredMixin, DetailView):

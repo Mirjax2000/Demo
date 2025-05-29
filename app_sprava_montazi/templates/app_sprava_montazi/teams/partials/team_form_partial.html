@@ -84,6 +84,7 @@
     {% endif %}
     {% if form.non_field_errors %}<div class="L-form__error">{{ form.non_field_errors }}</div>{% endif %}
     <!---->
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
     <div class="u-txt-right mt-3">
         <button type="submit" class="btn btn-primary">
             <i class="fa-solid fa-plus me-2"></i>Uložit tým

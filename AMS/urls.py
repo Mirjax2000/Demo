@@ -25,6 +25,7 @@ from app_sprava_montazi.views import (
     OrderUpdateView as OrderUpdate,
     ClientUpdateSecondaryView as CUS,
     OrderHistoryView as OrderHistory,
+    OrderProtocolView as OrderProtocol,
     ClientsOrdersView as ClientsOrders,
     ExportOrdersExcelView as ExportOrdersExcel,
 )
@@ -54,6 +55,7 @@ app_sprava_montazi: list = [
     path(f"order/client_orders/{SLUG}/", ClientsOrders.as_view(), name="client_orders"),
     path(f"order/history/{PK}/", OrderHistory.as_view(), name="order_history"),
     path("order/export", ExportOrdersExcel.as_view(), name="order_export"),
+    path(f"order/protocol/{PK}/", OrderProtocol.as_view(), name="protocol"),
     #
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),
@@ -65,8 +67,8 @@ app_sprava_montazi: list = [
     path(f"teams/update/{SLUG}/", TeamUpdate.as_view(), name="team_update"),
     #
     # --- pdf ---
-    path(f"order/pdf/{PK}/", OrderPdf.as_view(), name="order_pdf"),
-    path(f"order/pdf/{MANDANT}/", Pdf.as_view(), name="mandant_pdf"),
+    path(f"pdf/mandant/{MANDANT}/", Pdf.as_view(), name="mandant_pdf"),
+    path(f"pdf/order/{PK}/", OrderPdf.as_view(), name="protocol_pdf"),
     #
     # --- email ---
     path("send/", SendMail.as_view(), name="send_mail"),
