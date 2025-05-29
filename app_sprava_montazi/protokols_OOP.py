@@ -1,6 +1,7 @@
 """protokols to pdf"""
 
 from dataclasses import dataclass
+from abc import ABC, abstractmethod
 from io import BytesIO
 from pathlib import Path
 from typing import Any
@@ -44,62 +45,23 @@ class CompanyInfo:
     ref: str = "Zapsaná v OR: C 120048, Městský soud v Praze."
 
 
-class PdfGenerator:
+class PdfGenerator(ABC):
     """PDF generator"""
 
-    def __init__(self, model: None, data_layer: bool = True, data_form=None) -> None:
+    def __init__(self) -> None:
         # --- config ---
         self.cfg: PdfConfig = PdfConfig()
-        # --- atributes ---
-        self.model = model
-        self.data_layer = data_layer
-        self.data_form = data_form
         # --- pro reportlab
         Utility.font_register()
         self.buffer = BytesIO()
         self.cvs: Canvas = Canvas(self.buffer, pagesize=A4)
         # --- subclassy
-        self.utils: Utility = Utility(self.cfg, self.cvs)
+        self.utils: Utility = Utility(self.cfg, self.cvs, self.buffer)
         self.section: Section = Section(self)
 
-    def generate_pdf_sccz(self) -> bytes:
-        section, utils, cvs, buffer = self.section, self.utils, self.cvs, self.buffer
-        utils.watermark(CompanyInfo.name)  # --- vodoznak ---
-        section.header()  # --- header ---
-        section.sccz_section()  # --- body sconto ---
-        section.footer()  # --- footer ---
-        # ---
-        if self.data_layer and self.model is not None:
-            model, order_number = self.model, self.model.order_number
-            utils.generate_barcode(order_number.upper(), 370, 670)
-            section.sccz_data_section(model)  # --- data layer ---
-            cons.log(f"pdf: {order_number} sestaven")
-        # ---
-        cvs.showPage()
-        cvs.save()
-        # ---
-        pdf = buffer.getvalue()
-        buffer.close()
-        return pdf
-
-    def generate_pdf_general(self) -> bytes:
-        section, utils, cvs, buffer = self.section, self.utils, self.cvs, self.buffer
-        utils.watermark(CompanyInfo.name)  # --- vodoznak ---
-        section.header()  # --- header ---
-        section.default_section()  # --- body general ---
-        section.footer()  # --- footer ---
-        # ---
-        if self.data_layer and self.model is not None:
-            model, order_number = self.model, self.model.order_number
-            self.utils.generate_barcode(order_number.upper(), 370, 670)
-            self.section.default_data_section(model)  # --- data layer ---
-            cons.log(f"pdf: {order_number} sestaven")
-        cvs.showPage()
-        cvs.save()
-        # ---
-        pdf = buffer.getvalue()
-        buffer.close()
-        return pdf
+    @abstractmethod
+    def generate_pdf_protocol(self, model) -> bytes:
+        pass
 
 
 class Section:
@@ -233,7 +195,6 @@ class Section:
     def __init__(self, parent: PdfGenerator) -> None:
         # --- atributy
         self.parent: PdfGenerator = parent
-        self.model = self.parent.model
         # --- config
         self.cfg: PdfConfig = self.parent.cfg
         # --- reportlab
@@ -361,6 +322,7 @@ class Section:
         # ---
         header: str = "Vyúčtování provedených prací - daňový doklad"
         utils.draw_txt(header, y_offset=84, font="Roboto-Semibold", font_size=bigger)
+        # ---
         subsection.customer_info()
         subsection.faktura_info()
         subsection.team_info()
@@ -369,12 +331,8 @@ class Section:
             "MONTÁŽ NÁBYTKU", y_offset=220, font="Roboto-Semibold", font_size=bigger
         )
         utils.draw_txt("Minimální cena montáže:", x_offset=40, y_offset=240)
-        utils.draw_txt(
-            "454 Kč + doprava montérů",
-            x_offset=132,
-            y_offset=240,
-            font="Roboto-Semibold",
-        )
+        header_2: str = "454 Kč + doprava montérů"
+        utils.draw_txt(header_2, x_offset=132, y_offset=240, font="Roboto-Semibold")
         # --- zony ---
         utils.draw_txt("Zóna 1", x_offset=130, y_offset=260)
         utils.draw_txt("Zóna 2", x_offset=190, y_offset=260)
@@ -409,9 +367,8 @@ class Section:
         utils.draw_checkbox(text="", x=321, y=502, x_txt=0, y_txt=0)
         # --- nabytek ---
         utils.draw_txt_field("Nábytek", 322, 37, 427, 521, 50)
-        utils.draw_txt(
-            "Montáž: 12% z hodnoty nábytku bez DPH určeného k montáži", 40, 340
-        )
+        header_3: str = "Montáž: 12% z hodnoty nábytku bez DPH určeného k montáži"
+        utils.draw_txt(header_3, x_offset=40, y_offset=340)
         utils.draw_txt("Hodnota zboží", x_offset=295, y_offset=340)
         utils.draw_dotted_line(x1=355, y1=455, x2=425, y2=455)
         utils.draw_txt("=", x_offset=435, y_offset=340)
@@ -426,29 +383,28 @@ class Section:
         utils.draw_dotted_line(450, 435, 520, 435)
         utils.draw_txt("Kč", x_offset=525, y_offset=363)
         # ---
-        utils.draw_txt_field(
-            "Použitý nadstandardní spotřební materiál:", 392, 37, 357, 521, 50
-        )
+        header_4: str = "Použitý nadstandardní spotřební materiál:"
+        utils.draw_txt_field(header_4, 392, 37, 357, 521, 50)
         # --- predavaci protokol
         subsection.predavaci_protokol_default()
         # --- celkova cena
         utils.draw_txt("Celková cena: ", x_offset=390, y_offset=620)
-        utils.draw_txt("." * 37, x_offset=450, y_offset=625, font="Roboto-Light")
+        utils.draw_dotted_line(450, 178, 520, 178)
         utils.draw_txt("Kč", x_offset=525, y_offset=620)
         # ---
         utils.draw_txt("Záloha (platba na OD): ", x_offset=360, y_offset=642)
-        utils.draw_txt("." * 37, x_offset=450, y_offset=647, font="Roboto-Light")
+        utils.draw_dotted_line(450, 156, 520, 156)
         utils.draw_txt("Kč", x_offset=525, y_offset=642)
         # ---
         utils.draw_txt("Sazba DPH: ", x_offset=210, y_offset=664)
         utils.draw_checkbox("15%", 271, 135, 255, 664)
         utils.draw_checkbox("21%", 306, 135, 290, 664)
         utils.draw_checkbox("Přenesená daňová povinnost", 425, 135, 325, 664)
-        utils.draw_txt("." * 37, x_offset=450, y_offset=669, font="Roboto-Light")
+        utils.draw_dotted_line(450, 134, 520, 134)
         utils.draw_txt("Kč", x_offset=525, y_offset=664)
         # ---
         utils.draw_txt("K úhradě: ", x_offset=405, y_offset=686)
-        utils.draw_txt("." * 37, x_offset=450, y_offset=691, font="Roboto-Light")
+        utils.draw_dotted_line(450, 112, 520, 112)
         utils.draw_txt("Kč", x_offset=525, y_offset=686)
         # ---
 
@@ -458,10 +414,7 @@ class Section:
 
         # --- client info
         utils.draw_txt(
-            order.client.name[:30],
-            x_offset=x1,
-            y_offset=120,
-            font="Roboto-Semibold",
+            order.client.name[:30], x_offset=x1, y_offset=120, font="Roboto-Semibold"
         )
         utils.draw_txt(order.client.street, x_offset=x1, y_offset=134)
         utils.draw_txt(order.client.format_psc(), x_offset=x1, y_offset=148)
@@ -472,12 +425,9 @@ class Section:
         utils.draw_txt(order.order_number.upper(), x_offset=x2, y_offset=162)
         # --- prevod casu
         local_dt = localtime(order.montage_termin)
-        utils.draw_txt(
-            f"{order.format_datetime(local_dt)}",
-            x_offset=x2,
-            y_offset=175,
-            font="Roboto-Semibold",
-        )
+        time: str = order.format_datetime(local_dt)
+        utils.draw_txt(text=time, x_offset=x2, y_offset=175, font="Roboto-Semibold")
+        # ---
         utils.draw_txt(
             f"{order.team}", x_offset=x2, y_offset=190, font="Roboto-Semibold"
         )
@@ -486,9 +436,10 @@ class Section:
 class Utility:
     """Utilitky pro PDF generator"""
 
-    def __init__(self, cfg, cvs):
+    def __init__(self, cfg, cvs, buffer):
         self.cfg = cfg
         self.cvs = cvs
+        self.buffer = buffer
 
     FONT_DIR: Path = settings.BASE_DIR / "files"
     FONTS: dict[str, Path] = {
@@ -588,6 +539,58 @@ class Utility:
         barcode.drawOn(self.cvs, x, y)
         buffer.seek(0)
         return buffer
+
+    def finalize_pdf(self) -> bytes:
+        cvs, buffer = self.cvs, self.buffer
+        cvs.showPage()
+        cvs.save()
+        pdf_data = buffer.getvalue()
+        buffer.close()
+        return pdf_data
+
+
+class SCCZPdfGenerator(PdfGenerator):
+    """PDF generator for SCCZ type."""
+
+    def generate_pdf_protocol(self, model: Any = None) -> bytes:
+        section, utils = self.section, self.utils
+        # ---
+        utils.watermark(CompanyInfo.name)  # --- vodoznak ---
+        section.header()  # --- header ---
+        section.sccz_section()  # --- body sconto ---
+        section.footer()  # --- footer ---
+        # ---
+        if model is not None:
+            order_number = model.order_number
+            utils.generate_barcode(order_number.upper(), 370, 670)
+            section.sccz_data_section(model)  # --- data layer ---
+            cons.log(f"SCCZ pdf: {order_number} sestaven", style="blue")
+        else:
+            cons.log("SCCZ pdf: obecny Template sestaven", style="blue")
+        # ---
+        return utils.finalize_pdf()
+
+
+class DefaultPdfGenerator(PdfGenerator):
+    """PDF generator for Default."""
+
+    def generate_pdf_protocol(self, model: Any = None) -> bytes:
+        section, utils = self.section, self.utils
+        # ---
+        utils.watermark(CompanyInfo.name)  # --- vodoznak ---
+        section.header()  # --- header ---
+        section.default_section()  # --- body general ---
+        section.footer()  # --- footer ---
+        # ---
+        if model is not None:
+            order_number = model.order_number
+            utils.generate_barcode(order_number.upper(), 370, 670)
+            section.default_data_section(model)  # --- data layer ---
+            cons.log(f"General pdf: {order_number} sestaven", style="blue")
+        else:
+            cons.log("Default pdf: Obecny Template sestaven", style="blue")
+        # ---
+        return utils.finalize_pdf()
 
 
 if __name__ == "__main__":

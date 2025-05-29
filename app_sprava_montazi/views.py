@@ -36,12 +36,11 @@ from .forms import (
     CallLogFormSet,
 )
 from .utils import filter_orders, parse_order_filters, format_date
-from .protokols_OOP import PdfGenerator
+from .protokols_OOP import PdfGenerator, SCCZPdfGenerator, DefaultPdfGenerator
 from .emails_OOP import CustomEmail
 
 # --- alias types
-PdfGeneratorFunc = Callable[[], bytes]
-PdfGeneratorsDict = dict[str, PdfGeneratorFunc]
+
 
 cons: Console = Console()
 # ---
@@ -737,16 +736,17 @@ class ExportOrdersExcelView(LoginRequiredMixin, View):
 class PdfView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         mandant = self.kwargs.get("mandant", "default")
-
-        pdf_generator = PdfGenerator(mandant, False)
-        pdf_generators = {
-            "default": pdf_generator.generate_pdf_general,
-            "SCCZ": pdf_generator.generate_pdf_sccz,
+        # ---
+        pdf_generator_classes = {
+            "default": DefaultPdfGenerator,
+            "SCCZ": SCCZPdfGenerator,
         }
-
-        pdf_func = pdf_generators.get(mandant, pdf_generators["default"])
-        pdf = pdf_func()
-
+        # ---
+        generator_class = pdf_generator_classes.get(mandant, DefaultPdfGenerator)
+        generator_instance = generator_class()
+        # ---
+        pdf = generator_instance.generate_pdf_protocol(model=None)
+        # ---
         filename = f"Protokol_{mandant}.pdf"
         response = HttpResponse(content=pdf, content_type="application/pdf")
         response["Content-Disposition"] = f'inline; filename="{filename}"'
@@ -759,21 +759,20 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
 
     def render_to_response(self, context, **response_kwargs):
         order = context["object"]
-        data_form = None
         # ---
-        pdf_generator = PdfGenerator(order, True, data_form)
-        # ---
-        pdf_generators = {
-            "default": pdf_generator.generate_pdf_general,
-            "SCCZ": pdf_generator.generate_pdf_sccz,
+        pdf_generator_classes = {
+            "default": DefaultPdfGenerator,
+            "SCCZ": SCCZPdfGenerator,
         }
         # ---
-        pdf_func = pdf_generators.get(order.mandant, pdf_generators["default"])
-        pdf = pdf_func()
+        generator_class = pdf_generator_classes.get(order.mandant, DefaultPdfGenerator)
+        generator_instance = generator_class()
+        # ---
+        pdf = generator_instance.generate_pdf_protocol(model=order)
         # ---
         filename = f"objednavka_{order.order_number.upper()}.pdf"
         response = HttpResponse(content=pdf, content_type="application/pdf")
-        response["Content-Disposition"] = f'filename="{filename}"'
+        response["Content-Disposition"] = f'inline; filename="{filename}"'
         # ---
         return response
 
