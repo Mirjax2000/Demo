@@ -42,9 +42,21 @@ INSTALLED_APPS = [
     "django_dump_load_utf8",
     # --- restframework
     "rest_framework",
+    "rest_framework.authtoken",
     # --- model Phone
     "phonenumber_field",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+}
+
+
 PHONENUMBER_DEFAULT_REGION = "CZ"
 PHONENUMBER_DB_FORMAT = "E164"
 PHONENUMBER_DEFAULT_FORMAT = "E164"

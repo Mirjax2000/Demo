@@ -1,43 +1,55 @@
 """app_sprava_montazi View"""
 
-from typing import Any
 from datetime import datetime
-from django.utils.http import url_has_allowed_host_and_scheme
-from openpyxl import Workbook
-from rich.console import Console
+from typing import Any
+
 from django.conf import settings
-from django.db import transaction
 from django.contrib import messages
-from django.http import HttpResponse
-from django.urls import reverse_lazy, reverse
-from django.core.management import call_command
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.management import call_command
+from django.db import transaction
 from django.forms import BaseModelForm, inlineformset_factory
-from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import (
     CreateView,
     DetailView,
+    FormView,
     ListView,
     TemplateView,
     UpdateView,
     View,
-    FormView,
 )
-from .models import CallLog, Order, Status, Team, Article, Client, TeamType
+from openpyxl import Workbook
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rich.console import Console
 
-from .models import HistoricalArticle  # vim o tom je to abstract classa
-from .forms import (
-    TeamForm,
-    ArticleForm,
-    OrderForm,
-    ClientForm,
-    UploadForm,
-    DistribHub,
-    CallLogFormSet,
-)
-from .utils import filter_orders, parse_order_filters, format_date
-from .protokols_OOP import pdf_generator_classes, SCCZPdfGenerator, DefaultPdfGenerator
 from .emails_OOP import CustomEmail
+from .forms import (
+    ArticleForm,
+    CallLogFormSet,
+    ClientForm,
+    DistribHub,
+    OrderForm,
+    TeamForm,
+    UploadForm,
+)
+from .models import (
+    Article,
+    CallLog,
+    Client,
+    Order,
+    Status,
+    Team,
+    TeamType,
+)
+from .models import HistoricalArticle  # vim o tom je to abstract classa
+from .protokols_OOP import DefaultPdfGenerator, pdf_generator_classes
+from .utils import filter_orders, format_date, parse_order_filters
 
 # --- alias types
 
@@ -794,3 +806,13 @@ class SendMailView(LoginRequiredMixin, View):
         )
         email.send_email()
         return HttpResponse("Email byl odeslán.")
+
+
+class IncompleteCustomersView(APIView):
+    permission_classes = [IsAuthenticated]  # jen pro přihlášené uživatele
+
+    def get(self, request) -> Response:
+        qs = Order.objects.filter(client__incomplete=True)
+        seznam = [record.order_number.upper() for record in qs]
+        cons.log(f"seznam nekompletnich klientu: {seznam}")
+        return Response(seznam)

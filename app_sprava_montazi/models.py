@@ -3,7 +3,6 @@
 from rich.console import Console
 from simple_history.models import HistoricalRecords
 
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models

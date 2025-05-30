@@ -1,8 +1,10 @@
 asgiref==3.8.1
 astroid==3.3.9
 Brotli==1.1.0
+certifi==2025.4.26
 cffi==1.17.1
 chardet==5.2.0
+charset-normalizer==3.4.2
 click==8.1.8
 colorama==0.4.6
 coverage==7.8.0
@@ -14,10 +16,12 @@ django-dump-load-utf8==0.0.4
 django-phonenumber-field==8.1.0
 django-simple-history==3.8.0
 djangorestframework==3.16.0
+djangorestframework_simplejwt==5.5.0
 djlint==1.36.4
 EditorConfig==0.17.0
 et_xmlfile==2.0.0
 fonttools==4.58.0
+idna==3.10
 isort==6.0.1
 jsbeautifier==1.15.4
 json5==0.12.0
@@ -36,6 +40,7 @@ platformdirs==4.3.7
 pycparser==2.22
 pydyf==0.11.0
 Pygments==2.19.1
+PyJWT==2.9.0
 pylint==3.3.6
 pyphen==0.17.2
 python-dateutil==2.9.0.post0
@@ -44,6 +49,7 @@ pytz==2025.2
 PyYAML==6.0.2
 regex==2024.11.6
 reportlab==4.4.1
+requests==2.32.3
 rich==14.0.0
 ruff==0.11.4
 six==1.17.0
@@ -54,5 +60,6 @@ tomlkit==0.13.2
 tqdm==4.67.1
 typing_extensions==4.13.1
 tzdata==2025.2
+urllib3==2.4.0
 webencodings==0.5.1
 zopfli==0.2.3.post1

@@ -1,5 +1,6 @@
 """URLs config"""
 
+from rest_framework.authtoken.views import obtain_auth_token
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -27,6 +28,7 @@ from app_sprava_montazi.views import (
     OrderHistoryView as OrderHistory,
     OrderProtocolView as OrderProtocol,
     ClientsOrdersView as ClientsOrders,
+    IncompleteCustomersView as IncompleteCustomers,
     ExportOrdersExcelView as ExportOrdersExcel,
 )
 
@@ -79,7 +81,14 @@ app_accounts_urls: list = [
     path("accounts/", include("django.contrib.auth.urls")),
 ]
 
-api_urls: list = []
+api_urls: list = [
+    path(
+        "api/incomplete-customers/",
+        IncompleteCustomers.as_view(),
+        name="incomplete-customers",
+    ),
+    path("api-token-auth/", obtain_auth_token),
+]
 #
 urlpatterns += app_sprava_montazi
 urlpatterns += app_accounts_urls
