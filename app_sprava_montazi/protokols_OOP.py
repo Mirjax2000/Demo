@@ -593,5 +593,10 @@ class DefaultPdfGenerator(PdfGenerator):
         return utils.finalize_pdf()
 
 
+pdf_generator_classes = {
+    "default": DefaultPdfGenerator,
+    "SCCZ": SCCZPdfGenerator,
+}
+
 if __name__ == "__main__":
     ...

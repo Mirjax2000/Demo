@@ -36,7 +36,7 @@ from .forms import (
     CallLogFormSet,
 )
 from .utils import filter_orders, parse_order_filters, format_date
-from .protokols_OOP import PdfGenerator, SCCZPdfGenerator, DefaultPdfGenerator
+from .protokols_OOP import pdf_generator_classes, SCCZPdfGenerator, DefaultPdfGenerator
 from .emails_OOP import CustomEmail
 
 # --- alias types
@@ -742,11 +742,6 @@ class PdfView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         mandant = self.kwargs.get("mandant", "default")
         # ---
-        pdf_generator_classes = {
-            "default": DefaultPdfGenerator,
-            "SCCZ": SCCZPdfGenerator,
-        }
-        # ---
         generator_class = pdf_generator_classes.get(mandant, DefaultPdfGenerator)
         generator_instance = generator_class()
         # ---
@@ -779,11 +774,6 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
 
     def render_to_response(self, context, **response_kwargs):
         order = context["object"]
-        # ---
-        pdf_generator_classes = {
-            "default": DefaultPdfGenerator,
-            "SCCZ": SCCZPdfGenerator,
-        }
         # ---
         generator_class = pdf_generator_classes.get(order.mandant, DefaultPdfGenerator)
         generator_instance = generator_class()
