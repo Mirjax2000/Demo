@@ -24,6 +24,7 @@ from app_sprava_montazi.views import (
     OrderDetailView as OrderDetail,
     OrderCreateView as OrderCreate,
     OrderUpdateView as OrderUpdate,
+    GeneratePDFView as GeneratePDF,
     ClientUpdateSecondaryView as CUS,
     OrderHistoryView as OrderHistory,
     OrderProtocolView as OrderProtocol,
@@ -50,14 +51,15 @@ app_sprava_montazi: list = [
     # --- orders ---
     path("orders/", Orders.as_view(), name="orders"),
     path("order/create/", OrderCreate.as_view(), name="order_create"),
-    path(f"order/order_update/{PK}/", OrderUpdate.as_view(), name="order_update"),
-    path(f"order/client_update/{SLUG}/{OPK}/", CUV.as_view(), name="client_update"),
-    path(f"order/client_update_sec/{SLUG}/", CUS.as_view(), name="client_update_sec"),
-    path(f"order/detail/{PK}/", OrderDetail.as_view(), name="order_detail"),
-    path(f"order/client_orders/{SLUG}/", ClientsOrders.as_view(), name="client_orders"),
-    path(f"order/history/{PK}/", OrderHistory.as_view(), name="order_history"),
-    path("order/export", ExportOrdersExcel.as_view(), name="order_export"),
-    path(f"order/protocol/{PK}/", OrderProtocol.as_view(), name="protocol"),
+    path("order/export/", ExportOrdersExcel.as_view(), name="order_export"),
+    path(f"order/{SLUG}/{OPK}/client_update/", CUV.as_view(), name="client_update"),
+    path(f"order/{SLUG}/client_update_sec/", CUS.as_view(), name="client_update_sec"),
+    path(f"order/{SLUG}/client_orders/", ClientsOrders.as_view(), name="client_orders"),
+    path(f"order/{PK}/order_update/", OrderUpdate.as_view(), name="order_update"),
+    path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),
+    path(f"order/{PK}/history/", OrderHistory.as_view(), name="order_history"),
+    path(f"order/{PK}/protocol/", OrderProtocol.as_view(), name="protocol"),
+    path(f"order/{PK}/generate-pdf/", GeneratePDF.as_view(), name="generate_pdf"),
     #
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),
@@ -65,15 +67,15 @@ app_sprava_montazi: list = [
     # --- teams ---
     path("teams/", Teams.as_view(), name="teams"),
     path("teams/create/", TeamCreate.as_view(), name="team_create"),
-    path(f"teams/detail/{SLUG}/", TeamDetail.as_view(), name="team_detail"),
-    path(f"teams/update/{SLUG}/", TeamUpdate.as_view(), name="team_update"),
+    path(f"teams/{SLUG}/detail/", TeamDetail.as_view(), name="team_detail"),
+    path(f"teams/{SLUG}/update/", TeamUpdate.as_view(), name="team_update"),
     #
     # --- pdf ---
-    path(f"pdf/mandant/{MANDANT}/", Pdf.as_view(), name="mandant_pdf"),
-    path(f"pdf/order/{PK}/", OrderPdf.as_view(), name="protocol_pdf"),
+    path(f"pdf/{MANDANT}/mandant/", Pdf.as_view(), name="mandant_pdf"),
+    path(f"pdf/{PK}/order/", OrderPdf.as_view(), name="protocol_pdf"),
     #
     # --- email ---
-    path("send/", SendMail.as_view(), name="send_mail"),
+    path(f"send/{PK}/order/", SendMail.as_view(), name="send_mail"),
 ]
 
 app_accounts_urls: list = [

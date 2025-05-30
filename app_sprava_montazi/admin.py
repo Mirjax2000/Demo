@@ -1,6 +1,15 @@
 from django.contrib import admin
 
-from .models import Order, Team, DistribHub, Upload, Client, Article, CallLog
+from .models import (
+    Order,
+    Team,
+    DistribHub,
+    Upload,
+    Client,
+    Article,
+    CallLog,
+    OrderPDFStorage,
+)
 from simple_history.admin import SimpleHistoryAdmin
 
 
@@ -90,3 +99,4 @@ admin.site.register(Team, TeamHistoryAdmin)
 admin.site.register(Article, ArticleHistoryAdmin)
 admin.site.register(Upload, SimpleHistoryAdmin)  # Pro model bez vlastní Admin třídy
 admin.site.register(CallLog, CallLogHistoryAdmin)
+admin.site.register(OrderPDFStorage)

@@ -1,8 +1,11 @@
 """app_sprava_montazi View"""
 
-from datetime import datetime
 from typing import Any
+from datetime import datetime
+from openpyxl import Workbook
+from rich.console import Console
 
+# --- Django
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,44 +16,37 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.views.generic import (
-    CreateView,
-    DetailView,
-    FormView,
-    ListView,
-    TemplateView,
-    UpdateView,
-    View,
-)
-from openpyxl import Workbook
+from django.views.generic import CreateView, DetailView, FormView, ListView
+from django.views.generic import View, UpdateView, TemplateView
+
+# API rest ---
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rich.console import Console
 
-from .emails_OOP import CustomEmail
-from .forms import (
-    ArticleForm,
-    CallLogFormSet,
-    ClientForm,
-    DistribHub,
-    OrderForm,
-    TeamForm,
-    UploadForm,
-)
+# --- formulare
+from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
+from .forms import UploadForm, TeamForm, OrderForm
+
+# --- modely z DB
 from .models import (
     Article,
     CallLog,
     Client,
     Order,
+    OrderPDFStorage,
     Status,
     Team,
     TeamType,
 )
 from .models import HistoricalArticle  # vim o tom je to abstract classa
-from .protokols_OOP import DefaultPdfGenerator, pdf_generator_classes
+
+# pomocne funkce ---
 from .utils import filter_orders, format_date, parse_order_filters
 
+# 00P classes ---
+from .protokols_OOP import DefaultPdfGenerator, pdf_generator_classes
+from .emails_OOP import CustomEmail
 # --- alias types
 
 
@@ -180,7 +176,9 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form) -> HttpResponse:
-        messages.success(self.request, f"Zákazník: {self.object} aktualizován.")
+        messages.success(
+            self.request, f"Zákazník: <strong>{self.object}</strong> aktualizován."
+        )
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
@@ -202,7 +200,9 @@ class ClientUpdateSecondaryView(LoginRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form) -> HttpResponse:
-        messages.success(self.request, f"Zákazník: {self.object} aktualizován.")
+        messages.success(
+            self.request, f"Zákazník: <strong>{self.object}</strong> aktualizován."
+        )
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
@@ -346,7 +346,10 @@ class OrderUpdateView(LoginRequiredMixin, View):
                         f"Objednávka změnila status na {Status.ADVICED.label}",
                     )
                 else:
-                    messages.success(request, "Objednávka upravena.")
+                    messages.success(
+                        request,
+                        f"Objednávka <strong>{order.order_number}</strong> upravena.",
+                    )
                 return redirect(reverse("order_detail", kwargs={"pk": order.id}))
 
             except Exception as e:
@@ -455,7 +458,9 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form) -> HttpResponse:
         response = super().form_valid(form)
-        messages.success(self.request, f"Tým: {self.object} byl úspěšně vytvořen.")
+        messages.success(
+            self.request, f"Tým: <strong>{self.object}</strong> byl úspěšně vytvořen."
+        )
         return response
 
 
@@ -774,10 +779,14 @@ class OrderProtocolView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         order = context["object"]
-
-        context["team"] = order.team
-        # --- navigace
-        context["active"] = "orders_all"
+        pdf_exists = OrderPDFStorage.objects.filter(order=order.pk).exists()
+        context.update(
+            {
+                "pdf_exists": pdf_exists,
+                "team": order.team,
+                "active": "orders_all",
+            }
+        )
         return context
 
 
@@ -799,15 +808,47 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
         return response
 
 
+class GeneratePDFView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        pk = kwargs["pk"]
+        order = get_object_or_404(Order, pk=pk)
+
+        generator_class = pdf_generator_classes.get(order.mandant, DefaultPdfGenerator)
+        generator_instance = generator_class()
+        pdf_io = generator_instance.generate_pdf_protocol(model=order)
+        created = generator_instance.save_pdf_protocol_to_db(model=order, pdf=pdf_io)
+
+        messages.success(
+            request,
+            (
+            "PDF: <strong>{order}</strong> bylo úspěšně vygenerováno a uloženo."
+            ).format(order=str(order).upper()),
+        )
+        return redirect("protocol", pk=pk)
+
+
+# --- Emails ---
 class SendMailView(LoginRequiredMixin, View):
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
+        pk = kwargs["pk"]
+        order = get_object_or_404(Order, pk=pk)
+        body: str = f"Zasilame vam montazni protokol s datumem montaze: {order.format_datetime(order.montage_termin)}"
+
         email: CustomEmail = CustomEmail(
-            "Test_1", "Body", ["miroslav.viktorin@seznam.cz"], []
+            f"Montazni protokol: {order.order_number.upper()} ",
+            body,
+            ["miroslav.viktorin@seznam.cz"],
+            [],
         )
         email.send_email()
-        return HttpResponse("Email byl odeslán.")
+        messages.success(
+            request,
+            f"Email pro montazni tym: <strong>{order.team}</strong> na adresu <strong>{order.team.email}</strong> odeslan",
+        )
+        return redirect("protocol", pk=pk)
 
 
+# --- API ---
 class IncompleteCustomersView(APIView):
     permission_classes = [IsAuthenticated]  # jen pro přihlášené uživatele
 

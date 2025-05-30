@@ -1,7 +1,7 @@
 {% for message in messages %}
     <div class="C-messages alert alert-{{ message.tags }} alert-dismissible fade show"
          role="alert">
-        <strong>Message:</strong><span class="ms-2">{{ message }}</span>
+        <strong>Message:</strong><span class="ms-2">{{ message|safe }}</span>
         <button type="button"
                 class="btn-close"
                 data-bs-dismiss="alert"

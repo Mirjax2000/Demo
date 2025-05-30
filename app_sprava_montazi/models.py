@@ -325,6 +325,18 @@ class Upload(models.Model):
         ordering = ["-created"]
 
 
+class OrderPDFStorage(models.Model):
+    order = models.OneToOneField(
+        Order, on_delete=models.PROTECT, related_name="pdf", verbose_name="Objednávka"
+    )
+    file = models.FileField(upload_to="stored_pdfs/", verbose_name="PDF soubor")
+    created = models.DateTimeField(auto_now=True, verbose_name="Čas uložení")
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return f"PDF pro objednávku {self.order.order_number}"
+
+
 class CallLog(Model):
     client = ForeignKey(
         Client,

@@ -5,7 +5,9 @@ from abc import ABC, abstractmethod
 from io import BytesIO
 from pathlib import Path
 from typing import Any
+
 from django.utils.timezone import localtime
+from django.core.files.base import ContentFile
 from django.conf import settings
 from reportlab.lib.colors import Color, HexColor
 from reportlab.lib.pagesizes import A4
@@ -14,7 +16,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.graphics.barcode import code128
 from reportlab.pdfgen.canvas import Canvas
 from rich.console import Console
-from .models import Article
+from .models import Article, Order, OrderPDFStorage
 
 # ---
 cons: Console = Console()
@@ -62,6 +64,25 @@ class PdfGenerator(ABC):
     @abstractmethod
     def generate_pdf_protocol(self, model) -> bytes:
         pass
+
+    def save_pdf_protocol_to_db(self, model, pdf: bytes) -> bool:
+        pdf_content = ContentFile(pdf)
+        filename = f"order_{model.order_number}.pdf"
+        pdf_file, created = OrderPDFStorage.objects.get_or_create(order=model)
+
+        # Smaž předchozí soubor, pokud existuje
+        if pdf_file.file and pdf_file.file.name:
+            pdf_file.file.delete(save=False)
+
+        # Ulož nový PDF soubor
+        pdf_file.file.save(filename, pdf_content, save=True)
+
+        if created and settings.DEBUG:
+            cons.log(f"pdf: {pdf_file} ulozeno", style="blue bold")
+        elif settings.DEBUG:
+            cons.log(f"soubor byl nahrazen novym {pdf_file}")
+
+        return created
 
 
 class Section:
@@ -520,10 +541,10 @@ class Utility:
         cvs, cfg = self.cvs, self.cfg
         cvs.saveState()
         cvs.translate(cfg.width / 2, cfg.height / 2)
-        cvs.rotate(45)
+        cvs.rotate(55)
 
-        cvs.setFont("Roboto-Regular", 56)
-        cvs.setFillColorRGB(0.96, 0.96, 0.96)
+        cvs.setFont("Roboto-Regular", 61)
+        cvs.setFillColorRGB(0.95, 0.95, 0.95)
         cvs.drawCentredString(10, 0, text)
 
         cvs.restoreState()

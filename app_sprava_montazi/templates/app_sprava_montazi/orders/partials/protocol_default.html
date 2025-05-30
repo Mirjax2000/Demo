@@ -1,12 +1,17 @@
 <section class="L-form__fieldset">
     <div>
-        <a href="{% url 'protocol_pdf' order.pk %}"
+        <a href="{% url 'generate_pdf' order.pk %}"
            class="btn btn-primary d-block ms-5 me-5 mb-2">
-            <i class="fa-solid fa-eye me-2"></i>Náhled Protokolu</a>
+            <i class="fa-solid fa-file-pdf me-2"></i>Generuj Protokol</a>
     </div>
     <div>
-        <a href="{% url 'protocol_pdf' order.pk %}"
+        <a href="{% url 'generate_pdf' order.pk %}"
+           class="btn btn-primary d-block ms-5 me-5 mb-2">
+            <i class="fa-solid fa-eye me-2"></i>Zkontroluj Protokol</a>
+    </div>
+    <div>
+        <a href="{% url 'send_mail' %}"
            class="btn btn-primary d-block ms-5 me-5">
-            <i class="fa-solid fa-envelope me-2"></i>Odeslat Email</a>
+            <i class="fa-solid fa-envelope-circle-check me-2"></i>Odeslat Email</a>
     </div>
 </section>

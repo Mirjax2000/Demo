@@ -1,31 +1,38 @@
 """View tests"""
 
 import io
+import os
 from datetime import date, datetime
 from unittest.mock import patch
-from io import BytesIO
+import tempfile
+import shutil
 
 from django.conf import settings
-from openpyxl import load_workbook
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
+from django.contrib.messages import get_messages
+from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client as CL
 from django.test import TestCase
-from django.contrib.messages import get_messages
 from django.urls import reverse
 from django.utils import timezone
-from .utils import format_date, parse_order_filters, filter_orders
+from django.test import override_settings
+from openpyxl import load_workbook
+
 from app_sprava_montazi.models import (
     Article,
     Client,
     DistribHub,
     Order,
+    OrderPDFStorage,
     Status,
     Team,
     TeamType,
     Upload,
 )
+from .protokols_OOP import PdfGenerator, DefaultPdfGenerator, pdf_generator_classes
+
+from .utils import filter_orders, format_date, parse_order_filters
 
 
 class IndexViewTest(TestCase):
@@ -413,7 +420,7 @@ class ClientUpdateViewTest(TestCase):
         }
         response = self.client.post(self.url, data, follow=True)
         messages = [msg.message for msg in get_messages(response.wsgi_request)]
-        self.assertIn("Zákazník: Karel aktualizován.", messages)
+        self.assertIn("Zákazník: <strong>Karel</strong> aktualizován.", messages)
 
     def test_post_invalid_data_name(self):
         data = {
@@ -1598,3 +1605,79 @@ class OrderPdfViewTestV1(TestCase):
         self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+
+class GeneratePDFViewTest(TestCase):
+    def setUp(self):
+        self._temp_media = tempfile.mkdtemp()  # vytvoří dočasný adresář
+        self.override = override_settings(MEDIA_ROOT=self._temp_media)
+        self.override.enable()
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client.login(username="testuser", password="testpass")
+
+        self.hub = DistribHub.objects.create(code="626", city="Chrastany")
+        self.customer = Client.objects.create(name="Franta test", zip_code="12345")
+
+        self.order = Order.objects.create(
+            order_number="12345-R",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            evidence_termin=date(2024, 1, 1),
+            delivery_termin=date(2024, 4, 10),
+            montage_termin=timezone.make_aware(datetime(2024, 5, 20, 8, 0)),
+            status=Status.ADVICED,
+            team=Team.objects.create(
+                name="Test Company",
+                city="Praha",
+                region="Střední Čechy",
+                phone="123456789",
+                email="test@company.cz",
+                active=True,
+                price_per_hour=150.50,
+                price_per_km=12.30,
+                notes="Toto je testovací poznámka.",
+            ),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+        )
+        self.url = reverse("generate_pdf", kwargs={"pk": self.order.pk})
+
+    def test_logged_in_redirects(self):
+        """
+        Přihlášený uživatel je přesměrován po úspěšném vygenerování PDF.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response, reverse("protocol", kwargs={"pk": self.order.pk})
+        )
+
+    def test_redirect_if_not_logged_in(self):
+        """
+        Nepřihlášený uživatel je přesměrován na login stránku.
+        """
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def tearDown(self):
+        self.override.disable()
+
+        # Smaž všechny soubory v dočasném MEDIA_ROOT
+        shutil.rmtree(self._temp_media, ignore_errors=True)
+
+    def test_pdf_is_generated_and_savedV1(self):
+        response = self.client.get(self.url)
+        self.assertRedirects(
+            response, reverse("protocol", kwargs={"pk": self.order.pk})
+        )
+
+        pdf_entry = OrderPDFStorage.objects.get(order=self.order)
+        self.assertIsNotNone(pdf_entry.file)
+        self.assertTrue(pdf_entry.file.name.endswith(".pdf"))
+
+        self.assertTrue(default_storage.exists(pdf_entry.file.name))
+
+        with default_storage.open(pdf_entry.file.name, "rb") as f:
+            content = f.read()
+            self.assertGreater(len(content), 0)
