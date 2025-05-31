@@ -49,7 +49,6 @@ def format_date(date_obj):
 
 def update_customers(customer_details: list) -> None:
     """Update modelu Client"""
-    cons.log("ahoj spustim funcki")
     for item in customer_details:
         for order_number, data in item.items():
             try:
