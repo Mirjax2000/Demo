@@ -2,6 +2,11 @@
 
 from django.db.models import QuerySet
 from .models import Order
+from rich.console import Console
+from django.conf import settings
+from django.db import transaction
+
+cons: Console = Console()
 
 
 def parse_order_filters(request) -> dict:
@@ -40,3 +45,41 @@ def filter_orders(filters: dict) -> QuerySet:
 
 def format_date(date_obj):
     return date_obj.strftime("%Y-%m-%d") if date_obj else ""
+
+
+def update_customers(customer_details: list) -> None:
+    """Update modelu Client"""
+    cons.log("ahoj spustim funcki")
+    for item in customer_details:
+        for order_number, data in item.items():
+            try:
+                order = Order.objects.get(order_number=order_number.lower())
+                client = order.client
+                if client:
+                    cons.log(f"zacatek  {client.slug} ma incomplete{client.incomplete}")
+                    try:
+                        with transaction.atomic():
+                            client.name = data["name"]
+                            client.city = data.get("city", "")
+                            client.zip_code = data["zip_code"]
+                            client.street = data.get("street", "")
+                            client.phone = data.get("phone", "")
+                            client.email = data.get("email", "")
+                            client.save()
+                            if settings.DEBUG:
+                                cons.log(f"{client.slug}: byl aktualizovan.")
+                                cons.log(
+                                    f"konec: {client.slug} ma incomplete {client.incomplete}"
+                                )
+
+                    except Exception:
+                        if settings.DEBUG:
+                            cons.log(f"{client.slug}: Update selhal, nic se neulozilo.")
+
+                else:
+                    if settings.DEBUG:
+                        cons.log(f"{client}: nenalezen")
+
+            except Order.DoesNotExist:
+                if settings.DEBUG:
+                    cons.log(f"Order {order_number} not found")

@@ -1681,3 +1681,65 @@ class GeneratePDFViewTest(TestCase):
         with default_storage.open(pdf_entry.file.name, "rb") as f:
             content = f.read()
             self.assertGreater(len(content), 0)
+
+
+class CheckPDFProtocolViewTest(TestCase):
+    def setUp(self):
+        # Vytvoření dočasného MEDIA_ROOT
+        self._temp_media = tempfile.mkdtemp()
+        self.override = override_settings(MEDIA_ROOT=self._temp_media)
+        self.override.enable()
+
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client.login(username="testuser", password="testpass")
+
+        self.hub = DistribHub.objects.create(code="626", city="Chrastany")
+        self.customer = Client.objects.create(name="Franta test", zip_code="12345")
+
+        self.order = Order.objects.create(
+            order_number="12345-R",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            evidence_termin=date(2024, 1, 1),
+            delivery_termin=date(2024, 4, 10),
+            montage_termin=timezone.make_aware(datetime(2024, 5, 20, 8, 0)),
+            status=Status.ADVICED,
+            team=Team.objects.create(
+                name="Test Company",
+                city="Praha",
+                region="Střední Čechy",
+                phone="123456789",
+                email="test@company.cz",
+                active=True,
+                price_per_hour=150.50,
+                price_per_km=12.30,
+                notes="Toto je testovací poznámka.",
+            ),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+        )
+
+        self.test_pdf_content = b"%PDF-1.4 fake content for testing"
+        self.test_pdf_file = SimpleUploadedFile(
+            "test.pdf", self.test_pdf_content, content_type="application/pdf"
+        )
+
+        self.pdf_storage = OrderPDFStorage.objects.create(
+            order=self.order,
+            file=self.test_pdf_file,
+        )
+
+        self.url = reverse("check_pdf", kwargs={"pk": self.order.pk})
+
+    def tearDown(self):
+        # Úklid: odstraní vytvořený dočasný adresář a vypne override
+        shutil.rmtree(self._temp_media)
+        self.override.disable()
+
+    def test_check_pdf_protocol_view(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        content = b"".join(response.streaming_content)
+        self.assertIn(b"%PDF-1.4", content)

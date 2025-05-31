@@ -26,6 +26,7 @@ from app_sprava_montazi.views import (
     OrderUpdateView as OrderUpdate,
     GeneratePDFView as GeneratePDF,
     ClientUpdateSecondaryView as CUS,
+    CustomerUpdateView as CustomerUpdate,
     OrderHistoryView as OrderHistory,
     OrderProtocolView as OrderProtocol,
     ClientsOrdersView as ClientsOrders,
@@ -91,6 +92,7 @@ api_urls: list = [
         IncompleteCustomers.as_view(),
         name="incomplete-customers",
     ),
+    path("api/update-customers/", CustomerUpdate.as_view(), name="update-customers"),
     path("api-token-auth/", obtain_auth_token),
 ]
 #

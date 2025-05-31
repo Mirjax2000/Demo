@@ -23,10 +23,14 @@ from django.views.generic import View, UpdateView, TemplateView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 
 # --- formulare
 from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
 from .forms import UploadForm, TeamForm, OrderForm
+
+# --- serializer
+from .serializer import CustomerDetailSerializer, OrderCustomerUpdateSerializer
 
 # --- modely z DB
 from .models import (
@@ -42,7 +46,7 @@ from .models import (
 from .models import HistoricalArticle  # vim o tom je to abstract classa
 
 # pomocne funkce ---
-from .utils import filter_orders, format_date, parse_order_filters
+from .utils import filter_orders, format_date, parse_order_filters, update_customers
 
 # 00P classes ---
 from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
@@ -882,3 +886,17 @@ class IncompleteCustomersView(APIView):
         seznam = [record.order_number.upper() for record in qs]
         cons.log(f"seznam nekompletnich klientu: {seznam}")
         return Response(seznam)
+
+
+class CustomerUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = OrderCustomerUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            updates = serializer.validated_data["updates"]
+
+            update_customers(updates)
+
+            return Response({"message": "Zákazníci byli aktualizováni."})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
