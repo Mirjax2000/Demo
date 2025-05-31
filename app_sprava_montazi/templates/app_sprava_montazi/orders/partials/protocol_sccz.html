@@ -5,7 +5,7 @@
             <i class="fa-solid fa-file-pdf me-2"></i>Generuj Protokol</a>
     </div>
     <div>
-        <a href="{% url 'generate_pdf' order.pk %}"
+        <a href="{% url 'check_pdf' order.pk %}"
            class="btn {% if pdf_exists %}btn-primary{% else %}btn-secondary disabled{% endif %} d-block ms-5 me-5 mb-2">
             <i class="fa-solid fa-eye me-2"></i>Zkontroluj Protokol</a>
     </div>

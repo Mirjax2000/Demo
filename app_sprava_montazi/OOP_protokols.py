@@ -67,7 +67,7 @@ class PdfGenerator(ABC):
 
     def save_pdf_protocol_to_db(self, model, pdf: bytes) -> bool:
         pdf_content = ContentFile(pdf)
-        filename = f"order_{model.order_number}.pdf"
+        filename = f"order_{model.order_number.upper()}.pdf"
         pdf_file, created = OrderPDFStorage.objects.get_or_create(order=model)
 
         # Smaž předchozí soubor, pokud existuje

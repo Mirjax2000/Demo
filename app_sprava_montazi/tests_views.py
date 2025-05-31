@@ -30,7 +30,7 @@ from app_sprava_montazi.models import (
     TeamType,
     Upload,
 )
-from .protokols_OOP import PdfGenerator, DefaultPdfGenerator, pdf_generator_classes
+from .OOP_protokols import PdfGenerator, DefaultPdfGenerator, pdf_generator_classes
 
 from .utils import filter_orders, format_date, parse_order_filters
 

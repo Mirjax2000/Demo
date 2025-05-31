@@ -29,6 +29,7 @@ from app_sprava_montazi.views import (
     OrderHistoryView as OrderHistory,
     OrderProtocolView as OrderProtocol,
     ClientsOrdersView as ClientsOrders,
+    CheckPDFProtocolView as CheckPDFProtocol,
     IncompleteCustomersView as IncompleteCustomers,
     ExportOrdersExcelView as ExportOrdersExcel,
 )
@@ -73,6 +74,7 @@ app_sprava_montazi: list = [
     # --- pdf ---
     path(f"pdf/{MANDANT}/mandant/", Pdf.as_view(), name="mandant_pdf"),
     path(f"pdf/{PK}/order/", OrderPdf.as_view(), name="protocol_pdf"),
+    path(f"pdf/{PK}/check/", CheckPDFProtocol.as_view(), name="check_pdf"),
     #
     # --- email ---
     path(f"send/{PK}/order/", SendMail.as_view(), name="send_mail"),

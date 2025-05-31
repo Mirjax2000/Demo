@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.management import call_command
 from django.db import transaction
 from django.forms import BaseModelForm, inlineformset_factory
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -45,8 +45,8 @@ from .models import HistoricalArticle  # vim o tom je to abstract classa
 from .utils import filter_orders, format_date, parse_order_filters
 
 # 00P classes ---
-from .protokols_OOP import DefaultPdfGenerator, pdf_generator_classes
-from .emails_OOP import CustomEmail
+from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
+from .OOP_emails import CustomEmail
 # --- alias types
 
 
@@ -817,14 +817,39 @@ class GeneratePDFView(LoginRequiredMixin, View):
         generator_instance = generator_class()
         pdf_io = generator_instance.generate_pdf_protocol(model=order)
         created = generator_instance.save_pdf_protocol_to_db(model=order, pdf=pdf_io)
+        if created:
+            messages.success(
+                request,
+                (
+                    f"PDF: <strong>{str(order).upper()}</strong> "
+                    f"byl úspěšně vygenerován a uložen."
+                ),
+            )
+        else:
+            messages.success(
+                request,
+                (
+                    f"PDF: <strong>{str(order).upper()}</strong> "
+                    f"byl úspěšně vygenerováno,uložen a nahrazen."
+                ),
+            )
 
-        messages.success(
-            request,
-            (
-            "PDF: <strong>{order}</strong> bylo úspěšně vygenerováno a uloženo."
-            ).format(order=str(order).upper()),
-        )
         return redirect("protocol", pk=pk)
+
+
+class CheckPDFProtocolView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs) -> FileResponse:
+        pk = kwargs["pk"]
+        order = get_object_or_404(Order, pk=pk)
+        stored_pdf_info = get_object_or_404(OrderPDFStorage, order=order)
+        pdf_file = stored_pdf_info.file
+
+        return FileResponse(
+            pdf_file.open("rb"),
+            content_type="application/pdf",
+            as_attachment=False,
+            filename=pdf_file.name.split("/")[-1],
+        )
 
 
 # --- Emails ---
