@@ -55,7 +55,7 @@ def update_customers(customer_details: list) -> None:
                 order = Order.objects.get(order_number=order_number.lower())
                 client = order.client
                 if client:
-                    cons.log(f"zacatek  {client.slug} ma incomplete{client.incomplete}")
+                    cons.log(f"zacatek {client.slug} ma incomplete: {client.incomplete}")
                     try:
                         with transaction.atomic():
                             client.name = data["name"]
@@ -68,7 +68,7 @@ def update_customers(customer_details: list) -> None:
                             if settings.DEBUG:
                                 cons.log(f"{client.slug}: byl aktualizovan.")
                                 cons.log(
-                                    f"konec: {client.slug} ma incomplete {client.incomplete}"
+                                    f"konec: {client.slug} ma incomplete: {client.incomplete}"
                                 )
 
                     except Exception:

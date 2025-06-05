@@ -32,7 +32,7 @@ else:
     cons.log("Chyba:", response.status_code, style="red")
     cons.log(response.text, style="red")
     sys.exit()
-    
+
 if not data:
     cons.log("Žádná data k aktualizaci", style="yellow")
     sys.exit()
@@ -41,6 +41,16 @@ if not data:
 # --- 2. Funkce pro vyplnění dat (nahraď selenium daty později) ---
 def selenium_foo(data) -> dict[str, list[dict]]:
     order_list = [
+        {
+            "708809617500494793-O": {
+                "name": "Horakova Magda",
+                "zip_code": "51801",
+                "city": "Praha",
+                "street": "Konvalinkova 15",
+                "phone": "234234234",
+                "email": "horakova.magda@seznam.cz",
+            }
+        },
         {
             "709809544700494450-O": {
                 "name": "Zakordonets Kateryna",
@@ -82,7 +92,7 @@ def selenium_foo(data) -> dict[str, list[dict]]:
             }
         },
     ]
-
+    
     return {"updates": order_list}
 
 
