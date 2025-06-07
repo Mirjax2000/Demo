@@ -1,4 +1,6 @@
-<form method="post" class="d-block ms-5 me-5 mb-2">
+<form method="post"
+      class="d-block ms-5 me-5 mb-2"
+      action="{% url "generate_pdf" order.pk %}">
     {% csrf_token %}
     <div class="form-check">
         <input class="form-check-input"

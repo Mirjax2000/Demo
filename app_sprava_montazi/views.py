@@ -821,6 +821,7 @@ class GeneratePDFView(LoginRequiredMixin, View):
         generator_instance = generator_class()
         pdf_io = generator_instance.generate_pdf_protocol(model=order)
         created = generator_instance.save_pdf_protocol_to_db(model=order, pdf=pdf_io)
+        # ---
         if created:
             messages.success(
                 request,
@@ -839,6 +840,13 @@ class GeneratePDFView(LoginRequiredMixin, View):
             )
 
         return redirect("protocol", pk=pk)
+
+    def post(self, request, *args, **kwargs):
+        pk = kwargs["pk"]
+        order = get_object_or_404(Order, pk=pk)
+        zona = request.POST.get("zona")
+        km = request.POST.get("zona_km", 0)
+        return HttpResponse(f"Zóna: {zona}, km: {km}")
 
 
 class CheckPDFProtocolView(LoginRequiredMixin, View):
