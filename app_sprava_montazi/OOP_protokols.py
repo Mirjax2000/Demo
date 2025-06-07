@@ -479,38 +479,39 @@ class Section:
 
         # --- not sofa - percentage
         utils.draw_txt(
-            text=f"{goods_value:.2f}",
-            x_offset=355,
+            text=utils.x_offset_length(goods_value)[0],
+            x_offset=425 - utils.x_offset_length(goods_value)[1],
             y_offset=331,
             font="Roboto-Semibold",
             font_size=cfg.font_size_bigger,
         )
         utils.draw_txt(
-            text=f"{percentage_value:.2f}",
-            x_offset=450,
+            text=utils.x_offset_length(percentage_value)[0],
+            x_offset=520 - utils.x_offset_length(percentage_value)[1],
             y_offset=331,
             font="Roboto-Semibold",
             font_size=cfg.font_size_bigger,
         )
         # --- sofa
+
         utils.draw_txt(
-            text=f"{sofa_count}",
-            x_offset=400,
+            text=str(sofa_count),
+            x_offset=410,
             y_offset=354,
             font="Roboto-Semibold",
             font_size=cfg.font_size_bigger,
         )
         utils.draw_txt(
-            text=f"{price_with_sofa:.2f}",
-            x_offset=450,
+            text=utils.x_offset_length(price_with_sofa)[0],
+            x_offset=520 - utils.x_offset_length(price_with_sofa)[1],
             y_offset=354,
             font="Roboto-Semibold",
             font_size=cfg.font_size_bigger,
         )
         # --- total price
         utils.draw_txt(
-            text=f"{total_price:.2f}",
-            x_offset=450,
+            text=utils.x_offset_length(total_price)[0],
+            x_offset=520 - utils.x_offset_length(total_price)[1],
             y_offset=622,
             font="Roboto-Semibold",
             font_size=cfg.font_size_bigger,
@@ -631,6 +632,15 @@ class Utility:
         pdf_data = buffer.getvalue()
         buffer.close()
         return pdf_data
+
+    def x_offset_length(self, number: float) -> tuple[str, float]:
+        text: str = f"{number:.2f}"
+        width: float = pdfmetrics.stringWidth(
+            text,
+            "Roboto-Semibold",
+            self.cfg.font_size_bigger,
+        )
+        return (text, width)
 
 
 class SCCZPdfGenerator(PdfGenerator):
