@@ -1,4 +1,6 @@
 /* --- utils --- */
+@use "../utils/" as *;
+@use "../base/placeholders" as *;
 
 .u-txt-center {
   text-align: center !important;
@@ -110,4 +112,35 @@
 
 .u-flex-grow {
   flex-grow: 1;
+}
+
+.u-opacity-0 {
+  opacity: 0;
+}
+
+.u-opacity-1 {
+  opacity: 1;
+}
+
+.u-pdf-km {
+  display: flex;
+  justify-content: flex-start;
+
+  label {
+    width: auto;
+  }
+
+  input {
+    @extend %border-radius;
+    @extend %transition-theme;
+
+    width: 30%;
+    margin-left: 1em;
+    margin-top: -0.2em;
+    color: var(--txt-default);
+    background-color: var(--bck-table-head);
+    padding: 0.3em 0.5em;
+    border: 1px solid var(--border);
+    box-shadow: 1px 1px 1px #00000069;
+  }
 }

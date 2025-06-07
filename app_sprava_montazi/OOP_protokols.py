@@ -331,6 +331,7 @@ class Section:
         # --- articles
         articles = Article.objects.filter(order=order)
         offset: float = 346.0
+        # ---
         for article in articles:
             utils.draw_txt(article.name, y_offset=offset, font="Roboto-Semibold")
             if article.price:

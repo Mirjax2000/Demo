@@ -61,7 +61,7 @@ body.home {
 
 .L-detail__item, .L-table__nav-panel__form__group input,
 .L-table__nav-panel__form__group select, .L-form__group .L-form__input,
-.L-form__group input, .L-form__group .L-form__select, .L-form__group .L-form__date, .L-sidebar .L-active {
+.L-form__group input, .L-form__group .L-form__select, .L-form__group .L-form__date, .L-sidebar .L-active, .u-pdf-km input {
   border-radius: 5px;
 }
 
@@ -71,7 +71,7 @@ body.home {
 
 .P-body, .L-detail, .L-detail__item, .L-table, .L-table__nav-panel__form__group input,
 .L-table__nav-panel__form__group select, .L-table__table thead th, .L-table .dt-input, .L-form, .L-form__group .L-form__input,
-.L-form__group input, .L-form__group .L-form__select, .L-form__group .L-form__date, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn {
+.L-form__group input, .L-form__group .L-form__select, .L-form__group .L-form__date, .L-sidebar, .L-sidebar__header__link, .L-sidebar__nav-link, .L-sidebar__btn, .u-pdf-km input {
   transition: 0.5s background-color ease-in-out, 0.5s color ease-in-out;
 }
 
@@ -186,6 +186,32 @@ body.home {
 
 .u-flex-grow {
   flex-grow: 1;
+}
+
+.u-opacity-0 {
+  opacity: 0;
+}
+
+.u-opacity-1 {
+  opacity: 1;
+}
+
+.u-pdf-km {
+  display: flex;
+  justify-content: flex-start;
+}
+.u-pdf-km label {
+  width: auto;
+}
+.u-pdf-km input {
+  width: 30%;
+  margin-left: 1em;
+  margin-top: -0.2em;
+  color: var(--txt-default);
+  background-color: var(--bck-table-head);
+  padding: 0.3em 0.5em;
+  border: 1px solid var(--border);
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4117647059);
 }
 
 .L-sidebar {
