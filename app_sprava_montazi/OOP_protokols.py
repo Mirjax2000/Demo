@@ -333,7 +333,13 @@ class Section:
         offset: float = 346.0
         for article in articles:
             utils.draw_txt(article.name, y_offset=offset, font="Roboto-Semibold")
-            utils.draw_txt(f"cena: {article.price} Kč", x_offset=150, y_offset=offset)
+            if article.price:
+                utils.draw_txt(
+                    f"cena: {article.price} Kč", x_offset=150, y_offset=offset
+                )
+            else:
+                utils.draw_txt("cena: 0.00 Kč", x_offset=150, y_offset=offset)
+
             utils.draw_txt(f"qty: {article.quantity} ks", x_offset=240, y_offset=offset)
             utils.draw_txt(f"pzn.: {article.note[:74]}", x_offset=280, y_offset=offset)
             offset += 14
@@ -387,7 +393,7 @@ class Section:
         utils.draw_checkbox(text="", x=253, y=512, x_txt=0, y_txt=0)
         utils.draw_checkbox(text="", x=321, y=512, x_txt=0, y_txt=0)
         # --- nabytek ---
-        utils.draw_txt_field("Nábytek", 312, 37, 437, 521, 50)
+        utils.draw_txt_field("Montáž", 312, 37, 437, 521, 50)
         header_3: str = "Montáž: 12% z hodnoty nábytku bez DPH určeného k montáži"
         utils.draw_txt(header_3, x_offset=40, y_offset=330)
         utils.draw_txt("Hodnota zboží", x_offset=295, y_offset=330)
@@ -412,7 +418,9 @@ class Section:
         utils.draw_txt("Minimální cena montáže:", x_offset=40, y_offset=620)
         header_2: str = "454 Kč + doprava montérů"
         utils.draw_txt(header_2, x_offset=132, y_offset=620, font="Roboto-Semibold")
-        utils.draw_txt("Celková cena: ", x_offset=390, y_offset=620)
+        utils.draw_txt(
+            "Celková cena (cena montáže + doprava): ", x_offset=295, y_offset=620
+        )
         utils.draw_dotted_line(450, 178, 520, 178)
         utils.draw_txt("Kč", x_offset=525, y_offset=620)
         # ---
@@ -493,7 +501,6 @@ class Section:
             font_size=cfg.font_size_bigger,
         )
         # --- sofa
-
         utils.draw_txt(
             text=str(sofa_count),
             x_offset=410,
