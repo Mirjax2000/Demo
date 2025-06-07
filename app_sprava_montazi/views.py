@@ -846,7 +846,30 @@ class GeneratePDFView(LoginRequiredMixin, View):
         order = get_object_or_404(Order, pk=pk)
         zona = request.POST.get("zona")
         km = request.POST.get("zona_km", 0)
-        return HttpResponse(f"Zóna: {zona}, km: {km}")
+        data = [zona, km]
+
+        default_pdf_protocol = DefaultPdfGenerator()
+        pdf_io = default_pdf_protocol.generate_pdf_protocol(model=order, data=data)
+        created = default_pdf_protocol.save_pdf_protocol_to_db(model=order, pdf=pdf_io)
+        # ---
+        if created:
+            messages.success(
+                request,
+                (
+                    f"PDF: <strong>{str(order).upper()}</strong> "
+                    f"byl úspěšně vygenerován a uložen."
+                ),
+            )
+        else:
+            messages.success(
+                request,
+                (
+                    f"PDF: <strong>{str(order).upper()}</strong> "
+                    f"byl úspěšně vygenerováno,uložen a nahrazen."
+                ),
+            )
+
+        return redirect("protocol", pk=pk)
 
 
 class CheckPDFProtocolView(LoginRequiredMixin, View):
