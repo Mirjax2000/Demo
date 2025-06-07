@@ -299,6 +299,7 @@ class Article(Model):
         ],
         verbose_name="Množství",
     )
+    is_sofa = BooleanField(default=False, verbose_name="Sedačka?")
     note = TextField(blank=True, verbose_name="Popis")
     history = HistoricalRecords()
 
