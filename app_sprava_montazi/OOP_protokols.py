@@ -63,9 +63,11 @@ class PdfGenerator(ABC):
         # --- subclassy
         self.utils: Utility = Utility(self.cfg, self.cvs, self.buffer)
         self.section: Section = Section(self)
+        # --- data
+        self.data = None
 
     @abstractmethod
-    def generate_pdf_protocol(self, model, data: Any = None) -> bytes:
+    def generate_pdf_protocol(self, model) -> bytes:
         pass
 
     def save_pdf_protocol_to_db(self, model, pdf: bytes) -> bool:
@@ -654,7 +656,7 @@ class Utility:
 class SCCZPdfGenerator(PdfGenerator):
     """PDF generator for SCCZ type."""
 
-    def generate_pdf_protocol(self, model: Any = None, data: Any = None) -> bytes:
+    def generate_pdf_protocol(self, model: Any = None) -> bytes:
         section, utils = self.section, self.utils
         # ---
         utils.watermark(CompanyInfo.name)  # --- vodoznak ---
@@ -676,7 +678,7 @@ class SCCZPdfGenerator(PdfGenerator):
 class DefaultPdfGenerator(PdfGenerator):
     """PDF generator for Default."""
 
-    def generate_pdf_protocol(self, model: Any = None, data: Any = None) -> bytes:
+    def generate_pdf_protocol(self, model: Any = None) -> bytes:
         section, utils = self.section, self.utils
         # ---
         utils.watermark(CompanyInfo.name)  # --- vodoznak ---
@@ -684,13 +686,12 @@ class DefaultPdfGenerator(PdfGenerator):
         section.default_section()  # --- body general ---
         section.footer()  # --- footer ---
         # ---
+        cons.log(f"ahoj: {self.data}")
         if model is not None:
             order_number = model.order_number
-            shiping: list = data
             utils.generate_barcode(order_number.upper(), 370, 670)
             section.default_data_section(model)  # --- data layer ---
             cons.log(f"General pdf: {order_number} sestaven", style="blue")
-            cons.log(f"zona: {shiping[0]} pocet km: {shiping[1]}")
         else:
             cons.log("Default pdf: Obecny Template sestaven", style="blue")
         # ---

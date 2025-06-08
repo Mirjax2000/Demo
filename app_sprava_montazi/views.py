@@ -849,7 +849,8 @@ class GeneratePDFView(LoginRequiredMixin, View):
         data = [zona, km]
 
         default_pdf_protocol = DefaultPdfGenerator()
-        pdf_io = default_pdf_protocol.generate_pdf_protocol(model=order, data=data)
+        default_pdf_protocol.data = data
+        pdf_io = default_pdf_protocol.generate_pdf_protocol(model=order)
         created = default_pdf_protocol.save_pdf_protocol_to_db(model=order, pdf=pdf_io)
         # ---
         if created:
