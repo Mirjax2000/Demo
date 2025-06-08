@@ -49,7 +49,7 @@ def safe_click(driver, locator, max_attempts=120, sleep_time=0.1):
     raise Exception(
         f"safe_click: Nelze bezpečně kliknout na prvek {locator} po {max_attempts} pokusech.")
 
-TOKEN = "0f559f8a2f34b65b335e55bbd3a77e605fde1984"
+TOKEN = "c88580a252b9cb58d091af7603c27ed3609cb1d9"
 
 # Adresa API
 API_URL_GET = "http://localhost:8000/api/incomplete-customers/"
