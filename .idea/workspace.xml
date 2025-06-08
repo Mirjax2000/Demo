@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3be6afcc-5532-4452-b706-c104b9dc4acc" name="Changes" comment="Add CSV import functionality with UI and backend support&#10;&#10;Implemented a new feature to upload and process CSV files in the CreatePageView. This includes backend logic for file handling, data processing, error management, and a corresponding frontend interface for user interaction. Added tests to ensure proper form handling and error reporting.">
+      <change beforePath="$PROJECT_DIR$/app_sprava_montazi/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_sprava_montazi/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager" show_ignored="true" />
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="import/feature_2" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;DaliborZ-tech&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Mirjax2000/Demo.git&quot;,
+    &quot;accountId&quot;: &quot;f2904811-6666-4ac4-9117-2253655fbc63&quot;
+  }
+}</component>
+  <component name="PackageJsonUpdateNotifier">
+    <dismissed value="$PROJECT_DIR$/package.json" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="ProjectErrors" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="2wP6dqih8loMpcLAlUfqrmvikHQ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Django Server.Demo.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Notification.DisplayName-DoNotAsk-DatabaseConfigFileWatcher.found&quot;: &quot;Database connection parameters found&quot;,
+    &quot;Notification.DoNotAsk-DatabaseConfigFileWatcher.found&quot;: &quot;true&quot;,
+    &quot;Python.bot.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/projects/Rhenus/Demo&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.stylelint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.stylelint&quot;: &quot;D:\\projects\\Rhenus\\Demo\\node_modules\\stylelint&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\projects\Rhenus\Demo\files" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Demo" type="Python.DjangoServer" factoryName="Django server">
+      <module name="Demo" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="DJANGO_SETTINGS_MODULE" value="AMS.settings" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-PY-251.25410.159" />
+        <option value="bundled-python-sdk-e0ed3721d81e-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.25410.159" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3be6afcc-5532-4452-b706-c104b9dc4acc" name="Changes" comment="" />
+      <created>1745930952232</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1745930952232</updated>
+      <workItem from="1745930953356" duration="1181000" />
+      <workItem from="1745932835338" duration="4851000" />
+      <workItem from="1746349207285" duration="2174000" />
+      <workItem from="1746381811127" duration="2272000" />
+      <workItem from="1746430889022" duration="4773000" />
+      <workItem from="1746435714283" duration="11688000" />
+      <workItem from="1746460973560" duration="22000" />
+      <workItem from="1746538718661" duration="8855000" />
+      <workItem from="1746785669022" duration="1391000" />
+      <workItem from="1746788365214" duration="2861000" />
+      <workItem from="1747307553679" duration="5983000" />
+      <workItem from="1747399616313" duration="376000" />
+      <workItem from="1747400030514" duration="4396000" />
+      <workItem from="1747643624640" duration="9596000" />
+      <workItem from="1747724318821" duration="7440000" />
+      <workItem from="1747811382138" duration="1882000" />
+      <workItem from="1748273637051" duration="815000" />
+      <workItem from="1748421180513" duration="11147000" />
+      <workItem from="1748439981774" duration="71000" />
+      <workItem from="1749285338524" duration="3629000" />
+      <workItem from="1749309642686" duration="209000" />
+    </task>
+    <task id="LOCAL-00001" summary="Refactor forms to consolidate submission into main template&#10;&#10;Moved the form submission logic from partial templates to the main `order_update_order-form.html` template. This improves structure by centralizing the form handling, simplifying the partial templates, and ensuring a cleaner separation of concerns.">
+      <option name="closed" value="true" />
+      <created>1746434559169</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1746434559169</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Slepá větev">
+      <option name="closed" value="true" />
+      <created>1746435470442</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1746435470442</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Slepá větev">
+      <option name="closed" value="true" />
+      <created>1746435568189</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1746435568189</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Add CSV import functionality with UI and backend support&#10;&#10;Implemented a new feature to upload and process CSV files in the CreatePageView. This includes backend logic for file handling, data processing, error management, and a corresponding frontend interface for user interaction. Added tests to ensure proper form handling and error reporting.">
+      <option name="closed" value="true" />
+      <created>1746543636739</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1746543636739</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Refactor forms to consolidate submission into main template&#10;&#10;Moved the form submission logic from partial templates to the main `order_update_order-form.html` template. This improves structure by centralizing the form handling, simplifying the partial templates, and ensuring a cleaner separation of concerns." />
+    <MESSAGE value="Slepá větev" />
+    <MESSAGE value="Add CSV import functionality with UI and backend support&#10;&#10;Implemented a new feature to upload and process CSV files in the CreatePageView. This includes backend logic for file handling, data processing, error management, and a corresponding frontend interface for user interaction. Added tests to ensure proper form handling and error reporting." />
+    <option name="LAST_COMMIT_MESSAGE" value="Add CSV import functionality with UI and backend support&#10;&#10;Implemented a new feature to upload and process CSV files in the CreatePageView. This includes backend logic for file handling, data processing, error management, and a corresponding frontend interface for user interaction. Added tests to ensure proper form handling and error reporting." />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/Demo$bot.coverage" NAME="bot Coverage Results" MODIFIED="1749286992169" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
