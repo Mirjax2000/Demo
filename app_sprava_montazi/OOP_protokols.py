@@ -443,10 +443,10 @@ class Section:
         utils.draw_txt("Kč", x_offset=525, y_offset=686)
         # ---
 
-    def default_data_section(self, order) -> None:
+    def default_data_section(self, order, km) -> None:
         utils = self.utils
         x1, x2 = 73, 442
-        self.montage_calculation(order)
+        self.montage_calculation(order, km)
 
         # --- client info
         utils.draw_txt(
@@ -468,7 +468,7 @@ class Section:
             f"{order.team}", x_offset=x2, y_offset=190, font="Roboto-Semibold"
         )
 
-    def montage_calculation(self, order) -> None:
+    def montage_calculation(self, order, km) -> None:
         cfg, utils = self.cfg, self.utils
         articles = order.articles.all()
         goods_value: float = 0
@@ -698,10 +698,8 @@ class DefaultPdfGenerator(PdfGenerator):
         section.footer()  # --- footer ---
         # ---
         if model and self.data is not None and self.data is not None:
-            order_number = model.order_number
             data = self.data
-            zona, km = data["zona"], data["km"]
-            cons.log(zona, km)
+            zona, km, order_number = data["zona"], data["km"], model.order_number
             cross_position: dict[str, tuple[int, ...]] = {
                 "1": (133, 511, 14),
                 "2": (191, 511, 14),
@@ -710,7 +708,7 @@ class DefaultPdfGenerator(PdfGenerator):
             }
             # ---
             utils.generate_barcode(order_number.upper(), 370, 670)
-            section.default_data_section(model)  # --- data layer ---
+            section.default_data_section(model, km)  # --- data layer ---
             section.draw_cross(*cross_position[zona])
             cons.log(f"General pdf: {order_number} sestaven", style="blue")
         else:
