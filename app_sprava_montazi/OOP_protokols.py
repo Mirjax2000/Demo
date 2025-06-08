@@ -527,6 +527,10 @@ class Section:
             font_size=cfg.font_size_bigger,
         )
 
+    def draw_cross(self, *args) -> None:
+        utils = self.utils
+        utils.cross(*args)
+
 
 class Utility:
     """Utilitky pro PDF generator"""
@@ -548,6 +552,13 @@ class Utility:
         """Registrujeme fonty do pameti pro reportlab"""
         for name, path in Utility.FONTS.items():
             pdfmetrics.registerFont(TTFont(name, str(path)))
+
+    def cross(self, x: int, y: int, size: int) -> None:
+        cvs = self.cvs
+        cvs.setStrokeColor(HexColor("#000000"))
+        cvs.line(x, y, x + size, y + size)
+        cvs.line(x, y + size, x + size, y)
+        cvs.setStrokeColor(HexColor("#707070"))
 
     def draw_txt(
         self,
@@ -686,11 +697,21 @@ class DefaultPdfGenerator(PdfGenerator):
         section.default_section()  # --- body general ---
         section.footer()  # --- footer ---
         # ---
-        cons.log(f"ahoj: {self.data}")
-        if model is not None:
+        if model and self.data is not None and self.data is not None:
             order_number = model.order_number
+            data = self.data
+            zona, km = data["zona"], data["km"]
+            cons.log(zona, km)
+            cross_position: dict[str, tuple[int, ...]] = {
+                "1": (133, 511, 14),
+                "2": (191, 511, 14),
+                "3": (252, 511, 14),
+                "4": (320, 511, 14),
+            }
+            # ---
             utils.generate_barcode(order_number.upper(), 370, 670)
             section.default_data_section(model)  # --- data layer ---
+            section.draw_cross(*cross_position[zona])
             cons.log(f"General pdf: {order_number} sestaven", style="blue")
         else:
             cons.log("Default pdf: Obecny Template sestaven", style="blue")
