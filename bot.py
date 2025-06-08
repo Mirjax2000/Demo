@@ -40,7 +40,6 @@ def safe_click(driver, locator, max_attempts=120, sleep_time=0.1):
                          locator, attempts)
             time.sleep(sleep_time)
         except WebDriverException as wde:
-            # Pokud se objeví jiná chyba (např. Node with given id does not belong to the document)
             attempts += 1
             logging.info(
                 "WebDriverException při safe_click na locator %s, pokus %s: %s",
@@ -94,7 +93,7 @@ def selenium_foo(data) -> dict[str, list[dict]]:
         # Inicializace Edge WebDriveru
         try:
             options = webdriver.EdgeOptions()
-            # Můžete přidat další options, pokud je potřeba
+            # Můžeme přidat další options, pokud je potřeba
             # options.add_argument('--headless') # Pro běh bez viditelného okna prohlížeče
             # options.add_argument('--disable-gpu')
             driver = webdriver.Edge(options=options)
@@ -115,9 +114,9 @@ def selenium_foo(data) -> dict[str, list[dict]]:
             driver.get('https://tms.rhenus-hd.de/Login.aspx')
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'inputlogin')))
 
-            # Zadejte své uživatelské jméno a heslo zde - POUŽIJTE PLACEHOLDERY NEBO NAČÍTÁNÍ Z KONFIGURACE
-            username = 'Dalibor.Zalesak'  # <-- Zde vložte vaše uživatelské jméno nebo použijte bezpečnější metodu
-            password = 'Dalzal626Z'       # <-- Zde vložte vaše heslo nebo použijte bezpečnější metodu
+            # Zadejte své uživatelské jméno a heslo zde
+            username = 'Dalibor.Zalesak'
+            password = 'Dalzal626Z'
 
             if username == 'VASE_UZIVATELSKE_JMENO' or password == 'VASE_HESLO':
                 cons.log("Varování: Ve skriptu nejsou nastaveny přihlašovací údaje!", style="yellow")
@@ -148,7 +147,7 @@ def selenium_foo(data) -> dict[str, list[dict]]:
 
         for index, item in enumerate(data):
             try:
-                cislo_zasilky = str(item)  # Předpokládáme, že data z API jsou čísla zakázek
+                cislo_zasilky = str(item)
                 cislo_zasilky_s_hvezdickou = f"{cislo_zasilky}"
                 logging.info(f"Číslo zásilky: {cislo_zasilky}")
                 cons.log(f"Zpracovávám zakázku {index+1}/{total_items}: {cislo_zasilky}", style="blue")
