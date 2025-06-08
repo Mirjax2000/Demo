@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3be6afcc-5532-4452-b706-c104b9dc4acc" name="Changes" comment="Add CSV import functionality with UI and backend support&#10;&#10;Implemented a new feature to upload and process CSV files in the CreatePageView. This includes backend logic for file handling, data processing, error management, and a corresponding frontend interface for user interaction. Added tests to ensure proper form handling and error reporting.">
-      <change beforePath="$PROJECT_DIR$/app_sprava_montazi/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_sprava_montazi/migrations/0001_initial.py" afterDir="false" />
+    <list default="true" id="3be6afcc-5532-4452-b706-c104b9dc4acc" name="Changes" comment="Add IntelliJ IDEA configuration files and setup script&#10;&#10;This commit adds various IntelliJ IDEA configuration files, including project settings, inspection profiles, and module descriptors. Additionally, a batch script (`priprava.bat`) for setting up a virtual environment and installing dependencies is introduced. These changes support project initialization and development in an IntelliJ-based environment.">
+      <change afterPath="$PROJECT_DIR$/extrakce udaju zakazniku.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -27,7 +28,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="import/feature_2" />
+        <entry key="$PROJECT_DIR$" value="develop" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -59,31 +60,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Django Server.Demo.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Notification.DisplayName-DoNotAsk-DatabaseConfigFileWatcher.found&quot;: &quot;Database connection parameters found&quot;,
-    &quot;Notification.DoNotAsk-DatabaseConfigFileWatcher.found&quot;: &quot;true&quot;,
-    &quot;Python.bot.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/projects/Rhenus/Demo&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.stylelint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.stylelint&quot;: &quot;D:\\projects\\Rhenus\\Demo\\node_modules\\stylelint&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Django Server.Demo.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Notification.DisplayName-DoNotAsk-DatabaseConfigFileWatcher.found": "Database connection parameters found",
+    "Notification.DoNotAsk-DatabaseConfigFileWatcher.found": "true",
+    "Python.bot.executor": "Run",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "import/feature__4",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "D:/projects/Rhenus/Demo",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.stylelint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.stylelint": "D:\\projects\\Rhenus\\Demo\\node_modules\\stylelint",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\projects\Rhenus\Demo" />
       <recent name="D:\projects\Rhenus\Demo\files" />
     </key>
   </component>
@@ -150,6 +152,7 @@
       <workItem from="1748439981774" duration="71000" />
       <workItem from="1749285338524" duration="3629000" />
       <workItem from="1749309642686" duration="209000" />
+      <workItem from="1749397406212" duration="981000" />
     </task>
     <task id="LOCAL-00001" summary="Refactor forms to consolidate submission into main template&#10;&#10;Moved the form submission logic from partial templates to the main `order_update_order-form.html` template. This improves structure by centralizing the form handling, simplifying the partial templates, and ensuring a cleaner separation of concerns.">
       <option name="closed" value="true" />
@@ -183,7 +186,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746543636739</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Add IntelliJ IDEA configuration files and setup script&#10;&#10;This commit adds various IntelliJ IDEA configuration files, including project settings, inspection profiles, and module descriptors. Additionally, a batch script (`priprava.bat`) for setting up a virtual environment and installing dependencies is introduced. These changes support project initialization and development in an IntelliJ-based environment.">
+      <option name="closed" value="true" />
+      <created>1749397614679</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1749397614679</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -204,7 +215,8 @@
     <MESSAGE value="Refactor forms to consolidate submission into main template&#10;&#10;Moved the form submission logic from partial templates to the main `order_update_order-form.html` template. This improves structure by centralizing the form handling, simplifying the partial templates, and ensuring a cleaner separation of concerns." />
     <MESSAGE value="Slepá větev" />
     <MESSAGE value="Add CSV import functionality with UI and backend support&#10;&#10;Implemented a new feature to upload and process CSV files in the CreatePageView. This includes backend logic for file handling, data processing, error management, and a corresponding frontend interface for user interaction. Added tests to ensure proper form handling and error reporting." />
-    <option name="LAST_COMMIT_MESSAGE" value="Add CSV import functionality with UI and backend support&#10;&#10;Implemented a new feature to upload and process CSV files in the CreatePageView. This includes backend logic for file handling, data processing, error management, and a corresponding frontend interface for user interaction. Added tests to ensure proper form handling and error reporting." />
+    <MESSAGE value="Add IntelliJ IDEA configuration files and setup script&#10;&#10;This commit adds various IntelliJ IDEA configuration files, including project settings, inspection profiles, and module descriptors. Additionally, a batch script (`priprava.bat`) for setting up a virtual environment and installing dependencies is introduced. These changes support project initialization and development in an IntelliJ-based environment." />
+    <option name="LAST_COMMIT_MESSAGE" value="Add IntelliJ IDEA configuration files and setup script&#10;&#10;This commit adds various IntelliJ IDEA configuration files, including project settings, inspection profiles, and module descriptors. Additionally, a batch script (`priprava.bat`) for setting up a virtual environment and installing dependencies is introduced. These changes support project initialization and development in an IntelliJ-based environment." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Demo$bot.coverage" NAME="bot Coverage Results" MODIFIED="1749286992169" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
