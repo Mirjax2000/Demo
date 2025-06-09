@@ -40,6 +40,10 @@ class PdfConfig:
     montage_minimal_price: int = 454
     percentage_value: float = 12.00
     km_price: int = 20
+    zone_1: int = 313
+    zone_2: int = 379
+    zone_3: int = 470
+    zone_4: int = 470
 
 
 @dataclass(frozen=True)
@@ -444,10 +448,10 @@ class Section:
         utils.draw_txt("Kč", x_offset=525, y_offset=686)
         # ---
 
-    def default_data_section(self, order, km) -> None:
+    def default_data_section(self, order, km, zona) -> None:
         utils = self.utils
         x1, x2 = 73, 442
-        self.montage_calculation(order, km)
+        self.montage_calculation(order, km, zona)
 
         # --- client info
         utils.draw_txt(
@@ -469,14 +473,14 @@ class Section:
             f"{order.team}", x_offset=x2, y_offset=190, font="Roboto-Semibold"
         )
 
-    def montage_calculation(self, order, km: int = 0) -> None:
+    def montage_calculation(self, order, km: int, zona: int = 0) -> None:
         cfg, utils = self.cfg, self.utils
         articles = order.articles.all()
         goods_value: float = 0
         sofa_count: int = 0
         percentage_value: float = 0
-        shipping_price: float = 0
-
+        shipping_price: float = zona
+        cons.log(km, type(km), type(km))
 
         for article in articles:
             if not article.is_sofa:
@@ -489,41 +493,58 @@ class Section:
         percentage_value = goods_value / 100 * 12
         price: float = price_with_sofa + percentage_value
         total_price: float = price + shipping_price
+        #
+        # --- shiping price
+        if km > 0:
+            utils.draw_txt(
+                text=utils.x_offset_length_0f(km)[0],
+                x_offset=424 - utils.x_offset_length_0f(km)[1],
+                y_offset=283,
+                font="Roboto-Semibold",
+                font_size=cfg.font_size_bigger,
+            )
 
+        utils.draw_txt(
+            text=utils.x_offset_length_2f(shipping_price)[0],
+            x_offset=520 - utils.x_offset_length_2f(shipping_price)[1],
+            y_offset=283,
+            font="Roboto-Semibold",
+            font_size=cfg.font_size_bigger,
+        )
         # --- not sofa - percentage
         utils.draw_txt(
-            text=utils.x_offset_length(goods_value)[0],
-            x_offset=425 - utils.x_offset_length(goods_value)[1],
+            text=utils.x_offset_length_2f(goods_value)[0],
+            x_offset=425 - utils.x_offset_length_2f(goods_value)[1],
             y_offset=331,
             font="Roboto-Semibold",
             font_size=cfg.font_size_bigger,
         )
         utils.draw_txt(
-            text=utils.x_offset_length(percentage_value)[0],
-            x_offset=520 - utils.x_offset_length(percentage_value)[1],
+            text=utils.x_offset_length_2f(percentage_value)[0],
+            x_offset=520 - utils.x_offset_length_2f(percentage_value)[1],
             y_offset=331,
             font="Roboto-Semibold",
             font_size=cfg.font_size_bigger,
         )
         # --- sofa
         utils.draw_txt(
-            text=str(sofa_count),
-            x_offset=410,
+            text=utils.x_offset_length_0f(sofa_count)[0],
+            x_offset=420 - utils.x_offset_length_0f(sofa_count)[1],
             y_offset=354,
             font="Roboto-Semibold",
             font_size=cfg.font_size_bigger,
         )
         utils.draw_txt(
-            text=utils.x_offset_length(price_with_sofa)[0],
-            x_offset=520 - utils.x_offset_length(price_with_sofa)[1],
+            text=utils.x_offset_length_2f(price_with_sofa)[0],
+            x_offset=520 - utils.x_offset_length_2f(price_with_sofa)[1],
             y_offset=354,
             font="Roboto-Semibold",
             font_size=cfg.font_size_bigger,
         )
         # --- total price
         utils.draw_txt(
-            text=utils.x_offset_length(total_price)[0],
-            x_offset=520 - utils.x_offset_length(total_price)[1],
+            text=utils.x_offset_length_2f(total_price)[0],
+            x_offset=520 - utils.x_offset_length_2f(total_price)[1],
             y_offset=622,
             font="Roboto-Semibold",
             font_size=cfg.font_size_bigger,
@@ -656,8 +677,17 @@ class Utility:
         buffer.close()
         return pdf_data
 
-    def x_offset_length(self, number: float) -> tuple[str, float]:
+    def x_offset_length_2f(self, number: float) -> tuple[str, float]:
         text: str = f"{number:.2f}"
+        width: float = pdfmetrics.stringWidth(
+            text,
+            "Roboto-Semibold",
+            self.cfg.font_size_bigger,
+        )
+        return (text, width)
+
+    def x_offset_length_0f(self, number: int) -> tuple[str, float]:
+        text: str = str(number)
         width: float = pdfmetrics.stringWidth(
             text,
             "Roboto-Semibold",
@@ -692,25 +722,34 @@ class DefaultPdfGenerator(PdfGenerator):
     """PDF generator for Default."""
 
     def generate_pdf_protocol(self, model: Any = None) -> bytes:
-        section, utils = self.section, self.utils
+        section, utils, cfg = self.section, self.utils, self.cfg
         # ---
         utils.watermark(CompanyInfo.name)  # --- vodoznak ---
         section.header()  # --- header ---
         section.default_section()  # --- body general ---
         section.footer()  # --- footer ---
         # ---
-        if model and self.data is not None and self.data is not None:
+        if model and self.data:
             data = self.data
-            zona, km, order_number = data["zona"], data["km"], model.order_number
-            cross_position: dict[str, tuple[int, ...]] = {
-                "1": (133, 511, 14),
-                "2": (191, 511, 14),
-                "3": (252, 511, 14),
-                "4": (320, 511, 14),
+            zona, km, order_number = data["zona"], data.get("km", 0), model.order_number
+            cross_position: dict[int, tuple[int, ...]] = {
+                1: (133, 511, 14),
+                2: (191, 511, 14),
+                3: (252, 511, 14),
+                4: (320, 511, 14),
             }
+            shipping_zona: dict[int, int] = {
+                1: cfg.zone_1,
+                2: cfg.zone_2,
+                3: cfg.zone_3,
+                4: cfg.zone_4 + (km * cfg.km_price),
+            }
+
             # ---
             utils.generate_barcode(order_number.upper(), 370, 670)
-            section.default_data_section(model, km)  # --- data layer ---
+            section.default_data_section(
+                model, km, shipping_zona[zona]
+            )  # --- data layer ---
             section.draw_cross(*cross_position[zona])
             cons.log(f"General pdf: {order_number} sestaven", style="blue")
         else:

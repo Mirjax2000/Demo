@@ -844,8 +844,8 @@ class GeneratePDFView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         pk = kwargs["pk"]
         order = get_object_or_404(Order, pk=pk)
-        zona = request.POST.get("zona")
-        km = request.POST.get("zona_km", 0)
+        zona: int = int(request.POST.get("zona") or 0)
+        km: int = int(request.POST.get("zona_km") or 0)
         data: dict[str, int] = {"zona": zona, "km": km}
 
         default_pdf_protocol = DefaultPdfGenerator()
