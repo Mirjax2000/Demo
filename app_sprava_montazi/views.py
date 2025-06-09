@@ -893,15 +893,22 @@ class SendMailView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         pk = kwargs["pk"]
         order = get_object_or_404(Order, pk=pk)
-        body: str = f"Zasilame vam montazni protokol s datumem montaze: {order.format_datetime(order.montage_termin)}"
+        pdf_file = get_object_or_404(OrderPDFStorage, order=pk)
+        body: str = (
+            f"Zasíláme vám montážní protokol.\n\n"
+            f"Datum montáže: {order.format_datetime(order.montage_termin)}\n\n"
+            f"V případě dotazů nás kontaktujte.\n"
+            f"S pozdravem,\n"
+            f"Tým Rhenus"
+        )
 
         email: CustomEmail = CustomEmail(
             f"Montazni protokol: {order.order_number.upper()} ",
             body,
-            ["miroslav.viktorin@seznam.cz"],
-            [],
+            [order.team.email],
+            [pdf_file.file.path],
         )
-        email.send_email()
+        email.send_email_with_pdf()
         messages.success(
             request,
             f"Email pro montazni tym: <strong>{order.team}</strong> na adresu <strong>{order.team.email}</strong> odeslan",

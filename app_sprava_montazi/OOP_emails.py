@@ -5,7 +5,7 @@ class CustomEmail:
     def __init__(self, subject, body, to_email: list, attachments: list) -> None:
         self.subject = subject
         self.body = body
-        self.from_email = "tvuj.email@gmail.com"
+        self.from_email = "miroslav.viktorin@seznam.cz"
         self.to_email: list = to_email
         self.attachments: list = attachments
 
@@ -13,17 +13,18 @@ class CustomEmail:
         email = EmailMessage(self.subject, self.body, self.from_email, self.to_email)
         email.send()
 
-    # def send_email_with_pdf(self):
-    #     subject = self.subject
-    #     body = self.body
-    #     from_email = self.from_email
-    #     to_email = self.to_email
+    def send_email_with_pdf(self):
+        email = EmailMessage(self.subject, self.body, self.from_email, self.to_email)
 
-    #     email = EmailMessage(subject, body, from_email, to_email)
+        for file_path in self.attachments:
+            with open(file_path, "rb") as f:
+                email.attach(
+                    filename=file_path.split("/")[-1],
+                    content=f.read(),
+                    mimetype="application/pdf",
+                )
 
-    #     email.attach(self.attachments)
-
-    #     email.send()
+        email.send()
 
 
 if __name__ == "__main__":
