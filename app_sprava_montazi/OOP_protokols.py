@@ -201,23 +201,23 @@ class Section:
                 "Montáž byla provedena v určeném rozsahu, dle montážního návodu a nejsou třeba další zásahy montážního týmu",
                 y_offset=472,
             )
-            utils.draw_checkbox("ano", 490, 316, 475, 472)
-            utils.draw_checkbox("ne", 535, 316, 524, 472)
+            utils.draw_checkbox("ano", 490, 326, 475, 472)
+            utils.draw_checkbox("ne", 535, 326, 524, 472)
             # ---
             utils.draw_txt("Montáž nebyla provedena v určeném rozsahu", y_offset=489)
-            utils.draw_checkbox("ano", 490, 299, 475, 489)
-            utils.draw_checkbox("ne", 535, 299, 524, 489)
+            utils.draw_checkbox("ano", 490, 309, 475, 489)
+            utils.draw_checkbox("ne", 535, 309, 524, 489)
             # ---
             utils.draw_txt("Montáž s vrtáním a kotvením do zdi", y_offset=506)
-            utils.draw_checkbox("ano", 490, 282, 475, 506)
-            utils.draw_checkbox("ne", 535, 282, 524, 506)
+            utils.draw_checkbox("ano", 490, 292, 475, 506)
+            utils.draw_checkbox("ne", 535, 292, 524, 506)
             # ---
             utils.draw_txt(
                 "Montáž slouží k bytové potřebě ve smyslu § 48 zákona 235/2004 Sb. ve znění PP",
                 y_offset=523,
             )
-            utils.draw_checkbox("ano", 490, 265, 475, 523)
-            utils.draw_checkbox("ne", 535, 265, 524, 523)
+            utils.draw_checkbox("ano", 490, 275, 475, 523)
+            utils.draw_checkbox("ne", 535, 275, 524, 523)
             reklamace_txt = "Reklamace nebo poznámka k montáži:"
             utils.draw_txt_field(reklamace_txt, 540, 37, 200, 521, 60)
 
