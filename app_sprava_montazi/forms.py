@@ -149,7 +149,7 @@ class OrderForm(forms.ModelForm):
 class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
-        fields = ["name", "price", "quantity", "note"]
+        fields = ["name", "price", "quantity", "is_sofa", "note"]
         widgets = {
             "name": forms.TextInput(
                 attrs={"class": "L-form__input", "placeholder": "artikl..."}
@@ -166,7 +166,11 @@ class ArticleForm(forms.ModelForm):
                 attrs={
                     "class": "L-form__input",
                     "placeholder": "množství...",
-                    
+                }
+            ),
+            "is_sofa": forms.CheckboxInput(
+                attrs={
+                    "class": "form-check-input C-checkbox",
                 }
             ),
             "note": forms.Textarea(
@@ -420,3 +424,6 @@ class CallLogForm(forms.ModelForm):
 CallLogFormSet = inlineformset_factory(
     Client, CallLog, form=CallLogForm, extra=1, can_delete=True
 )
+
+
+

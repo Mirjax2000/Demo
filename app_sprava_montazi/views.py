@@ -821,6 +821,38 @@ class GeneratePDFView(LoginRequiredMixin, View):
         generator_instance = generator_class()
         pdf_io = generator_instance.generate_pdf_protocol(model=order)
         created = generator_instance.save_pdf_protocol_to_db(model=order, pdf=pdf_io)
+        # ---
+        if created:
+            messages.success(
+                request,
+                (
+                    f"PDF: <strong>{str(order).upper()}</strong> "
+                    f"byl úspěšně vygenerován a uložen."
+                ),
+            )
+        else:
+            messages.success(
+                request,
+                (
+                    f"PDF: <strong>{str(order).upper()}</strong> "
+                    f"byl úspěšně vygenerováno,uložen a nahrazen."
+                ),
+            )
+
+        return redirect("protocol", pk=pk)
+
+    def post(self, request, *args, **kwargs):
+        pk = kwargs["pk"]
+        order = get_object_or_404(Order, pk=pk)
+        zona: int = int(request.POST.get("zona") or 0)
+        km: int = int(request.POST.get("zona_km") or 0)
+        data: dict[str, int] = {"zona": zona, "km": km}
+
+        default_pdf_protocol = DefaultPdfGenerator()
+        default_pdf_protocol.data = data
+        pdf_io = default_pdf_protocol.generate_pdf_protocol(model=order)
+        created = default_pdf_protocol.save_pdf_protocol_to_db(model=order, pdf=pdf_io)
+        # ---
         if created:
             messages.success(
                 request,

@@ -1,0 +1,47 @@
+<form method="post"
+      class="d-block ms-5 me-5 mb-2"
+      action="{% url "generate_pdf" order.pk %}">
+    {% csrf_token %}
+    <div class="form-check">
+        <input class="form-check-input"
+               type="radio"
+               name="zona"
+               id="flexRadioDefault1"
+               value="1">
+        <label class="form-check-label" for="flexRadioDefault1">Zona 1</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input"
+               type="radio"
+               name="zona"
+               id="flexRadioDefault2"
+               value="2">
+        <label class="form-check-label" for="flexRadioDefault2">Zona 2</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input"
+               type="radio"
+               name="zona"
+               id="flexRadioDefault3"
+               value="3">
+        <label class="form-check-label" for="flexRadioDefault3">Zona 3</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input"
+               type="radio"
+               name="zona"
+               id="flexRadioDefault4"
+               value="4">
+        <label class="form-check-label" for="flexRadioDefault4">Nad zonu 3</label>
+    </div>
+    <div class="u-opacity-0 u-pdf-km" id="km-wrapper">
+        <label for="zona_km">Počet km (nad zónu 3):</label>
+        <input type="number" id="zona_km" name="zona_km" min=1 max=999>
+    </div>
+    <hr>
+    <button type="submit"
+            class="btn btn-primary w-100 disabled"
+            id="default_pdf_btn">
+        <i class="fa-solid fa-file-pdf me-2"></i>Generuj Protokol
+    </button>
+</form>

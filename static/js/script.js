@@ -15,6 +15,7 @@
 
     window.addEventListener("load", () => {
         syncHeight();
+        checkZona();
         P_main.classList.add("visible");
     });
     // messages
@@ -194,6 +195,39 @@
             right.style.maxHeight = left.offsetHeight + 50 + 'px';
         }
     }
+    // ---
+    function checkZona() {
+        const pdf_form_radios = document.querySelectorAll('input[name=zona]');
+        const kmWrapper = document.getElementById('km-wrapper');
+        const defaultPdfBtn = document.getElementById('default_pdf_btn');
+        const zonaKmInput = document.getElementById('zona_km'); // input, co chceme dělat required
+
+        if (!pdf_form_radios.length || !kmWrapper || !defaultPdfBtn || !zonaKmInput) {
+            return;
+        }
+
+        pdf_form_radios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (radio.value === '4' && radio.checked) {
+                    kmWrapper.classList.remove('u-opacity-0');
+                    kmWrapper.classList.add('u-opacity-1');
+                    zonaKmInput.required = true;
+                } else if (radio.checked) {
+                    kmWrapper.classList.remove('u-opacity-1');
+                    kmWrapper.classList.add('u-opacity-0');
+                    zonaKmInput.required = false;
+                }
+
+                const someChecked = Array.from(pdf_form_radios).some(r => r.checked);
+                if (someChecked) {
+                    defaultPdfBtn.classList.remove('disabled');
+                } else {
+                    defaultPdfBtn.classList.add('disabled');
+                }
+            });
+        });
+    }
+
 
 
 })();

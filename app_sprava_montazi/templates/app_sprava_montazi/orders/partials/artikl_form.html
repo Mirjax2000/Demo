@@ -32,6 +32,11 @@
                 {% if form.quantity.errors %}{{ form.quantity.errors }}{% endif %}
             </div>
         </div>
+        <div>
+            <label class="form-check-label" for="{{ form.is_sofa.id_for_label }}">{{ form.is_sofa.label }}</label>
+            {{ form.is_sofa }}
+            {% for error in form.is_sofa.errors %}<span class="text-danger">{{ error }}</span>{% endfor %}
+        </div>
     </div>
     <div class="L-form__group">
         {{ form.note.label_tag }}

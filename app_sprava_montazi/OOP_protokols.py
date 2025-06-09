@@ -36,6 +36,14 @@ class PdfConfig:
     border_radius: int = 3
     border_clr: Color = HexColor("#ABABAB")
     fill_clr: Color = HexColor("#EAEAEA")
+    montage_sofa_price: int = 495
+    montage_minimal_price: int = 454
+    percentage_value: float = 12.00
+    km_price: int = 20
+    zone_1: int = 313
+    zone_2: int = 379
+    zone_3: int = 470
+    zone_4: int = 470
 
 
 @dataclass(frozen=True)
@@ -60,6 +68,8 @@ class PdfGenerator(ABC):
         # --- subclassy
         self.utils: Utility = Utility(self.cfg, self.cvs, self.buffer)
         self.section: Section = Section(self)
+        # --- data
+        self.data = None
 
     @abstractmethod
     def generate_pdf_protocol(self, model) -> bytes:
@@ -182,34 +192,34 @@ class Section:
         def predavaci_protokol_default(self) -> None:
             """Predavaci protokol subsection"""
             utils = self.utils
-            utils.draw_txt("Čas začátku montáže:", y_offset=465)
-            utils.draw_dotted_line(125, 333, 185, 333)
-            utils.draw_txt("Čas dokončení montáže:", x_offset=200, y_offset=465)
-            utils.draw_dotted_line(295, 333, 355, 333)
+            utils.draw_txt("Čas začátku montáže:", y_offset=455)
+            utils.draw_dotted_line(125, 343, 185, 343)
+            utils.draw_txt("Čas dokončení montáže:", x_offset=200, y_offset=455)
+            utils.draw_dotted_line(295, 343, 355, 343)
             # ---
             utils.draw_txt(
                 "Montáž byla provedena v určeném rozsahu, dle montážního návodu a nejsou třeba další zásahy montážního týmu",
-                y_offset=482,
+                y_offset=472,
             )
-            utils.draw_checkbox("ano", 490, 316, 475, 482)
-            utils.draw_checkbox("ne", 535, 316, 524, 482)
+            utils.draw_checkbox("ano", 490, 316, 475, 472)
+            utils.draw_checkbox("ne", 535, 316, 524, 472)
             # ---
-            utils.draw_txt("Montáž nebyla provedena v určeném rozsahu", y_offset=499)
-            utils.draw_checkbox("ano", 490, 299, 475, 499)
-            utils.draw_checkbox("ne", 535, 299, 524, 499)
+            utils.draw_txt("Montáž nebyla provedena v určeném rozsahu", y_offset=489)
+            utils.draw_checkbox("ano", 490, 299, 475, 489)
+            utils.draw_checkbox("ne", 535, 299, 524, 489)
             # ---
-            utils.draw_txt("Montáž s vrtáním a kotvením do zdi", y_offset=516)
-            utils.draw_checkbox("ano", 490, 282, 475, 516)
-            utils.draw_checkbox("ne", 535, 282, 524, 516)
+            utils.draw_txt("Montáž s vrtáním a kotvením do zdi", y_offset=506)
+            utils.draw_checkbox("ano", 490, 282, 475, 506)
+            utils.draw_checkbox("ne", 535, 282, 524, 506)
             # ---
             utils.draw_txt(
                 "Montáž slouží k bytové potřebě ve smyslu § 48 zákona 235/2004 Sb. ve znění PP",
-                y_offset=533,
+                y_offset=523,
             )
-            utils.draw_checkbox("ano", 490, 265, 475, 533)
-            utils.draw_checkbox("ne", 535, 265, 524, 533)
+            utils.draw_checkbox("ano", 490, 265, 475, 523)
+            utils.draw_checkbox("ne", 535, 265, 524, 523)
             reklamace_txt = "Reklamace nebo poznámka k montáži:"
-            utils.draw_txt_field(reklamace_txt, 550, 37, 200, 521, 50)
+            utils.draw_txt_field(reklamace_txt, 540, 37, 200, 521, 60)
 
         # ---
 
@@ -328,9 +338,16 @@ class Section:
         # --- articles
         articles = Article.objects.filter(order=order)
         offset: float = 346.0
+        # ---
         for article in articles:
             utils.draw_txt(article.name, y_offset=offset, font="Roboto-Semibold")
-            utils.draw_txt(f"cena: {article.price} Kč", x_offset=150, y_offset=offset)
+            if article.price:
+                utils.draw_txt(
+                    f"cena: {article.price} Kč", x_offset=150, y_offset=offset
+                )
+            else:
+                utils.draw_txt("cena: 0.00 Kč", x_offset=150, y_offset=offset)
+
             utils.draw_txt(f"qty: {article.quantity} ks", x_offset=240, y_offset=offset)
             utils.draw_txt(f"pzn.: {article.note[:74]}", x_offset=280, y_offset=offset)
             offset += 14
@@ -341,7 +358,7 @@ class Section:
         bigger = self.cfg.font_size_bigger
         small = self.cfg.font_size_small
         # ---
-        header: str = "Vyúčtování provedených prací - daňový doklad"
+        header: str = "Vyúčtování provedených prací:"
         utils.draw_txt(header, y_offset=84, font="Roboto-Semibold", font_size=bigger)
         # ---
         subsection.customer_info()
@@ -351,65 +368,67 @@ class Section:
         utils.draw_txt(
             "MONTÁŽ NÁBYTKU", y_offset=220, font="Roboto-Semibold", font_size=bigger
         )
-        utils.draw_txt("Minimální cena montáže:", x_offset=40, y_offset=240)
-        header_2: str = "454 Kč + doprava montérů"
-        utils.draw_txt(header_2, x_offset=132, y_offset=240, font="Roboto-Semibold")
         # --- zony ---
-        utils.draw_txt("Zóna 1", x_offset=130, y_offset=260)
-        utils.draw_txt("Zóna 2", x_offset=190, y_offset=260)
-        utils.draw_txt("Zóna 3", x_offset=250, y_offset=260)
-        utils.draw_txt("Nad Zónou 3", x_offset=310, y_offset=260)
+        utils.draw_txt("Zóna 1", x_offset=130, y_offset=250)
+        utils.draw_txt("Zóna 2", x_offset=190, y_offset=250)
+        utils.draw_txt("Zóna 3", x_offset=250, y_offset=250)
+        utils.draw_txt("Nad Zónou 3", x_offset=310, y_offset=250)
         utils.draw_txt(
-            "do 10 km", x_offset=126, y_offset=268, font="Roboto-Light", font_size=small
+            "do 10 km", x_offset=126, y_offset=258, font="Roboto-Light", font_size=small
         )
         utils.draw_txt(
-            "do 20 km", x_offset=186, y_offset=268, font="Roboto-Light", font_size=small
+            "do 20 km", x_offset=186, y_offset=258, font="Roboto-Light", font_size=small
         )
         utils.draw_txt(
-            "do 50 km", x_offset=246, y_offset=268, font="Roboto-Light", font_size=small
+            "do 50 km", x_offset=246, y_offset=258, font="Roboto-Light", font_size=small
         )
         # --- monteri ---
-        utils.draw_txt_field("Doprava montérů", 268, 37, 495, 521, 35)
-        utils.draw_txt("313,- Kč", x_offset=126, y_offset=283, font="Roboto-Semibold")
-        utils.draw_txt("379,- Kč", x_offset=185, y_offset=283, font="Roboto-Semibold")
-        utils.draw_txt("470,- Kč", x_offset=246, y_offset=283, font="Roboto-Semibold")
+        utils.draw_txt_field("Doprava montérů", 258, 37, 505, 521, 35)
+        utils.draw_txt("313,- Kč", x_offset=126, y_offset=273, font="Roboto-Semibold")
+        utils.draw_txt("379,- Kč", x_offset=185, y_offset=273, font="Roboto-Semibold")
+        utils.draw_txt("470,- Kč", x_offset=246, y_offset=273, font="Roboto-Semibold")
         utils.draw_txt(
-            "470 Kč + 20 Kč/km", x_offset=298, y_offset=283, font="Roboto-Semibold"
+            "470 Kč + 20 Kč/km", x_offset=298, y_offset=273, font="Roboto-Semibold"
         )
-        utils.draw_txt("km", x_offset=382, y_offset=290)
-        utils.draw_dotted_line(x1=397, y1=507, x2=425, y2=507)
-        utils.draw_txt("=", x_offset=435, y_offset=290)
-        utils.draw_dotted_line(x1=450, y1=507, x2=520, y2=507)
-        utils.draw_txt("Kč", x_offset=525, y_offset=290)
+        utils.draw_txt("km", x_offset=382, y_offset=280)
+        utils.draw_dotted_line(x1=397, y1=518, x2=425, y2=518)
+        utils.draw_txt("=", x_offset=435, y_offset=280)
+        utils.draw_dotted_line(x1=450, y1=518, x2=520, y2=518)
+        utils.draw_txt("Kč", x_offset=525, y_offset=280)
         # --- check boxy ---
-        utils.draw_checkbox(text="", x=134, y=502, x_txt=0, y_txt=0)
-        utils.draw_checkbox(text="", x=192, y=502, x_txt=0, y_txt=0)
-        utils.draw_checkbox(text="", x=253, y=502, x_txt=0, y_txt=0)
-        utils.draw_checkbox(text="", x=321, y=502, x_txt=0, y_txt=0)
+        utils.draw_checkbox(text="", x=134, y=512, x_txt=0, y_txt=0)
+        utils.draw_checkbox(text="", x=192, y=512, x_txt=0, y_txt=0)
+        utils.draw_checkbox(text="", x=253, y=512, x_txt=0, y_txt=0)
+        utils.draw_checkbox(text="", x=321, y=512, x_txt=0, y_txt=0)
         # --- nabytek ---
-        utils.draw_txt_field("Nábytek", 322, 37, 427, 521, 50)
+        utils.draw_txt_field("Montáž", 312, 37, 437, 521, 50)
         header_3: str = "Montáž: 12% z hodnoty nábytku bez DPH určeného k montáži"
-        utils.draw_txt(header_3, x_offset=40, y_offset=340)
-        utils.draw_txt("Hodnota zboží", x_offset=295, y_offset=340)
-        utils.draw_dotted_line(x1=355, y1=455, x2=425, y2=455)
-        utils.draw_txt("=", x_offset=435, y_offset=340)
-        utils.draw_dotted_line(x1=450, y1=455, x2=520, y2=455)
-        utils.draw_txt("Kč", x_offset=525, y_offset=340)
+        utils.draw_txt(header_3, x_offset=40, y_offset=330)
+        utils.draw_txt("Hodnota zboží", x_offset=295, y_offset=330)
+        utils.draw_dotted_line(x1=355, y1=469, x2=425, y2=469)
+        utils.draw_txt("=", x_offset=435, y_offset=330)
+        utils.draw_dotted_line(x1=450, y1=469, x2=520, y2=469)
+        utils.draw_txt("Kč", x_offset=525, y_offset=330)
         # ---
-        utils.draw_txt("Sesazení sedací soupravy:", x_offset=40, y_offset=363)
-        utils.draw_txt("495,-Kč/ks", x_offset=135, y_offset=363, font="Roboto-Semibold")
-        utils.draw_txt("množství", x_offset=360, y_offset=363)
-        utils.draw_dotted_line(x1=397, y1=435, x2=425, y2=435)
-        utils.draw_txt("=", x_offset=435, y_offset=363)
-        utils.draw_dotted_line(450, 435, 520, 435)
-        utils.draw_txt("Kč", x_offset=525, y_offset=363)
+        utils.draw_txt("Sesazení sedací soupravy:", x_offset=40, y_offset=353)
+        utils.draw_txt("495,-Kč/ks", x_offset=135, y_offset=353, font="Roboto-Semibold")
+        utils.draw_txt("množství", x_offset=360, y_offset=353)
+        utils.draw_dotted_line(x1=397, y1=446, x2=425, y2=446)
+        utils.draw_txt("=", x_offset=435, y_offset=353)
+        utils.draw_dotted_line(450, 446, 520, 446)
+        utils.draw_txt("Kč", x_offset=525, y_offset=353)
         # ---
         header_4: str = "Použitý nadstandardní spotřební materiál:"
-        utils.draw_txt_field(header_4, 392, 37, 357, 521, 50)
+        utils.draw_txt_field(header_4, 382, 37, 367, 521, 50)
         # --- predavaci protokol
         subsection.predavaci_protokol_default()
         # --- celkova cena
-        utils.draw_txt("Celková cena: ", x_offset=390, y_offset=620)
+        utils.draw_txt("Minimální cena montáže:", x_offset=40, y_offset=620)
+        header_2: str = "454 Kč + doprava montérů"
+        utils.draw_txt(header_2, x_offset=132, y_offset=620, font="Roboto-Semibold")
+        utils.draw_txt(
+            "Celková cena (cena montáže + doprava): ", x_offset=295, y_offset=620
+        )
         utils.draw_dotted_line(450, 178, 520, 178)
         utils.draw_txt("Kč", x_offset=525, y_offset=620)
         # ---
@@ -429,9 +448,10 @@ class Section:
         utils.draw_txt("Kč", x_offset=525, y_offset=686)
         # ---
 
-    def default_data_section(self, order) -> None:
+    def default_data_section(self, order, km, zona) -> None:
         utils = self.utils
         x1, x2 = 73, 442
+        self.montage_calculation(order, km, zona)
 
         # --- client info
         utils.draw_txt(
@@ -452,6 +472,87 @@ class Section:
         utils.draw_txt(
             f"{order.team}", x_offset=x2, y_offset=190, font="Roboto-Semibold"
         )
+
+    def montage_calculation(self, order, km: int, zona: int = 0) -> None:
+        cfg, utils = self.cfg, self.utils
+        articles = order.articles.all()
+        goods_value: float = 0
+        sofa_count: int = 0
+        percentage_value: float = 0
+        shipping_price: float = zona
+        cons.log(km, type(km), type(km))
+
+        for article in articles:
+            if not article.is_sofa:
+                if article.price is not None:
+                    goods_value += float(article.price) * article.quantity
+            else:
+                sofa_count += article.quantity
+
+        price_with_sofa: float = sofa_count * cfg.montage_sofa_price
+        percentage_value = goods_value / 100 * 12
+        price: float = price_with_sofa + percentage_value
+        total_price: float = price + shipping_price
+        #
+        # --- shiping price
+        if km > 0:
+            utils.draw_txt(
+                text=utils.x_offset_length_0f(km)[0],
+                x_offset=424 - utils.x_offset_length_0f(km)[1],
+                y_offset=283,
+                font="Roboto-Semibold",
+                font_size=cfg.font_size_bigger,
+            )
+
+        utils.draw_txt(
+            text=utils.x_offset_length_2f(shipping_price)[0],
+            x_offset=520 - utils.x_offset_length_2f(shipping_price)[1],
+            y_offset=283,
+            font="Roboto-Semibold",
+            font_size=cfg.font_size_bigger,
+        )
+        # --- not sofa - percentage
+        utils.draw_txt(
+            text=utils.x_offset_length_2f(goods_value)[0],
+            x_offset=425 - utils.x_offset_length_2f(goods_value)[1],
+            y_offset=331,
+            font="Roboto-Semibold",
+            font_size=cfg.font_size_bigger,
+        )
+        utils.draw_txt(
+            text=utils.x_offset_length_2f(percentage_value)[0],
+            x_offset=520 - utils.x_offset_length_2f(percentage_value)[1],
+            y_offset=331,
+            font="Roboto-Semibold",
+            font_size=cfg.font_size_bigger,
+        )
+        # --- sofa
+        utils.draw_txt(
+            text=utils.x_offset_length_0f(sofa_count)[0],
+            x_offset=420 - utils.x_offset_length_0f(sofa_count)[1],
+            y_offset=354,
+            font="Roboto-Semibold",
+            font_size=cfg.font_size_bigger,
+        )
+        utils.draw_txt(
+            text=utils.x_offset_length_2f(price_with_sofa)[0],
+            x_offset=520 - utils.x_offset_length_2f(price_with_sofa)[1],
+            y_offset=354,
+            font="Roboto-Semibold",
+            font_size=cfg.font_size_bigger,
+        )
+        # --- total price
+        utils.draw_txt(
+            text=utils.x_offset_length_2f(total_price)[0],
+            x_offset=520 - utils.x_offset_length_2f(total_price)[1],
+            y_offset=622,
+            font="Roboto-Semibold",
+            font_size=cfg.font_size_bigger,
+        )
+
+    def draw_cross(self, *args) -> None:
+        utils = self.utils
+        utils.cross(*args)
 
 
 class Utility:
@@ -474,6 +575,13 @@ class Utility:
         """Registrujeme fonty do pameti pro reportlab"""
         for name, path in Utility.FONTS.items():
             pdfmetrics.registerFont(TTFont(name, str(path)))
+
+    def cross(self, x: int, y: int, size: int) -> None:
+        cvs = self.cvs
+        cvs.setStrokeColor(HexColor("#000000"))
+        cvs.line(x, y, x + size, y + size)
+        cvs.line(x, y + size, x + size, y)
+        cvs.setStrokeColor(HexColor("#707070"))
 
     def draw_txt(
         self,
@@ -569,6 +677,24 @@ class Utility:
         buffer.close()
         return pdf_data
 
+    def x_offset_length_2f(self, number: float) -> tuple[str, float]:
+        text: str = f"{number:.2f}"
+        width: float = pdfmetrics.stringWidth(
+            text,
+            "Roboto-Semibold",
+            self.cfg.font_size_bigger,
+        )
+        return (text, width)
+
+    def x_offset_length_0f(self, number: int) -> tuple[str, float]:
+        text: str = str(number)
+        width: float = pdfmetrics.stringWidth(
+            text,
+            "Roboto-Semibold",
+            self.cfg.font_size_bigger,
+        )
+        return (text, width)
+
 
 class SCCZPdfGenerator(PdfGenerator):
     """PDF generator for SCCZ type."""
@@ -596,17 +722,35 @@ class DefaultPdfGenerator(PdfGenerator):
     """PDF generator for Default."""
 
     def generate_pdf_protocol(self, model: Any = None) -> bytes:
-        section, utils = self.section, self.utils
+        section, utils, cfg = self.section, self.utils, self.cfg
         # ---
         utils.watermark(CompanyInfo.name)  # --- vodoznak ---
         section.header()  # --- header ---
         section.default_section()  # --- body general ---
         section.footer()  # --- footer ---
         # ---
-        if model is not None:
-            order_number = model.order_number
+        if model and self.data:
+            data = self.data
+            zona, km, order_number = data["zona"], data.get("km", 0), model.order_number
+            cross_position: dict[int, tuple[int, ...]] = {
+                1: (133, 511, 14),
+                2: (191, 511, 14),
+                3: (252, 511, 14),
+                4: (320, 511, 14),
+            }
+            shipping_zona: dict[int, int] = {
+                1: cfg.zone_1,
+                2: cfg.zone_2,
+                3: cfg.zone_3,
+                4: cfg.zone_4 + (km * cfg.km_price),
+            }
+
+            # ---
             utils.generate_barcode(order_number.upper(), 370, 670)
-            section.default_data_section(model)  # --- data layer ---
+            section.default_data_section(
+                model, km, shipping_zona[zona]
+            )  # --- data layer ---
+            section.draw_cross(*cross_position[zona])
             cons.log(f"General pdf: {order_number} sestaven", style="blue")
         else:
             cons.log("Default pdf: Obecny Template sestaven", style="blue")
