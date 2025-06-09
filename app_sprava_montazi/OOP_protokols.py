@@ -39,6 +39,7 @@ class PdfConfig:
     montage_sofa_price: int = 495
     montage_minimal_price: int = 454
     percentage_value: float = 12.00
+    km_price: int = 20
 
 
 @dataclass(frozen=True)
@@ -468,13 +469,14 @@ class Section:
             f"{order.team}", x_offset=x2, y_offset=190, font="Roboto-Semibold"
         )
 
-    def montage_calculation(self, order, km) -> None:
+    def montage_calculation(self, order, km: int = 0) -> None:
         cfg, utils = self.cfg, self.utils
         articles = order.articles.all()
         goods_value: float = 0
         sofa_count: int = 0
         percentage_value: float = 0
         shipping_price: float = 0
+
 
         for article in articles:
             if not article.is_sofa:
