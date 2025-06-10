@@ -58,7 +58,8 @@ class CustomEmail:
         try:
             email.send()
         except Exception as e:
-            cons.log(f"Chyba při odesílání: {e}", style="red")
+            cons.log(f"Chyba při odesílání: {str(e)}", style="red")
+            raise
 
 
 if __name__ == "__main__":

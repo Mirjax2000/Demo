@@ -908,11 +908,18 @@ class SendMailView(LoginRequiredMixin, View):
             [order.team.email],
             [pdf_file.file.path],
         )
-        email.send_email_with_pdf(order.team.email)
-        messages.success(
-            request,
-            f"Email pro montazni tym: <strong>{order.team}</strong> na adresu <strong>{order.team.email}</strong> odeslan",
-        )
+        try:
+            email.send_email_with_pdf(order.team.email)
+            messages.success(
+                request,
+                f"Email pro montazni tym: <strong>{order.team}</strong> na adresu <strong>{order.team.email}</strong> odeslan",
+            )
+        except Exception as e:
+            messages.error(
+                request,
+                f"Email pro montazni tym: <strong>{order.team}</strong> na adresu <strong>{order.team.email}</strong> nebyl odeslan, Chyba {str(e)}",
+            )
+
         return redirect("protocol", pk=pk)
 
 
