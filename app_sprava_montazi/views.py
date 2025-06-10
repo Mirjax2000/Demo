@@ -908,7 +908,7 @@ class SendMailView(LoginRequiredMixin, View):
             [order.team.email],
             [pdf_file.file.path],
         )
-        email.send_email_with_pdf()
+        email.send_email_with_pdf(order.team.email)
         messages.success(
             request,
             f"Email pro montazni tym: <strong>{order.team}</strong> na adresu <strong>{order.team.email}</strong> odeslan",
