@@ -53,6 +53,7 @@ class CustomEmail:
                     content=f.read(),
                     mimetype="application/pdf",
                 )
+            os.remove(encrypted_file_path)
 
         try:
             email.send()
