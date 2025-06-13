@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.management import call_command
 from django.db import transaction
+from django.utils import timezone
 from django.forms import BaseModelForm, inlineformset_factory
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -910,6 +911,8 @@ class SendMailView(LoginRequiredMixin, View):
         )
         try:
             email.send_email_with_pdf(order.team.email)
+            order.mail_datum_sended = timezone.now()
+            order.save()
             messages.success(
                 request,
                 f"Email pro montazni tym: <strong>{order.team}</strong> na adresu <strong>{order.team.email}</strong> odeslan",

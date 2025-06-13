@@ -10,4 +10,13 @@
            class="btn btn-primary d-block ms-5 me-5">
             <i class="fa-solid fa-envelope-circle-check me-2"></i>Odeslat Email</a>
     </div>
+    <!--mail-->
+    <div class="mt-5 ms-5 me-5">
+        {% if order.mail_datum_sended %}
+            <p class="u-txt-success">mail byl odeslan:</p>
+            <p>{{ order.mail_datum_sended|date:"d. m. Y v H:i" }}</p>
+        {% else %}
+            <p class="u-txt-warning">Mail ještě nebyl odeslán:</p>
+        {% endif %}
+    </div>
 </section>

@@ -213,14 +213,14 @@ class Order(Model):
         verbose_name="Termín montáže",
     )
 
-    team_type = models.CharField(
+    team_type = CharField(
         max_length=32,
         blank=True,
         choices=TeamType.choices,
         default=TeamType.BY_ASSEMBLY_CREW,
         verbose_name="Realizace kým",
     )
-    team = models.ForeignKey(
+    team = ForeignKey(
         Team,
         on_delete=models.PROTECT,
         null=True,
@@ -228,7 +228,12 @@ class Order(Model):
         limit_choices_to={"active": True},
         verbose_name="Montážní tým",
     )
-    notes = models.TextField(blank=True, verbose_name="Poznámky")
+    notes = TextField(blank=True, verbose_name="Poznámky")
+    mail_datum_sended = DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Protocol mail odeslan",
+    )
 
     history = HistoricalRecords()
 
