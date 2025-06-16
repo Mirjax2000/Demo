@@ -21,6 +21,7 @@ from django.db.models import (
     SlugField,
     TextChoices,
     TextField,
+    OneToOneField,
 )
 from django.utils.text import slugify
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -331,16 +332,37 @@ class Upload(models.Model):
         ordering = ["-created"]
 
 
-class OrderPDFStorage(models.Model):
-    order = models.OneToOneField(
-        Order, on_delete=models.PROTECT, related_name="pdf", verbose_name="Objednávka"
+class OrderPDFStorage(Model):
+    order = OneToOneField(
+        Order, on_delete=PROTECT, related_name="pdf", verbose_name="Objednávka"
     )
-    file = models.FileField(upload_to="stored_pdfs/", verbose_name="PDF soubor")
-    created = models.DateTimeField(auto_now=True, verbose_name="Čas uložení")
+    file = FileField(upload_to="stored_pdfs/", verbose_name="PDF soubor")
+    created = DateTimeField(auto_now=True, verbose_name="Čas uložení")
     history = HistoricalRecords()
 
     def __str__(self):
         return f"PDF pro objednávku {self.order.order_number}"
+
+    class Meta:
+        ordering = ["-created"]
+
+
+class OrderBackProtocol(Model):
+    order = OneToOneField(
+        Order,
+        on_delete=PROTECT,
+        related_name="back_protocol",
+        verbose_name="Objednávka",
+    )
+    file = FileField(upload_to="recieved_protocols/", verbose_name="Recieved protocols")
+    created = DateTimeField(auto_now=True, verbose_name="Čas uložení")
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return f"Recieved protokol pro objednávku {self.order.order_number}"
+
+    class Meta:
+        ordering = ["-created"]
 
 
 class CallLog(Model):

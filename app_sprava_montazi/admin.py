@@ -9,6 +9,7 @@ from .models import (
     Article,
     CallLog,
     OrderPDFStorage,
+    OrderBackProtocol,
 )
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -100,3 +101,4 @@ admin.site.register(Article, ArticleHistoryAdmin)
 admin.site.register(Upload, SimpleHistoryAdmin)  # Pro model bez vlastní Admin třídy
 admin.site.register(CallLog, CallLogHistoryAdmin)
 admin.site.register(OrderPDFStorage)
+admin.site.register(OrderBackProtocol)

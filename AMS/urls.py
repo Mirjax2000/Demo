@@ -23,17 +23,18 @@ from app_sprava_montazi.views import (
     TeamDetailView as TeamDetail,
     OrderDetailView as OrderDetail,
     OrderCreateView as OrderCreate,
-    BackProtocolView as BackProtocol,
     OrderUpdateView as OrderUpdate,
     GeneratePDFView as GeneratePDF,
-    ClientUpdateSecondaryView as CUS,
-    CustomerUpdateView as CustomerUpdate,
     OrderHistoryView as OrderHistory,
+    BackProtocolView as BackProtocol,
+    ClientUpdateSecondaryView as CUS,
     OrderProtocolView as OrderProtocol,
     ClientsOrdersView as ClientsOrders,
+    CustomerUpdateView as CustomerUpdate,
     CheckPDFProtocolView as CheckPDFProtocol,
-    IncompleteCustomersView as IncompleteCustomers,
     ExportOrdersExcelView as ExportOrdersExcel,
+    UploadBackProtocolView as UploadBackProtocol,
+    IncompleteCustomersView as IncompleteCustomers,
 )
 
 # --- typove zkratky
@@ -64,6 +65,11 @@ app_sprava_montazi: list = [
     path(f"order/{PK}/protocol/", OrderProtocol.as_view(), name="protocol"),
     path(f"order/{PK}/generate-pdf/", GeneratePDF.as_view(), name="generate_pdf"),
     path(f"order/{PK}/back_protocol/", BackProtocol.as_view(), name="back_protocol"),
+    path(
+        f"order/{PK}/upload_protocol/",
+        UploadBackProtocol.as_view(),
+        name="upload_protocol",
+    ),
     #
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),

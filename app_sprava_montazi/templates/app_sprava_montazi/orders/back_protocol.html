@@ -25,7 +25,9 @@
                     <h3 class="text-start">Zákazník: {{ order.client }}</h3>
                 </div>
             </div>
-            <form method="post" enctype="multipart/form-data">
+            <form action="{% url 'upload_protocol' order.pk %}"
+                  method="post"
+                  enctype="multipart/form-data">
                 {% csrf_token %}
                 <input class="d-none"
                        type="file"

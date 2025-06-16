@@ -1,6 +1,7 @@
 """app_sprava_montazi View"""
 
 from typing import Any
+import os
 from datetime import datetime
 from openpyxl import Workbook
 from requests import request
@@ -13,6 +14,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.management import call_command
 from django.db import transaction
 from django.utils import timezone
+from django.core.files.base import ContentFile
 from django.forms import BaseModelForm, inlineformset_factory
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -35,16 +37,8 @@ from .forms import UploadForm, TeamForm, OrderForm
 from .serializer import CustomerDetailSerializer, OrderCustomerUpdateSerializer
 
 # --- modely z DB
-from .models import (
-    Article,
-    CallLog,
-    Client,
-    Order,
-    OrderPDFStorage,
-    Status,
-    Team,
-    TeamType,
-)
+from .models import Article, CallLog, Client, Order, Team, TeamType, Status
+from .models import OrderPDFStorage, OrderBackProtocol
 from .models import HistoricalArticle  # vim o tom je to abstract classa
 
 # pomocne funkce ---
@@ -898,6 +892,35 @@ class BackProtocolView(TemplateView):
         pk = self.kwargs["pk"]
         context["order"] = get_object_or_404(Order, pk=pk)
         return context
+
+
+class UploadBackProtocolView(View):
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get("pk")
+        order = get_object_or_404(Order, pk=pk)
+        image = request.FILES.get("image")
+
+        if not image:
+            messages.error(request, "Soubor nevybrán")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        # --- ziskavame jemno obrazku
+        ext = os.path.splitext(image.name)[1]
+        new_filename = f"{order.order_number.upper()}{ext}"
+
+        # --- menime jmeno obrazku
+        renamed_file = ContentFile(image.read())
+        renamed_file.name = new_filename
+
+        # --- ukladame obrazek
+        OrderBackProtocol.objects.update_or_create(
+            order=order, defaults={"file": renamed_file}
+        )
+
+        if settings.DEBUG:
+            cons.log("Obrázek uložen jako:", renamed_file.name)
+
+        return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
 # --- Emails ---
