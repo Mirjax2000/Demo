@@ -1,11 +1,16 @@
 """utilitky"""
 
-from django.db.models import QuerySet
-from .models import Order
+import cv2
+from pyzbar.pyzbar import decode
 from rich.console import Console
+
+# --- django
+from django.db.models import QuerySet
 from django.conf import settings
 from django.db import transaction
+from .models import Order
 
+# ---
 cons: Console = Console()
 
 
@@ -55,7 +60,9 @@ def update_customers(customer_details: list) -> None:
                 order = Order.objects.get(order_number=order_number.lower())
                 client = order.client
                 if client:
-                    cons.log(f"zacatek {client.slug} ma incomplete: {client.incomplete}")
+                    cons.log(
+                        f"zacatek {client.slug} ma incomplete: {client.incomplete}"
+                    )
                     try:
                         with transaction.atomic():
                             client.name = data["name"]
@@ -82,3 +89,16 @@ def update_customers(customer_details: list) -> None:
             except Order.DoesNotExist:
                 if settings.DEBUG:
                     cons.log(f"Order {order_number} not found")
+
+
+def get_barcode_value(image_path):
+    image = cv2.imread(image_path)
+    barcodes = decode(image)
+
+    if not barcodes:
+        return None
+
+    barcode = barcodes[0]
+    result = barcode.data.decode("utf-8")
+    cons.log(f"ziskany barcode: {result}")
+    return result

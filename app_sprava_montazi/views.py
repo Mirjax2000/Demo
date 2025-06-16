@@ -43,6 +43,7 @@ from .models import HistoricalArticle  # vim o tom je to abstract classa
 
 # pomocne funkce ---
 from .utils import filter_orders, format_date, parse_order_filters, update_customers
+from .utils import get_barcode_value
 
 # 00P classes ---
 from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
@@ -904,21 +905,31 @@ class UploadBackProtocolView(View):
             messages.error(request, "Soubor nevybrán")
             return redirect(request.META.get("HTTP_REFERER", "/"))
 
-        # --- ziskavame jemno obrazku
+        # --- získání přípony
         ext = os.path.splitext(image.name)[1]
         new_filename = f"{order.order_number.upper()}{ext}"
 
-        # --- menime jmeno obrazku
+        # --- načtení obsahu a přejmenování
         renamed_file = ContentFile(image.read())
         renamed_file.name = new_filename
 
-        # --- ukladame obrazek
-        OrderBackProtocol.objects.update_or_create(
-            order=order, defaults={"file": renamed_file}
-        )
+        # --- získáme nebo vytvoříme záznam
+        obj, created = OrderBackProtocol.objects.get_or_create(order=order)
 
-        if settings.DEBUG:
-            cons.log("Obrázek uložen jako:", renamed_file.name)
+        # --- pokud existuje starý soubor, smažeme ho
+        if not created and obj.file and obj.file.name:
+            obj.file.delete(save=False)
+
+        # --- uložíme nový soubor
+        obj.file.save(new_filename, renamed_file, save=True)
+
+        barcode_number = get_barcode_value(image_path=obj.file.path)
+        cons.log(barcode_number)
+
+        if created and settings.DEBUG:
+            cons.log(f"{obj.order}{ext} uložen", style="blue bold")
+        elif settings.DEBUG:
+            cons.log(f"soubor byl nahrazen novým: {obj.order}{ext}", style="blue")
 
         return redirect(request.META.get("HTTP_REFERER", "/"))
 

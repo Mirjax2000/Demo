@@ -94,6 +94,7 @@ class CustomEmail:
 
         try:
             email.send()
+            cons.log(f"Email byl odeslan na: {self.email_to()}", style="blue")
         except Exception as e:
             cons.log(f"Chyba při odesílání: {str(e)}", style="red")
             raise

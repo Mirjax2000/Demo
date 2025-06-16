@@ -81,7 +81,7 @@ class PdfGenerator(ABC):
         pdf_file, created = OrderPDFStorage.objects.get_or_create(order=model)
 
         # Smaž předchozí soubor, pokud existuje
-        if pdf_file.file and pdf_file.file.name:
+        if not created and pdf_file.file and pdf_file.file.name:
             pdf_file.file.delete(save=False)
 
         # Ulož nový PDF soubor
