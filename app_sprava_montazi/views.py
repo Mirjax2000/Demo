@@ -3,6 +3,7 @@
 from typing import Any
 from datetime import datetime
 from openpyxl import Workbook
+from requests import request
 from rich.console import Console
 
 # --- Django
@@ -890,7 +891,13 @@ class CheckPDFProtocolView(LoginRequiredMixin, View):
 
 
 class BackProtocolView(View):
-    pass
+    def get(self, request, *args, **kwargs):
+        pk = kwargs["pk"]
+        order: Order = get_object_or_404(Order, pk=pk)
+        cons.log(f"Ziskal jsem order: {order}")
+        return HttpResponse(
+            f"Protokol {str(order).upper()} byl přijat\nDěkujeme a nashledanou."
+        )
 
 
 # --- Emails ---
