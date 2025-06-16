@@ -889,28 +889,22 @@ class CheckPDFProtocolView(LoginRequiredMixin, View):
         )
 
 
+class BackProtocolView(View):
+    pass
+
+
 # --- Emails ---
 class SendMailView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         pk = kwargs["pk"]
-        order = get_object_or_404(Order, pk=pk)
-        pdf_file = get_object_or_404(OrderPDFStorage, order=pk)
-        body: str = (
-            f"Zasíláme vám montážní protokol.\n\n"
-            f"Datum montáže: {order.format_datetime(order.montage_termin)}\n\n"
-            f"V případě dotazů nás kontaktujte.\n"
-            f"S pozdravem,\n"
-            f"Tým Rhenus"
+        order: Order = get_object_or_404(Order, pk=pk)
+        back_url = request.build_absolute_uri(
+            reverse("back_protocol", kwargs={"pk": pk})
         )
 
-        email: CustomEmail = CustomEmail(
-            f"Montazni protokol: {order.order_number.upper()} ",
-            body,
-            [order.team.email],
-            [pdf_file.file.path],
-        )
+        email: CustomEmail = CustomEmail(pk=pk, back_url=back_url)
         try:
-            email.send_email_with_pdf(order.team.email)
+            email.send_email_with_encrypted_pdf()
             order.mail_datum_sended = timezone.now()
             order.save()
             messages.success(

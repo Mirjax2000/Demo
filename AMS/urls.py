@@ -23,6 +23,7 @@ from app_sprava_montazi.views import (
     TeamDetailView as TeamDetail,
     OrderDetailView as OrderDetail,
     OrderCreateView as OrderCreate,
+    BackProtocolView as BackProtocol,
     OrderUpdateView as OrderUpdate,
     GeneratePDFView as GeneratePDF,
     ClientUpdateSecondaryView as CUS,
@@ -62,6 +63,7 @@ app_sprava_montazi: list = [
     path(f"order/{PK}/history/", OrderHistory.as_view(), name="order_history"),
     path(f"order/{PK}/protocol/", OrderProtocol.as_view(), name="protocol"),
     path(f"order/{PK}/generate-pdf/", GeneratePDF.as_view(), name="generate_pdf"),
+    path(f"order/{PK}/back_protocol/", BackProtocol.as_view(), name="back_protocol"),
     #
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),

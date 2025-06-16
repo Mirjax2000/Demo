@@ -1,51 +1,88 @@
 """Emails"""
 
 import os
+from pathlib import Path
+from dataclasses import dataclass
+import dotenv
 from rich.console import Console
 from pypdf import PdfReader, PdfWriter
+
+# ---
 from django.core.mail import EmailMessage
+from django.shortcuts import get_object_or_404
+
+# ---
+from .models import Order, OrderPDFStorage, Team
 
 # ---
 cons: Console = Console()
+dotenv.load_dotenv(override=True, verbose=True)
+
+
+@dataclass(frozen=True)
+class Config:
+    from_email = os.getenv("EMAIL_HOST_USER")
 
 
 class CustomEmail:
-    def __init__(self, subject, body, to_email: list, attachments: list) -> None:
-        self.subject = subject
-        self.body = body
-        self.from_email = "miroslav.viktorin@seznam.cz"
-        self.to_email = to_email
-        self.attachments = attachments
+    """hlavni emailova classa"""
 
-    def _encrypt_pdf(self, input_pdf_path: str, password: str) -> str:
+    def __init__(self, pk, back_url) -> None:
+        self.order = get_object_or_404(Order, pk=pk)
+        self.back_url = back_url
+        self.cfg = Config()
+
+    # ---
+
+    def email_subject(self) -> str:
+        """Email subject"""
+        order: Order = self.order
+        subject: str = f"Montazni protokol: {order.order_number.upper()}"
+        return subject
+
+    def email_body(self) -> str:
+        """Email body"""
+        order: Order = self.order
+        body: str = (
+            f"Zasíláme vám montážní protokol.\n\n"
+            f"Zákazník: {order.client.name}\n"
+            f"Datum montáže: {order.format_datetime(order.montage_termin)}\n\n"
+            "Po dokončení zakázky odešlete fotokopii montažního protokolu na tento link"
+            f"\n{self.back_url}\n\n"
+            f"V případě dotazů nás kontaktujte.\n\n"
+            f"S pozdravem,\n"
+            f"Tým Rhenus"
+        )
+        return body
+
+    def email_to(self) -> list[str]:
+        """Email to"""
+        order: Order = self.order
+        adresat: list[str] = [order.team.email]
+        return adresat
+
+    def get_pdf_paths(self) -> list:
+        """pdf as a attachment"""
+        order: Order = self.order
+        pdf_file = get_object_or_404(OrderPDFStorage, order=order)
+        pdf_file_path: list = [pdf_file.file.path]
+        return pdf_file_path
+
+    def send_email_with_encrypted_pdf(self) -> None:
         """
-        Encryptuje pdfko
+        Posle zasifrovany pdfko
         """
-        reader = PdfReader(input_pdf_path)
-        writer = PdfWriter()
+        cfg, order = self.cfg, self.order
+        password: str = order.team.email
+        email = EmailMessage(
+            subject=self.email_subject(),
+            body=self.email_body(),
+            from_email=cfg.from_email,
+            to=self.email_to(),
+        )
 
-        for page in reader.pages:
-            writer.add_page(page)
-
-        writer.encrypt(password)
-
-        directory, filename = os.path.split(input_pdf_path)
-        name, ext = os.path.splitext(filename)
-        encrypted_pdf_path = os.path.join(directory, f"{name}_encrypted{ext}")
-
-        with open(encrypted_pdf_path, "wb") as f:
-            writer.write(f)
-
-        return encrypted_pdf_path
-
-    def send_email_with_pdf(self, pdf_password: str):
-        """
-        POsle zasifrovany pdfko
-        """
-        email = EmailMessage(self.subject, self.body, self.from_email, self.to_email)
-
-        for file_path in self.attachments:
-            encrypted_file_path = self._encrypt_pdf(file_path, pdf_password)
+        for file_path in self.get_pdf_paths():
+            encrypted_file_path = Utility.encrypt_pdf(file_path, password)
 
             with open(encrypted_file_path, "rb") as f:
                 email.attach(
@@ -60,6 +97,33 @@ class CustomEmail:
         except Exception as e:
             cons.log(f"Chyba při odesílání: {str(e)}", style="red")
             raise
+
+
+class Utility:
+    """Pomocne funkce pro odesilani emailu"""
+
+    @staticmethod
+    def encrypt_pdf(input_pdf_path: str, password: str) -> str:
+        """
+        Encryptuje PDFko a vrátí cestu k zašifrovanému souboru
+        """
+        input_path = Path(input_pdf_path)
+        reader = PdfReader(input_path)
+        writer = PdfWriter()
+
+        for page in reader.pages:
+            writer.add_page(page)
+
+        writer.encrypt(password)
+
+        encrypted_path = input_path.with_name(
+            f"{input_path.stem}_encrypted{input_path.suffix}"
+        )
+
+        with open(encrypted_path, "wb") as f:
+            writer.write(f)
+
+        return str(encrypted_path)
 
 
 if __name__ == "__main__":
