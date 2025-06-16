@@ -780,7 +780,7 @@ class PdfView(LoginRequiredMixin, View):
 class OrderProtocolView(LoginRequiredMixin, DetailView):
     model = Order
     context_object_name = "order"
-    template_name = template_name = f"{APP_URL}/orders/montazni_protokol.html"
+    template_name = f"{APP_URL}/orders/montazni_protokol.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -890,14 +890,14 @@ class CheckPDFProtocolView(LoginRequiredMixin, View):
         )
 
 
-class BackProtocolView(View):
-    def get(self, request, *args, **kwargs):
-        pk = kwargs["pk"]
-        order: Order = get_object_or_404(Order, pk=pk)
-        cons.log(f"Ziskal jsem order: {order}")
-        return HttpResponse(
-            f"Protokol {str(order).upper()} byl přijat\nDěkujeme a nashledanou."
-        )
+class BackProtocolView(TemplateView):
+    template_name = f"{APP_URL}/orders/back_protocol.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        pk = self.kwargs["pk"]
+        context["order"] = get_object_or_404(Order, pk=pk)
+        return context
 
 
 # --- Emails ---
