@@ -1054,7 +1054,7 @@ class SendMailView(LoginRequiredMixin, View):
             order.save()
             messages.success(
                 request,
-                f"Email pro montazni tym: <strong>{order.team}</strong> na adresu <strong>{order.team.email}</strong> odeslan",
+                f"Email pro montazni tym: <strong>{order.team}</strong> na adresu <strong>{order.team.email}</strong> byl odeslan.",
             )
         except Exception as e:
             messages.error(
