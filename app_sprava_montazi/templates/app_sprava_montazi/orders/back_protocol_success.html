@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="cs">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description"
+              content="Rhenus HD - Asset Management System for maintenance and repair operations" />
+        <meta name="keywords"
+              content="rhenus, asset management, maintenance, repair, operations" />
+        <title>Rhenus</title>
+        {% include "includes/css.html" %}
+    </head>
+    <body>
+        <div class="container text-center position-relative pt-5">
+            {% for message in messages %}
+                <div class="C-messages C-messages_custom_1 alert alert-{{ message.tags }} alert-dismissible fade show"
+                     role="alert">
+                    <strong>Message:</strong><span class="ms-2">{{ message|safe }}</span>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            <h1 class="mb-4 pt-2">Zakázka: {{ order|upper }}</h1>
+            <hr>
+            <div class="row justify-content-center mt-4 mb-5">
+                <div class="col-12 col-md-6">
+                    <h3 class="text-start">Montážní tým: {{ order.team }}</h3>
+                    <h3 class="text-start">Zákazník: {{ order.client }}</h3>
+                </div>
+            </div>
+        </div>
+        {% include "includes/scripts.html" %}
+    </body>
+</html>

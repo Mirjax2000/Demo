@@ -1,12 +1,17 @@
 """utilitky"""
 
+from io import BytesIO
+import os
+from PIL.ImageFile import ImageFile
 import cv2
+from PIL import Image
 from rich.console import Console
 
 # --- django
-from django.db.models import QuerySet
 from django.conf import settings
 from django.db import transaction
+from django.db.models import QuerySet
+from django.core.files.base import ContentFile
 
 
 # --- models
@@ -116,3 +121,38 @@ def get_qrcode_value(image_path):
     except Exception as e:
         cons.log(f"Chyba při zpracování obrázku {image_path}: {e}", style="red")
         return None
+
+
+def convert_image_to_webp(img_file, new_name: str, quality=90):
+    try:
+        input_size = img_file.size
+        cons.log(f"Input image size: {input_size / 1024:.2f} KB")
+        img = Image.open(img_file)
+    except FileNotFoundError:
+        cons.log("Error: Image file not found")
+        return None
+
+    except Exception as e:
+        cons.log(f"Error opening image: {e}")
+        return None
+
+    if img.mode in ("RGBA", "P"):
+        image = img.convert("RGB")
+    else:
+        image = img
+
+    buffer = BytesIO()
+    try:
+        image.save(buffer, format="WEBP", quality=quality)
+    except Exception as e:
+        cons.log(f"Error saving image as WEBP: {e}")
+        return None
+
+    buffer.seek(0)
+    output_size = len(buffer.getvalue())
+    cons.log(f"Output WEBP size: {output_size / 1024:.2f} KB")
+
+    webp_file = ContentFile(buffer.read())
+    webp_file.name = f"{new_name}.webp"
+    # ---
+    return webp_file
