@@ -11,9 +11,11 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 from reportlab.lib.colors import Color, HexColor
 from reportlab.lib.pagesizes import A4
+from reportlab.graphics.barcode import qr
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics import renderPDF
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.graphics.barcode import code128
 from reportlab.pdfgen.canvas import Canvas
 from rich.console import Console
 from .models import Article, Order, OrderPDFStorage
@@ -649,7 +651,7 @@ class Utility:
         cvs, cfg = self.cvs, self.cfg
         cvs.saveState()
         cvs.translate(cfg.width / 2, cfg.height / 2)
-        cvs.rotate(55)
+        cvs.rotate(-55)
 
         cvs.setFont("Roboto-Regular", 61)
         cvs.setFillColorRGB(0.95, 0.95, 0.95)
@@ -657,17 +659,18 @@ class Utility:
 
         cvs.restoreState()
 
-    def generate_barcode(self, data_string: str, x: float, y: float) -> BytesIO:
-        buffer = BytesIO()
-        barcode: code128.Code128 = code128.Code128(
-            data_string,
-            barHeight=25,
-            barWidth=1,
-            humanReadable=False,
-        )
-        barcode.drawOn(self.cvs, x, y)
-        buffer.seek(0)
-        return buffer
+    def generate_qrcode(self, data_string: str, x: float, y: float):
+        qr_code = qr.QrCodeWidget(data_string)
+        bounds = qr_code.getBounds()
+        width = bounds[2] - bounds[0]
+        height = bounds[3] - bounds[1]
+
+        # Vytvořím kresbu a přizpůsobím velikost QR kódu
+        d = Drawing(100, 100, transform=[100.0 / width, 0, 0, 100.0 / height, 0, 0])
+        d.add(qr_code)
+
+        # Vykreslím do PDF canvasu
+        renderPDF.draw(d, self.cvs, x, y)
 
     def finalize_pdf(self) -> bytes:
         cvs, buffer = self.cvs, self.buffer
@@ -709,7 +712,7 @@ class SCCZPdfGenerator(PdfGenerator):
         # ---
         if model is not None:
             order_number = model.order_number
-            utils.generate_barcode(order_number.upper(), 370, 670)
+            utils.generate_qrcode(order_number.upper(), 420, 660)
             section.sccz_data_section(model)  # --- data layer ---
             cons.log(f"SCCZ pdf: {order_number} sestaven", style="blue")
         else:
@@ -746,7 +749,7 @@ class DefaultPdfGenerator(PdfGenerator):
             }
 
             # ---
-            utils.generate_barcode(order_number.upper(), 370, 670)
+            utils.generate_qrcode(order_number.upper(), 420, 660)
             section.default_data_section(
                 model, km, shipping_zona[zona]
             )  # --- data layer ---

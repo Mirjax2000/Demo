@@ -1,17 +1,11 @@
-from django.contrib import admin
+"""django admin"""
 
-from .models import (
-    Order,
-    Team,
-    DistribHub,
-    Upload,
-    Client,
-    Article,
-    CallLog,
-    OrderPDFStorage,
-    OrderBackProtocol,
-)
+from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
+
+# --- models
+from .models import Order, Team, DistribHub, Upload, Client, Article, CallLog
+from .models import OrderPDFStorage, OrderBackProtocol, OrderBackProtocolToken
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -93,6 +87,13 @@ class CallLogHistoryAdmin(SimpleHistoryAdmin, CallLogAdmin):
     pass
 
 
+class OrderBackProtocolTokenAdmin(admin.ModelAdmin):
+    list_display = ("order", "token", "created")
+    readonly_fields = ("token", "created")
+    search_fields = ("order__order_number", "token")
+    ordering = ("-created",)
+
+
 admin.site.register(DistribHub, DistribHubHistoryAdmin)
 admin.site.register(Client, ClientHistoryAdmin)
 admin.site.register(Order, OrderHistoryAdmin)
@@ -102,3 +103,4 @@ admin.site.register(Upload, SimpleHistoryAdmin)  # Pro model bez vlastní Admin 
 admin.site.register(CallLog, CallLogHistoryAdmin)
 admin.site.register(OrderPDFStorage)
 admin.site.register(OrderBackProtocol)
+admin.site.register(OrderBackProtocolToken, OrderBackProtocolTokenAdmin)

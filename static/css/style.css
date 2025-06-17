@@ -544,6 +544,11 @@ body.home {
   height: fit-content;
 }
 
+.C-messages_custom_1 {
+  left: 10%;
+  right: 10%;
+}
+
 .C-clear-form {
   font-size: 80%;
   padding: 0.1em 0.5em;

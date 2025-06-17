@@ -1,13 +1,15 @@
 """utilitky"""
 
 import cv2
-from pyzbar.pyzbar import decode
 from rich.console import Console
 
 # --- django
 from django.db.models import QuerySet
 from django.conf import settings
 from django.db import transaction
+
+
+# --- models
 from .models import Order
 
 # ---
@@ -91,14 +93,28 @@ def update_customers(customer_details: list) -> None:
                     cons.log(f"Order {order_number} not found")
 
 
-def get_barcode_value(image_path):
-    image = cv2.imread(image_path)
-    barcodes = decode(image)
+def get_qrcode_value(image_path):
+    try:
+        image = cv2.imread(image_path)
+        if image is None:
+            cons.log(f"Nelze načíst obrázek: {image_path}")
+            return None
 
-    if not barcodes:
+        # Ořízneme horní pravý roh (např. 50 % výšky, 50 % šířky od pravého okraje)
+        height, width = image.shape[:2]
+        # cropped = image[0 : int(height * 0.5), int(width * 0.5) : width]
+
+        # Vytvoříme QR code detektor
+        detector = cv2.QRCodeDetector()
+
+        # Detekujeme a dekódujeme QR kód
+        data, points, _ = detector.detectAndDecode(image)
+        if not data:
+            cons.log("nebyl nalezen žádný QR kód.", style="red")
+            return None
+        cons.log(f"QR value: {data}")
+        return data
+
+    except Exception as e:
+        cons.log(f"Chyba při zpracování obrázku {image_path}: {e}", style="red")
         return None
-
-    barcode = barcodes[0]
-    result = barcode.data.decode("utf-8")
-    cons.log(f"ziskany barcode: {result}")
-    return result

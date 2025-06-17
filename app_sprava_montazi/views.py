@@ -1,49 +1,50 @@
 """app_sprava_montazi View"""
 
-from typing import Any
 import os
+import secrets
+from typing import Any
 from datetime import datetime
 from openpyxl import Workbook
-from requests import request
 from rich.console import Console
 
 # --- Django
 from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.management import call_command
 from django.db import transaction
 from django.utils import timezone
-from django.core.files.base import ContentFile
-from django.forms import BaseModelForm, inlineformset_factory
-from django.http import HttpResponse, FileResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
 from django.urls import reverse, reverse_lazy
+from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
+from django.core.management import call_command
+from django.http import HttpResponse, FileResponse, HttpResponseForbidden
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.views.generic import CreateView, DetailView, FormView, ListView
+from django.forms import BaseModelForm, inlineformset_factory
 from django.views.generic import View, UpdateView, TemplateView
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.generic import CreateView, DetailView, FormView, ListView
 
 # API rest ---
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 # --- formulare
 from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
 from .forms import UploadForm, TeamForm, OrderForm
 
 # --- serializer
-from .serializer import CustomerDetailSerializer, OrderCustomerUpdateSerializer
+from .serializer import OrderCustomerUpdateSerializer
 
 # --- modely z DB
 from .models import Article, CallLog, Client, Order, Team, TeamType, Status
-from .models import OrderPDFStorage, OrderBackProtocol
+from .models import OrderPDFStorage, OrderBackProtocol, OrderBackProtocolToken
 from .models import HistoricalArticle  # vim o tom je to abstract classa
 
 # pomocne funkce ---
 from .utils import filter_orders, format_date, parse_order_filters, update_customers
-from .utils import get_barcode_value
+from .utils import get_qrcode_value
 
 # 00P classes ---
 from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
@@ -888,6 +889,34 @@ class CheckPDFProtocolView(LoginRequiredMixin, View):
 class BackProtocolView(TemplateView):
     template_name = f"{APP_URL}/orders/back_protocol.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        pk = kwargs["pk"]
+        token_value = request.GET.get("token")
+        html = """
+                <!DOCTYPE html>
+                <html lang="cs">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Přístup odepřen</title>
+                </head>
+                <body style="text-align:center; font-family:sans-serif;">
+                    <h1>Neplatné přihlášení</h1>
+                    <hr>
+                    <h2>Prosím kontaktujte Rhenus Team</h2>
+                </body>
+                </html>
+                """
+
+        if (
+            not token_value
+            or not OrderBackProtocolToken.objects.filter(
+                order_id=pk, token=token_value
+            ).exists()
+        ):
+            return HttpResponseForbidden(html)
+
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         pk = self.kwargs["pk"]
@@ -896,6 +925,8 @@ class BackProtocolView(TemplateView):
 
 
 class UploadBackProtocolView(View):
+    """Upload protocol co se vrati zpet z montazniho tymu"""
+
     def post(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
         order = get_object_or_404(Order, pk=pk)
@@ -907,6 +938,10 @@ class UploadBackProtocolView(View):
 
         # --- získání přípony
         ext = os.path.splitext(image.name)[1]
+        if ext.lower() not in [".jpg", ".jpeg", ".png", ".webp", ".bmp"]:
+            messages.error(request, "Špatný soubor, nejedná se o obrázek")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
         new_filename = f"{order.order_number.upper()}{ext}"
 
         # --- načtení obsahu a přejmenování
@@ -923,14 +958,30 @@ class UploadBackProtocolView(View):
         # --- uložíme nový soubor
         obj.file.save(new_filename, renamed_file, save=True)
 
-        barcode_number = get_barcode_value(image_path=obj.file.path)
-        cons.log(barcode_number)
-
         if created and settings.DEBUG:
-            cons.log(f"{obj.order}{ext} uložen", style="blue bold")
+            cons.log(f"{str(obj.order).upper()}{ext} uložen", style="blue bold")
         elif settings.DEBUG:
             cons.log(f"soubor byl nahrazen novým: {obj.order}{ext}", style="blue")
 
+        barcode_number: str = str(get_qrcode_value(image_path=obj.file.path))
+        if barcode_number.upper() and barcode_number == order.order_number.upper():
+            messages.success(request, "Obrázek uložen, děkujeme.")
+            order.status = Status.REALIZED
+            User = get_user_model()
+            try:
+                system_user = User.objects.get(username=settings.SYSTEM_USERNAME)
+                order._history_user = system_user
+
+            except User.DoesNotExist:
+                order._history_user = None
+
+            order.save()
+            if settings.DEBUG:
+                cons.log(f"Order: {order.order_number} byl zmenen na {order.status}")
+        else:
+            messages.error(
+                request, "<strong>Chyba:</strong> Nejedná se o stejný protokol!"
+            )
         return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
@@ -939,10 +990,16 @@ class SendMailView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         pk = kwargs["pk"]
         order: Order = get_object_or_404(Order, pk=pk)
-        back_url = request.build_absolute_uri(
-            reverse("back_protocol", kwargs={"pk": pk})
-        )
+        # ---
+        token_obj, _ = OrderBackProtocolToken.objects.get_or_create(order=order)
+        if not token_obj.token:
+            token_obj.token = secrets.token_urlsafe(16)
+            token_obj.save()
 
+        back_url = request.build_absolute_uri(
+            reverse("back_protocol", kwargs={"pk": pk}) + f"?token={token_obj.token}"
+        )
+        # ---
         email: CustomEmail = CustomEmail(pk=pk, back_url=back_url)
         try:
             email.send_email_with_encrypted_pdf()

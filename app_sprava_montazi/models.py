@@ -385,3 +385,12 @@ class CallLog(Model):
 
     def __str__(self):
         return f"{self.client.name} - {self.called_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class OrderBackProtocolToken(Model):
+    order = OneToOneField("Order", on_delete=PROTECT)
+    token = CharField(max_length=64, unique=True)
+    created = DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.order} - {self.token}"

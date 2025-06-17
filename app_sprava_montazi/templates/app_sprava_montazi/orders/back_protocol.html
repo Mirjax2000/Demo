@@ -9,15 +9,21 @@
         <meta name="keywords"
               content="rhenus, asset management, maintenance, repair, operations" />
         <title>Rhenus</title>
-        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
-        <link rel="stylesheet"
-              href="{% static "fonts/fontAwesome_css/all.min.css" %}" />
-        <link rel="stylesheet"
-              href="{% static "fonts/fontAwesome_css/fontawesome.min.css" %}" />
+        {% include "includes/css.html" %}
     </head>
     <body>
-        <div class="container mt-5 text-center">
-            <h1 class="mb-4">Zakázka: {{ order|upper }}</h1>
+        <div class="container text-center position-relative pt-5">
+            {% for message in messages %}
+                <div class="C-messages C-messages_custom_1 alert alert-{{ message.tags }} alert-dismissible fade show"
+                     role="alert">
+                    <strong>Message:</strong><span class="ms-2">{{ message|safe }}</span>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            <h1 class="mb-4 pt-2">Zakázka: {{ order|upper }}</h1>
             <hr>
             <div class="row justify-content-center mt-4 mb-5">
                 <div class="col-12 col-md-6">
@@ -41,5 +47,6 @@
                 </label>
             </form>
         </div>
+        {% include "includes/scripts.html" %}
     </body>
 </html>
