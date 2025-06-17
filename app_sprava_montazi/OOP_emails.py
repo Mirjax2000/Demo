@@ -44,7 +44,7 @@ class CustomEmail:
         """Email body"""
         order: Order = self.order
         body: str = (
-            f"Zasíláme vám montážní protokol.\n\n"
+            f"Zasíláme vám montážní protokol.(viz. příloha)\n\n"
             f"Zákazník: {order.client.name}\n"
             f"Datum montáže: {order.format_datetime(order.montage_termin)}\n\n"
             "Po dokončení zakázky odešlete fotokopii montažního protokolu na tento link"

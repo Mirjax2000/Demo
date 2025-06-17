@@ -241,12 +241,12 @@ class Section:
     def header(self) -> None:
         """header section - mezery jsou zde po 11 pixelech"""
         utils, company = self.utils, self.company
-        utils.draw_txt(company.name, y_offset=11, font="Roboto-Semibold")
-        utils.draw_txt(company.address, y_offset=27, font="Roboto-Regular")
-        utils.draw_txt(company.ico, y_offset=38)
-        utils.draw_txt(company.dic, y_offset=49)
-        utils.draw_txt(company.ref, y_offset=60)
-        utils.place_img("rhenus_logo.png", img_width=180, img_height=42, x=375, y=760)
+        utils.draw_txt(company.name, y_offset=9, font="Roboto-Semibold")
+        utils.draw_txt(company.address, y_offset=25, font="Roboto-Regular")
+        utils.draw_txt(company.ico, y_offset=36)
+        utils.draw_txt(company.dic, y_offset=47)
+        utils.draw_txt(company.ref, y_offset=58)
+        utils.place_img("rhenus_logo.png", img_width=180, img_height=42, x=375, y=762)
 
     def footer(self) -> None:
         """Footer section"""
@@ -666,7 +666,7 @@ class Utility:
         height = bounds[3] - bounds[1]
 
         # Vytvořím kresbu a přizpůsobím velikost QR kódu
-        d = Drawing(100, 100, transform=[100.0 / width, 0, 0, 100.0 / height, 0, 0])
+        d = Drawing(110, 110, transform=[110.0 / width, 0, 0, 110.0 / height, 0, 0])
         d.add(qr_code)
 
         # Vykreslím do PDF canvasu
@@ -712,7 +712,7 @@ class SCCZPdfGenerator(PdfGenerator):
         # ---
         if model is not None:
             order_number = model.order_number
-            utils.generate_qrcode(order_number.upper(), 420, 660)
+            utils.generate_qrcode(order_number.upper(), 420, 657)
             section.sccz_data_section(model)  # --- data layer ---
             cons.log(f"SCCZ pdf: {order_number} sestaven", style="blue")
         else:
@@ -749,7 +749,7 @@ class DefaultPdfGenerator(PdfGenerator):
             }
 
             # ---
-            utils.generate_qrcode(order_number.upper(), 420, 660)
+            utils.generate_qrcode(order_number.upper(), 420, 657)
             section.default_data_section(
                 model, km, shipping_zona[zona]
             )  # --- data layer ---

@@ -100,15 +100,13 @@ def get_qrcode_value(image_path):
             cons.log(f"Nelze načíst obrázek: {image_path}")
             return None
 
-        # Ořízneme horní pravý roh (např. 50 % výšky, 50 % šířky od pravého okraje)
         height, width = image.shape[:2]
-        # cropped = image[0 : int(height * 0.5), int(width * 0.5) : width]
+        cropped = image[0 : int(height * 0.5), int(width * 0.5) : width]
+        gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
 
-        # Vytvoříme QR code detektor
         detector = cv2.QRCodeDetector()
 
-        # Detekujeme a dekódujeme QR kód
-        data, points, _ = detector.detectAndDecode(image)
+        data, points, _ = detector.detectAndDecode(gray)
         if not data:
             cons.log("nebyl nalezen žádný QR kód.", style="red")
             return None

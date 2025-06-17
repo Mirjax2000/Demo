@@ -901,6 +901,7 @@ class BackProtocolView(TemplateView):
                 </head>
                 <body style="text-align:center; font-family:sans-serif;">
                     <h1>Neplatné přihlášení</h1>
+                    <p>Druh chyby: neplatny tokken</p>
                     <hr>
                     <h2>Prosím kontaktujte Rhenus Team</h2>
                 </body>
@@ -925,7 +926,7 @@ class BackProtocolView(TemplateView):
 
 
 class UploadBackProtocolView(View):
-    """Upload protocol co se vrati zpet z montazniho tymu"""
+    """Upload protokolu, který vrací montážní tým"""
 
     def post(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
@@ -936,52 +937,61 @@ class UploadBackProtocolView(View):
             messages.error(request, "Soubor nevybrán")
             return redirect(request.META.get("HTTP_REFERER", "/"))
 
-        # --- získání přípony
+        # --- Kontrola přípony
         ext = os.path.splitext(image.name)[1]
         if ext.lower() not in [".jpg", ".jpeg", ".png", ".webp", ".bmp"]:
             messages.error(request, "Špatný soubor, nejedná se o obrázek")
             return redirect(request.META.get("HTTP_REFERER", "/"))
 
+        # --- Připravíme nový název souboru
         new_filename = f"{order.order_number.upper()}{ext}"
+        temp_file = ContentFile(image.read())
+        temp_file.name = new_filename
 
-        # --- načtení obsahu a přejmenování
-        renamed_file = ContentFile(image.read())
-        renamed_file.name = new_filename
+        # --- Ověření čárového kódu z obrázku
+        barcode_number = str(get_qrcode_value(image_path=temp_file)).strip().upper()
 
-        # --- získáme nebo vytvoříme záznam
+        if barcode_number != order.order_number.strip().upper():
+            messages.error(
+                request, "<strong>Chyba:</strong> Nejedná se o stejný protokol!"
+            )
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        # --- Ověření prošlo, jdeme ukládat
         obj, created = OrderBackProtocol.objects.get_or_create(order=order)
 
-        # --- pokud existuje starý soubor, smažeme ho
+        # --- Pokud existuje starý soubor, smažeme ho
         if not created and obj.file and obj.file.name:
             obj.file.delete(save=False)
 
-        # --- uložíme nový soubor
-        obj.file.save(new_filename, renamed_file, save=True)
+        # --- Uložíme nový soubor
+        obj.file.save(new_filename, temp_file, save=True)
 
+        # --- Logování do konzole
         if created and settings.DEBUG:
             cons.log(f"{str(obj.order).upper()}{ext} uložen", style="blue bold")
         elif settings.DEBUG:
             cons.log(f"soubor byl nahrazen novým: {obj.order}{ext}", style="blue")
 
-        barcode_number: str = str(get_qrcode_value(image_path=obj.file.path))
-        if barcode_number.upper() and barcode_number == order.order_number.upper():
-            messages.success(request, "Obrázek uložen, děkujeme.")
-            order.status = Status.REALIZED
-            User = get_user_model()
-            try:
-                system_user = User.objects.get(username=settings.SYSTEM_USERNAME)
-                order._history_user = system_user
+        # --- Změna stavu objednávky
+        order.status = Status.REALIZED
+        if settings.DEBUG:
+            cons.log(f"Order: {order.order_number} byl změněn na {order.status}")
 
-            except User.DoesNotExist:
-                order._history_user = None
+        # --- Historie
+        User = get_user_model()
+        try:
+            system_user = User.objects.get(username=settings.SYSTEM_USERNAME)
+            order._history_user = system_user
 
-            order.save()
-            if settings.DEBUG:
-                cons.log(f"Order: {order.order_number} byl zmenen na {order.status}")
-        else:
-            messages.error(
-                request, "<strong>Chyba:</strong> Nejedná se o stejný protokol!"
-            )
+        except User.DoesNotExist:
+            order._history_user = None
+
+        order.save()
+        if settings.DEBUG:
+            cons.log(f"{order._history_user} provedl zaznam ve statusu")
+
+        messages.success(request, "Obrázek uložen, děkujeme.")
         return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
