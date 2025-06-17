@@ -475,14 +475,13 @@ class Section:
             f"{order.team}", x_offset=x2, y_offset=190, font="Roboto-Semibold"
         )
 
-    def montage_calculation(self, order, km: int, zona: int = 0) -> None:
+    def montage_calculation(self, order, km: int, zona: int = 0) -> dict:
         cfg, utils = self.cfg, self.utils
         articles = order.articles.all()
         goods_value: float = 0
         sofa_count: int = 0
         percentage_value: float = 0
         shipping_price: float = zona
-        cons.log(km, type(km), type(km))
 
         for article in articles:
             if not article.is_sofa:
@@ -492,8 +491,10 @@ class Section:
                 sofa_count += article.quantity
 
         price_with_sofa: float = sofa_count * cfg.montage_sofa_price
-        percentage_value = goods_value / 100 * 12
-        price: float = price_with_sofa + percentage_value
+        percentage_value = goods_value * 0.12
+        price: float = max(
+            cfg.montage_minimal_price, price_with_sofa + percentage_value
+        )
         total_price: float = price + shipping_price
         #
         # --- shiping price
@@ -551,6 +552,14 @@ class Section:
             font="Roboto-Semibold",
             font_size=cfg.font_size_bigger,
         )
+
+        return {
+            "goods_value": goods_value,
+            "sofa_count": sofa_count,
+            "percentage_value": percentage_value,
+            "price_with_sofa": price_with_sofa,
+            "total_price": total_price,
+        }
 
     def draw_cross(self, *args) -> None:
         utils = self.utils

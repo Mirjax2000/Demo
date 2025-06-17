@@ -98,7 +98,8 @@ def update_customers(customer_details: list) -> None:
                     cons.log(f"Order {order_number} not found")
 
 
-def get_qrcode_value(image_path):
+def get_qrcode_value(image_path) -> None | str:
+    """Get QR code value and return it"""
     try:
         image = cv2.imread(image_path)
         if image is None:
@@ -111,10 +112,12 @@ def get_qrcode_value(image_path):
 
         detector = cv2.QRCodeDetector()
 
-        data, points, _ = detector.detectAndDecode(gray)
+        data, _, _ = detector.detectAndDecode(gray)
+        # ---
         if not data:
             cons.log("nebyl nalezen žádný QR kód.", style="red")
             return None
+
         cons.log(f"QR value: {data}")
         return data
 
@@ -123,7 +126,8 @@ def get_qrcode_value(image_path):
         return None
 
 
-def convert_image_to_webp(img_file, new_name: str, quality=90):
+def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | ContentFile:
+    """Convert img into webp format"""
     try:
         input_size = img_file.size
         cons.log(f"Input image size: {input_size / 1024:.2f} KB")
@@ -142,6 +146,7 @@ def convert_image_to_webp(img_file, new_name: str, quality=90):
         image = img
 
     buffer = BytesIO()
+
     try:
         image.save(buffer, format="WEBP", quality=quality)
     except Exception as e:
@@ -151,7 +156,7 @@ def convert_image_to_webp(img_file, new_name: str, quality=90):
     buffer.seek(0)
     output_size = len(buffer.getvalue())
     cons.log(f"Output WEBP size: {output_size / 1024:.2f} KB")
-
+    # ---
     webp_file = ContentFile(buffer.read())
     webp_file.name = f"{new_name}.webp"
     # ---
