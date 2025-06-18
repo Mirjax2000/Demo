@@ -127,7 +127,8 @@ class ProtocolUploader:
             if self.protocol_obj.file:
                 self.protocol_obj.file.delete(save=False)
             self.set_error(
-                "<strong>Chyba:</strong> Špatný <strong>QR code</strong>, zkuste znovu s lepším obrázkem."
+                "<strong>Chyba:</strong> Špatný <strong>QR code</strong>, "
+                "zkuste znovu s lepším obrázkem."
             )
             return False
 
@@ -136,7 +137,10 @@ class ProtocolUploader:
             if self.protocol_obj.file:
                 self.protocol_obj.file.delete(save=False)
             self.set_error(
-                f"<strong>Chyba:</strong> na předávaném obrazku je protokol: <strong>{barcode_number}</strong>"
+                (
+                    "<strong>Chyba:</strong> na předávaném obrazku je protokol: "
+                    f"<strong>{barcode_number}</strong>"
+                )
             )
             return False
         return True
