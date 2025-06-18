@@ -1,0 +1,32 @@
+<fieldset class="L-form__fieldset ms-5">
+    <legend>
+        <i class="fa-solid fa-qrcode me-2"></i>Uložení protokolu
+    </legend>
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="L-form__group">
+            <label for="orderNumber">Zadej číslo zakázky</label>
+            <input class="mt-1 L-form__input"
+                   type="text"
+                   id="orderNumber"
+                   name="order_number"
+                   required
+                   placeholder="Číslo zakázky ..." />
+        </div>
+        <div class="L-form__group">
+            <label for="fileInputProtocol">vyberte soubor s obrázkem protokolu</label>
+            <input class="form-control mt-1"
+                   type="file"
+                   id="fileInputProtocol"
+                   name="image"
+                   required
+                   accept="image/*" />
+        </div>
+        <!---->
+        <div class="u-txt-right mt-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-plus me-2"></i>Ulož protokol
+            </button>
+        </div>
+    </form>
+</fieldset>

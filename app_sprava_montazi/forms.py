@@ -94,7 +94,7 @@ class OrderForm(forms.ModelForm):
                 attrs={
                     "class": "L-form__input",
                     "rows": 4,
-                    "placeholder": "Poznámky",
+                    "placeholder": "Poznámky...",
                 }
             ),
         }
@@ -224,12 +224,12 @@ class ClientForm(forms.ModelForm):
             "phone": forms.TextInput(
                 attrs={
                     "class": "L-form__input number",
-                    "placeholder": "Telefon",
+                    "placeholder": "Telefon...",
                     "type": "tel",
                 }
             ),
             "email": forms.EmailInput(
-                attrs={"class": "L-form__input", "placeholder": "E-mail"}
+                attrs={"class": "L-form__input", "placeholder": "E-mail..."}
             ),
         }
         error_messages = {
@@ -295,23 +295,23 @@ class TeamForm(forms.ModelForm):
 
         widgets = {
             "name": forms.TextInput(
-                attrs={"class": "L-form__input", "placeholder": "Název společnosti"}
+                attrs={"class": "L-form__input", "placeholder": "Název společnosti..."}
             ),
             "city": forms.TextInput(
-                attrs={"class": "L-form__input", "placeholder": "Město"}
+                attrs={"class": "L-form__input", "placeholder": "Město..."}
             ),
             "region": forms.TextInput(
-                attrs={"class": "L-form__input", "placeholder": "Region"}
+                attrs={"class": "L-form__input", "placeholder": "Region..."}
             ),
             "phone": forms.TextInput(
                 attrs={
                     "class": "L-form__input number",
-                    "placeholder": "Telefon",
+                    "placeholder": "Telefon...",
                     "type": "tel",
                 }
             ),
             "email": forms.EmailInput(
-                attrs={"class": "L-form__input", "placeholder": "E-mail"}
+                attrs={"class": "L-form__input", "placeholder": "E-mail..."}
             ),
             "active": forms.CheckboxInput(
                 attrs={
@@ -335,7 +335,11 @@ class TeamForm(forms.ModelForm):
                 }
             ),
             "notes": forms.Textarea(
-                attrs={"class": "L-form__input", "rows": 4, "placeholder": "Poznámky"}
+                attrs={
+                    "class": "L-form__input",
+                    "rows": 4,
+                    "placeholder": "Poznámky...",
+                }
             ),
         }
         error_messages = {
@@ -424,6 +428,3 @@ class CallLogForm(forms.ModelForm):
 CallLogFormSet = inlineformset_factory(
     Client, CallLog, form=CallLogForm, extra=1, can_delete=True
 )
-
-
-
