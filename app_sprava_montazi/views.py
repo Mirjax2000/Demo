@@ -20,8 +20,8 @@ from django.http import HttpResponse, FileResponse, HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.forms import BaseModelForm, inlineformset_factory
-from django.views.generic import View, UpdateView, TemplateView
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.generic import View, UpdateView, TemplateView
 from django.views.generic import CreateView, DetailView, FormView, ListView
 
 # API rest ---
@@ -49,6 +49,7 @@ from .utils import get_qrcode_value, convert_image_to_webp
 # 00P classes ---
 from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
 from .OOP_emails import CustomEmail
+from .OOP_back_protocol import ProtocolUploader
 # --- alias types
 
 
@@ -934,103 +935,22 @@ class UploadBackProtocolView(View):
         order = get_object_or_404(Order, pk=pk)
         image = request.FILES.get("image")
 
-        if not image:
-            messages.error(request, "Soubor nevybrán")
-            return redirect(request.META.get("HTTP_REFERER", "/"))
+        uploader = ProtocolUploader(order, image, request)
 
-        # --- získání přípony
-        ext = os.path.splitext(image.name)[1]
-        if ext.lower() not in [".jpg", ".jpeg", ".png", ".webp", ".bmp"]:
-            messages.error(request, "Špatný soubor, nejedná se o obrázek")
-            return redirect(request.META.get("HTTP_REFERER", "/"))
+        if not uploader.validate_image():
+            return uploader.redirect_with_error()
 
-        new_filename = f"{order.order_number.upper()}{ext}"
+        if not uploader.process_and_save_protocol():
+            return uploader.redirect_with_error()
 
-        # --- načtení obsahu a přejmenování
-        renamed_file = ContentFile(image.read())
-        renamed_file.name = new_filename
+        if not uploader.validate_barcode():
+            return uploader.redirect_with_error()
 
-        # --- získáme nebo vytvoříme záznam
-        obj, created = OrderBackProtocol.objects.get_or_create(order=order)
+        uploader.update_order_status()
+        uploader.delete_token()
+        uploader.convert_and_save_webp()
 
-        # --- pokud existuje starý soubor, smažeme ho
-        if not created and obj.file and obj.file.name:
-            obj.file.delete(save=False)
-
-        # --- uložíme nový soubor
-        obj.file.save(new_filename, renamed_file, save=True)
-
-        if created and settings.DEBUG:
-            cons.log(f"{str(obj.order).upper()}{ext} uložen", style="blue bold")
-        elif settings.DEBUG:
-            cons.log(f"soubor byl nahrazen novým: {obj.order}{ext}", style="blue")
-
-        barcode_value: None | str = get_qrcode_value(image_path=obj.file.path)
-        barcode_number: str = str(barcode_value).strip().upper()
-        order_number: str = order.order_number.strip().upper()
-
-        if not barcode_value:
-            obj.file.delete(save=False)
-            messages.error(
-                request,
-                "<strong>Chyba:</strong> Špatný <strong>QR code</strong> , zkuste znovu s lepším obrázkem.",
-            )
-            return redirect(request.META.get("HTTP_REFERER", "/"))
-
-        if barcode_number == order_number:
-            order.status = Status.REALIZED
-            User = get_user_model()
-            try:
-                system_user = User.objects.get(username=settings.SYSTEM_USERNAME)
-                order._history_user = system_user
-
-            except User.DoesNotExist:
-                order._history_user = None
-
-            order.save()
-            if settings.DEBUG:
-                cons.log(f"zmenu provedl: {order._history_user}")
-                cons.log(f"Order: {order.order_number} byl zmenen na {order.status}")
-
-        else:
-            obj.file.delete(save=False)
-            messages.error(
-                request, "<strong>Chyba:</strong> Nejedná se o stejný protokol!"
-            )
-            return redirect(request.META.get("HTTP_REFERER", "/"))
-        # --- mazu tokken
-        tokken = OrderBackProtocolToken.objects.filter(order=order)
-        tokken.delete()
-        html_success = """
-                <!DOCTYPE html>
-                <html lang="cs">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Success</title>
-                </head>
-                <body style="text-align:center; font-family:sans-serif;">
-                    <h1 style="font-size:3rem;">Vše proběhlo v pořádku</h1>
-                    <h2 style="font-size:2rem;">Děkujeme</h2>
-                    <hr>
-                </body>
-                </html>
-                """
-
-        web_file = convert_image_to_webp(obj.file, order.order_number.upper())
-
-        if web_file:
-            obj.file.delete(save=False)
-            obj.file.save(web_file.name, web_file, save=True)
-            if settings.DEBUG:
-                cons.log(
-                    f"Original image nahrazen WEBP: {web_file.name}",
-                    style="green",
-                )
-        else:
-            if settings.DEBUG:
-                cons.log("WEBP konverze selhala", style="red")
-
-        return HttpResponse(html_success)
+        return HttpResponse(uploader.html_success())
 
 
 # --- Emails ---
