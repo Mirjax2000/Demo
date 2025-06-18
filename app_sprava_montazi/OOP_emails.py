@@ -25,32 +25,50 @@ class Config:
 class CustomEmail:
     """Hlavní emailová třída"""
 
-    def __init__(self, pk, back_url) -> None:
+    def __init__(self, pk, back_url, user) -> None:
         self.order = get_object_or_404(Order, pk=pk)
         self.back_url = back_url
         self.cfg = Config()
+        self.user = user
 
     def email_subject(self) -> str:
         """Předmět emailu"""
         order: Order = self.order
         return f"Montážní protokol: {order.order_number.upper()}"
 
+    def dispecert_email_address(self, user) -> str:
+        return user.email
+
     def email_body(self) -> str:
         """HTML tělo emailu"""
         order: Order = self.order
-        return (
-            f"<body>"
-            f"<p style='margin-bottom:10px;margin-top:20px'>Dobrý den,<br>Zasíláme vám montážní protokol. (viz. příloha)</p>"
-            f"<p style='margin-bottom:10px'>Zákazník: <strong>{order.client.name}</strong><br>"
-            f"Datum montáže: <strong>{order.format_datetime(order.montage_termin)}</strong></p>"
-            f"<p>Po dokončení zakázky odešlete fotokopii montážního protokolu na tento link:<br>"
-            f"<hr style='border:none;border-top: 1px solid #707070;'>"
-            f"<a href='{self.back_url}' style='color:#1a73e8;padding-block:50px;'>{self.back_url}</a></p>"
-            f"<hr style='border:none;border-top: 1px solid #707070;'>"
-            f"<p style='margin-bottom:10px'>V případě dotazů nás kontaktujte.</p>"
-            f"<p>S pozdravem,<br>Tým Rhenus</p>"
-            f"</body>"
-        )
+        html_body = f"""
+<body>
+    <p style="margin-bottom:10px;margin-top:20px">
+        Dobrý den,<br>Zasíláme vám montážní protokol. (viz. příloha)
+    </p>
+    <p style="margin-bottom:10px">
+        Zákazník: <strong>{order.client.name}</strong><br>
+        Datum montáže: <strong>{order.format_datetime(order.montage_termin)}</strong>
+    </p>
+    <p>Po dokončení zakázky odešlete fotokopii montážního protokolu na tento link:</p>
+    <br>
+    <a href="{self.back_url}"
+       style="color:#ffffff; background-color:#1a73e8; padding:10px 20px;
+              border-radius:5px; margin-left:45px;
+              display:inline-block; text-decoration:none;
+              font-size:1.5rem;">
+       předat protokol
+    </a>
+    <br><br>
+    <p>V případě dotazů nás kontaktujte.</p>
+    <p>dispečer: {self.dispecert_email_address(self.user)}</p>
+    <br>
+    <br>
+    <p>S pozdravem,<br>Tým Rhenus</p>
+</body>
+"""
+        return html_body
 
     def email_body_plain(self) -> str:
         """HTML tělo emailu"""

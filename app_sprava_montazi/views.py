@@ -900,10 +900,11 @@ class BackProtocolView(TemplateView):
                     <title>Přístup odepřen</title>
                 </head>
                 <body style="text-align:center; font-family:sans-serif;">
-                    <h1>Neplatné přihlášení</h1>
-                    <p>druh chyby: neplatny tokken</p>
+                    <h1 style="font-size:4rem;">Neplatné přihlášení</h1>
                     <hr>
-                    <h2>Prosím kontaktujte Rhenus Team</h2>
+                    <p style="font-size:2rem;">druh chyby: <strong style="padding:10px 25px;border-radius:5px;background-color:#e0e0e0;color:#535353;">neplatný tokken</strong></p>
+                    <hr>
+                    <h2 style="font-size:2rem;">Prosím kontaktujte Rhenus Team</h2>
                 </body>
                 </html>
                 """
@@ -1000,7 +1001,7 @@ class UploadBackProtocolView(View):
         # --- mazu tokken
         tokken = OrderBackProtocolToken.objects.filter(order=order)
         tokken.delete()
-        html = """
+        html_success = """
                 <!DOCTYPE html>
                 <html lang="cs">
                 <head>
@@ -1008,8 +1009,8 @@ class UploadBackProtocolView(View):
                     <title>Success</title>
                 </head>
                 <body style="text-align:center; font-family:sans-serif;">
-                    <h1>Vše proběhlo v pořádku</h1>
-                    <h2>Děkujeme</h2>
+                    <h1 style="font-size:3rem;">Vše proběhlo v pořádku</h1>
+                    <h2 style="font-size:2rem;">Děkujeme</h2>
                     <hr>
                 </body>
                 </html>
@@ -1029,7 +1030,7 @@ class UploadBackProtocolView(View):
             if settings.DEBUG:
                 cons.log("WEBP konverze selhala", style="red")
 
-        return HttpResponse(html)
+        return HttpResponse(html_success)
 
 
 # --- Emails ---
@@ -1047,7 +1048,7 @@ class SendMailView(LoginRequiredMixin, View):
             reverse("back_protocol", kwargs={"pk": pk}) + f"?token={token_obj.token}"
         )
         # ---
-        email: CustomEmail = CustomEmail(pk=pk, back_url=back_url)
+        email: CustomEmail = CustomEmail(pk=pk, back_url=back_url, user=request.user)
         try:
             email.send_email_with_encrypted_pdf()
             order.mail_datum_sended = timezone.now()

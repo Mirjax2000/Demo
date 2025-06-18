@@ -23,7 +23,8 @@ SYSTEM_USERNAME = "system"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS: list = []
+# ALLOWED_HOSTS: list = []
+ALLOWED_HOSTS = ["192.168.88.237"]
 
 
 # Application definition
