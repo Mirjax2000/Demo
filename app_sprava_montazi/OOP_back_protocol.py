@@ -37,21 +37,19 @@ class ProtocolUploader:
         self.renamed_file: ContentFile | None = None
 
     def set_error(self, message: str) -> None:
-        """Sets the error message to be displayed."""
+        """Hlavni message predavana ven"""
         self.error_message = message
 
     def redirect_with_error(self) -> HttpResponse:
-        """Handles error by redirecting with the stored message."""
+        """redirect s message chybou"""
         if self.error_message:
             messages.error(self.request, self.error_message)
         else:
-            messages.error(
-                self.request, "Nastala neočekávaná chyba."
-            )  # Fallback message
+            messages.error(self.request, "Nastala neočekávaná chyba.")
         return redirect(self.request.META.get("HTTP_REFERER", "/"))
 
     def validate_image(self) -> bool:
-        """Validates if an image is provided and has an allowed format."""
+        """Validace obrazku"""
         if not self.image:
             self.set_error("Soubor nevybrán")
             return False
@@ -137,12 +135,14 @@ class ProtocolUploader:
             # Delete the file if barcode does not match
             if self.protocol_obj.file:
                 self.protocol_obj.file.delete(save=False)
-            self.set_error("<strong>Chyba:</strong> Nejedná se o stejný protokol!")
+            self.set_error(
+                f"<strong>Chyba:</strong> na předávaném obrazku je protokol: <strong>{barcode_number}</strong>"
+            )
             return False
         return True
 
     def update_order_status(self) -> None:
-        """Updates the order status to REALIZED and sets the history user."""
+        """prepisujme status na REALIZED a ukladem jako system user"""
         self.order.status = Status.REALIZED
         User = get_user_model()
         try:
@@ -159,14 +159,14 @@ class ProtocolUploader:
             )
 
     def delete_token(self) -> None:
-        """Deletes the associated OrderBackProtocolToken."""
+        """mazeme tokken"""
         token = OrderBackProtocolToken.objects.filter(order=self.order)
         token.delete()
 
     def convert_and_save_webp(self) -> None:
-        """Converts the image to WEBP format and saves it."""
+        """convertujeme na webp"""
         if not self.protocol_obj or not self.protocol_obj.file:
-            cons.log("No protocol file to convert to WEBP.", style="red")
+            cons.log("Chybi soubor ke konverzi na WEBP.", style="red bold")
             return
 
         webp_file = convert_image_to_webp(
@@ -186,7 +186,7 @@ class ProtocolUploader:
 
     @staticmethod
     def html_success() -> str:
-        """Returns the HTML for a success page."""
+        """HTML string"""
         return """
                 <!DOCTYPE html>
                 <html lang="cs">
