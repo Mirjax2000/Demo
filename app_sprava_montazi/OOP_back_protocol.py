@@ -34,9 +34,10 @@ class ProtocolUploader:
         self.conf: Config = Config()
         self.protocol_obj: OrderBackProtocol | None = None
         self.error_message: str | None = None
+        self.renamed_file: ContentFile | None = None
 
     def set_error(self, message: str) -> None:
-        """nastavi error zpravu"""
+        """Sets the error message to be displayed."""
         self.error_message = message
 
     def redirect_with_error(self) -> HttpResponse:
@@ -58,41 +59,54 @@ class ProtocolUploader:
         ext = os.path.splitext(self.image.name)[1]
         if ext.lower() not in self.conf.img_formats:
             self.set_error(
-                f"Špatný soubor s koncovkou: <strong>{ext}</strong>, nejedná se o obrázek"
+                f"Špatná koncovka souboru <strong>{ext}</strong>, nejedná se o obrázek"
             )
             return False
         return True
 
-    def process_and_save_protocol(self) -> bool:
-        """Processes the image, renames it, and saves the protocol."""
-        new_filename = (
-            f"{self.order.order_number.upper()}{os.path.splitext(self.image.name)[1]}"
-        )
+    def prepare_file_for_saving(self) -> bool:
+        """priprava pred ulozenim souboru"""
+        try:
+            ext = os.path.splitext(self.image.name)[1]
+            new_filename = f"{self.order.order_number.upper()}{ext}"
 
-        renamed_file = ContentFile(self.image.read())
-        renamed_file.name = new_filename
+            renamed_file = ContentFile(self.image.read())
+            renamed_file.name = new_filename
+            self.renamed_file = renamed_file  # Store the prepared file
+            return True
+
+        except Exception as e:
+            cons.log(f"Chyba při přípravě souboru k uložení: {e}", style="red")
+            self.set_error("Chyba při přípravě souboru k uložení.")
+            return False
+
+    def save_protocol_object(self) -> bool:
+        """ukladame soubor"""
+        if not self.renamed_file:
+            cons.log("Interní chyba: Soubor nebyl připraven k uložení.", style="red")
+            self.set_error("Interní chyba: Soubor nebyl připraven k uložení.")
+            return False
 
         obj, created = OrderBackProtocol.objects.get_or_create(order=self.order)
-        self.protocol_obj = obj  # Store for later use
+        self.protocol_obj = obj
 
         if not created and obj.file and obj.file.name:
             obj.file.delete(save=False)
 
         try:
-            obj.file.save(new_filename, renamed_file, save=True)
+            obj.file.save(self.renamed_file.name, self.renamed_file, save=True)
+            name: str = str(obj.order).upper()
+            ext: str = os.path.splitext(self.renamed_file.name)[1]
+
             if created and settings.DEBUG:
-                cons.log(
-                    f"{str(obj.order).upper()}{os.path.splitext(self.image.name)[1]} uložen",
-                    style="blue bold",
-                )
+                cons.log(f"{name}{ext} uložen", style="blue")
+
             elif settings.DEBUG:
-                cons.log(
-                    f"soubor byl nahrazen novým: {obj.order}{os.path.splitext(self.image.name)[1]}",
-                    style="blue",
-                )
+                cons.log(f"soubor byl nahrazen novým: {name}{ext}", style="blue")
             return True
+
         except Exception as e:
-            cons.log(f"Error saving protocol file: {e}", style="red")
+            cons.log(f"Chyba při ukládání protokolu: {e}", style="red")
             self.set_error("Chyba při ukládání protokolu.")
             return False
 
@@ -123,21 +137,18 @@ class ProtocolUploader:
             # Delete the file if barcode does not match
             if self.protocol_obj.file:
                 self.protocol_obj.file.delete(save=False)
-            self.set_error(
-                f"<strong>Chyba:</strong> Nejedná se o protokol <strong>{order_number}</strong>"
-            )
+            self.set_error("<strong>Chyba:</strong> Nejedná se o stejný protokol!")
             return False
         return True
 
     def update_order_status(self) -> None:
-        """Prepnuti statusu a zapis do history zaznamy se "system" userem"""
+        """Updates the order status to REALIZED and sets the history user."""
         self.order.status = Status.REALIZED
-        user = get_user_model()
+        User = get_user_model()
         try:
-            system_user = user.objects.get(username=settings.SYSTEM_USERNAME)
+            system_user = User.objects.get(username=settings.SYSTEM_USERNAME)
             self.order._history_user = system_user
-
-        except user.DoesNotExist:
+        except User.DoesNotExist:
             self.order._history_user = None
         self.order.save()
 
@@ -148,14 +159,14 @@ class ProtocolUploader:
             )
 
     def delete_token(self) -> None:
-        """mazeme tokken"""
+        """Deletes the associated OrderBackProtocolToken."""
         token = OrderBackProtocolToken.objects.filter(order=self.order)
         token.delete()
 
     def convert_and_save_webp(self) -> None:
-        """convertujeme soubor na webp"""
+        """Converts the image to WEBP format and saves it."""
         if not self.protocol_obj or not self.protocol_obj.file:
-            cons.log("Chybi soubor konverzi na WEBP.", style="red")
+            cons.log("No protocol file to convert to WEBP.", style="red")
             return
 
         webp_file = convert_image_to_webp(

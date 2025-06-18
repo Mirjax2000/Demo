@@ -934,20 +934,32 @@ class UploadBackProtocolView(View):
         pk = kwargs.get("pk")
         order = get_object_or_404(Order, pk=pk)
         image = request.FILES.get("image")
-
+        # --- instance
         uploader = ProtocolUploader(order, image, request)
 
+        # 1. Validate image
         if not uploader.validate_image():
             return uploader.redirect_with_error()
 
-        if not uploader.process_and_save_protocol():
+        # 2. Process (rename/prepare) the file
+        if not uploader.prepare_file_for_saving():
             return uploader.redirect_with_error()
 
+        # 3. Save the protocol object and the file
+        if not uploader.save_protocol_object():
+            return uploader.redirect_with_error()
+
+        # 4. Validate barcode
         if not uploader.validate_barcode():
             return uploader.redirect_with_error()
 
+        # 5. Update order status
         uploader.update_order_status()
+
+        # 6. Delete token
         uploader.delete_token()
+
+        # 7. Convert and save WEBP (optional, less critical for initial success)
         uploader.convert_and_save_webp()
 
         return HttpResponse(uploader.html_success())
