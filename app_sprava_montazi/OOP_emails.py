@@ -42,13 +42,14 @@ class CustomEmail:
     def email_body(self) -> str:
         """HTML tělo emailu"""
         order: Order = self.order
-        html_body = f"""
+        zakaznik: str = order.client.name  # type:ignore
+        html_body: str = f"""
 <body>
     <p style="margin-bottom:10px;margin-top:20px">
         Dobrý den,<br>Zasíláme vám montážní protokol. (viz. příloha)
     </p>
     <p style="margin-bottom:10px">
-        Zákazník: <strong>{order.client.name}</strong><br>
+        Zákazník: <strong>{zakaznik}</strong><br>
         Datum montáže: <strong>{order.format_datetime(order.montage_termin)}</strong>
     </p>
     <p>Po dokončení zakázky odešlete fotokopii montážního protokolu na tento link:</p>
@@ -75,7 +76,7 @@ class CustomEmail:
         order: Order = self.order
         body_text = (
             "Zasíláme vám montážní protokol. (viz. příloha)\n\n"
-            f"Zákazník: {order.client.name}\n"
+            f"Zákazník: {order.client.name}\n"  # type: ignore
             f"Datum montáže: {order.format_datetime(order.montage_termin)}\n\n"
             "Po dokončení zakázky odešlete fotokopii montážního protokolu na tento link:\n"
             f"{self.back_url}\n\n"
@@ -88,7 +89,7 @@ class CustomEmail:
     def email_to(self) -> list[str]:
         """Adresáti emailu"""
         order: Order = self.order
-        return [order.team.email]
+        return [order.team.email]  # type: ignore
 
     def get_pdf_paths(self) -> list[str]:
         """Cesty k PDF přílohám"""
@@ -98,7 +99,7 @@ class CustomEmail:
 
     def send_email_with_encrypted_pdf(self) -> None:
         """Odeslání emailu s zašifrovaným PDF jako přílohou"""
-        password = self.order.team.email
+        password = self.order.team.email  # type: ignore
         email = EmailMultiAlternatives(
             subject=self.email_subject(),
             body=self.email_body_plain(),  # fallback plain text
