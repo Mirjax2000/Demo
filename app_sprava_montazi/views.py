@@ -1,6 +1,5 @@
 """app_sprava_montazi View"""
 
-import os
 import secrets
 from typing import Any
 from datetime import datetime
@@ -13,8 +12,6 @@ from django.db import transaction
 from django.utils import timezone
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
-from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
 from django.core.management import call_command
 from django.http import HttpResponse, FileResponse, HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -39,12 +36,11 @@ from .serializer import OrderCustomerUpdateSerializer
 
 # --- modely z DB
 from .models import Article, CallLog, Client, Order, Team, TeamType, Status
-from .models import OrderPDFStorage, OrderBackProtocol, OrderBackProtocolToken
-from .models import HistoricalArticle  # vim o tom je to abstract classa
+from .models import OrderPDFStorage, OrderBackProtocolToken
+from .models import HistoricalArticle  # type: ignore  # pylint: disable=no-name-in-module
 
 # pomocne funkce ---
 from .utils import filter_orders, format_date, parse_order_filters, update_customers
-from .utils import get_qrcode_value, convert_image_to_webp
 
 # 00P classes ---
 from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
@@ -133,7 +129,7 @@ class CreatePageView(LoginRequiredMixin, FormView):
             messages.error(self.request, f"Chyba hodnoty v souboru CSV! {str(e)}")
             return redirect("createpage")
         # ---
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             if settings.DEBUG:
                 cons.log(f"Chyba {str(e)}", style="red")
             messages.error(self.request, "Neznamá chyba!")
@@ -180,7 +176,8 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form) -> HttpResponse:
         messages.success(
-            self.request, f"Zákazník: <strong>{self.object}</strong> aktualizován."
+            self.request,
+            f"Zákazník: <strong>{self.object}</strong> aktualizován.",  # type: ignore
         )
         return super().form_valid(form)
 
@@ -204,12 +201,13 @@ class ClientUpdateSecondaryView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form) -> HttpResponse:
         messages.success(
-            self.request, f"Zákazník: <strong>{self.object}</strong> aktualizován."
+            self.request,
+            f"Zákazník: <strong>{self.object}</strong> aktualizován.",  # type: ignore
         )
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse("client_orders", kwargs={"slug": self.object.slug})
+        return reverse("client_orders", kwargs={"slug": self.object.slug})  # type: ignore
 
 
 class OrderCreateView(LoginRequiredMixin, View):
@@ -274,7 +272,7 @@ class OrderCreateView(LoginRequiredMixin, View):
                 messages.success(request, "Objednávka vytvořena.")
                 return redirect(reverse("order_detail", kwargs={"pk": order.id}))
 
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 if settings.DEBUG:
                     cons.log(f"chyba: {str(e)}")
 
@@ -346,7 +344,7 @@ class OrderUpdateView(LoginRequiredMixin, View):
                 if start_status == Status.NEW and end_status == Status.ADVICED:
                     messages.success(
                         request,
-                        f"Objednávka změnila status na {Status.ADVICED.label}",
+                        f"Objednávka změnila status na {Status.ADVICED.label}",  # type: ignore
                     )
                 else:
                     messages.success(
@@ -355,7 +353,7 @@ class OrderUpdateView(LoginRequiredMixin, View):
                     )
                 return redirect(reverse("order_detail", kwargs={"pk": order.id}))
 
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 if settings.DEBUG:
                     cons.log(f"chyba při aktualizaci: {str(e)}")
 
@@ -462,7 +460,8 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form) -> HttpResponse:
         response = super().form_valid(form)
         messages.success(
-            self.request, f"Tým: <strong>{self.object}</strong> byl úspěšně vytvořen."
+            self.request,
+            f"Tým: <strong>{self.object}</strong> byl úspěšně vytvořen.",  # type: ignore
         )
         return response
 
@@ -481,7 +480,7 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
-        messages.success(self.request, f"Team: {self.object} byl aktualizovan.")
+        messages.success(self.request, f"Team: {self.object} byl aktualizovan.")  # type: ignore
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
@@ -490,7 +489,7 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
             next_url, allowed_hosts={self.request.get_host()}
         ):
             return next_url
-        return reverse("team_detail", kwargs={"slug": self.object.slug})
+        return reverse("team_detail", kwargs={"slug": self.object.slug})  # type: ignore
 
 
 class TeamDetailView(LoginRequiredMixin, DetailView):
@@ -560,23 +559,23 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
     template_name = f"{APP_URL}/orders/order_detail_history.html"
 
     def dispatch(self, request, *args, **kwargs):
-        self.order_instance = get_object_or_404(Order, pk=self.kwargs["pk"])
+        self.order_instance = get_object_or_404(Order, pk=self.kwargs["pk"])  # type: ignore
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.order_instance.history.all()
+        return self.order_instance.history.all()  # type: ignore
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["order"] = self.order_instance
 
-        order_history = list(self.order_instance.history.all())
+        order_history = list(self.order_instance.history.all())  # type: ignore
 
         try:
             article_history = list(
                 HistoricalArticle.objects.filter(order=self.order_instance)
             )
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             cons.log(
                 f"Chyba při načítání historie HistoricalArticle pro zakázku {self.order_instance.pk}: {e}"
             )
@@ -659,7 +658,7 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
                                         old_val_str = str(old_obj)
                                     except model_class.DoesNotExist:
                                         old_val_str = f"ID:{old_val} (smazáno)"
-                                    except Exception:
+                                    except Exception:  # pylint: disable=broad-exception-caught
                                         old_val_str = str(old_val)
                                     old_val = old_val_str if old_val_str else "-"
 
@@ -669,11 +668,11 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
                                         new_val_str = str(new_obj)
                                     except model_class.DoesNotExist:
                                         new_val_str = f"ID:{new_val} (smazáno)"
-                                    except Exception:
+                                    except Exception:  # pylint: disable=broad-exception-caught
                                         new_val_str = str(new_val)
                                     new_val = new_val_str if new_val_str else "-"
 
-                        except Exception:
+                        except Exception:  # pylint: disable=broad-exception-caught
                             pass
 
                         entry_info["changes"].append(
@@ -700,7 +699,7 @@ class ExportOrdersExcelView(LoginRequiredMixin, View):
 
         wb = Workbook()
         ws = wb.active
-        ws.title = "Objednávky"
+        ws.title = "Objednávky"  # type: ignore
 
         headers = [
             "Číslo zakázky",
@@ -716,17 +715,17 @@ class ExportOrdersExcelView(LoginRequiredMixin, View):
             "Montážní tým",
             "Poznámky",
         ]
-        ws.append(headers)
+        ws.append(headers)  # type: ignore
 
         for order in orders:
             team = str(order.team) if order.team else ""
             team_type = order.get_team_type_display()
-            status = order.get_status_display()
+            status = order.get_status_display()  # pylint: disable=redefined-outer-name
             evidence_termin = format_date(order.evidence_termin)  # utils.py
             delivery_termin = format_date(order.delivery_termin)  # utils.py
             montage_termin = format_date(order.montage_termin)  # utils.py
 
-            ws.append(
+            ws.append(  # type: ignore
                 [
                     str(order.order_number).upper(),
                     str(order.distrib_hub),
@@ -768,7 +767,7 @@ class PdfView(LoginRequiredMixin, View):
         pdf = generator_instance.generate_pdf_protocol(model=None)
         # ---
         filename = f"Protokol_{mandant}.pdf"
-        response = HttpResponse(content=pdf, content_type="application/pdf")
+        response = HttpResponse(content=pdf, content_type="application/pdf")  # NOSONAR
         response["Content-Disposition"] = f'inline; filename="{filename}"'
 
         return response
@@ -848,7 +847,7 @@ class GeneratePDFView(LoginRequiredMixin, View):
         data: dict[str, int] = {"zona": zona, "km": km}
 
         default_pdf_protocol = DefaultPdfGenerator()
-        default_pdf_protocol.data = data
+        default_pdf_protocol.data = data  # type: ignore
         pdf_io = default_pdf_protocol.generate_pdf_protocol(model=order)
         created = default_pdf_protocol.save_pdf_protocol_to_db(model=order, pdf=pdf_io)
         # ---
@@ -937,29 +936,20 @@ class UploadBackProtocolView(View):
         # --- instance
         uploader = ProtocolUploader(order, image, request)
 
-        # 1. Validate image
         if not uploader.validate_image():
             return uploader.redirect_with_error()
 
-        # 2. Process (rename/prepare) the file
         if not uploader.prepare_file_for_saving():
             return uploader.redirect_with_error()
 
-        # 3. Save the protocol object and the file
         if not uploader.save_protocol_object():
             return uploader.redirect_with_error()
 
-        # 4. Validate barcode
         if not uploader.validate_barcode():
             return uploader.redirect_with_error()
 
-        # 5. Update order status
         uploader.update_order_status()
-
-        # 6. Delete token
         uploader.delete_token()
-
-        # 7. Convert and save WEBP (optional, less critical for initial success)
         uploader.convert_and_save_webp()
 
         return HttpResponse(uploader.html_success())
@@ -987,12 +977,19 @@ class SendMailView(LoginRequiredMixin, View):
             order.save()
             messages.success(
                 request,
-                f"Email pro montazni tym: <strong>{order.team}</strong> na adresu <strong>{order.team.email}</strong> byl odeslan.",
+                (
+                    f"Email pro montazni tym: <strong>{order.team}</strong> "
+                    f"na adresu <strong>{order.team.email}</strong> byl odeslan."  # type:ignore
+                ),
             )
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             messages.error(
                 request,
-                f"Email pro montazni tym: <strong>{order.team}</strong> na adresu <strong>{order.team.email}</strong> nebyl odeslan, Chyba {str(e)}",
+                (
+                    f"Email pro montazni tym: <strong>{order.team}</strong> "
+                    f"na adresu <strong>{order.team.email}</strong> "  # type: ignore
+                    f"nebyl odeslan, Chyba {str(e)}"
+                ),
             )
 
         return redirect("protocol", pk=pk)
@@ -1015,7 +1012,7 @@ class CustomerUpdateView(APIView):
     def post(self, request):
         serializer = OrderCustomerUpdateSerializer(data=request.data)
         if serializer.is_valid():
-            updates = serializer.validated_data["updates"]
+            updates = serializer.validated_data["updates"]  # type: ignore
 
             update_customers(updates)
 

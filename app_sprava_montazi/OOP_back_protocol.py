@@ -70,10 +70,10 @@ class ProtocolUploader:
 
             renamed_file = ContentFile(self.image.read())
             renamed_file.name = new_filename
-            self.renamed_file = renamed_file  # Store the prepared file
+            self.renamed_file = renamed_file
             return True
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             cons.log(f"Chyba při přípravě souboru k uložení: {e}", style="red")
             self.set_error("Chyba při přípravě souboru k uložení.")
             return False
@@ -103,7 +103,7 @@ class ProtocolUploader:
                 cons.log(f"soubor byl nahrazen novým: {name}{ext}", style="blue")
             return True
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             cons.log(f"Chyba při ukládání protokolu: {e}", style="red")
             self.set_error("Chyba při ukládání protokolu.")
             return False
@@ -144,16 +144,16 @@ class ProtocolUploader:
     def update_order_status(self) -> None:
         """prepisujme status na REALIZED a ukladem jako system user"""
         self.order.status = Status.REALIZED
-        User = get_user_model()
+        User = get_user_model()  # pylint: disable=invalid-name  # NOSONAR
         try:
             system_user = User.objects.get(username=settings.SYSTEM_USERNAME)
-            self.order._history_user = system_user
+            self.order._history_user = system_user  # pylint: disable=protected-access  # type: ignore
         except User.DoesNotExist:
-            self.order._history_user = None
+            self.order._history_user = None  # pylint: disable=protected-access  # type: ignore
         self.order.save()
 
         if settings.DEBUG:
-            cons.log(f"zmenu provedl: {self.order._history_user}")
+            cons.log(f"zmenu provedl: {self.order._history_user}")  # pylint: disable=protected-access  # type: ignore
             cons.log(
                 f"Order: {self.order.order_number} byl zmenen na {self.order.status}"
             )
