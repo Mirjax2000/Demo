@@ -34,8 +34,11 @@ from app_sprava_montazi.views import (
     CheckPDFProtocolView as CheckPDFProtocol,
     ExportOrdersExcelView as ExportOrdersExcel,
     UploadBackProtocolView as UploadBackProtocol,
-    AutocompleteOrdersView as AutocompleteOrders,
     IncompleteCustomersView as IncompleteCustomers,
+)
+from app_sprava_montazi.views_services import (
+    AutocompleteOrdersView as AutocompleteOrders,
+    OrderStatusView as OrderStatus,
 )
 
 # --- typove zkratky
@@ -90,9 +93,8 @@ app_sprava_montazi: list = [
     path(f"send/{PK}/order/", SendMail.as_view(), name="send_mail"),
     #
     # --- autocomplete ---
-    path(
-        "autocomplete-orders/", AutocompleteOrders.as_view(), name="autocomplete_orders"
-    ),
+    path("autocomp-orders/", AutocompleteOrders.as_view(), name="autocomplete_orders"),
+    path("order-status/", OrderStatus.as_view(), name="order_status"),
 ]
 
 

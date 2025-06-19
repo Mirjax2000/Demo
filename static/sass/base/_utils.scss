@@ -22,9 +22,19 @@
   font-size: 120% !important;
 }
 
+.u-negative-margin-5 {
+  margin: 0;
+  margin-bottom: -5px;
+}
+
 .u-txt-success {
   color: var(--success) !important;
   -webkit-text-stroke: 1px var(--success);
+}
+
+.u-txt-muted {
+  color: var(--txt-muted) !important;
+  -webkit-text-stroke: 1px var(--txt-muted);
 }
 
 .u-txt-success-light {
@@ -65,6 +75,10 @@
 
 .u-mt-medium {
   margin-top: 2.5rem;
+}
+
+.u-m-none {
+  margin: 0;
 }
 
 .u-s-none {

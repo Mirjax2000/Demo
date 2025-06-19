@@ -1020,13 +1020,3 @@ class CustomerUpdateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# --- Autocomplete ---
-
-
-class AutocompleteOrdersView(View):
-    def get(self, request):
-        term = request.GET.get("term", "")
-        zakazky = Order.objects.filter(order_number__istartswith=term).values_list(
-            "order_number", flat=True
-        )[:10]
-        return JsonResponse({"orders": list(zakazky)})

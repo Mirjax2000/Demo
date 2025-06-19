@@ -1,28 +1,3 @@
-<style>.autocomplete-suggestions {
-    position: absolute;
-    color:black;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 999;
-    border: 1px solid #ccc;
-    background: white;
-    max-height: 200px;
-    overflow-y: auto;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    border-radius: 4px;
-    font-size: 0.9rem;
-}
-
-.autocomplete-suggestions div {
-    padding: 8px 12px;
-    cursor: pointer;
-}
-
-.autocomplete-suggestions div:hover {
-    background-color: #f0f0f0;
-}
-</style>
 <fieldset class="L-form__fieldset ms-5">
     <legend>
         <i class="fa-solid fa-qrcode me-2"></i>Uložení protokolu
@@ -51,14 +26,21 @@
                    placeholder="Číslo zakázky ..." />
             <div id="orderSuggestions" class="autocomplete-suggestions"></div>
         </div>
+        <div>
+            <p class="m-0">
+                zakázka je ve stavu: <span id="StatusZakazky" class="u-txt-muted">nezjištěno</span>
+            </p>
+        </div>
         <!-- Přepínač statusu -->
-        <div class="form-check form-switch">
+        <div class="form-check form-switch" id="realizovanoSwitch">
+            <p class="u-txt-error u-txt-smaller p-0 u-negative-margin-5"
+               id="statusSwitchWarning">přepnutí stavu přepíše současný stav !!!</p>
             <input class="form-check-input"
                    type="checkbox"
                    id="flexSwitchCheckChecked"
                    name="realizovano"
                    checked>
-            <label class="form-check-label" for="flexSwitchCheckChecked">Přepnout status na Realizováno</label>
+            <label class="form-check-label" for="flexSwitchCheckChecked">Přepnout status na Realizováno ?</label>
         </div>
         <!-- Tlačítko -->
         <div class="u-txt-right mt-3">

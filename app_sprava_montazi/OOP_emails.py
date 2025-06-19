@@ -80,7 +80,8 @@ class CustomEmail:
             f"Datum montáže: {order.format_datetime(order.montage_termin)}\n\n"
             "Po dokončení zakázky odešlete fotokopii montážního protokolu na tento link:\n"
             f"{self.back_url}\n\n"
-            "V případě dotazů nás kontaktujte.\n\n"
+            "V případě dotazů nás kontaktujte.\n"
+            f"{self.dispecert_email_address(self.user)}\n\n"
             "S pozdravem,\n"
             "Tým Rhenus"
         )

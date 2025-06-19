@@ -1,0 +1,26 @@
+.autocomplete-suggestions {
+  position: absolute;
+  color: var(--txt-default);
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background: var(--bck-body);
+  box-shadow: 1px 1px 5px var(--shadow);
+  border: 1px solid var(--border);
+  border-top: none;
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.autocomplete-suggestions div {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.autocomplete-suggestions div:hover {
+  background-color: var(--bck-table-row-hover);
+  font-weight: bold;
+}
