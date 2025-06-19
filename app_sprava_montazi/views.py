@@ -13,12 +13,12 @@ from django.utils import timezone
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
 from django.core.management import call_command
-from django.http import HttpResponse, FileResponse, HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.forms import BaseModelForm, inlineformset_factory
-from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View, UpdateView, TemplateView
+from django.shortcuts import get_object_or_404, redirect, render
+from django.http import HttpResponse, FileResponse, HttpResponseForbidden, JsonResponse
 from django.views.generic import CreateView, DetailView, FormView, ListView
 
 # API rest ---
@@ -1018,3 +1018,15 @@ class CustomerUpdateView(APIView):
 
             return Response({"message": "Zákazníci byli aktualizováni."})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# --- Autocomplete ---
+
+
+class AutocompleteOrdersView(View):
+    def get(self, request):
+        term = request.GET.get("term", "")
+        zakazky = Order.objects.filter(order_number__istartswith=term).values_list(
+            "order_number", flat=True
+        )[:10]
+        return JsonResponse({"orders": list(zakazky)})

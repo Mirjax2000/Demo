@@ -34,6 +34,7 @@ from app_sprava_montazi.views import (
     CheckPDFProtocolView as CheckPDFProtocol,
     ExportOrdersExcelView as ExportOrdersExcel,
     UploadBackProtocolView as UploadBackProtocol,
+    AutocompleteOrdersView as AutocompleteOrders,
     IncompleteCustomersView as IncompleteCustomers,
 )
 
@@ -87,7 +88,13 @@ app_sprava_montazi: list = [
     #
     # --- email ---
     path(f"send/{PK}/order/", SendMail.as_view(), name="send_mail"),
+    #
+    # --- autocomplete ---
+    path(
+        "autocomplete-orders/", AutocompleteOrders.as_view(), name="autocomplete_orders"
+    ),
 ]
+
 
 app_accounts_urls: list = [
     path("accounts/register/", RegisterView.as_view(), name="signup"),

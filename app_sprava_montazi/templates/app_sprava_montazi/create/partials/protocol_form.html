@@ -1,20 +1,37 @@
+<style>.autocomplete-suggestions {
+    position: absolute;
+    color:black;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    border: 1px solid #ccc;
+    background: white;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.autocomplete-suggestions div {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.autocomplete-suggestions div:hover {
+    background-color: #f0f0f0;
+}
+</style>
 <fieldset class="L-form__fieldset ms-5">
     <legend>
         <i class="fa-solid fa-qrcode me-2"></i>Uložení protokolu
     </legend>
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
+        <!-- Obrázek -->
         <div class="L-form__group">
-            <label for="orderNumber">Zadej číslo zakázky</label>
-            <input class="mt-1 L-form__input"
-                   type="text"
-                   id="orderNumber"
-                   name="order_number"
-                   required
-                   placeholder="Číslo zakázky ..." />
-        </div>
-        <div class="L-form__group">
-            <label for="fileInputProtocol">vyberte soubor s obrázkem protokolu</label>
+            <label for="fileInputProtocol">Vyberte soubor s obrázkem protokolu</label>
             <input class="form-control mt-1"
                    type="file"
                    id="fileInputProtocol"
@@ -22,7 +39,28 @@
                    required
                    accept="image/*" />
         </div>
-        <!---->
+        <!-- Číslo zakázky + autocomplete -->
+        <div class="L-form__group position-relative ">
+            <label for="orderNumber">Zadej číslo zakázky</label>
+            <input class="mt-1 L-form__input"
+                   type="text"
+                   id="orderNumber"
+                   name="order_number"
+                   autocomplete="off"
+                   required
+                   placeholder="Číslo zakázky ..." />
+            <div id="orderSuggestions" class="autocomplete-suggestions"></div>
+        </div>
+        <!-- Přepínač statusu -->
+        <div class="form-check form-switch">
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="flexSwitchCheckChecked"
+                   name="realizovano"
+                   checked>
+            <label class="form-check-label" for="flexSwitchCheckChecked">Přepnout status na Realizováno</label>
+        </div>
+        <!-- Tlačítko -->
         <div class="u-txt-right mt-3">
             <button type="submit" class="btn btn-primary">
                 <i class="fa-solid fa-plus me-2"></i>Ulož protokol

@@ -228,6 +228,45 @@
         });
     }
 
+    // --- autocomplete orderNumber ---
+    const orderNumberInput = document.getElementById("orderNumber");
+    const orderSuggestions = document.getElementById("orderSuggestions");
+
+    if (orderNumberInput && orderSuggestions) {
+        orderNumberInput.addEventListener("input", function () {
+            const query = this.value;
+
+            if (query.length < 2) {
+                orderSuggestions.innerHTML = "";
+                return;
+            }
+
+            $.ajax({
+                url: "/autocomplete-orders/",
+                data: { term: query },
+                success: function (data) {
+                    let html = "";
+                    data.orders.forEach(function (item) {
+                        html += `<div class="suggestion-item">${item}</div>`;
+                    });
+                    orderSuggestions.innerHTML = html;
+                }
+            });
+        });
+
+        document.addEventListener("click", function (e) {
+            if (!e.target.closest("#orderNumber") && !e.target.closest("#orderSuggestions")) {
+                orderSuggestions.innerHTML = "";
+            }
+        });
+
+        orderSuggestions.addEventListener("click", function (e) {
+            if (e.target.classList.contains("suggestion-item")) {
+                orderNumberInput.value = e.target.textContent;
+                orderSuggestions.innerHTML = "";
+            }
+        });
+    }
 
 
 })();
