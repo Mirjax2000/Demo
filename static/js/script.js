@@ -18,16 +18,39 @@
         const fileInput = document.getElementById("fileInput");
         const fileError = document.getElementById("fileError");
 
-        if (fileInput && fileError) { // Ensure elements exist
+        // Allowed image file types
+        const allowedImageTypes = [
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/webp",
+            "image/bmp",
+            "image/gif",
+        ];
+
+        if (fileInput && fileError) {
             fileInput.addEventListener("change", function () {
                 const file = fileInput.files[0];
-                if (file && file.size > 5 * 1024 * 1024) { // 5 MB
-                    const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-                    fileError.innerHTML = `Soubor je příliš velký <strong class="u-txt-error">${sizeMB} MB</strong>.<br> Max.velikost je 5 MB.`;
-                    fileInput.value = "";
-                } else {
-                    fileError.textContent = "";
-                    if (fileInput.form) { // Check if form exists before submitting
+                fileError.textContent = ""; 
+
+                if (file) {
+                    // Check file size
+                    if (file.size > 5 * 1024 * 1024) { // 5 MB
+                        const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                        fileError.innerHTML = `Soubor je příliš velký <strong class="u-txt-error">${sizeMB} MB</strong>.<br> Max. velikost je 5 MB.`;
+                        fileInput.value = ""; 
+                        return; 
+                    }
+
+                    // Check file type
+                    if (!allowedImageTypes.includes(file.type)) {
+                        fileError.innerHTML = `Soubor musí být ve formátu obrázku (např. JPG, PNG, WebP).<br> Nepovolený typ souboru: <strong class="u-txt-error">${file.type}</strong>.`;
+                        fileInput.value = ""; // Clear the selected file
+                        return; // Stop further processing
+                    }
+
+                    // If both size and type are valid, submit the form
+                    if (fileInput.form) {
                         fileInput.form.submit();
                     }
                 }
