@@ -10,8 +10,9 @@
             {% include "app_sprava_montazi/teams/partials/team_detail_partial.html" %}
         </div>
         <!---->
-        <p class="mt-3">
-            <a href="{% url 'teams' %}">Zpět na seznam týmů.</a>
-        </p>
+        <hr>
+        <a href="{% url 'teams' %}"
+           class="btn btn-secondary btn-sm u-width-180 text-nowrap me-2">
+            <i class="fa-solid fa-backward me-2"></i>Zpět na seznam </a>
     </section>
 {% endblock content %}

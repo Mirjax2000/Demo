@@ -1,40 +1,49 @@
+<h3 class="L-detail__fieldset__header">Protokol</h3>
 <form method="post"
       class="d-block ms-5 me-5 mb-2"
       action="{% url "generate_pdf" order.pk %}">
     {% csrf_token %}
-    <div class="form-check">
+    <div class="form-check mb-1">
         <input class="form-check-input"
                type="radio"
                name="zona"
                id="flexRadioDefault1"
                value="1">
-        <label class="form-check-label" for="flexRadioDefault1">Zona 1</label>
+        <label class="form-check-label" for="flexRadioDefault1">
+            Zona 1:<span class="ms-5 ps-1">do 10km</span>
+        </label>
     </div>
-    <div class="form-check">
+    <div class="form-check mb-1">
         <input class="form-check-input"
                type="radio"
                name="zona"
                id="flexRadioDefault2"
                value="2">
-        <label class="form-check-label" for="flexRadioDefault2">Zona 2</label>
+        <label class="form-check-label" for="flexRadioDefault2">
+            Zona 2:<span class="ms-5 ps-1">do 20km</span>
+        </label>
     </div>
-    <div class="form-check">
+    <div class="form-check mb-1">
         <input class="form-check-input"
                type="radio"
                name="zona"
                id="flexRadioDefault3"
                value="3">
-        <label class="form-check-label" for="flexRadioDefault3">Zona 3</label>
+        <label class="form-check-label" for="flexRadioDefault3">
+            Zona 3:<span class="ms-5 ps-1">do 50km</span>
+        </label>
     </div>
-    <div class="form-check">
+    <div class="form-check mb-2">
         <input class="form-check-input"
                type="radio"
                name="zona"
                id="flexRadioDefault4"
                value="4">
-        <label class="form-check-label" for="flexRadioDefault4">Nad zonu 3</label>
+        <label class="form-check-label" for="flexRadioDefault4">
+            Nad zonu 3:<span class="ms-2 ps-1">nad 50km</span>
+        </label>
     </div>
-    <div class="u-opacity-0 u-pdf-km" id="km-wrapper">
+    <div class="u-pdf-km" id="km-wrapper">
         <label for="zona_km">Počet km (nad zónu 3):</label>
         <input type="number" id="zona_km" name="zona_km" min=1 max=999>
     </div>

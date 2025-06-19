@@ -232,35 +232,37 @@
     // Check "zona" radio buttons and manage 'km-wrapper' visibility and 'zona_km' required attribute
     function checkZona() {
         const pdf_form_radios = document.querySelectorAll('input[name=zona]');
-        const kmWrapper = document.getElementById('km-wrapper');
-        const defaultPdfBtn = document.getElementById('default_pdf_btn');
+        const $kmWrapper = $('#km-wrapper');
+        const $defaultPdfBtn = $('#default_pdf_btn');
         const zonaKmInput = document.getElementById('zona_km');
 
-        if (!pdf_form_radios.length || !kmWrapper || !defaultPdfBtn || !zonaKmInput) {
+        if (!pdf_form_radios.length || !$kmWrapper.length || !$defaultPdfBtn.length || !zonaKmInput) {
             return;
         }
+
+        $kmWrapper.hide();
+        zonaKmInput.required = false;
 
         pdf_form_radios.forEach(radio => {
             radio.addEventListener('change', () => {
                 if (radio.value === '4' && radio.checked) {
-                    kmWrapper.classList.remove('u-opacity-0');
-                    kmWrapper.classList.add('u-opacity-1');
+                    $kmWrapper.stop(true, true).slideDown("fast");
                     zonaKmInput.required = true;
                 } else if (radio.checked) {
-                    kmWrapper.classList.remove('u-opacity-1');
-                    kmWrapper.classList.add('u-opacity-0');
+                    $kmWrapper.stop(true, true).slideUp("fast");
                     zonaKmInput.required = false;
                 }
 
                 const someChecked = Array.from(pdf_form_radios).some(r => r.checked);
                 if (someChecked) {
-                    defaultPdfBtn.classList.remove('disabled');
+                    $defaultPdfBtn.removeClass('disabled');
                 } else {
-                    defaultPdfBtn.classList.add('disabled');
+                    $defaultPdfBtn.addClass('disabled');
                 }
             });
         });
     }
+
 
     // Autocomplete order number
     document.addEventListener("DOMContentLoaded", function () {

@@ -8,13 +8,13 @@
 <!--Zaterminovano adviced-->
 {% if order.status == "Adviced" %}
     <a href="{% url 'protocol' order.pk %}"
-       class="btn btn-primary btn-sm u-width-180 text-nowrap">
+       class="btn btn-primary btn-sm u-width-180 text-nowrap me-2">
         <i class="fa-solid fa-paper-plane me-2"></i>Montážní protokol</a>
 {% endif %}
 <!---->
 <!--Realized Realizováno-->
 {% if order.status == "Realized" %}
     <a href="{% url 'protocol' order.pk %}"
-       class="btn btn-primary btn-sm u-width-180 text-nowrap">
+       class="btn btn-primary btn-sm u-width-180 text-nowrap me-2">
         <i class="fa-solid fa-paper-plane me-2"></i>Montážní protokol</a>
 {% endif %}
