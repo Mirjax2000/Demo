@@ -49,24 +49,8 @@
                        class="btn btn-primary ps-5 pe-5 pt-2 pb-2 u-txt-bigger">
                     <i class="fa-solid fa-camera me-2"></i> Nahrát fotografii
                 </label>
-                <h3 id="fileError" class="mt-5"></h3>
+                <p id="fileError" class="mt-5 u-txt-bigger"></p>
             </form>
-            <script>
-    const fileInput = document.getElementById("fileInput");
-    const fileError = document.getElementById("fileError");
-
-    fileInput.addEventListener("change", function () {
-        const file = fileInput.files[0];
-        if (file && file.size > 5 * 1024 * 1024) {  // 5 MB
-            const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-            fileError.innerHTML = `Soubor je příliš velký <strong class="u-txt-error">${sizeMB} MB</strong>.<br> Max.velikost je 5 MB.`;
-            fileInput.value = "";  
-        } else {
-            fileError.textContent = "";
-            fileInput.form.submit(); 
-        }
-    });
-            </script>
         </div>
         {% include "includes/scripts.html" %}
     </body>

@@ -13,19 +13,40 @@
     const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
     const emptyFormHtml = $('#empty-form-template');
 
+    // File input validation
+    document.addEventListener("DOMContentLoaded", function () {
+        const fileInput = document.getElementById("fileInput");
+        const fileError = document.getElementById("fileError");
+
+        if (fileInput && fileError) { // Ensure elements exist
+            fileInput.addEventListener("change", function () {
+                const file = fileInput.files[0];
+                if (file && file.size > 5 * 1024 * 1024) { // 5 MB
+                    const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                    fileError.innerHTML = `Soubor je příliš velký <strong class="u-txt-error">${sizeMB} MB</strong>.<br> Max.velikost je 5 MB.`;
+                    fileInput.value = "";
+                } else {
+                    fileError.textContent = "";
+                    if (fileInput.form) { // Check if form exists before submitting
+                        fileInput.form.submit();
+                    }
+                }
+            });
+        }
+    });
+
     window.addEventListener("load", () => {
         syncHeight();
         checkZona();
         P_main.classList.add("visible");
     });
-    // messages
+
+    // Messages
     if (messages && messages.length > 0) {
         messages.each(function (index, element) {
-            // Převod elementu na jQuery objekt
             $(element).hide();
             $(element).slideDown(250);
 
-            // Po 5 sekundách efekt zmizení + odstranění elementu
             setTimeout(function () {
                 $(element).slideUp(250, function () {
                     $(this).remove();
@@ -33,10 +54,8 @@
             }, 5000);
         });
     }
-    // articles
 
-
-    // form cleaning
+    // Form cleaning
     deleteBtns.forEach(function (btn) {
         btn.addEventListener("click", function (e) {
             e.preventDefault();
@@ -50,49 +69,46 @@
                 ) {
                     if (field.tagName === "SELECT" && field.name === "team_type") {
                         field.value = "By_assembly_crew";
-                    }
-                    else if (field.tagName === "SELECT" && field.name === "status") {
+                    } else if (field.tagName === "SELECT" && field.name === "status") {
                         field.value = "New";
-                    }
-                    else {
+                    } else {
                         field.value = "";
                     }
                 }
             });
 
             fieldset.querySelectorAll(".L-form__error").forEach(function (errorDiv) {
-                errorDiv.innerHTML = "";  // Vyčistění chybových hlášení
+                errorDiv.innerHTML = "";
             });
         });
     });
 
-    // validace tel num v inputech
+    // Validate phone numbers in inputs
     numberInputs.forEach(function (input) {
         input.addEventListener('input', function () {
             this.value = this.value.replace(/[^0-9]/g, '');
         });
     });
 
-    // theme control
+    // Theme control
     function toggleTheme() {
         const current = html.dataset.theme;
         const newTheme = current === "light" ? "dark" : "light";
 
         html.dataset.theme = newTheme;
-
         localStorage.setItem("theme", newTheme);
-
         html.classList.remove(current);
         html.classList.add(newTheme);
     }
 
-    themeToggler.addEventListener("click", toggleTheme);
-    // 
+    if (themeToggler) { // Ensure themeToggler exists
+        themeToggler.addEventListener("click", toggleTheme);
+    }
 
+    // DataTable for orders
     if (orderTable) {
         $(orderTable).DataTable({
             order: [[0, 'desc']],
-
             rowReorder: false,
             fixedColumns: true,
             pageLength: 15,
@@ -114,6 +130,7 @@
         });
     }
 
+    // DataTable for teams
     if (teamTable) {
         $(teamTable).DataTable({
             order: [[3, 'asc']],
@@ -142,13 +159,13 @@
         });
     }
 
+    // DataTable for articles
     if (articleTable) {
         $(articleTable).DataTable({
             rowReorder: false,
             fixedColumns: true,
             searching: false,
             paging: false,
-
             columnDefs: [
                 { orderable: false, targets: [3] },
             ],
@@ -158,35 +175,30 @@
         });
     }
 
+    // Article formset
+    if (formsetContainer.length && totalFormsInput.length && emptyFormHtml.length) {
+        $('#add-article-button').on('click', function () {
+            const formIndex = parseInt(totalFormsInput.val(), 10);
+            const newFormHtml = emptyFormHtml.html().trim().replace(/__prefix__/g, formIndex);
+            formsetContainer.append(newFormHtml);
+            totalFormsInput.val(formIndex + 1);
+        });
 
-    // ---- article formset
-    // Přidání nového formuláře
-    $('#add-article-button').on('click', function () {
-        const formIndex = parseInt(totalFormsInput.val(), 10);
-        const newFormHtml = emptyFormHtml.html().trim().replace(/__prefix__/g, formIndex);
-        formsetContainer.append(newFormHtml);
-        totalFormsInput.val(formIndex + 1);
-    });
+        formsetContainer.on('click', '.remove-article-button', function () {
+            const formDiv = $(this).closest('.L-form__article-form');
+            const deleteInput = formDiv.find('input[type="checkbox"][name$="-DELETE"]');
+            if (deleteInput.length) {
+                deleteInput.prop('checked', true);
+                formDiv.hide();
+            } else {
+                formDiv.remove();
+                const newTotal = formsetContainer.find('.L-form__article-form').length;
+                totalFormsInput.val(newTotal);
+            }
+        });
+    }
 
-    // Odebrání formuláře
-    formsetContainer.on('click', '.remove-article-button', function () {
-        const formDiv = $(this).closest('.L-form__article-form');
-
-        // Pokud je ve formuláři delete checkbox (can_delete), zaškrtneme ho a skryjeme formulář
-        const deleteInput = formDiv.find('input[type="checkbox"][name$="-DELETE"]');
-        if (deleteInput.length) {
-            deleteInput.prop('checked', true);
-            formDiv.hide();
-        } else {
-            // Jinak rovnou odstraníme z DOM
-            formDiv.remove();
-
-            // Snížení počtu TOTAL_FORMS není nutné pro backend, ale můžeme ho udělat:
-            const newTotal = formsetContainer.find('.L-form__article-form').length;
-            totalFormsInput.val(newTotal);
-        }
-    });
-    // ----
+    // Synchronize height of left and right elements
     function syncHeight() {
         const left = document.querySelector('.left');
         const right = document.querySelector('.right');
@@ -195,12 +207,13 @@
             right.style.maxHeight = left.offsetHeight + 50 + 'px';
         }
     }
-    // ---
+
+    // Check "zona" radio buttons and manage 'km-wrapper' visibility and 'zona_km' required attribute
     function checkZona() {
         const pdf_form_radios = document.querySelectorAll('input[name=zona]');
         const kmWrapper = document.getElementById('km-wrapper');
         const defaultPdfBtn = document.getElementById('default_pdf_btn');
-        const zonaKmInput = document.getElementById('zona_km'); // input, co chceme dělat required
+        const zonaKmInput = document.getElementById('zona_km');
 
         if (!pdf_form_radios.length || !kmWrapper || !defaultPdfBtn || !zonaKmInput) {
             return;
@@ -228,7 +241,7 @@
         });
     }
 
-    // --- autocomplete orderNumber ---
+    // Autocomplete order number
     document.addEventListener("DOMContentLoaded", function () {
         const orderNumberInput = document.getElementById("orderNumber");
         const orderSuggestions = document.getElementById("orderSuggestions");
@@ -269,9 +282,8 @@
                 });
             });
 
-
             orderNumberInput.addEventListener("blur", function () {
-                const enteredOrderNumber = this.value.trim(); // Trim here
+                const enteredOrderNumber = this.value.trim();
                 if (enteredOrderNumber.length > 0 && orderSuggestions.innerHTML === "") {
                     fetchStatus(enteredOrderNumber);
                 }
@@ -302,7 +314,6 @@
 
         // Fetch status from backend
         function fetchStatus(orderNumber) {
-
             $.ajax({
                 url: "/order-status/",
                 data: { order_number: orderNumber },
@@ -350,5 +361,4 @@
             }
         }
     });
-
 })();

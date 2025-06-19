@@ -18,7 +18,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen.canvas import Canvas
 from rich.console import Console
-from .models import Article, Order, OrderPDFStorage
+from .models import Article, OrderPDFStorage
 
 # ---
 cons: Console = Console()
@@ -246,7 +246,7 @@ class Section:
         utils.draw_txt(company.ico, y_offset=36)
         utils.draw_txt(company.dic, y_offset=47)
         utils.draw_txt(company.ref, y_offset=58)
-        utils.place_img("rhenus_logo.png", img_width=180, img_height=42, x=375, y=762)
+        utils.place_img("rhenus_logo.png", img_width=167, img_height=39, x=387, y=765)
 
     def footer(self) -> None:
         """Footer section"""
@@ -721,7 +721,7 @@ class SCCZPdfGenerator(PdfGenerator):
         # ---
         if model is not None:
             order_number = model.order_number
-            utils.generate_qrcode(order_number.upper(), 420, 657)
+            utils.generate_qrcode(order_number.upper(), 420, 660)
             section.sccz_data_section(model)  # --- data layer ---
             cons.log(f"SCCZ pdf: {order_number} sestaven", style="blue")
         else:
@@ -758,7 +758,7 @@ class DefaultPdfGenerator(PdfGenerator):
             }
 
             # ---
-            utils.generate_qrcode(order_number.upper(), 420, 657)
+            utils.generate_qrcode(order_number.upper(), 420, 660)
             section.default_data_section(
                 model, km, shipping_zona[zona]
             )  # --- data layer ---

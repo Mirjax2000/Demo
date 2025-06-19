@@ -204,10 +204,12 @@ body.home {
 
 .u-opacity-0 {
   opacity: 0;
+  transition: opacity 0.5s ease-in-out;
 }
 
 .u-opacity-1 {
   opacity: 1;
+  transition: opacity 0.5s ease-in-out;
 }
 
 .u-pdf-km {
