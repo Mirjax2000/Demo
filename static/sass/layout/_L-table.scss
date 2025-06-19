@@ -4,7 +4,7 @@
 .L-table {
   @extend %transition-theme;
 
-  width: clamp(30rem, 100%, 87.5rem);
+  width: clamp(30rem, 100%, 90%);
   margin-top: $header-margin;
   margin-inline-start: 2%;
 

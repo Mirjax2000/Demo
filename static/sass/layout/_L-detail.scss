@@ -38,7 +38,7 @@
   &__list {
     margin: 0;
     padding: 0;
-    margin-bottom: 1em;
+    margin-bottom: 0.75em;
   }
 
   &__item {
@@ -46,8 +46,8 @@
     @extend %border-radius;
 
     list-style-type: none;
-    margin-bottom: 0.3em;
-    padding: 0.5em;
+    margin-bottom: 0.1em;
+    padding: 0.3em;
     background-color: var(--bck-list-item);
     border: 1px solid var(--border);
   }

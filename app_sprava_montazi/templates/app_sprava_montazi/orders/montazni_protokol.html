@@ -5,7 +5,7 @@
 <!---->
 {% block content %}
     <section>
-        <h2 class="mt-1">montazni protokol {{ order.order_number|upper }}</h2>
+        <h2 class="mt-1 ">montazni protokol: {{ order.order_number|upper }}</h2>
         <hr>
         <div class="u-flex-row-start">
             {% include "app_sprava_montazi/teams/partials/team_detail_partial.html" %}

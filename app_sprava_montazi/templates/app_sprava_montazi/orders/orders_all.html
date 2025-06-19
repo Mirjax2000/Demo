@@ -13,7 +13,7 @@
     <hr>
     <div class="u-flex-row-between">
       <div class="L-table__nav-panel__buttons">
-        <a href="{% url "order_create" %}" class="btn btn-primary">
+        <a href="{% url "order_create" %}" class="btn btn-primary btn-sm">
           <i class="fa-solid fa-circle-plus me-2"></i>
           <span>Vytvořit zakázku</span>
         </a>
@@ -21,8 +21,8 @@
       <!---->
       <div class="L-table__nav-panel__buttons">
         <a href="{% url 'order_export' %}?{{ request.GET.urlencode }}"
-           class="btn btn-primary">
-          <i class="fa-regular fa-file-excel me-2"></i>
+           class="btn btn-primary btn-sm">
+          <i class="fa-regular fa-file-excel me-2 "></i>
           <span>Excel export</span>
         </a>
       </div>

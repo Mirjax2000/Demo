@@ -18,7 +18,6 @@
         const fileInput = document.getElementById("fileInput");
         const fileError = document.getElementById("fileError");
 
-        // Allowed image file types
         const allowedImageTypes = [
             "image/jpeg",
             "image/jpg",
@@ -31,25 +30,24 @@
         if (fileInput && fileError) {
             fileInput.addEventListener("change", function () {
                 const file = fileInput.files[0];
-                fileError.textContent = ""; 
+                fileError.textContent = "";
 
                 if (file) {
-                    // Check file size
+
                     if (file.size > 5 * 1024 * 1024) { // 5 MB
                         const sizeMB = (file.size / 1024 / 1024).toFixed(2);
                         fileError.innerHTML = `Soubor je příliš velký <strong class="u-txt-error">${sizeMB} MB</strong>.<br> Max. velikost je 5 MB.`;
-                        fileInput.value = ""; 
-                        return; 
+                        fileInput.value = "";
+                        return;
                     }
 
-                    // Check file type
+
                     if (!allowedImageTypes.includes(file.type)) {
                         fileError.innerHTML = `Soubor musí být ve formátu obrázku (např. JPG, PNG, WebP).<br> Nepovolený typ souboru: <strong class="u-txt-error">${file.type}</strong>.`;
-                        fileInput.value = ""; // Clear the selected file
-                        return; // Stop further processing
+                        fileInput.value = "";
+                        return;
                     }
 
-                    // If both size and type are valid, submit the form
                     if (fileInput.form) {
                         fileInput.form.submit();
                     }

@@ -1,0 +1,10 @@
+<p class="mb-3">Další možnosti</p>
+<div>
+    <a href="{% url "order_history" order.pk %}"
+       class="btn btn-primary u-txt-smaller text-nowrap">
+        <i class="fa-solid fa-timeline me-2"></i>Zobrazit historii</a>
+</div>
+<hr>
+<p class="mt-3">
+    <a href="{% url 'orders' %}">Zpět na seznam objednávek</a>
+</p>

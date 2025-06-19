@@ -88,22 +88,10 @@
         </ul>
     </div>
     <!---->
-    <div>
-        <a href="{% url "order_history" order.pk %}"
-           class="btn btn-primary d-block ms-5 me-5 mb-2">
-            <i class="fa-solid fa-timeline me-2"></i>Zobrazit historii</a>
-    </div>
-    <div>
+    <div class="text-end">
         <a href="{% url 'order_update' order.pk %}"
-           class="btn btn-primary d-block ms-5 me-5 mb-2">
+           class="btn btn-primary btn-sm text-nowrap min-width-13em">
             <i class="fa-solid fa-pen-to-square me-2"></i>Upravit objednávku</a>
     </div>
-    {% if order.status == "Adviced" %}
-        <div>
-            <a href="{% url 'protocol' order.pk %}"
-               class="btn btn-primary d-block ms-5 me-5">
-                <i class="fa-solid fa-paper-plane me-2"></i>Montážní protokol</a>
-        </div>
-    {% endif %}
 </section>
 <!---->
