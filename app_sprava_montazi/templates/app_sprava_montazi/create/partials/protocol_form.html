@@ -2,7 +2,9 @@
     <legend>
         <i class="fa-solid fa-qrcode me-2"></i>Uložení protokolu
     </legend>
-    <form action="" method="post" enctype="multipart/form-data">
+    <form action="{% url "upload_protocol" %}"
+          method="post"
+          enctype="multipart/form-data">
         {% csrf_token %}
         <!-- Obrázek -->
         <div class="L-form__group">

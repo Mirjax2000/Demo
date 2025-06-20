@@ -926,8 +926,14 @@ class UploadBackProtocolView(View):
 
     def post(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
-        order = get_object_or_404(Order, pk=pk)
         image = request.FILES.get("image")
+        # ---
+        try:
+            order = Order.objects.get(pk=pk)
+        except Order.DoesNotExist:
+            messages.error(request, "Zakázka neexistuje.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+        #
         # --- instance
         uploader = ProtocolUploader(order, image, request)
 
@@ -948,6 +954,31 @@ class UploadBackProtocolView(View):
         uploader.convert_and_save_webp()
 
         return HttpResponse(uploader.html_success())
+
+
+class ProtocolUploadView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        messages.error(request, "Formulář nebyl odeslán.")
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+
+    def post(self, request):
+        image = request.FILES.get("image")
+        order_number = str(request.POST.get("order_number", "")).lower()
+        realizovano = request.POST.get("realizovano") == "on"
+
+        try:
+            order = Order.objects.get(order_number=order_number)
+        except Order.DoesNotExist:
+            messages.error(request, f"Zakázka s číslem '{order_number}' neexistuje.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        uploader = ProtocolUploader(order, image, request)
+
+        messages.success(
+            request,
+            f"Obrázek protokolu pro zakázku: {order_number} byl úspěšně uložen.",
+        )
+        return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
 # --- API ---

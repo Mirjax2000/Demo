@@ -31,6 +31,7 @@ from app_sprava_montazi.views import (
     ClientsOrdersView as ClientsOrders,
     CustomerUpdateView as CustomerUpdate,
     CheckPDFProtocolView as CheckPDFProtocol,
+    ProtocolUploadView as ProtocolUpload,
     ExportOrdersExcelView as ExportOrdersExcel,
     UploadBackProtocolView as UploadBackProtocol,
     IncompleteCustomersView as IncompleteCustomers,
@@ -77,6 +78,7 @@ app_sprava_montazi: list = [
     #
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),
+    path("createpage/upload/", ProtocolUpload.as_view(), name="upload_protocol"),
     #
     # --- teams ---
     path("teams/", Teams.as_view(), name="teams"),

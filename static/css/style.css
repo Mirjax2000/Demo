@@ -24,9 +24,9 @@
 }
 
 [data-theme=dark] {
-  --border: rgba(248, 249, 250, 0.2392156863);
+  --border: #424242;
   --shadow: rgba(248, 249, 250, 0.0705882353);
-  --bck-list-item: black;
+  --bck-list-item: #232323;
   --bck-sidebar: #212529;
   --bck-body: #212529;
   --bck-table-head: #212529;
@@ -569,6 +569,7 @@ body.home {
   padding: 0.3em;
   background-color: var(--bck-list-item);
   border: 1px solid var(--border);
+  box-shadow: 1px 1px 5px --shadow;
 }
 
 .C-spinner {
