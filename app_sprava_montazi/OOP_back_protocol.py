@@ -50,8 +50,13 @@ class ProtocolUploader:
 
     def validate_image(self) -> bool:
         """Validace obrazku"""
+        max_size_mb: int = 5
         if not self.image:
             self.set_error("Soubor nevybrán")
+            return False
+
+        if self.image.size > max_size_mb * 1024 * 1024:
+            self.set_error(f"Soubor je větší než {max_size_mb} MB")
             return False
 
         ext = os.path.splitext(self.image.name)[1]
@@ -60,6 +65,7 @@ class ProtocolUploader:
                 f"Špatná koncovka souboru <strong>{ext}</strong>, nejedná se o obrázek"
             )
             return False
+
         return True
 
     def prepare_file_for_saving(self) -> bool:

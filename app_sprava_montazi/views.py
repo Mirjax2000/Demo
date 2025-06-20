@@ -972,12 +972,30 @@ class ProtocolUploadView(LoginRequiredMixin, View):
             messages.error(request, f"Zakázka s číslem '{order_number}' neexistuje.")
             return redirect(request.META.get("HTTP_REFERER", "/"))
 
-        uploader = ProtocolUploader(order, image, request)
+        uploader: ProtocolUploader = ProtocolUploader(order, image, request)
 
-        messages.success(
-            request,
-            f"Obrázek protokolu pro zakázku: {order_number} byl úspěšně uložen.",
+        if not uploader.validate_image():
+            return uploader.redirect_with_error()
+
+        if not uploader.prepare_file_for_saving():
+            return uploader.redirect_with_error()
+
+        if not uploader.save_protocol_object():
+            return uploader.redirect_with_error()
+        # ---
+        change_status_message: str = ""
+        if realizovano:
+            change_status_message = "<p style='text-indent:4.7em;'>a status přepnut na <strong>Realizováno</strong></p>"
+            uploader.update_order_status()
+
+        uploader.delete_token()
+        uploader.convert_and_save_webp()
+
+        save_message: str = (
+            f"Obrázek protokolu pro zakázku: {order_number} byl úspěšně uložen."
         )
+        save_message += change_status_message
+        messages.success(request, save_message)
         return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
