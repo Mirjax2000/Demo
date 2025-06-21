@@ -25,5 +25,9 @@
             <!--recieved protocol-->
             {% include "app_sprava_montazi/orders/partials/recieved_protokol.html" %}
         </div>
+        <hr>
+        <a href="{% url "order_detail" order.pk %}"
+           class="btn btn-outline-secondary btn-sm u-width-180 text-nowrap me-2">
+            <i class="fa-solid fa-backward me-2"></i>Zpět na seznam </a>
     </section>
 {% endblock content %}

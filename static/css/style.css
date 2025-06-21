@@ -20,6 +20,7 @@
   --bck-table-row-odd: #fff;
   --bck-table-row-hover: #e5e5e5;
   --txt-default: #212529;
+  --txt-default-calm: #2b5277;
   --txt-muted: #c2c2c2;
 }
 
@@ -34,6 +35,7 @@
   --bck-table-row-even: #212529;
   --bck-table-row-hover: #4f4f4f;
   --txt-default: #f8f9fa;
+  --txt-default-calm: rgba(138, 179, 255, 0.3490196078);
   --txt-muted: #8b8b8b;
 }
 
@@ -485,7 +487,7 @@ body.home {
   width: 100%;
 }
 .L-table__table {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
 }
 .L-table__table thead th {
   color: var(--txt-default);
@@ -505,6 +507,8 @@ body.home {
 }
 .L-table__link {
   color: var(--txt-default);
+  padding-bottom: 1px;
+  text-decoration: none;
 }
 .L-table__update {
   text-align: center;
@@ -550,7 +554,7 @@ body.home {
   max-height: 100%;
 }
 .L-detail__fieldset__header {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 400;
 }
 .L-detail__hidden {
@@ -565,11 +569,12 @@ body.home {
 }
 .L-detail__item {
   list-style-type: none;
-  margin-bottom: 0.1em;
+  font-size: 0.9rem;
+  margin-bottom: 0.25em;
   padding: 0.3em;
   background-color: var(--bck-list-item);
   border: 1px solid var(--border);
-  box-shadow: 1px 1px 5px --shadow;
+  box-shadow: 0 0 5px --shadow;
 }
 
 .C-spinner {

@@ -48,8 +48,8 @@
         <div class="u-flex-row-between-start">
             {% if article_formset.can_delete %}
                 <button type="button"
-                        class="remove-article-button btn btn-danger btn-sm u-txt-smaller mb-2">
-                    <i class="fa-solid fa-minus me-2"></i>Odebrat artikl
+                        class="remove-article-button btn btn-outline-danger btn-sm u-txt-smaller mb-2">
+                    <i class="fa-solid fa-trash me-2"></i>Odebrat artikl
                 </button>
             {% endif %}
             <button class="btn btn-outline-secondary form__delete C-clear-form">Vyčistit</button>
@@ -58,7 +58,10 @@
         <span class="d-none">{{ form.DELETE }}</span>
         <div class="u-flex-row-between-start">
             {% if article_formset.can_delete %}
-                <button type="button" class="remove-article-button btn btn-danger btn-sm">Odebrat artikl</button>
+                <button type="button"
+                        class="remove-article-button btn btn-outline-danger btn-sm">
+                    <i class="fa-solid fa-trash me-2"></i>Odebrat artikl
+                </button>
             {% endif %}
         </div>
     {% endif %}

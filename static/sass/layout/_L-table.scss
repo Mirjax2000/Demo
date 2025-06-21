@@ -44,7 +44,7 @@
   }
 
   &__table {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
 
     thead th {
       @extend %transition-theme;
@@ -73,6 +73,8 @@
 
   &__link {
     color: var(--txt-default);
+    padding-bottom: 1px;
+    text-decoration: none;
   }
 
   &__update {

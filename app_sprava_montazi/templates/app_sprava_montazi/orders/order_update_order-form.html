@@ -16,9 +16,6 @@
                                 <i class="fa-solid fa-plus me-2"></i>Uložit objednávku
                             </button>
                         </div>
-                        <div class="u-txt-right mt-3">
-                            <a href="{% url 'orders' %}" class="u-txt-right">Zpět na seznam objednávek</a>
-                        </div>
                     </div>
                 </fieldset>
                 <!---->
@@ -62,5 +59,9 @@
                 {% endif %}
             </div>
         </form>
+        <hr>
+        <div>
+            <a href="{% url 'orders' %}" class="btn btn-outline-secondary"><i class="fa-solid fa-backward me-2"></i>Zpět na seznam objednávek</a>
+        </div>
     </section>
 {% endblock content %}

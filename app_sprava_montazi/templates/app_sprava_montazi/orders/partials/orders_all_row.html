@@ -2,7 +2,7 @@
     <tr class="L-table__body__row">
         <!--cislo zakazky-->
         <td>
-            <a href="{% url "order_detail" order.id %}" class="L-table__link">{{ order.order_number|upper }}</a>
+            <a href="{% url "order_detail" order.pk %}" class="L-table__link">{{ order.order_number|upper }}</a>
         </td>
         <!--misto urceni-->
         <td>{{ order.distrib_hub }}</td>
@@ -23,7 +23,8 @@
         <!--zakaznik-->
         {% if order.client.incomplete %}
             <td title="{{ order.client }}" class="u-txt-warning">
-                ⚠️<span class="ms-2">{{ order.client.first_15 }}</span>
+                <span>⚠️</span>
+                <span>{{ order.client.first_15 }}</span>
             </td>
         {% else %}
             <td title="{{ order.client }}" class="u-txt-success">

@@ -24,7 +24,7 @@
     }
 
     &__header {
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       font-weight: 400;
     }
   }
@@ -46,10 +46,11 @@
     @extend %border-radius;
 
     list-style-type: none;
-    margin-bottom: 0.1em;
+    font-size: 0.9rem;
+    margin-bottom: 0.25em;
     padding: 0.3em;
     background-color: var(--bck-list-item);
     border: 1px solid var(--border);
-    box-shadow: 1px 1px 5px (--shadow);
+    box-shadow: 0 0 5px (--shadow);
   }
 }
