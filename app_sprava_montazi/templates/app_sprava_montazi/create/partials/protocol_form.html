@@ -7,19 +7,20 @@
           enctype="multipart/form-data">
         {% csrf_token %}
         <!-- Obrázek -->
-        <div class="L-form__group">
+        <div class="L-form__group m-0">
             <label for="fileInputProtocol">Vyberte soubor s obrázkem protokolu</label>
-            <input class="form-control mt-1"
+            <input class="form-control"
                    type="file"
                    id="fileInputProtocol"
                    name="image"
                    required
                    accept="image/*" />
+            <p class="u-txt-error m-0 lh-1" id="errorMessageProtocolfile">&nbsp;</p>
         </div>
         <!-- Číslo zakázky + autocomplete -->
         <div class="L-form__group position-relative ">
             <label for="orderNumber">Zadej číslo zakázky</label>
-            <input class="mt-1 L-form__input"
+            <input class="L-form__input"
                    type="text"
                    id="orderNumber"
                    name="order_number"

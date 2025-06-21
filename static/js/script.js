@@ -17,6 +17,9 @@
     document.addEventListener("DOMContentLoaded", function () {
         const fileInput = document.getElementById("fileInput");
         const fileError = document.getElementById("fileError");
+        // ---
+        const fileInputProtocol = document.getElementById("fileInputProtocol");
+        const errorMessageProtocolfile = document.getElementById("errorMessageProtocolfile");
 
         const allowedImageTypes = [
             "image/jpeg",
@@ -54,6 +57,35 @@
                 }
             });
         }
+        //  ---
+        if (fileInputProtocol && errorMessageProtocolfile) {
+            fileInputProtocol.addEventListener("change", function () {
+                const file_from_fallback = fileInputProtocol.files[0];
+                errorMessageProtocolfile.textContent = "";
+
+                if (file_from_fallback) {
+
+                    if (file_from_fallback.size > 5 * 1024 * 1024) { // 5 MB
+                        const sizeMB = (file_from_fallback.size / 1024 / 1024).toFixed(2);
+                        errorMessageProtocolfile.innerHTML = `Soubor je příliš velký <strong>${sizeMB} MB</strong>.<br> Max. velikost je 5 MB.`;
+                        fileInputProtocol.value = "";
+                        return;
+                    }
+
+
+                    if (!allowedImageTypes.includes(file_from_fallback.type)) {
+                        errorMessageProtocolfile.innerHTML = `Soubor musí být ve formátu obrázku (např. JPG, PNG, WebP).<br> Nepovolený typ souboru: ${file_from_fallback.type}</strong>.`;
+                        fileInputProtocol.value = "";
+                        return;
+                    }
+
+                    if (fileInputProtocol.form) {
+                        fileInputProtocol.form.submit();
+                    }
+                }
+            });
+        }
+
     });
 
     window.addEventListener("load", () => {
