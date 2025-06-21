@@ -1,0 +1,16 @@
+.C-protocol {
+  width: 75%;
+  margin-inline: auto;
+
+  .C-protocol-image {
+    width: 100%;
+    border-radius: 5px;
+    opacity: 0.8;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 1px 1px 5px var(--shadow);
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

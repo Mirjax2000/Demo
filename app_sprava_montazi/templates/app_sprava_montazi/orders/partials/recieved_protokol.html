@@ -2,13 +2,23 @@
     <h3 class="L-detail__fieldset__header">Přijatý montážní protokol</h3>
     {% if recieved_protokol %}
         <p class="alert alert-success mt-2">
-            Protokol byl přijat:
+            <strong>Protokol byl přijat:</strong>
+            <br>
             <strong>{{ recieved_protokol.created|date:"d. m. Y v H:i" }}</strong>
         </p>
         <h3 class="L-detail__fieldset__header">náhled přijatého protokolu</h3>
         <hr>
-        <div class="w-100">
-            <img src="{{ recieved_protokol.file.url }}" alt="" class="w-100">
+        <div class="C-protocol">
+            <img src="{{ recieved_protokol.file.url }}"
+                 alt="{{ order.order_number|upper }}"
+                 class="C-protocol-image">
+        </div>
+        <hr>
+        <div class="text-end">
+            <a href="{{ recieved_protokol.file.url }}"
+               class="btn btn-primary btn-sm w-50">
+                <i class="fa-solid fa-download me-2"></i>Stáhnout protokol
+            </a>
         </div>
     {% else %}
         <p class="alert alert-danger">Žádný protokol ještě nebyl přijat.:</p>

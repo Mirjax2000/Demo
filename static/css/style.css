@@ -655,6 +655,21 @@ body.home {
   font-weight: bold;
 }
 
+.C-protocol {
+  width: 75%;
+  margin-inline: auto;
+}
+.C-protocol .C-protocol-image {
+  width: 100%;
+  border-radius: 5px;
+  opacity: 0.8;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 1px 1px 5px var(--shadow);
+}
+.C-protocol .C-protocol-image:hover {
+  opacity: 1;
+}
+
 .P-body {
   background-color: var(--bck-body);
   color: var(--txt-default);
