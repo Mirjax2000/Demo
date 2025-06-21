@@ -587,6 +587,7 @@ body.home {
   min-width: 80%;
   width: fit-content;
   height: fit-content;
+  z-index: 999;
 }
 
 .C-messages_custom_1 {
@@ -665,6 +666,7 @@ body.home {
   opacity: 0.8;
   transition: all 0.2s ease-in-out;
   box-shadow: 1px 1px 5px var(--shadow);
+  cursor: pointer;
 }
 .C-protocol .C-protocol-image:hover {
   opacity: 1;
@@ -676,7 +678,7 @@ body.home {
   inset: 0;
   height: 99svh;
   background-color: rgba(0, 0, 0, 0.7529411765);
-  z-index: 999;
+  z-index: 10;
 }
 .C-img-modal__img-container {
   width: 75%;

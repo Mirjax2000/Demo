@@ -8,6 +8,7 @@
     opacity: 0.8;
     transition: all 0.2s ease-in-out;
     box-shadow: 1px 1px 5px var(--shadow);
+    cursor: pointer;
 
     &:hover {
       opacity: 1;

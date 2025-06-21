@@ -1,10 +1,8 @@
 """utilitky"""
 
-from io import BytesIO
-import os
-from PIL.ImageFile import ImageFile
 import cv2
-from PIL import Image
+from io import BytesIO
+from PIL import Image, ImageOps
 from rich.console import Console
 
 # --- django
@@ -126,12 +124,34 @@ def get_qrcode_value(image_path) -> None | str:
         return None
 
 
+def resize_image_max_width(img: Image.Image, max_width: int = 1024) -> Image.Image:
+    """
+    Pokud je šířka obrázku větší než max_width,
+    zmenší obrázek na max_width a upraví výšku proporčně.
+    Jinak vrátí původní obrázek.
+    """
+    if img.width > max_width:
+        ratio = max_width / img.width
+        new_height = int(img.height * ratio)
+        print(
+            f"Resizing image from {img.width}x{img.height} to {max_width}x{new_height}"
+        )
+        return img.resize((max_width, new_height), Image.LANCZOS)
+
+    return img
+
+
 def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | ContentFile:
-    """Convert img into webp format"""
+    """Convert image to WEBP format with EXIF orientation fix and max width 1024px"""
+
     try:
         input_size = img_file.size
         cons.log(f"Input image size: {input_size / 1024:.2f} KB")
         img = Image.open(img_file)
+
+        # Oprava rotace podle EXIF dat (mobilní fotky apod.)
+        img = ImageOps.exif_transpose(img)
+
     except FileNotFoundError:
         cons.log("Error: Image file not found")
         return None
@@ -140,6 +160,9 @@ def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | Content
         cons.log(f"Error opening image: {e}")
         return None
 
+    img = resize_image_max_width(img, max_width=1024)
+
+    # Převod do RGB, pokud je potřeba (WEBP nemusí podporovat všechny módy)
     if img.mode in ("RGBA", "P"):
         image = img.convert("RGB")
     else:
@@ -148,6 +171,7 @@ def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | Content
     buffer = BytesIO()
 
     try:
+        # Uložíme do bufferu jako WEBP s nastavenou kvalitou
         image.save(buffer, format="WEBP", quality=quality)
     except Exception as e:
         cons.log(f"Error saving image as WEBP: {e}")
@@ -156,8 +180,9 @@ def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | Content
     buffer.seek(0)
     output_size = len(buffer.getvalue())
     cons.log(f"Output WEBP size: {output_size / 1024:.2f} KB")
-    # ---
+
+    # Vytvoříme ContentFile pro Django s novým názvem souboru
     webp_file = ContentFile(buffer.read())
     webp_file.name = f"{new_name}.webp"
-    # ---
+
     return webp_file
