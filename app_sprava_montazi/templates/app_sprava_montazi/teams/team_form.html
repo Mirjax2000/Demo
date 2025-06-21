@@ -8,8 +8,14 @@
         <div>
             <form method="post" class="L-form__form" novalidate>
                 {% csrf_token %}
-                    {% include "app_sprava_montazi/teams/partials/team_form_partial.html" with form=form %}
+                {% include "app_sprava_montazi/teams/partials/team_form_partial.html" with form=form %}
             </form>
+        </div>
+        <hr>
+        <div class="mt-3">
+            <a href="{% url 'teams' %}"
+               class="btn btn-secondary btn-sm u-width-180 text-nowrap me-2">
+                <i class="fa-solid fa-backward me-2"></i>Zpět na seznam </a>
         </div>
     </section>
 {% endblock content %}
