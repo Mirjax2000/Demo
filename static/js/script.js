@@ -15,11 +15,15 @@
 
     // File input validation
     document.addEventListener("DOMContentLoaded", function () {
+        // --- montazni protokol form
         const fileInput = document.getElementById("fileInput");
         const fileError = document.getElementById("fileError");
-        // ---
+        // --- fallback protocol form
         const fileInputProtocol = document.getElementById("fileInputProtocol");
         const errorMessageProtocolfile = document.getElementById("errorMessageProtocolfile");
+        // --- CSV form
+        const CsvFormFile = document.getElementById("CsvFormFile");
+        const csv_error_message = document.getElementById("csv_error_message");
 
         const allowedImageTypes = [
             "image/jpeg",
@@ -29,7 +33,7 @@
             "image/bmp",
             "image/gif",
         ];
-
+        // --- montazni protokol form
         if (fileInput && fileError) {
             fileInput.addEventListener("change", function () {
                 const file = fileInput.files[0];
@@ -57,7 +61,7 @@
                 }
             });
         }
-        //  ---
+        //  --- protokol fallback form
         if (fileInputProtocol && errorMessageProtocolfile) {
             fileInputProtocol.addEventListener("change", function () {
                 const file_from_fallback = fileInputProtocol.files[0];
@@ -81,6 +85,34 @@
 
                     if (fileInputProtocol.form) {
                         fileInputProtocol.form.submit();
+                    }
+                }
+            });
+        }
+        //  --- CSV form
+        if (CsvFormFile && csv_error_message) {
+            CsvFormFile.addEventListener("change", function () {
+                const file_from_csv = CsvFormFile.files[0];
+                csv_error_message.textContent = "";
+
+                if (file_from_csv) {
+                    const fileName = file_from_csv.name.toLowerCase();
+                    if (file_from_csv.size > 5 * 1024 * 1024) { // 5 MB
+                        const sizeMB = (file_from_csv.size / 1024 / 1024).toFixed(2);
+                        csv_error_message.innerHTML = `Soubor je příliš velký <strong>${sizeMB} MB</strong>.<br> Max. velikost je 5 MB.`;
+                        CsvFormFile.value = "";
+                        return;
+                    }
+
+
+                    if (!fileName.endsWith(".csv")) {
+                        csv_error_message.innerHTML = `Soubor musí být ve formátu CSV. Nepovolený typ souboru: ${file_from_csv.type}</strong>.`;
+                        CsvFormFile.value = "";
+                        return;
+                    }
+
+                    if (CsvFormFile.form) {
+                        CsvFormFile.form.submit();
                     }
                 }
             });

@@ -380,7 +380,7 @@ class UploadForm(forms.ModelForm):
             "file": forms.FileInput(
                 attrs={
                     "class": "form-control mt-1",
-                    "id": "formFile",
+                    "id": "CsvFormFile",
                     "type": "file",
                     "accept": ".csv",
                 }

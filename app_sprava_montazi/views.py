@@ -34,7 +34,7 @@ from .serializer import OrderCustomerUpdateSerializer
 
 # --- modely z DB
 from .models import Article, CallLog, Client, Order, Team, TeamType, Status
-from .models import OrderPDFStorage, OrderBackProtocolToken
+from .models import OrderPDFStorage, OrderBackProtocolToken, OrderBackProtocol
 from .models import HistoricalArticle  # type: ignore  # pylint: disable=no-name-in-module
 
 # pomocne funkce ---
@@ -776,9 +776,19 @@ class OrderProtocolView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         order = context["object"]
-        pdf_exists = OrderPDFStorage.objects.filter(order=order.pk).exists()
+        pdf_exists: bool = OrderPDFStorage.objects.filter(order=order.pk).exists()
+        # ---
+        back_protocol: OrderBackProtocol | None = None
+        back_protocol_exist: bool = OrderBackProtocol.objects.filter(
+            order=order.pk
+        ).exists()
+
+        if back_protocol_exist:
+            back_protocol = OrderBackProtocol.objects.filter(order=order.pk).first()
+        # ---
         context.update(
             {
+                "recieved_protokol": back_protocol,
                 "pdf_exists": pdf_exists,
                 "team": order.team,
                 "active": "orders_all",

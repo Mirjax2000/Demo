@@ -1,3 +1,16 @@
 <section class="L-form__fieldset">
     <h3 class="L-detail__fieldset__header">Přijatý montážní protokol</h3>
+    {% if recieved_protokol %}
+        <p class="alert alert-success mt-2">
+            Protokol byl přijat:
+            <strong>{{ recieved_protokol.created|date:"d. m. Y v H:i" }}</strong>
+        </p>
+        <h3 class="L-detail__fieldset__header">náhled přijatého protokolu</h3>
+        <hr>
+        <div class="w-100">
+            <img src="{{ recieved_protokol.file.url }}" alt="" class="w-100">
+        </div>
+    {% else %}
+        <p class="alert alert-danger">Žádný protokol ještě nebyl přijat.:</p>
+    {% endif %}
 </section>
