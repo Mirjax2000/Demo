@@ -134,9 +134,11 @@ def resize_image_max_width(img: Image.Image, max_width: int = 1024) -> Image.Ima
     if img.width > max_width:
         ratio = max_width / img.width
         new_height = int(img.height * ratio)
-        print(
-            f"Resizing image from {img.width}x{img.height} to {max_width}x{new_height}"
-        )
+        if settings.DEBUG:
+            cons.log(
+                f"Resizing image from {img.width}x{img.height} to {max_width}x{new_height}",
+                style="green",
+            )
         result = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
         return result
 
