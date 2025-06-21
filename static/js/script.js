@@ -448,4 +448,17 @@
             }
         }
     });
+    //  --- protokol img
+    $(document).ready(function () {
+        const protocolImg = $('#protocolImg');
+        const imgModal = $('#imgModalProtocol');
+
+        protocolImg.on('click', function () {
+            imgModal.fadeIn(500);
+        });
+
+        imgModal.on('click', function () {
+            imgModal.fadeOut(300);
+        });
+    });
 })();

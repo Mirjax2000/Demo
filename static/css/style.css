@@ -670,6 +670,26 @@ body.home {
   opacity: 1;
 }
 
+.C-img-modal {
+  position: absolute;
+  display: none;
+  inset: 0;
+  height: 99svh;
+  background-color: rgba(0, 0, 0, 0.7529411765);
+  z-index: 999;
+}
+.C-img-modal__img-container {
+  width: 75%;
+  margin-inline: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.C-img-modal__img {
+  padding-top: 1em;
+  border-radius: 5px;
+}
+
 .P-body {
   background-color: var(--bck-body);
   color: var(--txt-default);

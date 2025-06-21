@@ -4,7 +4,14 @@
 {% endblock title %}
 <!---->
 {% block content %}
-    <section>
+    <section class="position-relative">
+        <div class="C-img-modal" id="imgModalProtocol">
+            <div class="C-img-modal__img-container">
+                <img src="{{ recieved_protokol.file.url }}"
+                     alt="{{ order.order_number|upper }}"
+                     class="C-img-modal__img">
+            </div>
+        </div>
         <h2 class="mt-1 ">montazni protokol: {{ order.order_number|upper }}</h2>
         <hr>
         <div class="u-flex-row-start">

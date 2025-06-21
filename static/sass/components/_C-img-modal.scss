@@ -1,0 +1,21 @@
+.C-img-modal {
+  position: absolute;
+  display: none;
+  inset: 0;
+  height: 99svh;
+  background-color: #000000c0;
+  z-index: 999;
+
+  &__img-container {
+    width: 75%;
+    margin-inline: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  &__img {
+    padding-top: 1em;
+    border-radius: 5px;
+  }
+}
