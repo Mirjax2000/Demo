@@ -1,5 +1,6 @@
 """utilitky"""
 
+from PIL.ImageFile import ImageFile
 import cv2
 from io import BytesIO
 from PIL import Image, ImageOps
@@ -136,7 +137,8 @@ def resize_image_max_width(img: Image.Image, max_width: int = 1024) -> Image.Ima
         print(
             f"Resizing image from {img.width}x{img.height} to {max_width}x{new_height}"
         )
-        return img.resize((max_width, new_height), Image.LANCZOS)
+        result = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
+        return result
 
     return img
 
@@ -147,7 +149,7 @@ def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | Content
     try:
         input_size = img_file.size
         cons.log(f"Input image size: {input_size / 1024:.2f} KB")
-        img = Image.open(img_file)
+        img: Image.Image = Image.open(img_file)
 
         # Oprava rotace podle EXIF dat (mobilní fotky apod.)
         img = ImageOps.exif_transpose(img)
