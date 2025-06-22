@@ -587,38 +587,7 @@ class Utility:
         """Registrujeme fonty do pameti pro reportlab"""
         for name, path_obj in Utility.FONTS.items():
             font_path_str = str(path_obj)
-
-            cons.log(
-                f"DEBUG_REGISTER: Attempting to register font '{name}' from: '{font_path_str}'"
-            )
-
-            # KONTROLNÍ BLOK (přidejte toto!)
-            if not os.path.exists(font_path_str):
-                cons.log(f"ERROR: File does NOT exist: {font_path_str}")
-                continue
-            if not os.path.isfile(font_path_str):
-                cons.log(f"ERROR: Path is not a file: {font_path_str}")
-                continue
-            try:
-                with open(font_path_str, "rb") as f:
-                    cons.log(
-                        f"DEBUG: Successfully opened file for reading: {font_path_str}"
-                    )
-            except Exception as e:
-                cons.log(
-                    f"ERROR: Python FAILED to open file for reading: {font_path_str} - {e}"
-                )
-                # Toto je KLÍČOVÉ - pokud toto selže, problém je v oprávněních nebo disku, ne ReportLab.
-                continue
-            # Konec KONTROLNÍHO BLOKU
-
-            try:
-                pdfmetrics.registerFont(TTFont(name, font_path_str))
-                print(f"DEBUG_REGISTER: Successfully registered font: {name}")
-            except Exception as e:
-                print(
-                    f"ERROR_REGISTER: Failed to register font '{name}' from '{font_path_str}': {e}"
-                )
+            pdfmetrics.registerFont(TTFont(name, font_path_str))
 
     def cross(self, x: int, y: int, size: int) -> None:
         cvs = self.cvs
