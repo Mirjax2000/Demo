@@ -1,6 +1,7 @@
 """protokols to pdf"""
 
 from dataclasses import dataclass
+import os
 from abc import ABC, abstractmethod
 from io import BytesIO
 from pathlib import Path
@@ -583,11 +584,41 @@ class Utility:
 
     @staticmethod
     def font_register() -> None:
-        for name, path in Utility.FONTS.items():
-            cons.log(f"Registering font {name} from {path}")
-            if not path.exists():
-                cons.log(f"CHYBA: Soubor {path} neexistuje!")
-            pdfmetrics.registerFont(TTFont(name, str(path)))
+        """Registrujeme fonty do pameti pro reportlab"""
+        for name, path_obj in Utility.FONTS.items():
+            font_path_str = str(path_obj)
+
+            print(
+                f"DEBUG_REGISTER: Attempting to register font '{name}' from: '{font_path_str}'"
+            )
+
+            # KONTROLNÍ BLOK (přidejte toto!)
+            if not os.path.exists(font_path_str):
+                print(f"ERROR: File does NOT exist: {font_path_str}")
+                continue
+            if not os.path.isfile(font_path_str):
+                print(f"ERROR: Path is not a file: {font_path_str}")
+                continue
+            try:
+                with open(font_path_str, "rb") as f:
+                    print(
+                        f"DEBUG: Successfully opened file for reading: {font_path_str}"
+                    )
+            except Exception as e:
+                print(
+                    f"ERROR: Python FAILED to open file for reading: {font_path_str} - {e}"
+                )
+                # Toto je KLÍČOVÉ - pokud toto selže, problém je v oprávněních nebo disku, ne ReportLab.
+                continue
+            # Konec KONTROLNÍHO BLOKU
+
+            try:
+                pdfmetrics.registerFont(TTFont(name, font_path_str))
+                print(f"DEBUG_REGISTER: Successfully registered font: {name}")
+            except Exception as e:
+                print(
+                    f"ERROR_REGISTER: Failed to register font '{name}' from '{font_path_str}': {e}"
+                )
 
     def cross(self, x: int, y: int, size: int) -> None:
         cvs = self.cvs
