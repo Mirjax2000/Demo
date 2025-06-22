@@ -583,8 +583,10 @@ class Utility:
 
     @staticmethod
     def font_register() -> None:
-        """Registrujeme fonty do pameti pro reportlab"""
         for name, path in Utility.FONTS.items():
+            cons.log(f"Registering font {name} from {path}")
+            if not path.exists():
+                cons.log(f"CHYBA: Soubor {path} neexistuje!")
             pdfmetrics.registerFont(TTFont(name, str(path)))
 
     def cross(self, x: int, y: int, size: int) -> None:
