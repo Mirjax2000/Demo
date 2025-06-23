@@ -145,14 +145,18 @@ class Command(BaseCommand):
 
     def final_message(self):
         cons.log("\n\n")
-        cons.rule("nastaveni autobota u uzivatele", style="blue")
+        cons.rule("nastavení autobota u uživatele", style="blue")
         cons.log(
-            f"\nToto nastav u autobota u dispecerta.\nTokken:[magenta bold]{self.system_bot_token()}[/magenta bold]\n"
+            f"\nToto nastav u autobota u dispečerta.\nTokken:[magenta bold]{self.system_bot_token()}[/magenta bold]\n"
         )
         cons.log(
             f'API_URL_GET = "http://{self.print_host()}/api/incomplete-customers/"'
         )
         cons.log(
             f'API_URL_UPDATE = "http://{self.print_host()}/api/update-customers/"\n'
+        )
+        cons.log(
+            "\nDalším krokem je vytvoření uživatelských účtů pro dispečerty!\n",
+            style="blue",
         )
         cons.rule("", style="blue")
