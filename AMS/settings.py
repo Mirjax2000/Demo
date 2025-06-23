@@ -18,13 +18,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY", default="")
-SYSTEM_USERNAME = "system"
+SYSTEM_USERNAME = "allspark"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", default="True") == "True"
 
-ALLOWED_HOSTS: list = []
-# ALLOWED_HOSTS = ["192.168.88.237"]
+
+ALLOWED_HOSTS: list = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
 
 # Application definition
