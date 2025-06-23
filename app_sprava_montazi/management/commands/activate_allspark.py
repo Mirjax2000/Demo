@@ -6,6 +6,7 @@ from rich.console import Console
 from dotenv import load_dotenv
 
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from django.core.management import call_command
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
@@ -33,6 +34,7 @@ class Command(BaseCommand):
         cons.log("\n")
         self.run_migrations()
         self.create_users()
+        self.collect_static()
         cons.log("\n")
         cons.rule(
             "[bold yellow]⚡ Aktivace dokončena. Systém je připraven.[/bold yellow]"
@@ -116,6 +118,25 @@ class Command(BaseCommand):
                 f"🔑 Token pro '{username}': ...{token.key[2:8]}...\n", style="magenta"
             )
 
+    def collect_static(self) -> None:
+        if settings.DEBUG:
+            cons.log("🛑 DEBUG je zapnutý collectstatic se přeskočí.", style="yellow")
+            return
+
+        try:
+            cons.log("📦 Spouštím collectstatic...", style="blue")
+            call_command("collectstatic", interactive=False, verbosity=0)
+            cons.log(
+                "✅ Všechny jednotky AllSpark byly přesunuty do základny STATIC_ROOT.",
+                style="green",
+            )
+            cons.log(
+                "🌀 Statické komponenty se transformovaly a jsou připraveny na nasazení!",
+                style="cyan",
+            )
+        except Exception as e:
+            cons.log(f"❌ Collectstatic selhal: {e}", style="red")
+
     def print_host(self) -> str:
         hosts = os.getenv("ALLOWED_HOSTS", "localhost")
         host = hosts.split(",")[0].strip()
@@ -145,7 +166,7 @@ class Command(BaseCommand):
 
     def final_message(self):
         cons.log("\n\n")
-        cons.rule("nastavení autobota u uživatele", style="blue")
+        cons.rule("🔧 nastavení autobota u uživatele", style="blue")
         cons.log(
             f"\nToto nastav u autobota u dispečerta.\nTokken:[magenta bold]{self.system_bot_token()}[/magenta bold]\n"
         )
