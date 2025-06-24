@@ -17,6 +17,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", default="")
 SYSTEM_USERNAME = "allspark"
 
+# Nastavení pro produkci: https nastaveni
+CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", default="False") == "True"
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", default="False") == "True"
+SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", default="False") == "True"
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", default="True") == "True"
 

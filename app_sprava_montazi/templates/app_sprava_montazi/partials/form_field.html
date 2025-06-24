@@ -1,11 +1,9 @@
 {% for field in form %}
-    <div class="L-form__group">
-        {{ field.label_tag }}
+    <div class="L-form__group {% if field.field.widget.input_type == 'hidden' %}d-none{% endif %}">
+        {% if field.field.widget.input_type != 'hidden' %}{{ field.label_tag }}{% endif %}
         {{ field }}
     </div>
-    <div class="L-form__error">
-        {% if field.errors %}{{ field.errors }}{% endif %}
-    </div>
+    {% if field.errors %}<div class="L-form__error">{{ field.errors }}</div>{% endif %}
 {% endfor %}
 {% if form_type == "create" %}
     <div class="u-txt-right">

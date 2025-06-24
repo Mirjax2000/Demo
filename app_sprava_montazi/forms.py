@@ -1,5 +1,6 @@
 """Forms"""
 
+from typing import Any
 from rich.console import Console
 from django import forms
 from django.utils.text import slugify
@@ -28,6 +29,7 @@ class OrderForm(forms.ModelForm):
             "distrib_hub",
             "mandant",
             "status",
+            "client",
             "evidence_termin",
             "delivery_termin",
             "montage_termin",
@@ -67,6 +69,11 @@ class OrderForm(forms.ModelForm):
             "team": forms.Select(
                 attrs={
                     "class": "L-form__select",
+                }
+            ),
+            "client": forms.HiddenInput(
+                attrs={
+                    "class": "d-none",
                 }
             ),
             "evidence_termin": forms.DateInput(
@@ -144,6 +151,45 @@ class OrderForm(forms.ModelForm):
         if not status:
             return Status.NEW
         return status
+
+    def clean(self) -> dict[str, Any]:
+        cleaned_data: dict[str, Any] = super().clean()
+        # kontrola stavu - zaterminovano
+        if cleaned_data.get("status") != Status.ADVICED:
+            return cleaned_data
+
+        self.validate_adviced(data=cleaned_data)
+
+        return cleaned_data
+
+    def validate_adviced(self, data) -> None:
+        """Validace při stavu 'Zatermínováno'"""
+        team_type = data.get("team_type")
+        team = data.get("team")
+        client = data.get("client")
+        montage_termin = data.get("montage_termin")
+        delivery_termin = data.get("delivery_termin")
+
+        if team_type == TeamType.BY_ASSEMBLY_CREW and not team:
+            self.add_error(
+                "team", "Pro stav 'Zatermínováno' musí být vybrán montážní tým."
+            )
+
+        if not client:
+            self.add_error(
+                "client", "Pro stav 'Zatermínováno' je třeba vyplnit zákazníka."
+            )
+        elif client.incomplete:
+            self.add_error(
+                "client",
+                "Zákazník má neúplné údaje, nelze uložit jako 'Zatermínováno'.",
+            )
+
+        if not montage_termin:
+            self.add_error("montage_termin", "Zadej termín montáže.")
+
+        if not delivery_termin:
+            self.add_error("delivery_termin", "Zadej termín doručení.")
 
 
 class ArticleForm(forms.ModelForm):
