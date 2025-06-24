@@ -20,13 +20,11 @@ SYSTEM_USERNAME = "allspark"
 
 # Nastavení pro produkci: https nastaveni
 IS_PRODUCTION = os.getenv("DJANGO_ENV") == "production"
+# --- bere bool z .envu
+DEBUG = not IS_PRODUCTION
 CSRF_COOKIE_SECURE = IS_PRODUCTION
 SESSION_COOKIE_SECURE = IS_PRODUCTION
 SECURE_SSL_REDIRECT = IS_PRODUCTION
-
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", default="True") == "True"
 
 
 ALLOWED_HOSTS: list = os.getenv("ALLOWED_HOSTS", "localhost").split(",")

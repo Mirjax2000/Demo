@@ -50,7 +50,7 @@ class ProtocolUploader:
 
     def validate_image(self) -> bool:
         """Validace obrazku"""
-        max_size_mb: int = 5
+        max_size_mb: int = 10
         if not self.image:
             self.set_error("Soubor nevybrán")
             return False
