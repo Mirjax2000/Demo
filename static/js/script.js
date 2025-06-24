@@ -97,9 +97,9 @@
 
                 if (file_from_csv) {
                     const fileName = file_from_csv.name.toLowerCase();
-                    if (file_from_csv.size > 5 * 1024 * 1024) { // 5 MB
+                    if (file_from_csv.size > 10 * 1024 * 1024) { // 10 MB
                         const sizeMB = (file_from_csv.size / 1024 / 1024).toFixed(2);
-                        csv_error_message.innerHTML = `Soubor je příliš velký <strong>${sizeMB} MB</strong>.<br> Max. velikost je 5 MB.`;
+                        csv_error_message.innerHTML = `Soubor je příliš velký <strong>${sizeMB} MB</strong>.<br> Max. velikost je 10 MB.`;
                         CsvFormFile.value = "";
                         return;
                     }
