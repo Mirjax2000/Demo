@@ -114,14 +114,16 @@ def get_qrcode_value(image_path) -> None | str:
         data, _, _ = detector.detectAndDecode(gray)
         # ---
         if not data:
-            cons.log("nebyl nalezen žádný QR kód.", style="red")
+            if settings.DEBUG:
+                cons.log("nebyl nalezen žádný QR kód.", style="red")
             return None
-
-        cons.log(f"QR value: {data}")
+        if settings.DEBUG:
+            cons.log(f"QR value: {data}")
         return data
 
     except Exception as e:
-        cons.log(f"Chyba při zpracování obrázku {image_path}: {e}", style="red")
+        if settings.DEBUG:
+            cons.log(f"Chyba při zpracování obrázku {image_path}: {e}", style="red")
         return None
 
 
@@ -157,11 +159,13 @@ def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | Content
         img = ImageOps.exif_transpose(img)
 
     except FileNotFoundError:
-        cons.log("Error: Image file not found")
+        if settings.DEBUG:
+            cons.log("Error: Image file not found")
         return None
 
     except Exception as e:
-        cons.log(f"Error opening image: {e}")
+        if settings.DEBUG:
+            cons.log(f"Error opening image: {e}")
         return None
 
     img = resize_image_max_width(img, max_width=1024)
@@ -178,7 +182,8 @@ def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | Content
         # Uložíme do bufferu jako WEBP s nastavenou kvalitou
         image.save(buffer, format="WEBP", quality=quality)
     except Exception as e:
-        cons.log(f"Error saving image as WEBP: {e}")
+        if settings.DEBUG:
+            cons.log(f"Error saving image as WEBP: {e}")
         return None
 
     buffer.seek(0)

@@ -9,6 +9,7 @@ from pypdf import PdfReader, PdfWriter
 
 # Django imports
 from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 from .models import Order, OrderPDFStorage
@@ -124,9 +125,11 @@ class CustomEmail:
 
         try:
             email.send()
-            cons.log(f"Email byl odeslán na: {self.email_to()}", style="blue")
+            if settings.DEBUG:
+                cons.log(f"Email byl odeslán na: {self.email_to()}", style="blue")
         except Exception as e:
-            cons.log(f"Chyba při odesílání: {e}", style="red")
+            if settings.DEBUG:
+                cons.log(f"Chyba při odesílání: {e}", style="red")
             raise
 
 
