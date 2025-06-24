@@ -182,22 +182,3 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "Automate with Django <miroslav.viktorin77@gmail.com>"
-
-# fail2ban
-LOGGING = {
-    "version": 1,
-    "handlers": {
-        "file": {
-            "level": "WARNING",
-            "class": "logging.FileHandler",
-            "filename": "/var/log/django/security.log",
-        },
-    },
-    "loggers": {
-        "django.security": {
-            "handlers": ["file"],
-            "level": "WARNING",
-            "propagate": True,
-        },
-    },
-}
