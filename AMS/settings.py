@@ -183,3 +183,23 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "Automate with Django <miroslav.viktorin77@gmail.com>"
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "login_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs", "login_failures.log"),
+        },
+    },
+    "loggers": {
+        "login": {
+            "handlers": ["login_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

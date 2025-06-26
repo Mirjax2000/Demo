@@ -2,19 +2,21 @@
 
 import io
 import os
+import logging
 from datetime import date, datetime
 from unittest.mock import patch
 import tempfile
 import shutil
 
-from django.conf import settings
+from django.urls import reverse
 from django.contrib.auth.models import User
+
+from django.conf import settings
 from django.contrib.messages import get_messages
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client as CL
 from django.test import TestCase
-from django.urls import reverse
 from django.utils import timezone
 from django.test import override_settings
 from openpyxl import load_workbook
@@ -30,9 +32,113 @@ from app_sprava_montazi.models import (
     TeamType,
     Upload,
 )
+from accounts.views import CustomLoginView
+
+# --- oop
 from .OOP_protokols import PdfGenerator, DefaultPdfGenerator, pdf_generator_classes
 
+# --- utils
 from .utils import filter_orders, format_date, parse_order_filters
+
+# ---
+test_logger = logging.getLogger("test_logger_login")
+test_logger.setLevel(logging.INFO)
+test_handler = (
+    logging.StreamHandler()
+)  # Or a FileHandler/NullHandler depending on your needs
+test_logger.addHandler(test_handler)
+test_logger.propagate = False  # Prevent logs from going to the root logger
+LOGIN_URL = reverse("login")
+
+
+class CustomLoginViewTests(TestCase):
+    def setUp(self):
+        # Create a test user for successful login attempts
+        self.user = User.objects.create_user(
+            username="testuser", password="testpassword123"
+        )
+        self.client = CL()
+
+    def test_login_successful(self):
+        """
+        Test that a successful login logs an INFO message and redirects correctly.
+        """
+        # Patch your logger_login to capture its calls during the test
+        with patch("accounts.views.logger_login", test_logger) as mock_logger:
+            with self.assertLogs(mock_logger.name, level="INFO") as cm:
+                response = self.client.post(
+                    LOGIN_URL, {"username": "testuser", "password": "testpassword123"}
+                )
+
+                # Check if the user is authenticated
+                self.assertTrue(response.wsgi_request.user.is_authenticated)
+                self.assertRedirects(response, "/")  # Or your specific redirect URL
+
+                # Verify the log message
+                self.assertEqual(len(cm.output), 1)
+                self.assertIn("login succeeded: testuser z IP:", cm.output[0])
+
+    def test_login_failed_invalid_credentials(self):
+        """
+        Test that a failed login due to invalid credentials logs a WARNING message
+        and stays on the login page.
+        """
+        with patch("accounts.views.logger_login", test_logger) as mock_logger:
+            with self.assertLogs(mock_logger.name, level="WARNING") as cm:
+                response = self.client.post(
+                    LOGIN_URL, {"username": "testuser", "password": "wrongpassword"}
+                )
+
+                # Check that the user is not authenticated
+                self.assertFalse(response.wsgi_request.user.is_authenticated)
+                # Check that it re-renders the login page (status 200)
+                self.assertEqual(response.status_code, 200)
+                self.assertTemplateUsed(
+                    response, "registration/login.html"
+                )  # Or your login template
+
+                # Verify the log message
+                self.assertEqual(len(cm.output), 1)
+                self.assertIn("login failed: testuser z IP:", cm.output[0])
+
+    def test_login_failed_non_existent_user(self):
+        """
+        Test that a failed login due to a non-existent user logs a WARNING message.
+        """
+        with patch("accounts.views.logger_login", test_logger) as mock_logger:
+            with self.assertLogs(mock_logger.name, level="WARNING") as cm:
+                response = self.client.post(
+                    LOGIN_URL,
+                    {"username": "nonexistentuser", "password": "anypassword"},
+                )
+
+                self.assertFalse(response.wsgi_request.user.is_authenticated)
+                self.assertEqual(response.status_code, 200)
+
+                self.assertEqual(len(cm.output), 1)
+                self.assertIn("login failed: nonexistentuser z IP:", cm.output[0])
+
+    def test_get_client_ip_no_x_forwarded_for(self):
+        """
+        Test get_client_ip when HTTP_X_FORWARDED_FOR is not present.
+        """
+
+        request = self.client.get(LOGIN_URL).wsgi_request
+        request.META["REMOTE_ADDR"] = "192.168.1.1"
+        view = CustomLoginView()
+        view.request = request
+        self.assertEqual(view.get_client_ip(), "192.168.1.1")
+
+    def test_get_client_ip_with_x_forwarded_for(self):
+        """
+        Test get_client_ip when HTTP_X_FORWARDED_FOR is present.
+        """
+        request = self.client.get(LOGIN_URL).wsgi_request
+        request.META["HTTP_X_FORWARDED_FOR"] = "10.0.0.1, 192.168.1.5"
+        request.META["REMOTE_ADDR"] = "192.168.1.1"  # This should be ignored
+        view = CustomLoginView()
+        view.request = request
+        self.assertEqual(view.get_client_ip(), "10.0.0.1")
 
 
 class IndexViewTest(TestCase):
