@@ -470,6 +470,7 @@
         const tokkenEl = document.getElementById("autobotTokken");
         const urlGetEl = document.getElementById("autobotUrlGet");
         const urlUpdateEl = document.getElementById("autobotUrlUpdate");
+        const successMsg = document.getElementById("copySuccessAutobot");
 
         if (btn && tokkenEl && urlGetEl && urlUpdateEl) {
             btn.addEventListener("click", function () {
@@ -484,12 +485,19 @@
                 ].join("\n");
 
                 navigator.clipboard.writeText(textToCopy).then(() => {
-                    alert("Zkopírováno do schránky!");
+                    if (successMsg) {
+                        successMsg.classList.remove("d-none");
+                        successMsg.classList.add("d-inline-block");
+                    }
                 }).catch((err) => {
-                    alert("Nepodařilo se zkopírovat.");
                     console.error("Chyba kopírování:", err);
                 });
             });
         }
     }
+
+    document.addEventListener("DOMContentLoaded", setupAutobotCopy);
+
+
+
 })();
