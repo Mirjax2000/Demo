@@ -146,7 +146,8 @@ class Command(BaseCommand):
         system_bot = os.getenv("SYSTEM_BOT")
         if not system_bot:
             msg = "⚠️ Nebyl nastaven SYSTEM_BOT v .env, nelze vypsat token system_bota."
-            cons.log(f"{msg}", style="red")
+            if settings.DEBUG:
+                cons.log(f"{msg}", style="red")
             return msg
 
         try:
@@ -156,12 +157,14 @@ class Command(BaseCommand):
 
         except User.DoesNotExist:
             msg = f"Chyba: Uživatele '{system_bot}' nelze najít."
-            cons.log(f"[red]{msg}[/red]")
+            if settings.DEBUG:
+                cons.log(f"[red]{msg}[/red]")
             return msg
 
         except Token.DoesNotExist:
             msg = f"Chyba: Token pro uživatele '{system_bot}' neexistuje."
-            cons.log(f"[red]{msg}[/red]")
+            if settings.DEBUG:
+                cons.log(f"[red]{msg}[/red]")
             return msg
 
     def final_message(self):

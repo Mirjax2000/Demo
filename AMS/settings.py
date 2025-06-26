@@ -20,11 +20,14 @@ SYSTEM_USERNAME = "allspark"
 
 # Nastavení pro produkci: https nastaveni
 IS_PRODUCTION = os.getenv("DJANGO_ENV") == "production"
+USE_HTTPS = os.getenv("USE_HTTPS") == "true"
 # --- bere bool z .envu
 DEBUG = not IS_PRODUCTION
-CSRF_COOKIE_SECURE = IS_PRODUCTION
-SESSION_COOKIE_SECURE = IS_PRODUCTION
-SECURE_SSL_REDIRECT = IS_PRODUCTION
+# --- https
+CSRF_COOKIE_SECURE = IS_PRODUCTION and USE_HTTPS
+SESSION_COOKIE_SECURE = IS_PRODUCTION and USE_HTTPS
+SECURE_SSL_REDIRECT = IS_PRODUCTION and USE_HTTPS
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 ALLOWED_HOSTS: list = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
@@ -180,3 +183,23 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "Automate with Django <miroslav.viktorin77@gmail.com>"
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "login_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs", "login_failures.log"),
+        },
+    },
+    "loggers": {
+        "login": {
+            "handlers": ["login_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

@@ -6,7 +6,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from django.urls.conf import include
-from accounts.views import RegisterView
+from accounts.views import RegisterView, CustomLoginView
 from app_sprava_montazi.views import (
     PdfView as Pdf,
     IndexView as Index,
@@ -101,6 +101,7 @@ app_sprava_montazi: list = [
 
 
 app_accounts_urls: list = [
+    path("accounts/login/", CustomLoginView.as_view(), name="login"),
     path("accounts/register/", RegisterView.as_view(), name="signup"),
     path("accounts/", include("django.contrib.auth.urls")),
 ]

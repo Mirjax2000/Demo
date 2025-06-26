@@ -1,5 +1,7 @@
 """app_sprava_montazi View"""
 
+import os
+import logging
 from typing import Any
 from datetime import datetime
 from openpyxl import Workbook
@@ -10,6 +12,7 @@ from django.conf import settings
 from django.db import transaction
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.forms import BaseModelForm, inlineformset_factory
@@ -24,6 +27,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
 
 # --- formulare
 from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
@@ -45,6 +49,7 @@ from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
 from .OOP_back_protocol import ProtocolUploader
 
 cons: Console = Console()
+User = get_user_model()
 # ---
 APP_URL = "app_sprava_montazi"
 OD_CHOICES = [
@@ -58,6 +63,7 @@ OD_CHOICES = [
 ]
 OD_DICT = dict(OD_CHOICES)
 # ---
+
 
 
 class IndexView(LoginRequiredMixin, TemplateView):
@@ -90,6 +96,40 @@ class CreatePageView(LoginRequiredMixin, FormView):
 
         # --- navigace
         context["active"] = "create"
+
+        try:
+            hosts = os.getenv("ALLOWED_HOSTS", "localhost")
+            system_bot = os.getenv("SYSTEM_BOT")
+
+            if not system_bot:
+                raise ValueError("Proměnná SYSTEM_BOT není nastavena.")
+
+            user = User.objects.get(username=system_bot)
+            token = Token.objects.get(user=user)
+
+            context["tokken"] = token.key
+            context["url"] = hosts.split(",")[0].strip()
+
+        except ValueError as e:
+            context.update({"tokken": "nenalezeno", "url": "nenalezeno"})
+            if settings.DEBUG:
+                cons.log(f"[get_context_data] Chyba: {e}")
+
+        except User.DoesNotExist:
+            context.update({"tokken": "nenalezeno", "url": "nenalezeno"})
+            if settings.DEBUG:
+                cons.log("[get_context_data] Autobot nebyl nalezen.")
+
+        except Token.DoesNotExist:
+            context.update({"tokken": "nenalezeno", "url": "nenalezeno"})
+            if settings.DEBUG:
+                cons.log("[get_context_data] Token pro Autobota nebyl nalezen.")
+
+        except Exception as e:
+            context.update({"tokken": "nenalezeno", "url": "nenalezeno"})
+            if settings.DEBUG:
+                cons.log(f"[get_context_data] Neočekávaná chyba: {e}")
+
         return context
 
     def form_valid(self, form) -> HttpResponse:

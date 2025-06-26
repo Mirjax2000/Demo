@@ -242,6 +242,16 @@ body.home {
   min-width: 13em;
 }
 
+.theme {
+  background-color: var(--bck-body);
+  color: var(--txt-default);
+}
+
+.theme-lighter {
+  background-color: var(--bck-list-item);
+  color: var(--txt-default);
+}
+
 .u-pdf-km {
   display: flex;
   justify-content: flex-start;
