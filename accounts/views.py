@@ -5,6 +5,7 @@ from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
 
@@ -38,7 +39,7 @@ class CustomLoginView(LoginView):
         return self.request.META.get("REMOTE_ADDR")
 
 
-class RegisterView(FormView):
+class RegisterView(LoginRequiredMixin, FormView):
     template_name = "registration/register.html"
     form_class = UserCreationForm
     success_url = reverse_lazy("index")
