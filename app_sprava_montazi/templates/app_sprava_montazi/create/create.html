@@ -19,5 +19,11 @@
             <!--montazni protokoly-->
             {% include "app_sprava_montazi/create/partials/montazni_protokoly.html" %}
         </div>
+        <hr>
+        <!-- pouze superUser -->
+        {% if request.user.is_superuser %}
+            <!-- autobot info -->
+            {% include "app_sprava_montazi/create/partials/autobot_info.html" %}
+        {% endif %}
     </section>
 {% endblock content %}

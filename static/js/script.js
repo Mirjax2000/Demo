@@ -12,7 +12,8 @@
     const formsetContainer = $('#article-formset-container');
     const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
     const emptyFormHtml = $('#empty-form-template');
-
+    // copy to schranka
+    document.addEventListener("DOMContentLoaded", setupAutobotCopy());
     // File input validation
     document.addEventListener("DOMContentLoaded", function () {
         // --- montazni protokol form
@@ -21,6 +22,7 @@
         // --- fallback protocol form
         const fileInputProtocol = document.getElementById("fileInputProtocol");
         const errorMessageProtocolfile = document.getElementById("errorMessageProtocolfile");
+
         // --- CSV form
         const CsvFormFile = document.getElementById("CsvFormFile");
         const csv_error_message = document.getElementById("csv_error_message");
@@ -461,4 +463,33 @@
             imgModal.fadeOut(300);
         });
     });
+
+    // --- autobot copy values to schranka
+    function setupAutobotCopy() {
+        const btn = document.getElementById("copyBtnAutobot");
+        const tokkenEl = document.getElementById("autobotTokken");
+        const urlGetEl = document.getElementById("autobotUrlGet");
+        const urlUpdateEl = document.getElementById("autobotUrlUpdate");
+
+        if (btn && tokkenEl && urlGetEl && urlUpdateEl) {
+            btn.addEventListener("click", function () {
+                const cleanLine = (el) => {
+                    return el.textContent.trim().replace(/\s+=\s+/, " = ");
+                };
+
+                const textToCopy = [
+                    cleanLine(tokkenEl),
+                    cleanLine(urlGetEl),
+                    cleanLine(urlUpdateEl)
+                ].join("\n");
+
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    alert("Zkopírováno do schránky!");
+                }).catch((err) => {
+                    alert("Nepodařilo se zkopírovat.");
+                    console.error("Chyba kopírování:", err);
+                });
+            });
+        }
+    }
 })();
