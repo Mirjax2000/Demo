@@ -1,0 +1,18 @@
+[Unit]
+Description=Gunicorn service for Django app
+After=network.target
+
+[Service]
+User=vigo
+Group=vigo
+WorkingDirectory=/var/www/RHENUS/Demo
+ExecStart=/var/www/RHENUS/Demo/.venv/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind 127.0.0.1:8000 \
+          AMS.wsgi:application
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

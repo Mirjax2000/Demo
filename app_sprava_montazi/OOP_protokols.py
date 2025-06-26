@@ -725,9 +725,11 @@ class SCCZPdfGenerator(PdfGenerator):
             order_number = model.order_number
             utils.generate_qrcode(order_number.upper(), 420, 660)
             section.sccz_data_section(model)  # --- data layer ---
-            cons.log(f"SCCZ pdf: {order_number} sestaven", style="blue")
+            if settings.DEBUG:
+                cons.log(f"SCCZ pdf: {order_number} sestaven", style="blue")
         else:
-            cons.log("SCCZ pdf: obecny Template sestaven", style="blue")
+            if settings.DEBUG:
+                cons.log("SCCZ pdf: obecny Template sestaven", style="blue")
         # ---
         return utils.finalize_pdf()
 
@@ -765,9 +767,11 @@ class DefaultPdfGenerator(PdfGenerator):
                 model, km, shipping_zona[zona]
             )  # --- data layer ---
             section.draw_cross(*cross_position[zona])
-            cons.log(f"General pdf: {order_number} sestaven", style="blue")
+            if settings.DEBUG:
+                cons.log(f"General pdf: {order_number} sestaven", style="blue")
         else:
-            cons.log("Default pdf: Obecny Template sestaven", style="blue")
+            if settings.DEBUG:
+                cons.log("Default pdf: Obecny Template sestaven", style="blue")
         # ---
         return utils.finalize_pdf()
 
