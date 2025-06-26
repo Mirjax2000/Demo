@@ -1,7 +1,7 @@
 <div class="accordion accordion-flush" id="accordionFlushExample">
-    <div class="accordion-item">
+    <div class="accordion-item theme">
         <h2 class="accordion-header">
-            <button class="accordion-button collapsed"
+            <button class="accordion-button collapsed theme-lighter border border-secondary rounded"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#flush-collapseOne"
@@ -22,10 +22,11 @@
                     <strong>API_URL_UPDATE</strong> = "http://{{ url }}/api/update-customers/"
                 </p>
                 <hr class="m-2">
-                <p class="btn btn-sm btn-primary" id="copyBtnAutobot">
+                <p class="btn btn-sm btn-primary m-0" id="copyBtnAutobot">
                     <i class="fa-solid fa-copy me-2"></i>copy
                 </p>
-                <span class="u-txt-info u-txt-smaller d-none ms-2" id="copySuccessAutobot">zkopírováno</span>
+                <strong class="alert alert-success u-txt-smaller d-none ms-2 p-1"
+                        id="copySuccessAutobot">zkopírováno</strong>
             </div>
         </div>
     </div>
