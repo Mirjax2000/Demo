@@ -1,36 +1,35 @@
-<div>
-    <p>Jen pro superusery:</p>
-</div>
-<div class="accordion accordion-flush" id="accordionFlushExample">
-    <div class="accordion-item theme">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed theme-lighter border border-secondary rounded"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#flush-collapseOne"
-                    aria-expanded="false"
-                    aria-controls="flush-collapseOne">Nastavení Autobota</button>
-        </h2>
-        <div id="flush-collapseOne"
-             class="accordion-collapse collapse"
-             data-bs-parent="#accordionFlushExample">
-            <div class="accordion-body">
-                <p class="mb-1" id="autobotTokken">
-                    <strong>TOKEN</strong> = "{{ tokken }}"
-                </p>
-                <p class="mb-1" id="autobotUrlGet">
-                    <strong>API_URL_GET</strong> = "https://{{ url }}/api/incomplete-customers/"
-                </p>
-                <p class="mb-1" id="autobotUrlUpdate">
-                    <strong>API_URL_UPDATE</strong> = "https://{{ url }}/api/update-customers/"
-                </p>
-                <hr class="m-2">
-                <p class="btn btn-sm btn-primary m-0" id="copyBtnAutobot">
-                    <i class="fa-solid fa-copy me-2"></i>copy
-                </p>
-                <strong class="alert alert-success u-txt-smaller d-none ms-2 p-1"
-                        id="copySuccessAutobot">zkopírováno</strong>
+<section id="superuserOnly">
+    <div class="accordion accordion-flush" id="accordionFlushExample">
+        <div class="accordion-item theme">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed theme-lighter border border-secondary rounded"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#flush-collapseOne"
+                        aria-expanded="false"
+                        aria-controls="flush-collapseOne">Nastavení Autobota</button>
+            </h2>
+            <div id="flush-collapseOne"
+                 class="accordion-collapse collapse"
+                 data-bs-parent="#accordionFlushExample">
+                <div class="accordion-body">
+                    <p class="mb-1" id="autobotTokken">
+                        <strong>TOKEN</strong> = "{{ tokken }}"
+                    </p>
+                    <p class="mb-1" id="autobotUrlGet">
+                        <strong>API_URL_GET</strong> = "https://{{ url }}/api/incomplete-customers/"
+                    </p>
+                    <p class="mb-1" id="autobotUrlUpdate">
+                        <strong>API_URL_UPDATE</strong> = "https://{{ url }}/api/update-customers/"
+                    </p>
+                    <hr class="m-2">
+                    <p class="btn btn-sm btn-primary m-0" id="copyBtnAutobot">
+                        <i class="fa-solid fa-copy me-2"></i>copy
+                    </p>
+                    <strong class="alert alert-success u-txt-smaller d-none ms-2 p-1"
+                            id="copySuccessAutobot">zkopírováno</strong>
+                </div>
             </div>
         </div>
     </div>
-</div>
+</section>

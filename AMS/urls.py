@@ -26,7 +26,7 @@ from app_sprava_montazi.views import (
     GeneratePDFView as GeneratePDF,
     OrderHistoryView as OrderHistory,
     BackProtocolView as BackProtocol,
-    # ClientUpdateSecondaryView as CUS,
+    ClientUpdateSecondaryView as CUS,
     OrderProtocolView as OrderProtocol,
     ClientsOrdersView as ClientsOrders,
     CustomerUpdateView as CustomerUpdate,
@@ -42,7 +42,6 @@ from app_sprava_montazi.views_services import (
     SendMailView as SendMail,
 )
 
-fields.get("telefon1", "telefon2")
 
 # --- typove zkratky
 PK = "<int:pk>"
@@ -64,7 +63,7 @@ app_sprava_montazi: list = [
     path("order/create/", OrderCreate.as_view(), name="order_create"),
     path("order/export/", ExportOrdersExcel.as_view(), name="order_export"),
     path(f"order/{SLUG}/{OPK}/client_update/", CUV.as_view(), name="client_update"),
-    # path(f"order/{SLUG}/client_update_sec/", CUS.as_view(), name="client_update_sec"),
+    path(f"order/{SLUG}/client_update_sec/", CUS.as_view(), name="client_update_sec"),
     path(f"order/{SLUG}/client_orders/", ClientsOrders.as_view(), name="client_orders"),
     path(f"order/{PK}/order_update/", OrderUpdate.as_view(), name="order_update"),
     path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),
