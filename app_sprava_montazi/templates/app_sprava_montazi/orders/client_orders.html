@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block title %}
-    detail objednavky
+    detail zakaznik/objednavka
 {% endblock title %}
 <!---->
 {% block content %}
-    <section class="L-table">
+    <section class="L-table" id="detailOrderClientPage">
         <div class="u-flex-row-start">
             {% include "app_sprava_montazi/orders/partials/client_orders_list.html" %}
             {% include "app_sprava_montazi/orders/partials/client_formset_call.html" %}

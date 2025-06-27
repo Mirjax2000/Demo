@@ -42,7 +42,13 @@ class AuthTests(TestCase):
         self.assertRedirects(response, "/accounts/login/")
 
     def test_register_positive(self):
-        """Testuje registraci nového uživatele."""
+        """Přihlášený uživatel vytvoří nový účet, odhlásí se a přihlásí jako nový uživatel."""
+
+        # Přihlášení jako testovací uživatel
+        login_ok = self.client.login(username="testuser", password="testpass123")
+        self.assertTrue(login_ok, "Nepodařilo se přihlásit jako testuser")
+
+        # Vytvoření nového uživatele
         response = self.client.post(
             reverse("signup"),
             {
@@ -51,17 +57,24 @@ class AuthTests(TestCase):
                 "password2": "Testpass123!",
             },
         )
-        # Potvrzuje existenci nového uživatele v databázi
+
+        # Ověření, že uživatel byl vytvořen
         self.assertTrue(User.objects.filter(username="newuser").exists())
-        # Ověřuje HTTP 302 přesměrovací status
         self.assertEqual(response.status_code, 302)
-        # Ověřuje přesměrování na hlavní stránku
         self.assertRedirects(response, "/")
-        # Potvrzuje automatické vytvoření přihlašovací session
-        self.assertIn("_auth_user_id", self.client.session)
+
+        # Odhlášení
+        response_logout = self.client.post("/accounts/logout/")
+        self.assertEqual(response_logout.status_code, 302)
+        self.assertRedirects(response_logout, "/accounts/login/")
+
+        # Přihlášení jako nově vytvořený uživatel
+        login_new_ok = self.client.login(username="newuser", password="Testpass123!")
+        self.assertTrue(login_new_ok, "Nepodařilo se přihlásit jako newuser")
 
     def test_register_negative(self):
         """Testuje neplatnou registraci:"""
+        self.client.login(username="testuser", password="testpass123")
 
         response = self.client.post(
             reverse("signup"),
@@ -76,5 +89,3 @@ class AuthTests(TestCase):
         self.assertFalse(User.objects.filter(username="newuser%").exists())
         # Měl by se vrátit k registračnímu formuláři (200 = chyba ve formuláři)
         self.assertEqual(response.status_code, 200)
-        # Přihlášení by nemělo proběhnout
-        self.assertNotIn("_auth_user_id", self.client.session)

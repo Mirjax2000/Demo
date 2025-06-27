@@ -42,6 +42,7 @@ from app_sprava_montazi.views_services import (
     SendMailView as SendMail,
 )
 
+
 # --- typove zkratky
 PK = "<int:pk>"
 OPK = "<int:order_pk>"
