@@ -1,11 +1,12 @@
 [Unit]
-Description=Gunicorn service for Django app
+Description=Gunicorn instance for AMS Django project
 After=network.target
 
 [Service]
 User=vigo
 Group=vigo
 WorkingDirectory=/var/www/RHENUS/Demo
+Environment="PATH=/var/www/RHENUS/Demo/.venv/bin"
 ExecStart=/var/www/RHENUS/Demo/.venv/bin/gunicorn \
           --access-logfile - \
           --workers 3 \
