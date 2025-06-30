@@ -1,4 +1,5 @@
 """nonce generator pro povoleni js v html"""
+
 import secrets
 
 
@@ -7,14 +8,20 @@ class CSPNonceMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # Vygenerujeme náhodný nonce (řetězec)
         nonce = secrets.token_urlsafe(16)
-        request.csp_nonce = nonce  # uložíme nonce do requestu
+        request.csp_nonce = nonce
 
         response = self.get_response(request)
 
-        # Přidáme CSP hlavičku s nonce
-        csp_policy = f"script-src 'nonce-{nonce}' 'self';"
+        csp_policy = (
+            "default-src 'self'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self'; "
+            "font-src 'self'; "
+            "object-src 'none'; "
+            "frame-ancestors 'none'; "
+            f"script-src 'nonce-{nonce}' 'self';"
+        )
         response["Content-Security-Policy"] = csp_policy
 
         return response
