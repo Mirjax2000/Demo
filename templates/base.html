@@ -18,7 +18,7 @@
             <!-- css files go here -->
         {% endblock css %}
     </head>
-    <script>
+    <script nonce="{{ request.csp_nonce}}">
         (function () {
         const savedTheme = localStorage.getItem("theme");
         const html = document.documentElement;
