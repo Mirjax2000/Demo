@@ -19,7 +19,7 @@ from django.forms import BaseModelForm, inlineformset_factory
 from django.views.generic import View, UpdateView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpResponse, FileResponse, HttpResponseForbidden
+from django.http import HttpResponse, FileResponse, HttpResponseForbidden, JsonResponse
 from django.views.generic import CreateView, DetailView, FormView, ListView
 
 # API rest ---
@@ -63,7 +63,6 @@ OD_CHOICES = [
 ]
 OD_DICT = dict(OD_CHOICES)
 # ---
-
 
 
 class IndexView(LoginRequiredMixin, TemplateView):
@@ -445,6 +444,37 @@ class OrdersView(LoginRequiredMixin, ListView):
         )
 
         return context
+
+
+# def api_orders(request):
+#     filters = parse_order_filters(request)
+#     qs = filter_orders(filters).order_by("-id")
+
+#     draw = int(request.GET.get("draw", 1))
+#     start = int(request.GET.get("start", 0))
+#     length = int(request.GET.get("length", 15))
+
+#     total = qs.count()
+#     orders = qs[start : start + length]
+
+#     data = [
+#         [
+#             order.id,
+#             order.evidence_termin.strftime("%Y-%m-%d") if order.evidence_termin else "",
+#             order.customer_name,
+#             order.status,
+#         ]
+#         for order in orders
+#     ]
+
+#     return JsonResponse(
+#         {
+#             "draw": draw,
+#             "recordsTotal": total,
+#             "recordsFiltered": total,
+#             "data": data,
+#         }
+#     )
 
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
