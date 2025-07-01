@@ -446,35 +446,35 @@ class OrdersView(LoginRequiredMixin, ListView):
         return context
 
 
-def api_orders(request):
-    filters = parse_order_filters(request)
-    qs = filter_orders(filters).order_by("-id")
+# def api_orders(request):
+#     filters = parse_order_filters(request)
+#     qs = filter_orders(filters).order_by("-id")
 
-    draw = int(request.GET.get("draw", 1))
-    start = int(request.GET.get("start", 0))
-    length = int(request.GET.get("length", 15))
+#     draw = int(request.GET.get("draw", 1))
+#     start = int(request.GET.get("start", 0))
+#     length = int(request.GET.get("length", 15))
 
-    total = qs.count()
-    orders = qs[start : start + length]
+#     total = qs.count()
+#     orders = qs[start : start + length]
 
-    data = [
-        [
-            order.id,
-            order.evidence_termin.strftime("%Y-%m-%d") if order.evidence_termin else "",
-            order.customer_name,
-            order.status,
-        ]
-        for order in orders
-    ]
+#     data = [
+#         [
+#             order.id,
+#             order.evidence_termin.strftime("%Y-%m-%d") if order.evidence_termin else "",
+#             order.customer_name,
+#             order.status,
+#         ]
+#         for order in orders
+#     ]
 
-    return JsonResponse(
-        {
-            "draw": draw,
-            "recordsTotal": total,
-            "recordsFiltered": total,
-            "data": data,
-        }
-    )
+#     return JsonResponse(
+#         {
+#             "draw": draw,
+#             "recordsTotal": total,
+#             "recordsFiltered": total,
+#             "data": data,
+#         }
+#     )
 
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
