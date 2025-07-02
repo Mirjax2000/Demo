@@ -10,13 +10,13 @@
         <td>{{ order.mandant }}</td>
         <!--Termin evidence-->
         {% if order.evidence_termin %}
-            <td>{{ order.evidence_termin|date:"d.m.Y" }}</td>
+            <td data-sort="{{ order.evidence_termin|date:'Y-m-d' }}">{{ order.evidence_termin|date:'d.m.Y' }}</td>
         {% else %}
             <td class="u-txt-center">-</td>
         {% endif %}
         <!--Termin doruceni-->
         {% if order.delivery_termin %}
-            <td>{{ order.delivery_termin|date:"d.m.Y" }}</td>
+            <td data-sort="{{ order.delivery_termin|date:'Y-m-d' }}">{{ order.delivery_termin|date:'d.m.Y' }}</td>
         {% else %}
             <td class="u-txt-center">-</td>
         {% endif %}
@@ -49,7 +49,8 @@
         {% endif %}
         <!--termin montaze-->
         {% if order.montage_termin %}
-            <td class="u-s-none">
+            <td class="u-s-none"
+                data-sort="{{ order.montage_termin|date:"Y-m-d H:i:s" }}">
                 <strong>{{ order.montage_termin|date:"d.m.Y H:i" }}</strong>
             </td>
         {% elif order.team_type != "By_assembly_crew" %}
