@@ -210,7 +210,8 @@
                 bottomStart: 'info',
                 bottomEnd: 'paging'
             },
-            columnDefs: [],
+            columnDefs: [
+                { targets: [3, 4], type: 'date' }],
             language: {
                 emptyTable: "Žádné objednávky"
             },
