@@ -73,7 +73,6 @@ class Command(BaseCommand):
             task = progress.add_task("Creating orders...", total=total_items)
             for item in dataset.to_dict(orient="records"):
                 try:
-                    cons.log(item["misto-urceni"])
                     # ziskavam FK DistribHubu
                     distrib_hub: DistribHub = DistribHub.objects.get(
                         code=item["misto-urceni"]
@@ -168,12 +167,12 @@ class DatasetTools:
             cons.log(f"chybi pozadovane sloupce: {missing}")
             raise KeyError(f"CSV soubor postrádá požadované sloupce: {missing}")
         # tvorba datasetu s pozadovanyma sloupcema
-        dataset = dataset[expected_cols] 
+        dataset = dataset[expected_cols]
         # cisteni datasetu
         dataset["krestni-jmeno"] = dataset["krestni-jmeno"].fillna("")
         dataset["avizovany-termin"] = dataset["avizovany-termin"].fillna("").astype(str)
         dataset["erfassungstermin"] = dataset["erfassungstermin"].fillna("").astype(str)
-        dataset["misto-urceni"] = dataset["misto-urceni"].fillna("").astype(int)
+        dataset["misto-urceni"] = dataset["misto-urceni"].fillna(0).astype(int)
         dataset["poznamka-mandanta"] = dataset["poznamka-mandanta"].fillna("")
         dataset["cislo-zakazky"] = dataset["cislo-zakazky"].apply(slugify)
 
