@@ -3,9 +3,7 @@
 from datetime import datetime
 from pathlib import Path
 from typing import TypedDict
-from time import sleep
 
-from dill.tests.test_classdef import Z
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import transaction
 from django.utils.text import slugify

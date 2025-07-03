@@ -1084,9 +1084,10 @@ class IncompleteCustomersView(APIView):
     permission_classes = [IsAuthenticated]  # jen pro přihlášené uživatele
 
     def get(self, request) -> Response:
-        qs = Order.objects.filter(client__incomplete=True)
+        qs = Order.objects.filter(client__incomplete=True).exclude(status="Hidden")
         seznam = [record.order_number.upper() for record in qs]
-        cons.log(f"seznam nekompletnich klientu: {seznam}")
+        if settings.DEBUG:
+            cons.log(f"seznam nekompletnich klientu: {seznam}")
         return Response(seznam)
 
 
