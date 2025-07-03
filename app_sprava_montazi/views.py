@@ -241,7 +241,7 @@ class ClientUpdateSecondaryView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse("client_orders", kwargs={"slug": self.object.slug})  # type: ignore
+        return reverse("client_orders", kwargs={"pk": self.object.pk})  # type: ignore
 
 
 class OrderCreateView(LoginRequiredMixin, View):
@@ -572,8 +572,8 @@ class TeamDetailView(LoginRequiredMixin, DetailView):
 class ClientsOrdersView(LoginRequiredMixin, View):
     template_name = f"{APP_URL}/orders/client_orders.html"
 
-    def get(self, request, slug):
-        client = get_object_or_404(Client, slug=slug)
+    def get(self, request, pk):
+        client = get_object_or_404(Client, pk=pk)
         orders = Order.objects.filter(client=client)
         call_logs = CallLog.objects.filter(client=client)
 

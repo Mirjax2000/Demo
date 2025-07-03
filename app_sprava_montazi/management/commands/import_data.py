@@ -171,6 +171,7 @@ class DatasetTools:
         dataset["avizovany-termin"] = dataset["avizovany-termin"].fillna("").astype(str)
         dataset["erfassungstermin"] = dataset["erfassungstermin"].fillna("").astype(str)
         dataset["misto-urceni"] = dataset["misto-urceni"].fillna(0).astype(int)
+        dataset["psc"] = dataset["psc"].fillna(0).astype(int)
         dataset["poznamka-mandanta"] = dataset["poznamka-mandanta"].fillna("")
         dataset["cislo-zakazky"] = dataset["cislo-zakazky"].apply(slugify)
 

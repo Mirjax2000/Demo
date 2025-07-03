@@ -572,6 +572,110 @@ class ClientUpdateViewTest(TestCase):
         self.assertEqual(self.customer.email, "karel@seznam.cz")
 
 
+class ClientUpdateSecondaryViewTest(TestCase):
+    def setUp(self):
+        # Vytvoříme testovacího uživatele
+
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client.login(username="testuser", password="testpass")
+        self.template = "app_sprava_montazi/orders/client_update_secondary.html"
+        self.hub = DistribHub.objects.create(code="626", city="Chrastany")
+        self.customer = Client.objects.create(name="franta", zip_code="11111")
+        self.order = Order.objects.create(
+            order_number="703777143100437749-R",
+            distrib_hub=self.hub,
+            status=Status.NEW,
+            client=self.customer,
+            mandant="SCCZ",
+            evidence_termin=date.today(),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+            team=None,
+        )
+        self.url = reverse(
+            "client_update_sec",
+            kwargs={
+                "pk": self.order.client.pk,
+            },
+        )
+
+    def test_logged_in(self):
+        """
+        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
+        a je použita správná šablona.
+        """
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
+
+    def test_redirect_if_not_logged_in(self):
+        """
+        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
+        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
+        """
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_context_data(self):
+        """test spravneho zobrazeni"""
+        response = self.client.get(self.url)
+        self.assertEqual(response.context["form_type"], "update")
+        self.assertEqual(response.context["active"], "orders_all")
+
+    def test_success_message_displayed(self):
+        data = {
+            "name": "Karel",
+            "zip_code": "12345",
+        }
+        response = self.client.post(self.url, data, follow=True)
+        messages = [msg.message for msg in get_messages(response.wsgi_request)]
+        self.assertIn("Zákazník: <strong>Karel</strong> aktualizován.", messages)
+
+    def test_post_invalid_data_name(self):
+        data = {
+            "name": "",  # jméno je povinné
+            "zip_code": "12345",
+        }
+        response = self.client.post(self.url, data)
+
+        form = response.context["form"]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Jméno je povinné!", str(form.errors["name"]))
+
+    def test_post_invalid_data_zip_code(self):
+        data = {
+            "name": "ferda",  # jméno je povinné
+            "zip_code": "",
+        }
+        response = self.client.post(self.url, data)
+
+        form = response.context["form"]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("PSČ je povinné!", str(form.errors["zip_code"]))
+
+    def test_post_valid_data(self):
+        data = {
+            "name": "Karel",
+            "zip_code": "12345",
+            "street": "Kopretinova 15",
+            "city": "Kolin",
+            "phone": "234234234",
+            "email": "karel@seznam.cz",
+        }
+        response = self.client.post(self.url, data, follow=True)
+        self.assertRedirects(
+            response, reverse("client_orders", kwargs={"pk": self.customer.pk})
+        )
+        self.customer.refresh_from_db()
+        self.assertEqual(self.customer.name, "Karel")
+        self.assertEqual(self.customer.zip_code, "12345")
+        self.assertEqual(self.customer.street, "Kopretinova 15")
+        self.assertEqual(self.customer.city, "Kolin")
+        self.assertEqual(self.customer.phone, "234234234")
+        self.assertEqual(self.customer.email, "karel@seznam.cz")
+
+
 class OrderCreateViewTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass")
@@ -1148,7 +1252,7 @@ class ClientOrdersViewTest(TestCase):
         # Vytvoříme testovacího uživatele
         self.user = User.objects.create_user(username="testuser", password="testpass")
         self.customer = Client.objects.create(name="Franta Pina", zip_code="12345")
-        self.url = reverse("client_orders", kwargs={"slug": self.customer.slug})
+        self.url = reverse("client_orders", kwargs={"pk": self.customer.pk})
         self.template = "app_sprava_montazi/orders/client_orders.html"
         self.client.login(username="testuser", password="testpass")
 

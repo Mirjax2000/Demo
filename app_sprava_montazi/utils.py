@@ -70,7 +70,7 @@ def update_customers(customer_details: list) -> None:
                 client = order.client
                 if client:
                     cons.log(
-                        f"zacatek {client.slug} ma incomplete: {client.incomplete}"
+                        f"zacatek {client.name} ma incomplete: {client.incomplete}"
                     )
                     try:
                         with transaction.atomic():
@@ -82,14 +82,14 @@ def update_customers(customer_details: list) -> None:
                             client.email = data.get("email", "")
                             client.save()
                             if settings.DEBUG:
-                                cons.log(f"{client.slug}: byl aktualizovan.")
+                                cons.log(f"{client.name}: byl aktualizovan.")
                                 cons.log(
-                                    f"konec: {client.slug} ma incomplete: {client.incomplete}"
+                                    f"konec: {client.name} ma incomplete: {client.incomplete}"
                                 )
 
                     except Exception:
                         if settings.DEBUG:
-                            cons.log(f"{client.slug}: Update selhal, nic se neulozilo.")
+                            cons.log(f"{client.name}: Update selhal, nic se neulozilo.")
 
                 else:
                     if settings.DEBUG:
