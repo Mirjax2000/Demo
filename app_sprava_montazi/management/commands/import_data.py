@@ -173,6 +173,7 @@ class DatasetTools:
         dataset["misto-urceni"] = dataset["misto-urceni"].fillna(0).astype(int)
         dataset["poznamka-mandanta"] = dataset["poznamka-mandanta"].fillna("")
         dataset["cislo-zakazky"] = dataset["cislo-zakazky"].apply(slugify)
+        dataset["cislo-zakazky"] = dataset["cislo-zakazky"].str.upper()
 
         return dataset
 
