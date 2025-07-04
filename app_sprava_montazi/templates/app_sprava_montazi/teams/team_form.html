@@ -13,9 +13,10 @@
         </div>
         <hr>
         <div class="mt-3">
-            <a href="{% url 'teams' %}"
-               class="btn btn-outline-secondary btn-sm u-width-180 text-nowrap me-2">
-                <i class="fa-solid fa-backward me-2"></i>Zpět na seznam </a>
+            <a href="#"
+               data-back-link-url="{% url 'teams' %}"
+               class="go-back btn btn-outline-secondary btn-sm u-width-180 text-nowrap me-2">
+                <i class="fa-solid fa-backward me-2"></i>Zpět</a>
         </div>
     </section>
 {% endblock content %}

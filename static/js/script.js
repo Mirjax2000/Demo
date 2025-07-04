@@ -12,8 +12,13 @@
     const formsetContainer = $('#article-formset-container');
     const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
     const emptyFormHtml = $('#empty-form-template');
+    // back linky
     // copy to schranka
-    document.addEventListener("DOMContentLoaded", setupAutobotCopy());
+    document.addEventListener("DOMContentLoaded", function () {
+        setupAutobotCopy();
+        goBack();
+    });
+
     // File input validation
     document.addEventListener("DOMContentLoaded", function () {
         // --- montazni protokol form
@@ -497,8 +502,29 @@
         }
     }
 
-    document.addEventListener("DOMContentLoaded", setupAutobotCopy);
 
+    function goBack() {
+        let backLinks = document.querySelectorAll(".go-back")
+        if (!backLinks.length) {
+            return
+        }
+        backLinks.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (document.referrer) {
+                    history.back();
+                }
+                else if (btn.dataset.backLinkUrl) {
+                    // pres dataset data-back-link-url
+                    window.location.href = btn.dataset.backLinkUrl;
+                }
+                else {
+                    // fallback
+                    window.location.href = '/';
+                }
+            })
+        })
+    }
 
 
 })();
