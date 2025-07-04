@@ -483,7 +483,7 @@ class ClientUpdateViewTest(TestCase):
         self.url = reverse(
             "client_update",
             kwargs={
-                "slug": self.order.client.slug,
+                "pk": self.order.client.pk,
                 "order_pk": self.order.pk,
             },
         )

@@ -63,7 +63,7 @@
     </div>
     <!---->
     <div class="text-end">
-        <a href="{% url "client_update_sec" client.pk %}"
+        <a href="{% url "client_update_sec" pk=client.pk %}?next={{ request.get_full_path }}"
            class="btn btn-primary u-txt-smaller w-50 text-nowrap">
             <i class="fa-solid fa-pen-to-square me-2"></i><span>Upravit zákazníka</span></a>
     </div>

@@ -14,6 +14,15 @@
     const emptyFormHtml = $('#empty-form-template');
     // copy to schranka
     document.addEventListener("DOMContentLoaded", setupAutobotCopy());
+    // history back
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.go-back').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                history.back();
+            });
+        });
+    });
     // File input validation
     document.addEventListener("DOMContentLoaded", function () {
         // --- montazni protokol form
@@ -23,7 +32,7 @@
         const fileInputProtocol = document.getElementById("fileInputProtocol");
         const errorMessageProtocolfile = document.getElementById("errorMessageProtocolfile");
 
-        // --- CSV form
+        // --- Create forms
         const CsvFormFile = document.getElementById("CsvFormFile");
         const csv_error_message = document.getElementById("csv_error_message");
 

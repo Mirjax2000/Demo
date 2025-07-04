@@ -241,7 +241,12 @@ class ClientUpdateSecondaryView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse("client_orders", kwargs={"pk": self.object.pk})  # type: ignore
+        next_url = self.request.GET.get("next") or self.request.POST.get("next")
+        if next_url:
+            cons.log("mam to")
+            return next_url
+        cons.log("nemam to")
+        return reverse("client_orders", kwargs={"pk": self.object.pk})
 
 
 class OrderCreateView(LoginRequiredMixin, View):
@@ -573,7 +578,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
     template_name = f"{APP_URL}/orders/client_orders.html"
 
     def get(self, request, pk):
-        client = get_object_or_404(Client, pk=pk)
+        client: Client = get_object_or_404(Client, pk=pk)
         orders = Order.objects.filter(client=client)
         call_logs = CallLog.objects.filter(client=client)
 
@@ -589,8 +594,8 @@ class ClientsOrdersView(LoginRequiredMixin, View):
         }
         return render(request, self.template_name, context)
 
-    def post(self, request, slug):
-        client = get_object_or_404(Client, slug=slug)
+    def post(self, request, pk):
+        client = get_object_or_404(Client, pk=pk)
         orders = Order.objects.filter(client=client)
         call_logs = CallLog.objects.filter(client=client)
 
@@ -614,7 +619,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
                     instance.save()
 
             messages.success(request, "Hovor zpracován a uložen.")
-            return redirect("client_orders", slug=slug)
+            return redirect("client_orders", pk=pk)
 
         messages.error(request, "Hovor nebyl uložen do databáze!")
         return render(request, self.template_name, context)

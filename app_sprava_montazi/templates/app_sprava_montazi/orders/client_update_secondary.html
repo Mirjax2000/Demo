@@ -1,11 +1,18 @@
 {% extends "base.html" %}
 {% block title %}
-    Client form
+    Client form sec
 {% endblock title %}
 <!---->
 {% block content %}
     <section class="L-detail" id="clientUpdateSecondaryPage">
         <!--zakaznik-->
         {% include "app_sprava_montazi/orders/partials/client_form.html" %}
+        <!---->
+        <hr>
+        <div>
+            <a href="#"
+               class="go-back btn btn-outline-secondary btn-sm u-width-180 text-nowrap me-2">
+                <i class="fa-solid fa-backward me-2"></i>Zpět</a>
+        </div>
     </section>
 {% endblock content %}

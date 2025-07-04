@@ -48,6 +48,7 @@ PK = "<int:pk>"
 OPK = "<int:order_pk>"
 SLUG = "<slug:slug>"
 MANDANT = "<str:mandant>"
+PKOPK = f"{PK}/{OPK}"
 # ---
 urlpatterns: list = [
     path("admin/", admin.site.urls),
@@ -62,9 +63,11 @@ app_sprava_montazi: list = [
     path("orders/", Orders.as_view(), name="orders"),
     path("order/create/", OrderCreate.as_view(), name="order_create"),
     path("order/export/", ExportOrdersExcel.as_view(), name="order_export"),
-    path(f"order/{PK}/{OPK}/client_update/", CUV.as_view(), name="client_update"),
+    # ---
+    path(f"order/{PK}/client_update/", CUV.as_view(), name="client_update"),
     path(f"order/{PK}/client_update_sec/", CUS.as_view(), name="client_update_sec"),
     path(f"order/{PK}/client_orders/", ClientsOrders.as_view(), name="client_orders"),
+    # ---
     path(f"order/{PK}/order_update/", OrderUpdate.as_view(), name="order_update"),
     path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),
     path(f"order/{PK}/history/", OrderHistory.as_view(), name="order_history"),
