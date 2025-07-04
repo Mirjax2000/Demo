@@ -191,7 +191,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        order_pk = self.kwargs["order_pk"]
+        order_pk = self.request.GET.get("order_pk")
         order = Order.objects.get(pk=order_pk)
         articles = Article.objects.filter(order=order_pk)
 
@@ -216,7 +216,8 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse("order_detail", kwargs={"pk": self.kwargs["order_pk"]})
+        order_pk = self.request.GET.get("order_pk")
+        return reverse("order_detail", kwargs={"pk": order_pk})
 
 
 class ClientUpdateSecondaryView(LoginRequiredMixin, UpdateView):
