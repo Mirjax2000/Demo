@@ -86,8 +86,8 @@ app_sprava_montazi: list = [
     # --- teams ---
     path("teams/", Teams.as_view(), name="teams"),
     path("teams/create/", TeamCreate.as_view(), name="team_create"),
-    path(f"teams/{SLUG}/detail/", TeamDetail.as_view(), name="team_detail"),
-    path(f"teams/{SLUG}/update/", TeamUpdate.as_view(), name="team_update"),
+    path(f"teams/{PK}/detail/", TeamDetail.as_view(), name="team_detail"),
+    path(f"teams/{PK}/update/", TeamUpdate.as_view(), name="team_update"),
     #
     # --- pdf ---
     path(f"pdf/{MANDANT}/mandant/", Pdf.as_view(), name="mandant_pdf"),

@@ -513,11 +513,12 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
     model = Team
     form_class = TeamForm
     template_name = f"{APP_URL}/teams/team_form.html"
-    success_url = reverse_lazy("teams")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         # --- vycistit btn create/update
+        cons.log(f"mam backlink: {self.request.GET.get('next', '')}")
+        context["back_link"] = self.request.GET.get("next", "")
         context["form_type"] = "create"
         # --- navigace
         context["active"] = "teams"
@@ -530,6 +531,10 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
             f"Tým: <strong>{self.object}</strong> byl úspěšně vytvořen.",  # type: ignore
         )
         return response
+
+    def get_success_url(self):
+        back_link = self.request.GET.get("next", "")
+        return back_link or reverse(back_link)
 
 
 class TeamUpdateView(LoginRequiredMixin, UpdateView):

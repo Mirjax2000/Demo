@@ -8,7 +8,7 @@
             </a>
         </li>
         <li class="C-create-menu__item">
-            <a href="{% url 'team_create' %}" class="link">
+            <a href="{% url 'team_create' %}?next={{ request.path }}" class="link">
                 <i class="bi bi-people me-2"></i>
                 <span>Vytvořit Tým</span>
             </a>

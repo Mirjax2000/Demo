@@ -10,8 +10,9 @@
         <!---->
         <hr>
         <div class="L-table__nav-panel__buttons">
-            <a href="{% url "team_create" %}" class="btn btn-primary btn-sm">
-                <i class="fa-solid fa-circle-plus"></i>&nbsp;&nbsp;Vytvořit team
+            <a href="{% url "team_create" %}?next={{ request.path }}"
+               class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-circle-plus me-2"></i>Vytvořit team
             </a>
         </div>
     </div>
