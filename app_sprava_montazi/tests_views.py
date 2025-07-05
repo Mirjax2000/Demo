@@ -1,6 +1,7 @@
 """View tests"""
 
 import io
+from decimal import Decimal
 import os
 import logging
 from datetime import date, datetime
@@ -1041,11 +1042,36 @@ class TeamCreateTest(TestCase):
         self.assertEqual(response.context.get("form_type"), "create")
         self.assertEqual(response.context.get("back_link"), "/nejaka-cesta/")
 
+    def test_context_variables_no_next(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.context.get("active"), "teams")
+        self.assertEqual(response.context.get("form_type"), "create")
+        self.assertEqual(response.context.get("back_link"), "")
+
+    def test_db_records_after_post_create(self):
+        data = {
+            "name": "Ferda Company",
+            "city": "Praha",
+            "active": True,
+            "phone": "234234234",
+            "email": "test.email@google.cz",
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Team.objects.count(), 1)
+        # ---
+        team = Team.objects.get(name="Ferda Company")
+        self.assertEqual(team.name, data["name"])
+        self.assertEqual(team.city, data["city"])
+        self.assertEqual(team.active, data["active"])
+        self.assertEqual(team.phone, data["phone"])
+        self.assertEqual(team.email, data["email"])
+
     def test_post_create_team_and_redirect_default(self):
         data = {
             "name": "Team jedna",
             "city": "Praha",
-            "active": "True",
+            "active": True,
             "phone": "234234234",
             "email": "test.email@google.cz",
         }
@@ -1053,12 +1079,16 @@ class TeamCreateTest(TestCase):
         self.assertRedirects(response, reverse("teams"))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Team.objects.filter(name="Team jedna").exists())
+        self.assertTrue(Team.objects.filter(city="Praha").exists())
+        self.assertTrue(Team.objects.filter(active=True).exists())
+        self.assertTrue(Team.objects.filter(phone="234234234").exists())
+        self.assertTrue(Team.objects.filter(email="test.email@google.cz").exists())
 
     def test_post_create_team_with_next_redirect(self):
         data = {
             "name": "Team dve",
             "city": "Praha",
-            "active": "True",
+            "active": True,
             "phone": "234234234",
             "email": "test.email@google.cz",
         }
@@ -1071,7 +1101,7 @@ class TeamCreateTest(TestCase):
         data = {
             "name": "Team tri",
             "city": "Praha",
-            "active": "True",
+            "active": True,
             "phone": "234234234",
             "email": "test.email@google.cz",
         }
@@ -1122,6 +1152,27 @@ class TeamDetailViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertIn("active", response.context)
         self.assertEqual(response.context["active"], "teams")
+        self.assertIn("back_link", response.context)
+        self.assertEqual(response.context["back_link"], "")
+
+    def test_back_link_in_context(self):
+        response = self.client.get(f"{self.url}?next=/some/page/")
+        self.assertIn("back_link", response.context)
+        self.assertEqual(response.context["back_link"], "/some/page/")
+
+    def test_team_in_context(self):
+        response = self.client.get(self.url)
+        team = response.context["team"]
+        self.assertEqual(team.name, "Test Company")
+        self.assertEqual(team.city, "Praha")
+        self.assertEqual(team.region, "Střední Čechy")
+        self.assertEqual(team.phone, "123456789")
+        self.assertEqual(team.email, "test@company.cz")
+        self.assertEqual(team.active, True)
+        self.assertEqual(team.price_per_hour, Decimal("150.50"))
+        self.assertEqual(team.price_per_km, Decimal("12.30"))
+        self.assertEqual(team.notes, "Toto je testovací poznámka.")
+        self.assertIsInstance(response.context["team"], Team)
 
 
 class TeamUpdateViewTest(TestCase):
