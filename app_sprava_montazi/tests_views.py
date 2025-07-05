@@ -8,6 +8,7 @@ from unittest.mock import patch
 import tempfile
 import shutil
 
+from cv2 import floodFill
 from django.urls import reverse
 from django.contrib.auth.models import User
 
@@ -480,7 +481,7 @@ class ClientUpdateViewTest(TestCase):
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=None,
         )
-        base_url = reverse('client_update', kwargs={'pk': self.order.client.pk})
+        base_url = reverse("client_update", kwargs={"pk": self.order.client.pk})
         self.url = f"{base_url}?order_pk={self.order.pk}"
 
     def test_logged_in(self):
@@ -597,7 +598,7 @@ class OrderCreateViewTest(TestCase):
             mandant="SCCZ",
             evidence_termin=date.today(),
             team_type=TeamType.BY_ASSEMBLY_CREW,
-            team=None,
+            team=self.team,
         )
 
         # Základní validní data pro formuláře
@@ -799,9 +800,6 @@ class OrderCreateViewTest(TestCase):
         response = self.client.post(self.url, post_data)
         created_order = Order.objects.latest("id")
         created_client = Client.objects.latest("id")
-
-        self.assertEqual(response.status_code, 302)
-        # Zkontrolujeme vazby
 
         self.assertEqual(response.status_code, 302)
         # Zkontrolujeme, že přesměrování je na URL detailu objednávky
@@ -1022,34 +1020,65 @@ class TeamsViewTest(TestCase):
 
 class TeamCreateTest(TestCase):
     def setUp(self):
-        # Vytvoříme testovacího uživatele
         self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client.login(username="testuser", password="testpass")
         self.url = reverse("team_create")
         self.template = "app_sprava_montazi/teams/team_form.html"
-        self.client.login(username="testuser", password="testpass")
 
     def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
 
     def test_redirect_if_not_logged_in(self):
-        """
-        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
-        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
-        """
         self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
 
-    def test_active_context_variable(self):
-        response = self.client.get(self.url)
-        self.assertIn("active", response.context)
-        self.assertEqual(response.context["active"], "teams")
+    def test_context_variables(self):
+        response = self.client.get(self.url + "?next=/nejaka-cesta/")
+        self.assertEqual(response.context.get("active"), "teams")
+        self.assertEqual(response.context.get("form_type"), "create")
+        self.assertEqual(response.context.get("back_link"), "/nejaka-cesta/")
+
+    def test_post_create_team_and_redirect_default(self):
+        data = {
+            "name": "Team jedna",
+            "city": "Praha",
+            "active": "True",
+            "phone": "234234234",
+            "email": "test.email@google.cz",
+        }
+        response = self.client.post(self.url, data)
+        self.assertRedirects(response, reverse("teams"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Team.objects.filter(name="Team jedna").exists())
+
+    def test_post_create_team_with_next_redirect(self):
+        data = {
+            "name": "Team dve",
+            "city": "Praha",
+            "active": "True",
+            "phone": "234234234",
+            "email": "test.email@google.cz",
+        }
+        response = self.client.post(f"{self.url}?next=/teams/", data)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Team.objects.filter(name="Team dve").exists())
+        self.assertRedirects(response, "/teams/")
+
+    def test_success_message_after_create(self):
+        data = {
+            "name": "Team tri",
+            "city": "Praha",
+            "active": "True",
+            "phone": "234234234",
+            "email": "test.email@google.cz",
+        }
+        response = self.client.post(self.url, data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        messages_list = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("byl úspěšně vytvořen" in str(m) for m in messages_list))
 
 
 class TeamDetailViewTest(TestCase):
@@ -1068,7 +1097,7 @@ class TeamDetailViewTest(TestCase):
             price_per_km=12.30,
             notes="Toto je testovací poznámka.",
         )
-        self.url = reverse("team_detail", kwargs={"slug": self.team.slug})
+        self.url = reverse("team_detail", kwargs={"pk": self.team.pk})
         self.client.login(username="testuser", password="testpass")
 
     def test_logged_in(self):
@@ -1110,7 +1139,7 @@ class TeamUpdateViewTest(TestCase):
             price_per_km=12.30,
             notes="Toto je testovací poznámka.",
         )
-        self.url = reverse("team_update", kwargs={"slug": self.team.slug})
+        self.url = reverse("team_update", kwargs={"pk": self.team.pk})
         self.template = "app_sprava_montazi/teams/team_form.html"
         self.client.login(username="testuser", password="testpass")
 

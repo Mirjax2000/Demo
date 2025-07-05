@@ -306,7 +306,8 @@ class ArticleFormTest(TestCase):
 class TeamFormTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        Team.objects.create(name="Ferda Team", city="Praha")
+        Team.objects.create(name="Ferda Team", city="New City", phone="987654321")
+        Team.objects.create(name="duplicate", city="Berlin", phone="232456789")
 
     def test_valid_team_form(self):
         """Validni form"""
@@ -325,11 +326,26 @@ class TeamFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_invalid_email_team_form(self):
-        """Validni form"""
+        """no email no phone"""
+        form_data = {
+            "name": "New Teams",
+            "city": "Berlin",
+            "region": "Jihoceksy kraj",
+            "active": True,
+            "price_per_hour": 250.00,
+            "price_per_km": 8.00,
+            "notes": "Spolehlivy tym",
+        }
+        form = TeamForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_invalid_phone_team_form(self):
+        """no email no phone"""
         form_data = {
             "name": "New Team",
             "city": "Berlin",
             "region": "Jihoceksy kraj",
+            "email": "new@example.com",
             "active": True,
             "price_per_hour": 250.00,
             "price_per_km": 8.00,
@@ -359,6 +375,23 @@ class TeamFormTest(TestCase):
 
     def test_invalid_team_form_duplicate_name(self):
         form_data = {"name": "Ferda Team", "city": "New City", "phone": "987654321"}
+        form = TeamForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("name", form.errors)
+
+    def test_valid_team_form_duplicate(self):
+        """Validni form ale duplicate"""
+        form_data = {
+            "name": "duplicate",
+            "city": "Berlin",
+            "region": "Jihoceksy kraj",
+            "phone": "232456789",
+            "email": "new@example.com",
+            "active": True,
+            "price_per_hour": 250.00,
+            "price_per_km": 8.00,
+            "notes": "Spolehlivy tym",
+        }
         form = TeamForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn("name", form.errors)

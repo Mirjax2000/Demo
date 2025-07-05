@@ -447,37 +447,6 @@ class OrdersView(LoginRequiredMixin, ListView):
         return context
 
 
-# def api_orders(request):
-#     filters = parse_order_filters(request)
-#     qs = filter_orders(filters).order_by("-id")
-
-#     draw = int(request.GET.get("draw", 1))
-#     start = int(request.GET.get("start", 0))
-#     length = int(request.GET.get("length", 15))
-
-#     total = qs.count()
-#     orders = qs[start : start + length]
-
-#     data = [
-#         [
-#             order.id,
-#             order.evidence_termin.strftime("%Y-%m-%d") if order.evidence_termin else "",
-#             order.customer_name,
-#             order.status,
-#         ]
-#         for order in orders
-#     ]
-
-#     return JsonResponse(
-#         {
-#             "draw": draw,
-#             "recordsTotal": total,
-#             "recordsFiltered": total,
-#             "data": data,
-#         }
-#     )
-
-
 class OrderDetailView(LoginRequiredMixin, DetailView):
     model = Order
     template_name = f"{APP_URL}/orders/order_detail.html"
@@ -509,6 +478,20 @@ class TeamsView(LoginRequiredMixin, ListView):
         return context
 
 
+class TeamDetailView(LoginRequiredMixin, DetailView):
+    model = Team
+    template_name = f"{APP_URL}/teams/team_detail.html"
+    context_object_name = "team"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        # --- odkud jsi prisel
+        context["back_link"] = self.request.GET.get("next", "")
+        # --- navigace
+        context["active"] = "teams"
+        return context
+
+
 class TeamCreateView(LoginRequiredMixin, CreateView):
     model = Team
     form_class = TeamForm
@@ -516,9 +499,9 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        # --- vycistit btn create/update
-        cons.log(f"mam backlink: {self.request.GET.get('next', '')}")
+        # --- odkud jsi prisel
         context["back_link"] = self.request.GET.get("next", "")
+        # --- vycistit btn create/update
         context["form_type"] = "create"
         # --- navigace
         context["active"] = "teams"
@@ -532,9 +515,10 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
         )
         return response
 
+    # --- odkud jsi prisel tam te to redirectne
     def get_success_url(self):
         back_link = self.request.GET.get("next", "")
-        return back_link or reverse(back_link)
+        return back_link or reverse("teams")
 
 
 class TeamUpdateView(LoginRequiredMixin, UpdateView):
@@ -560,19 +544,7 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
             next_url, allowed_hosts={self.request.get_host()}
         ):
             return next_url
-        return reverse("team_detail", kwargs={"slug": self.object.slug})  # type: ignore
-
-
-class TeamDetailView(LoginRequiredMixin, DetailView):
-    model = Team
-    template_name = f"{APP_URL}/teams/team_detail.html"
-    context_object_name = "team"
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        # --- navigace
-        context["active"] = "teams"
-        return context
+        return reverse("team_detail", kwargs={"pk": self.object.pk})  # type: ignore
 
 
 class ClientsOrdersView(LoginRequiredMixin, View):
