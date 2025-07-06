@@ -485,8 +485,6 @@ class TeamDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        # --- odkud jsi prisel
-        context["back_link"] = self.request.GET.get("next", "")
         # --- navigace
         context["active"] = "teams"
         return context
@@ -499,8 +497,6 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        # --- odkud jsi prisel
-        context["back_link"] = self.request.GET.get("next", "")
         # --- vycistit btn create/update
         context["form_type"] = "create"
         # --- navigace
@@ -538,13 +534,17 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
         messages.success(self.request, f"Team: {self.object} byl aktualizovan.")  # type: ignore
         return super().form_valid(form)
 
-    def get_success_url(self) -> str:
-        next_url = self.request.POST.get("next") or self.request.GET.get("next")
-        if next_url and url_has_allowed_host_and_scheme(
-            next_url, allowed_hosts={self.request.get_host()}
-        ):
-            return next_url
-        return reverse("team_detail", kwargs={"pk": self.object.pk})  # type: ignore
+    # def get_success_url(self) -> str:
+    #     next_url = self.request.POST.get("next") or self.request.GET.get("next")
+    #     if next_url and url_has_allowed_host_and_scheme(
+    #         next_url, allowed_hosts={self.request.get_host()}
+    #     ):
+    #         return next_url
+    #     return reverse("team_detail", kwargs={"pk": self.object.pk})  # type: ignore
+
+    # --- odkud jsi prisel tam te to redirectne
+    def get_success_url(self):
+        return reverse("team_detail", kwargs={"pk": self.object.id})
 
 
 class ClientsOrdersView(LoginRequiredMixin, View):
