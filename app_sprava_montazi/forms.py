@@ -141,17 +141,16 @@ class OrderForm(forms.ModelForm):
         ]
 
     def clean_order_number(self):
-        order_number = self.cleaned_data.get("order_number").upper()
+        order_number = self.cleaned_data.get("order_number", "").upper()
 
-        qs = Order.objects.filter(order_number=order_number)
+        qs = Order.objects.filter(order_numberr__iexact=order_number)
 
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Objednávka už existuje!")
 
-        if qs:
-            
-
-
+        return order_number
 
     def clean_team_type(self):
         team_type = self.cleaned_data.get("team_type")
