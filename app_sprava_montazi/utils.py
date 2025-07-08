@@ -40,11 +40,17 @@ def filter_orders(filters: dict) -> QuerySet:
     # --- dotaz na vsechno a postupne se pridavaji dalsi filtry
     orders = Order.objects.all()
     # --- status filtr
+    # --- vsechny krome hidden
     if status == "all":
         orders = orders.exclude(status="Hidden")
+    elif status == "closed":
+        # --- Uzavrene
+        orders = orders.filter(status__in=["Billed", "Canceled"])
     elif status:
+        # --- jednotlive
         orders = orders.filter(status=status)
     else:
+        # --- Otevrene
         orders = orders.exclude(status__in=["Hidden", "Billed", "Canceled"])
     # --- casovy filtr
     if start_date:

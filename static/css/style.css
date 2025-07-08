@@ -274,25 +274,34 @@ body.home {
   box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4117647059);
 }
 
-option[value=New],
-option[value=Adviced],
-option[value=Realized] {
+.L-table__select option[value=New],
+.L-table__select option[value=Adviced],
+.L-table__select option[value=Realized] {
   background-color: rgb(255, 254, 204);
 }
 
-option[value=Billed],
-option[value=Canceled],
-option[value=Hidden] {
-  background-color: rgba(204, 243, 255, 0.2235294118);
+.L-table__select option[value=Billed],
+.L-table__select option[value=Canceled],
+.L-table__select option[value=Hidden] {
+  background-color: #bcebff;
 }
 
-option[value=all] {
+.L-table__select option[value=Hidden] {
+  background-color: #ababab;
+}
+
+.L-table__select option[value=all] {
   background-color: rgba(204, 249, 145, 0.571);
   font-weight: 600;
 }
 
-.option_open-all {
-  background-color: rgba(241, 195, 95, 0.498);
+.L-table__select .option_open-all {
+  background-color: #bada55;
+  font-weight: 600;
+}
+
+.option_closed-all {
+  background-color: #5fe5f1;
   font-weight: 600;
 }
 

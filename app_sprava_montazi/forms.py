@@ -146,7 +146,7 @@ class OrderForm(forms.ModelForm):
     def clean_order_number(self):
         order_number = self.cleaned_data.get("order_number", "").upper()
 
-        qs = Order.objects.filter(order_numberr__iexact=order_number)
+        qs = Order.objects.filter(order_number__iexact=order_number)
 
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)

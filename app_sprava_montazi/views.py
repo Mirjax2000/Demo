@@ -432,6 +432,8 @@ class OrdersView(LoginRequiredMixin, ListView):
                 "get_status": (
                     "Všechny"
                     if self.filters["status"] == "all"
+                    else "Uzavřené"
+                    if self.filters["status"] == "closed"
                     else Status(self.filters["status"]).label
                     if self.filters["status"]
                     else ""
