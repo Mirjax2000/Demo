@@ -4,12 +4,14 @@
         <div class="L-table__nav-panel__form__group">
             <label for="status">Filter status</label>
             <select name="status" class="form-select L-table__select" id="status">
-                <option value="" {% if not raw_status %}selected{% endif %}>Otevřené</option>
+                <option class="option_open-all"
+                        value=""
+                        {% if not raw_status %}selected{% endif %}>Otevřené</option>
                 {% for status in statuses %}
                     <option value="{{ status.value }}"
                             {% if raw_status == status.value %}selected{% endif %}>{{ status.label }}</option>
                 {% endfor %}
-                <option value="all">Všechny</option>
+                <option value="all"{% if raw_status == "all" %}selected{% endif %}>Všechny</option>
             </select>
             <!---->
             {% if get_status %}

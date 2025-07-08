@@ -37,21 +37,22 @@ def filter_orders(filters: dict) -> QuerySet:
     od_value = filters.get("od", "").strip()
     start_date = filters.get("start_date")
     end_date = filters.get("end_date")
+    # --- dotaz na vsechno a postupne se pridavaji dalsi filtry
     orders = Order.objects.all()
-
+    # --- status filtr
     if status == "all":
-        pass  # žádný filtr
+        orders = orders.exclude(status="Hidden")
     elif status:
         orders = orders.filter(status=status)
     else:
         orders = orders.exclude(status__in=["Hidden", "Billed", "Canceled"])
-
+    # --- casovy filtr
     if start_date:
         orders = orders.filter(evidence_termin__gte=start_date)
 
     if end_date:
         orders = orders.filter(evidence_termin__lte=end_date)
-
+    # --- obchodni dum filtr
     if od_value:
         orders = orders.filter(order_number__startswith=od_value)
 

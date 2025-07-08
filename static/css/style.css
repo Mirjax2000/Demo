@@ -12,6 +12,7 @@
 [data-theme=light] {
   --border: rgba(33, 37, 41, 0.2901960784);
   --shadow: rgba(33, 37, 41, 0.1843137255);
+  --bck-form-date: #9bc8ff;
   --bck-list-item: white;
   --bck-sidebar: #f8f9fa;
   --bck-body: #f8f9fa;
@@ -20,13 +21,15 @@
   --bck-table-row-odd: #fff;
   --bck-table-row-hover: #e5e5e5;
   --txt-default: #212529;
-  --txt-default-calm: #2b5277;
+  --txt-default-calm: #386187;
   --txt-muted: #c2c2c2;
+  --txt-montage-termin: #e8f6b3;
 }
 
 [data-theme=dark] {
   --border: #424242;
   --shadow: rgba(248, 249, 250, 0.0705882353);
+  --bck-form-date: #264460;
   --bck-list-item: #232323;
   --bck-sidebar: #212529;
   --bck-body: #212529;
@@ -37,6 +40,7 @@
   --txt-default: #f8f9fa;
   --txt-default-calm: rgba(138, 179, 255, 0.3490196078);
   --txt-muted: #8b8b8b;
+  --txt-montage-termin: #3e6011;
 }
 
 /* --- base --- */
@@ -270,6 +274,33 @@ body.home {
   box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4117647059);
 }
 
+option[value=New],
+option[value=Adviced],
+option[value=Realized] {
+  background-color: rgb(255, 254, 204);
+}
+
+option[value=Billed],
+option[value=Canceled],
+option[value=Hidden] {
+  background-color: rgba(204, 243, 255, 0.2235294118);
+}
+
+option[value=all] {
+  background-color: rgba(204, 249, 145, 0.571);
+  font-weight: 600;
+}
+
+.option_open-all {
+  background-color: rgba(241, 195, 95, 0.498);
+  font-weight: 600;
+}
+
+#id_montage_termin {
+  font-weight: 600;
+  background-color: var(--bck-form-date);
+}
+
 .L-sidebar {
   display: flex;
   justify-content: flex-start;
@@ -420,7 +451,7 @@ body.home {
   color: var(--success-lighter);
   background-color: var(--bck-table-head);
   font-weight: bold;
-  padding: 0.3em 0.5em;
+  padding: 0.2em 0.3em;
 }
 .L-form__group .L-form__select option {
   color: var(--success-lighter);

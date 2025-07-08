@@ -282,7 +282,7 @@ class Order(Model):
         super().save(*args, **kwargs)
 
     class Meta:
-        ordering = ["-order_number"]
+        ordering = ["-evidence_termin"]
 
 
 class Article(Model):

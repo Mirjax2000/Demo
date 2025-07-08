@@ -43,9 +43,9 @@
 
                 if (file) {
 
-                    if (file.size > 5 * 1024 * 1024) { // 5 MB
+                    if (file.size > 10 * 1024 * 1024) { // 10 MB
                         const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-                        fileError.innerHTML = `Soubor je příliš velký <strong class="u-txt-error">${sizeMB} MB</strong>.<br> Max. velikost je 5 MB.`;
+                        fileError.innerHTML = `Soubor je příliš velký <strong class="u-txt-error">${sizeMB} MB</strong>.<br> Max. velikost je 10 MB.`;
                         fileInput.value = "";
                         return;
                     }
@@ -71,9 +71,9 @@
 
                 if (file_from_fallback) {
 
-                    if (file_from_fallback.size > 5 * 1024 * 1024) { // 5 MB
+                    if (file_from_fallback.size > 10 * 1024 * 1024) { // 1 MB
                         const sizeMB = (file_from_fallback.size / 1024 / 1024).toFixed(2);
-                        errorMessageProtocolfile.innerHTML = `Soubor je příliš velký <strong>${sizeMB} MB</strong>.<br> Max. velikost je 5 MB.`;
+                        errorMessageProtocolfile.innerHTML = `Soubor je příliš velký <strong>${sizeMB} MB</strong>.<br> Max. velikost je 10 MB.`;
                         fileInputProtocol.value = "";
                         return;
                     }
@@ -195,7 +195,7 @@
     // DataTable for orders
     if (orderTable) {
         $(orderTable).DataTable({
-            order: [[0, 'desc']],
+            order: [[3, 'desc']],
             rowReorder: false,
             fixedColumns: true,
             pageLength: 15,
