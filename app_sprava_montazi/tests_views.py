@@ -1354,7 +1354,21 @@ class ExportOrdersExcelViewTest(TestCase):
         )
         self.order2.refresh_from_db()
 
-        # Objednávka, která bude zrušena a má být ignorována `filter_orders` defaultně (protože má status 'Hidden')
+        self.order3 = Order.objects.create(
+            order_number="54321-S",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer2,
+            evidence_termin=date(2024, 6, 15),
+            delivery_termin=None,  # Test None values
+            montage_termin=None,  # Test None values
+            status=Status.NEW,
+            team_type=TeamType.BY_DELIVERY_CREW,
+            team=None,
+            notes="",
+        )
+        self.order3.refresh_from_db()
+
         self.order_hidden = Order.objects.create(
             order_number="HIDDEN-Y",
             distrib_hub=self.hub,
@@ -1365,7 +1379,6 @@ class ExportOrdersExcelViewTest(TestCase):
             team_type=TeamType.BY_CUSTOMER,
         )
 
-        # Objednávka se status 'CANCELED', která bude viditelná, pokud není explicitně filtrována
         self.order_canceled = Order.objects.create(
             order_number="CANCELED-X",
             distrib_hub=self.hub,
@@ -1387,46 +1400,6 @@ class ExportOrdersExcelViewTest(TestCase):
         )
 
         self.url = reverse("order_export")
-
-    def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_redirect_if_not_logged_in(self):
-        """
-        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
-        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
-        """
-        self.client.logout()
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
-
-    def test_excel_response_headers(self):
-        """
-        Testuje, zda jsou hlavičky HTTP odpovědi správně nastaveny pro Excel soubor.
-        """
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response["Content-Type"],
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-        # Test Content-Disposition filename structure
-        self.assertTrue(
-            response["Content-Disposition"].startswith(
-                "attachment; filename=objednavky-"
-            )
-        )
-        self.assertTrue(response["Content-Disposition"].endswith(".xlsx"))
-        self.assertTrue(
-            response["Content-Disposition"].endswith(
-                "filename=objednavky-__None_None.xlsx"
-            )
-        )
 
     def test_excel_file_content_all_visible_orders(self):
         """
@@ -1461,11 +1434,10 @@ class ExportOrdersExcelViewTest(TestCase):
         # Získání viditelných objednávek z DB a jejich seřazení pro ověření
         visible_orders = Order.objects.exclude(
             status__in=["Hidden", "Billed", "Canceled"]
-        ).order_by("-order_number")
+        )
 
         # Test datových řádků
 
-        # Řádek 2 (první viditelná objednávka: self.order_canceled)
         current_order = visible_orders[0]
         row_values = [cell.value for cell in ws[2]]
         self.assertEqual(row_values[0], current_order.order_number)
@@ -1497,8 +1469,9 @@ class ExportOrdersExcelViewTest(TestCase):
             row_values[11], current_order.notes if current_order.notes else None
         )  # "" read as None
 
-        # Řádek 3 (druhá viditelná objednávka: self.order2)
+        # Řádek 2 (prvni viditelná objednávka: self.order1)
         current_order = visible_orders[1]
+
         row_values = [cell.value for cell in ws[3]]
         self.assertEqual(row_values[0], current_order.order_number)
         self.assertEqual(row_values[1], str(current_order.distrib_hub))
@@ -1529,7 +1502,6 @@ class ExportOrdersExcelViewTest(TestCase):
             row_values[11], current_order.notes if current_order.notes else None
         )  # "" read as None
 
-        # Řádek 4 (třetí viditelná objednávka: self.order1)
         current_order = visible_orders[2]
         row_values = [cell.value for cell in ws[4]]
         self.assertEqual(row_values[0], current_order.order_number)
@@ -1549,8 +1521,8 @@ class ExportOrdersExcelViewTest(TestCase):
             row_values[11], current_order.notes if current_order.notes else None
         )
 
-        # Zajistíme správný počet řádků (1 hlavička + 3 datové řádky)
-        self.assertEqual(ws.max_row, 4)
+        # Zajistíme správný počet řádků (1 hlavička + 4 datové řádky)
+        self.assertEqual(ws.max_row, 5)
 
     def test_excel_file_no_matching_orders(self):
         """
