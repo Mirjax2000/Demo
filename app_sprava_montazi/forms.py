@@ -121,6 +121,9 @@ class OrderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        if self.instance.pk:
+            self.fields["order_number"].widget.attrs["readonly"] = True
+
         self.fields["evidence_termin"].input_formats = [
             "%Y-%m-%d",
             "%d.%m.%Y",
