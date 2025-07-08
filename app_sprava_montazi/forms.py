@@ -140,6 +140,19 @@ class OrderForm(forms.ModelForm):
             "%d/%m/%Y %H:%M",
         ]
 
+    def clean_order_number(self):
+        order_number = self.cleaned_data.get("order_number").upper()
+
+        qs = Order.objects.filter(order_number=order_number)
+
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs:
+            
+
+
+
     def clean_team_type(self):
         team_type = self.cleaned_data.get("team_type")
         if not team_type:
