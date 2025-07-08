@@ -39,11 +39,12 @@ def filter_orders(filters: dict) -> QuerySet:
     end_date = filters.get("end_date")
     orders = Order.objects.all()
 
-    if not status or status != "Hidden":
-        orders = orders.exclude(status="Hidden")
-
-    if status:
+    if status == "all":
+        pass  # žádný filtr
+    elif status:
         orders = orders.filter(status=status)
+    else:
+        orders = orders.exclude(status__in=["Hidden", "Billed", "Canceled"])
 
     if start_date:
         orders = orders.filter(evidence_termin__gte=start_date)

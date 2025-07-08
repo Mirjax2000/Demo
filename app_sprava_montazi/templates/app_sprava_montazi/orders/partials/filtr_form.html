@@ -4,17 +4,18 @@
         <div class="L-table__nav-panel__form__group">
             <label for="status">Filter status</label>
             <select name="status" class="form-select L-table__select" id="status">
-                <option value="" {% if not raw_status %}selected{% endif %}>Všechny</option>
+                <option value="" {% if not raw_status %}selected{% endif %}>Otevřené</option>
                 {% for status in statuses %}
                     <option value="{{ status.value }}"
                             {% if raw_status == status.value %}selected{% endif %}>{{ status.label }}</option>
                 {% endfor %}
+                <option value="all">Všechny</option>
             </select>
             <!---->
             {% if get_status %}
                 Status:<span class="ms-2 u-txt-success-light">{{ get_status }}</span>
             {% else %}
-                <span>Všechny záznamy:</span>
+                <span>Všechny otevřené:</span>
             {% endif %}
         </div>
         <!-- Input pro datum "od" -->

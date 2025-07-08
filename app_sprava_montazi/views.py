@@ -429,9 +429,13 @@ class OrdersView(LoginRequiredMixin, ListView):
             {
                 "statuses": Status,
                 "raw_status": self.filters["status"],
-                "get_status": Status(self.filters["status"]).label
-                if self.filters["status"]
-                else "",
+                "get_status": (
+                    "Všechny"
+                    if self.filters["status"] == "all"
+                    else Status(self.filters["status"]).label
+                    if self.filters["status"]
+                    else ""
+                ),
                 "od_choices": OD_CHOICES,
                 "raw_od": self.filters["od"],
                 "od_value": OD_DICT.get(self.filters["od"], ""),

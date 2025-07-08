@@ -1327,7 +1327,7 @@ class ExportOrdersExcelViewTest(TestCase):
             team=self.team,
             notes="Nějaké poznámky k zakázce 1.",
         )
-        self.order1.refresh_from_db()  # Získání aktuálního stavu z DB (status by měl být ADVICED)
+        self.order1.refresh_from_db()
 
         # Druhá objednávka s chybějícími daty pro testování prázdných buněk
         self.customer2 = Client.objects.create(
@@ -1374,6 +1374,16 @@ class ExportOrdersExcelViewTest(TestCase):
             evidence_termin=date(2024, 3, 1),
             status=Status.CANCELED,
             team_type=TeamType.BY_CUSTOMER,
+        )
+
+        self.order_adviced = Order.objects.create(
+            order_number="ADVICED-X",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            evidence_termin=date(2024, 3, 1),
+            status=Status.ADVICED,
+            team_type=TeamType.BY_ASSEMBLY_CREW,
         )
 
         self.url = reverse("order_export")
@@ -1449,10 +1459,9 @@ class ExportOrdersExcelViewTest(TestCase):
         self.assertEqual(actual_headers, expected_headers)
 
         # Získání viditelných objednávek z DB a jejich seřazení pro ověření
-        visible_orders = Order.objects.exclude(status=Status.HIDDEN).order_by(
-            "-order_number"
-        )
-        self.assertEqual(len(visible_orders), 3)
+        visible_orders = Order.objects.exclude(
+            status__in=["Hidden", "Billed", "Canceled"]
+        ).order_by("-order_number")
 
         # Test datových řádků
 
@@ -1591,16 +1600,17 @@ class ExportOrdersExcelViewTest(TestCase):
         wb = load_workbook(excel_file)
         ws = wb.active
 
-        # Měl by obsahovat hlavičky + 1 řádek dat (order1 je ADVICED)
-        self.assertEqual(ws.max_row, 2)
+        self.assertEqual(ws.max_row, 3)
 
         # Zkontrolujeme, zda se jedná o správnou objednávku
         order_row_values = [cell.value for cell in ws[2]]
-        self.assertEqual(order_row_values[0], self.order1.order_number)
+        self.assertEqual(order_row_values[0], self.order_adviced.order_number)
         self.assertEqual(
-            order_row_values[3], self.order1.get_status_display()
+            order_row_values[3], self.order_adviced.get_status_display()
         )  # ADVICED
-        self.assertEqual(order_row_values[6], format_date(self.order1.evidence_termin))
+        self.assertEqual(
+            order_row_values[6], format_date(self.order_adviced.evidence_termin)
+        )
 
 
 class PdfViewTestV1(TestCase):
