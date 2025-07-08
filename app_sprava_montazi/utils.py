@@ -40,7 +40,7 @@ def filter_orders(filters: dict) -> QuerySet:
     orders = Order.objects.all()
 
     if status == "all":
-        pass
+        pass  # žádný filtr
     elif status:
         orders = orders.filter(status=status)
     else:
