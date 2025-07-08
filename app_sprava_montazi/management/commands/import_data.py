@@ -173,6 +173,7 @@ class DatasetTools:
         dataset["misto-urceni"] = dataset["misto-urceni"].fillna(0).astype(int)
         dataset["poznamka-mandanta"] = dataset["poznamka-mandanta"].fillna("")
         dataset["cislo-zakazky"] = dataset["cislo-zakazky"].apply(slugify)
+        dataset["cislo-zakazky"] = dataset["cislo-zakazky"].str.upper()
 
         return dataset
 
@@ -192,7 +193,7 @@ class DatasetTools:
 
         filtered_dataset = dataset[
             (dataset["montaz"] == 1)
-            | ((dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-r")))
+            | ((dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-R")))
         ].copy()
 
         filtered_dataset["team_type"] = "By_customer"
