@@ -50,7 +50,7 @@ def filter_orders(filters: dict) -> QuerySet:
         # --- jednotlive
         orders = orders.filter(status=status)
     else:
-        # --- Otevrene
+        # --- Otevrene - default filtr
         orders = orders.exclude(status__in=["Hidden", "Billed", "Canceled"])
     # --- casovy filtr
     if start_date:

@@ -425,19 +425,22 @@ class OrdersView(LoginRequiredMixin, ListView):
             else None
         )
 
+        # get status pro context
+        status_filter = self.filters["status"]
+        if status_filter == "all":
+            get_status = "Všechny"
+        elif status_filter == "closed":
+            get_status = "Uzavřené"
+        elif status_filter:
+            get_status = Status(status_filter).label
+        else:
+            get_status = ""
+
         context.update(
             {
                 "statuses": Status,
-                "raw_status": self.filters["status"],
-                "get_status": (
-                    "Všechny"
-                    if self.filters["status"] == "all"
-                    else "Uzavřené"
-                    if self.filters["status"] == "closed"
-                    else Status(self.filters["status"]).label
-                    if self.filters["status"]
-                    else ""
-                ),
+                "raw_status": status_filter,
+                "get_status": get_status,
                 "od_choices": OD_CHOICES,
                 "raw_od": self.filters["od"],
                 "od_value": OD_DICT.get(self.filters["od"], ""),

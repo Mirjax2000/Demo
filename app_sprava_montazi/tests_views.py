@@ -774,7 +774,7 @@ class OrderCreateViewTest(TestCase):
         order_form = response.context.get("order_form")
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("objednávka uz existuje!", str(order_form.errors["order_number"]))
+        self.assertIn("Objednávka už existuje!", str(order_form.errors["order_number"]))
 
         mock_error_message.assert_called_once()
         args, kwargs = mock_error_message.call_args
