@@ -3,9 +3,7 @@
 from datetime import datetime
 from pathlib import Path
 from typing import TypedDict
-from time import sleep
 
-from dill.tests.test_classdef import Z
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import transaction
 from django.utils.text import slugify
@@ -175,6 +173,7 @@ class DatasetTools:
         dataset["misto-urceni"] = dataset["misto-urceni"].fillna(0).astype(int)
         dataset["poznamka-mandanta"] = dataset["poznamka-mandanta"].fillna("")
         dataset["cislo-zakazky"] = dataset["cislo-zakazky"].apply(slugify)
+        dataset["cislo-zakazky"] = dataset["cislo-zakazky"].str.upper()
 
         return dataset
 
@@ -194,7 +193,7 @@ class DatasetTools:
 
         filtered_dataset = dataset[
             (dataset["montaz"] == 1)
-            | ((dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-r")))
+            | ((dataset["montaz"] == 0) & (dataset["cislo-zakazky"].str.endswith("-R")))
         ].copy()
 
         filtered_dataset["team_type"] = "By_customer"

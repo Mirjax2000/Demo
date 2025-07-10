@@ -198,3 +198,39 @@
     box-shadow: 1px 1px 1px #00000069;
   }
 }
+
+.L-table__select option[value="New"],
+.L-table__select option[value="Adviced"],
+.L-table__select option[value="Realized"] {
+  background-color: rgb(255, 254, 204);
+}
+
+.L-table__select option[value="Billed"],
+.L-table__select option[value="Canceled"],
+.L-table__select option[value="Hidden"] {
+  background-color: #bcebff;
+}
+
+.L-table__select option[value="Hidden"] {
+  background-color: #ababab;
+}
+
+.L-table__select option[value="all"] {
+  background-color: rgba(204, 249, 145, 0.571);
+  font-weight: 600;
+}
+
+.L-table__select .option_open-all {
+  background-color: #bada55;
+  font-weight: 600;
+}
+
+.option_closed-all {
+  background-color: #5fe5f1;
+  font-weight: 600;
+}
+
+#id_montage_termin {
+  font-weight: 600;
+  background-color: var(--bck-form-date);
+}

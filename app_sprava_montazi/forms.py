@@ -121,6 +121,9 @@ class OrderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        if self.instance.pk:
+            self.fields["order_number"].widget.attrs["readonly"] = True
+
         self.fields["evidence_termin"].input_formats = [
             "%Y-%m-%d",
             "%d.%m.%Y",
@@ -139,6 +142,20 @@ class OrderForm(forms.ModelForm):
             "%d.%m.%Y %H:%M",
             "%d/%m/%Y %H:%M",
         ]
+
+    def clean_order_number(self):
+        order_number = self.cleaned_data.get("order_number", "").upper()
+
+        qs = Order.objects.filter(order_number__iexact=order_number)
+
+        # Pokud jde o aktualizaci, vyloučím sám sebe
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            raise forms.ValidationError("Objednávka už existuje!")
+
+        return order_number
 
     def clean_team_type(self):
         team_type = self.cleaned_data.get("team_type")

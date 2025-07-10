@@ -13,6 +13,7 @@ $light-theme: (
   "border": #2125294a,
   "shadow": #2125292f,
   "bck": (
+    "form-date": #9bc8ff,
     "list-item": white,
     "sidebar": #f8f9fa,
     "body": #f8f9fa,
@@ -23,8 +24,9 @@ $light-theme: (
   ),
   "txt": (
     "default": #212529,
-    "default-calm": #2b5277,
+    "default-calm": #386187,
     "muted": #c2c2c2,
+    "montage-termin": #e8f6b3,
   ),
 );
 
@@ -33,6 +35,7 @@ $dark-theme: (
   "border": #424242,
   "shadow": #f8f9fa12,
   "bck": (
+    "form-date": #264460,
     "list-item": #232323,
     "sidebar": #212529,
     "body": #212529,
@@ -45,5 +48,6 @@ $dark-theme: (
     "default": #f8f9fa,
     "default-calm": #8ab3ff59,
     "muted": #8b8b8b,
+    "montage-termin": #3e6011,
   ),
 );

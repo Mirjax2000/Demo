@@ -854,7 +854,7 @@ class OrderModelTestV2(TestCase):
         )
         orders = Order.objects.all()
         self.assertEqual(
-            list(orders.values_list("order_number", flat=True)), ["300", "200", "100"]
+            list(orders.values_list("order_number", flat=True)), ["300", "100", "200"]
         )
 
     def test_zaterminovano_on_create_success(self):
@@ -1199,4 +1199,4 @@ class OrderModelStructuralTest(TestCase):
         self.assertEqual(str(obj), "ZK2025001")
 
     def test_meta_ordering(self):
-        self.assertEqual(Order._meta.ordering, ["-order_number"])
+        self.assertEqual(Order._meta.ordering, ["-evidence_termin"])

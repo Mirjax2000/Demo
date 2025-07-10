@@ -191,7 +191,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        order_pk = self.kwargs["order_pk"]
+        order_pk = self.request.GET.get("order_pk")
         order = Order.objects.get(pk=order_pk)
         articles = Article.objects.filter(order=order_pk)
 
@@ -216,7 +216,8 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse("order_detail", kwargs={"pk": self.kwargs["order_pk"]})
+        order_pk = self.request.GET.get("order_pk")
+        return reverse("order_detail", kwargs={"pk": order_pk})
 
 
 class ClientUpdateSecondaryView(LoginRequiredMixin, UpdateView):
@@ -425,13 +426,22 @@ class OrdersView(LoginRequiredMixin, ListView):
             else None
         )
 
+        # get status pro context
+        status_filter = self.filters["status"]
+        if status_filter == "all":
+            get_status = "Všechny"
+        elif status_filter == "closed":
+            get_status = "Uzavřené"
+        elif status_filter:
+            get_status = Status(status_filter).label
+        else:
+            get_status = ""
+
         context.update(
             {
                 "statuses": Status,
-                "raw_status": self.filters["status"],
-                "get_status": Status(self.filters["status"]).label
-                if self.filters["status"]
-                else "",
+                "raw_status": status_filter,
+                "get_status": get_status,
                 "od_choices": OD_CHOICES,
                 "raw_od": self.filters["od"],
                 "od_value": OD_DICT.get(self.filters["od"], ""),
@@ -444,37 +454,6 @@ class OrdersView(LoginRequiredMixin, ListView):
         )
 
         return context
-
-
-# def api_orders(request):
-#     filters = parse_order_filters(request)
-#     qs = filter_orders(filters).order_by("-id")
-
-#     draw = int(request.GET.get("draw", 1))
-#     start = int(request.GET.get("start", 0))
-#     length = int(request.GET.get("length", 15))
-
-#     total = qs.count()
-#     orders = qs[start : start + length]
-
-#     data = [
-#         [
-#             order.id,
-#             order.evidence_termin.strftime("%Y-%m-%d") if order.evidence_termin else "",
-#             order.customer_name,
-#             order.status,
-#         ]
-#         for order in orders
-#     ]
-
-#     return JsonResponse(
-#         {
-#             "draw": draw,
-#             "recordsTotal": total,
-#             "recordsFiltered": total,
-#             "data": data,
-#         }
-#     )
 
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
@@ -1084,9 +1063,10 @@ class IncompleteCustomersView(APIView):
     permission_classes = [IsAuthenticated]  # jen pro přihlášené uživatele
 
     def get(self, request) -> Response:
-        qs = Order.objects.filter(client__incomplete=True)
+        qs = Order.objects.filter(client__incomplete=True).exclude(status="Hidden")
         seznam = [record.order_number.upper() for record in qs]
-        cons.log(f"seznam nekompletnich klientu: {seznam}")
+        if settings.DEBUG:
+            cons.log(f"seznam nekompletnich klientu: {seznam}")
         return Response(seznam)
 
 
