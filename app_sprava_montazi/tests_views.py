@@ -480,13 +480,8 @@ class ClientUpdateViewTest(TestCase):
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=None,
         )
-        self.url = reverse(
-            "client_update",
-            kwargs={
-                "slug": self.order.client.slug,
-                "order_pk": self.order.pk,
-            },
-        )
+        base_url = reverse('client_update', kwargs={'pk': self.order.client.pk})
+        self.url = f"{base_url}?order_pk={self.order.pk}"
 
     def test_logged_in(self):
         """

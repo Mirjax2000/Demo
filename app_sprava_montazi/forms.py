@@ -148,8 +148,10 @@ class OrderForm(forms.ModelForm):
 
         qs = Order.objects.filter(order_number__iexact=order_number)
 
+        # Pokud jde o aktualizaci, vyloučím sám sebe
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
+
         if qs.exists():
             raise forms.ValidationError("Objednávka už existuje!")
 
