@@ -242,3 +242,11 @@
   font-weight: 600;
   background-color: var(--bck-form-date);
 }
+
+#id_status option[value="Hidden"] {
+  color: var(--accent);
+}
+
+#id_status option[value="Canceled"] {
+  color: var(--error);
+}

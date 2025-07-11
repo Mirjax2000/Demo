@@ -318,6 +318,14 @@ body.home {
   background-color: var(--bck-form-date);
 }
 
+#id_status option[value=Hidden] {
+  color: var(--accent);
+}
+
+#id_status option[value=Canceled] {
+  color: var(--error);
+}
+
 .L-sidebar {
   display: flex;
   justify-content: flex-start;
