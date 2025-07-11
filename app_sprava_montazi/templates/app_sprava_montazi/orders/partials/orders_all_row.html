@@ -59,7 +59,14 @@
             <td class="u-txt-warning u-s-none">⚠️&nbsp;Nevybráno</td>
         {% endif %}
         <!--Status-->
-        <td class="u-s-none">{{ order.get_status_display }}</td>
+        <td class="u-s-none">
+            {{ order.get_status_display|slice:":8" }}
+            {% if order.status == "Adviced" %}
+                <a href="{% url "protocol" pk=order.pk %}" title="Zobrazit protokol">
+                    <i class="{% if order.mail_datum_sended %}fa-solid fa-envelope-circle-check u-txt-success-light-color {% else %} fa-solid fa-envelope fa-beat u-txt-warning-color {% endif %}"></i>
+                </a>
+            {% endif %}
+        </td>
         <!--Articles-->
         {% if order.articles.count == 0 %}
             <td class="u-s-none u-txt-center u-txt-error">{{ order.articles.count }}</td>
