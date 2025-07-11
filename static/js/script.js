@@ -211,7 +211,8 @@
                 bottomEnd: 'paging'
             },
             columnDefs: [
-                { targets: [3, 4], type: 'date' }],
+                { targets: [3, 4, 8], type: 'date' },
+                { targets: [0, 10, 11], orderable: false }],
             language: {
                 emptyTable: "Žádné objednávky"
             },
