@@ -122,6 +122,10 @@ body.home {
   -webkit-text-stroke: 1px var(--success-lighter);
 }
 
+.u-txt-success-light-color {
+  color: var(--success-lighter) !important;
+}
+
 .u-txt-info {
   color: var(--info) !important;
   -webkit-text-stroke: 1px var(--info);
@@ -130,6 +134,10 @@ body.home {
 .u-txt-warning {
   color: orange !important;
   -webkit-text-stroke: 1px orange;
+}
+
+.u-txt-warning-color {
+  color: orange !important;
 }
 
 .u-txt-error {
@@ -308,6 +316,14 @@ body.home {
 #id_montage_termin {
   font-weight: 600;
   background-color: var(--bck-form-date);
+}
+
+#id_status option[value=Hidden] {
+  color: var(--accent);
+}
+
+#id_status option[value=Canceled] {
+  color: var(--error);
 }
 
 .L-sidebar {

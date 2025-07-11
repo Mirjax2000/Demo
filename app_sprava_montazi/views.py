@@ -1066,6 +1066,7 @@ class IncompleteCustomersView(APIView):
         qs = Order.objects.filter(client__incomplete=True).exclude(status="Hidden")
         seznam = [record.order_number.upper() for record in qs]
         if settings.DEBUG:
+            cons.log(f"pocet nekompletnych klientu je: {len(seznam)}")
             cons.log(f"seznam nekompletnich klientu: {seznam}")
         return Response(seznam)
 

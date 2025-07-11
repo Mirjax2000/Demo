@@ -15,6 +15,7 @@ class Command(BaseCommand):
 
     def incomplete_customers_query(self) -> list[str]:
         qs = Order.objects.filter(client__incomplete=True)
+        qs = qs.exclude(status="Hidden")
         seznam: list[str] = []
 
         for record in qs:
