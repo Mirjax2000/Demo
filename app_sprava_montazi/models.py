@@ -200,13 +200,14 @@ class Order(Model):
         verbose_name="Zákazník",
     )
 
+    evidence_termin = DateField(
+        verbose_name="Termín evidence",
+    )
+
     delivery_termin = DateField(
         blank=True,
         null=True,
         verbose_name="Termín doručení",
-    )
-    evidence_termin = DateField(
-        verbose_name="Termín evidence",
     )
     montage_termin = DateTimeField(
         blank=True,

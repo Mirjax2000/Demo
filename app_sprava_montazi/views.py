@@ -1,26 +1,27 @@
 """app_sprava_montazi View"""
 
 import os
-import logging
 from typing import Any
 from datetime import datetime
 from openpyxl import Workbook
 from rich.console import Console
 
 # --- Django
-from django.conf import settings
+from django.db.models import Q
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
+from django.conf import settings
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model
-from django.db.models.deletion import ProtectedError
 from django.core.management import call_command
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.forms import BaseModelForm, inlineformset_factory
-from django.views.generic import View, UpdateView, TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpResponse, FileResponse, HttpResponseForbidden, JsonResponse
+from django.http import HttpResponse, FileResponse, HttpResponseForbidden
+from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import View, UpdateView, TemplateView
 from django.views.generic import CreateView, DetailView, FormView, ListView
 
 # API rest ---
@@ -417,19 +418,56 @@ class OrderDeleteView(LoginRequiredMixin, View):
 
 
 class OrdersView(LoginRequiredMixin, ListView):
-    """Vypis seznamu modelu Order"""
+    """Vypis seznamu modelu Order s podporou server-side DataTables paginace."""
 
     model = Order
     template_name = f"{APP_URL}/orders/orders_all.html"
     context_object_name = "orders"
+    paginate_by = 15
 
     def dispatch(self, request, *args, **kwargs):
-        self.filters = parse_order_filters(request)  # pylint: disable=W0201
+        self.filters = parse_order_filters(request)
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        # --- utils.py
         return filter_orders(self.filters)
+
+    def get(self, request, *args, **kwargs):
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return self.get_json_data(request)
+        return super().get(request, *args, **kwargs)
+
+    def get_json_data(self, request):
+        draw = int(request.GET.get("draw", 1))
+        start = int(request.GET.get("start", 0))
+        length = int(request.GET.get("length", self.paginate_by))
+
+        queryset = filter_orders(self.filters)
+        total_records = Order.objects.count()
+        records_filtered = queryset.count()
+
+        queryset = queryset[start : start + length]
+
+        # ---
+        data = []
+        for order in queryset:
+            order_link = reverse("order_detail", args=[order.pk])
+            data.append(
+                {
+                    "order_number": f'<a href="{order_link}" class="L-table__link">{order.order_number}</a>',
+                    "distrib_hub": order.distrib_hub.slug,
+                    "mandant": order.mandant,
+                }
+            )
+
+        response = {
+            "draw": draw,
+            "recordsTotal": total_records,
+            "recordsFiltered": records_filtered,
+            "data": data,
+        }
+
+        return JsonResponse(response)
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
@@ -446,7 +484,6 @@ class OrdersView(LoginRequiredMixin, ListView):
             else None
         )
 
-        # get status pro context
         status_filter = self.filters["status"]
         if status_filter == "all":
             get_status = "Všechny"
@@ -468,11 +505,9 @@ class OrdersView(LoginRequiredMixin, ListView):
                 "get_start": get_start,
                 "get_end": get_end,
                 "request": self.request,
-                # --- navigace
                 "active": "orders_all",
             }
         )
-
         return context
 
 

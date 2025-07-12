@@ -198,9 +198,19 @@
     // DataTable for orders
     if (orderTable) {
         $(orderTable).DataTable({
-            order: [[3, 'desc']],
+            // Enable server-side processing
+            processing: true,
+            serverSide: true,
+
+            // Specify the URL for your AJAX requests
+            ajax: {
+                url: window.location.href, // This sends the request to the current URL
+                type: "GET",
+            },
+
+            order: [[0, 'desc']], // Initial order (evidence_termin desc)
             rowReorder: false,
-            fixedColumns: true,
+            fixedColumns: false,
             pageLength: 15,
             lengthMenu: [[15, 20, 30, -1], [15, 20, 30, "Vše"]],
             layout: {
@@ -213,9 +223,11 @@
                 bottomStart: 'info',
                 bottomEnd: 'paging'
             },
-            columnDefs: [
-                { targets: [3, 4, 8], type: 'date' },
-                { targets: [0, 10], orderable: false }],
+            columns: [
+                { data: 'order_number', name: 'order_number', orderable: false, searchable: true },
+                { data: 'distrib_hub', name: 'distrib_hub', orderable: true, searchable: true },
+                { data: 'mandant', name: 'mandant', orderable: true, searchable: true },
+            ],
             language: {
                 emptyTable: "Žádné objednávky"
             },
