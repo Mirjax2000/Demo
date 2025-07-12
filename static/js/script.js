@@ -12,8 +12,11 @@
     const formsetContainer = $('#article-formset-container');
     const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
     const emptyFormHtml = $('#empty-form-template');
+
+    // delete Order
+    document.addEventListener("DOMContentLoaded", deleteOrder);
     // copy to schranka
-    document.addEventListener("DOMContentLoaded", setupAutobotCopy());
+    document.addEventListener("DOMContentLoaded", setupAutobotCopy);
     // File input validation
     document.addEventListener("DOMContentLoaded", function () {
         // --- montazni protokol form
@@ -212,7 +215,7 @@
             },
             columnDefs: [
                 { targets: [3, 4, 8], type: 'date' },
-                { targets: [0, 10, 11], orderable: false }],
+                { targets: [0, 10], orderable: false }],
             language: {
                 emptyTable: "Žádné objednávky"
             },
@@ -498,8 +501,20 @@
         }
     }
 
-    document.addEventListener("DOMContentLoaded", setupAutobotCopy);
+    // delete Order
+    function deleteOrder() {
+        const checkBoxDeleteOrder = document.getElementById("checkBoxDeleteOrder");
+        const deleteOrderButton = document.getElementById("deleteOrderButton")
 
-
-
+        if (!checkBoxDeleteOrder && !deleteOrderButton) {
+            return
+        }
+        checkBoxDeleteOrder.addEventListener("change", function () {
+            if (checkBoxDeleteOrder.checked) {
+                deleteOrderButton.classList.remove("disabled")
+            } else {
+                deleteOrderButton.classList.add("disabled")
+            }
+        })
+    }
 })();
