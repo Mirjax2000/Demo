@@ -16,6 +16,7 @@ from django.contrib.messages import get_messages
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client as CL
+from django.db.models.deletion import ProtectedError
 from django.test import TestCase
 from django.utils import timezone
 from django.test import override_settings
@@ -480,7 +481,7 @@ class ClientUpdateViewTest(TestCase):
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=None,
         )
-        base_url = reverse('client_update', kwargs={'pk': self.order.client.pk})
+        base_url = reverse("client_update", kwargs={"pk": self.order.client.pk})
         self.url = f"{base_url}?order_pk={self.order.pk}"
 
     def test_logged_in(self):
@@ -828,6 +829,60 @@ class OrderCreateViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertIn("active", response.context)
         self.assertEqual(response.context["active"], "orders_all")
+
+
+class OrderDeleteViewTest(TestCase):
+    def setUp(self) -> None:
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client.login(username="testuser", password="testpass")
+        self.hub = DistribHub.objects.create(code="626", city="Chrastany")
+        self.customer = Client.objects.create(name="Pedro Pascal", zip_code="12345")
+        self.order = Order.objects.create(
+            order_number="703777143100437749-R",
+            distrib_hub=self.hub,
+            status=Status.NEW,
+            client=self.customer,
+            mandant="SCCZ",
+            evidence_termin=date.today(),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+            team=None,
+        )
+        self.url = reverse("delete_order", kwargs={"pk": self.order.pk})
+
+    def test_logged_in(self):
+        response = self.client.get(self.url)
+        self.assertRedirects(response, reverse("orders"))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Order.objects.filter(pk=self.order.pk).exists())
+
+    def test_redirect_if_not_logged_in(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_success_message_displayed(self):
+        response = self.client.get(self.url, follow=True)
+        messages = [msg.message for msg in get_messages(response.wsgi_request)]
+        self.assertIn(f"Zakázka: {self.order.order_number} byla smazána.", messages)
+
+    def test_delete_order_with_pdf_storage_should_fail(self):
+        # Navázat PDF na objednávku (ochrání ji před smazáním)
+        OrderPDFStorage.objects.create(
+            order=self.order, file=SimpleUploadedFile("file.pdf", b"dummy")
+        )
+
+        response = self.client.get(self.url, follow=True)
+
+        self.assertTrue(Order.objects.filter(pk=self.order.pk).exists())
+
+        # Ověřím, že se zobrazila chybová hláška
+        messages = [msg.message for msg in get_messages(response.wsgi_request)]
+        self.assertIn(
+            f"Zakázku: {self.order.order_number} nelze smazat, protože má vazby na jiné záznamy.",
+            messages,
+        )
+        # Cílová stránka po redirectu
+        self.assertEqual(response.request["PATH_INFO"], reverse("orders"))
 
 
 class OrdersAllViewTest(TestCase):

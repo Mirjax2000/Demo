@@ -13,6 +13,7 @@ from django.db import transaction
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model
+from django.db.models.deletion import ProtectedError
 from django.core.management import call_command
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.forms import BaseModelForm, inlineformset_factory
@@ -394,6 +395,25 @@ class OrderUpdateView(LoginRequiredMixin, View):
 
         messages.error(request, "Nastala chyba při ukládání změn.")
         return render(request, self.template, context)
+
+
+class OrderDeleteView(LoginRequiredMixin, View):
+    """Delete single order"""
+
+    def get(self, request, *args, **kwargs):
+        order = get_object_or_404(Order, pk=kwargs["pk"])
+
+        try:
+            order.delete()
+            messages.success(request, f"Zakázka: {order.order_number} byla smazána.")
+
+        except ProtectedError:
+            messages.error(
+                request,
+                f"Zakázku: {order.order_number} nelze smazat, protože má vazby na jiné záznamy.",
+            )
+
+        return redirect("orders")
 
 
 class OrdersView(LoginRequiredMixin, ListView):

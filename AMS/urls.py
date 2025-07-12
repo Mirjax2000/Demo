@@ -21,6 +21,7 @@ from app_sprava_montazi.views import (
     TeamUpdateView as TeamUpdate,
     TeamDetailView as TeamDetail,
     OrderDetailView as OrderDetail,
+    OrderDeleteView as OrderDelete,
     OrderCreateView as OrderCreate,
     OrderUpdateView as OrderUpdate,
     GeneratePDFView as GeneratePDF,
@@ -30,10 +31,10 @@ from app_sprava_montazi.views import (
     OrderProtocolView as OrderProtocol,
     ClientsOrdersView as ClientsOrders,
     CustomerUpdateView as CustomerUpdate,
-    CheckPDFProtocolView as CheckPDFProtocol,
     ProtocolUploadView as ProtocolUpload,
+    UploadBackProtocolView as UplBckPrtcl,
+    CheckPDFProtocolView as CheckPDFProtocol,
     ExportOrdersExcelView as ExportOrdersExcel,
-    UploadBackProtocolView as UploadBackProtocol,
     IncompleteCustomersView as IncompleteCustomers,
 )
 from app_sprava_montazi.views_services import (
@@ -61,24 +62,22 @@ app_sprava_montazi: list = [
     # --- orders ---
     path("orders/", Orders.as_view(), name="orders"),
     path("order/create/", OrderCreate.as_view(), name="order_create"),
+    path(f"order/{PK}/order_update/", OrderUpdate.as_view(), name="order_update"),
+    path(f"order/{PK}/delete_order/", OrderDelete.as_view(), name="delete_order"),
+    path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),
     path("order/export/", ExportOrdersExcel.as_view(), name="order_export"),
     # ---
     path(f"order/{PK}/client_update/", CUV.as_view(), name="client_update"),
     path(f"order/{SLUG}/client_update_sec/", CUS.as_view(), name="client_update_sec"),
     path(f"order/{SLUG}/client_orders/", ClientsOrders.as_view(), name="client_orders"),
     # ---
-    path(f"order/{PK}/order_update/", OrderUpdate.as_view(), name="order_update"),
-    path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),
     path(f"order/{PK}/history/", OrderHistory.as_view(), name="order_history"),
+    # ---
     path(f"order/{PK}/protocol/", OrderProtocol.as_view(), name="protocol"),
     path(f"order/{PK}/generate-pdf/", GeneratePDF.as_view(), name="generate_pdf"),
     path(f"order/{PK}/back_protocol/", BackProtocol.as_view(), name="back_protocol"),
-    path(
-        f"order/{PK}/upload_protocol/",
-        UploadBackProtocol.as_view(),
-        name="upload_protocol",
-    ),
-    #
+    path(f"order/{PK}/upload_protocol/", UplBckPrtcl.as_view(), name="upload_protocol"),
+    # ---
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),
     path("createpage/upload/", ProtocolUpload.as_view(), name="upload_protocol"),
