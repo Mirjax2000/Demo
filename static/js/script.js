@@ -3,6 +3,7 @@
     const html = document.documentElement;
     const themeToggler = document.getElementById("themeToggler");
     const orderTable = document.getElementById("orderTable");
+    const clientOrderTable = document.getElementById("clientOrderTable");
     const teamTable = document.getElementById("teamTable");
     const articleTable = document.getElementById("articleTable");
     const numberInputs = document.querySelectorAll(".number");
@@ -193,6 +194,32 @@
 
     if (themeToggler) { // Ensure themeToggler exists
         themeToggler.addEventListener("click", toggleTheme);
+    }
+    // datatables for client orders
+    if (clientOrderTable) {
+        $(clientOrderTable).DataTable({
+            order: [[3, 'desc']],
+            rowReorder: false,
+            fixedColumns: true,
+            pageLength: 15,
+            lengthMenu: [[15, 20, 30, -1], [15, 20, 30, "Vše"]],
+            layout: {
+                topStart: {
+                    search: {
+                        placeholder: "Hledej ..."
+                    }
+                },
+                topEnd: 'pageLength',
+                bottomStart: 'info',
+                bottomEnd: 'paging'
+            },
+            columnDefs: [
+                { targets: [3, 4, 7], type: 'date' },
+                { targets: [0, 9, 10], orderable: false }],
+            language: {
+                emptyTable: "Žádné objednávky"
+            },
+        });
     }
 
     // DataTable for orders

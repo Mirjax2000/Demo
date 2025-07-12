@@ -455,7 +455,7 @@ class OrdersView(LoginRequiredMixin, ListView):
             data.append(
                 {
                     "order_number": f'<a href="{order_link}" class="L-table__link">{order.order_number}</a>',
-                    "distrib_hub": order.distrib_hub.slug,
+                    "distrib_hub": f"{order.distrib_hub.code} - {order.distrib_hub.city}",
                     "mandant": order.mandant,
                 }
             )
