@@ -264,6 +264,9 @@
                 { data: 'delivery_termin', orderable: true, searchable: true },
                 { data: 'client', orderable: true, searchable: true },
                 { data: 'team_type', orderable: true, searchable: true },
+                { data: 'team', orderable: true, searchable: true },
+                { data: 'montage_termin', orderable: true, searchable: true },
+                { data: 'status', orderable: true, searchable: true },
             ],
             language: {
                 emptyTable: "Žádné objednávky",

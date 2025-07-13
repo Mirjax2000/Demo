@@ -78,6 +78,9 @@ class JsonOrders:
                     "delivery_termin": self.deliver_termin_coll(order),
                     "client": self.client_coll(order),
                     "team_type": self.team_type_coll(order),
+                    "team": self.team_coll(order),
+                    "montage_termin": self.montage_termin_coll(order),
+                    "status": self.status_coll(order),
                 }
             )
 
@@ -123,12 +126,20 @@ class JsonOrders:
         return result
 
     def client_coll(self, order) -> str:
-        """Vraci clienta - complete or incomplete"""
-        result: str = ""
+        """Vrací clienta – complete nebo incomplete"""
+        css: str = "u-txt-success"
+        icon: str = '<i class="fa-solid fa-check me-1 u-txt-success-color"></i>'
+
         if order.client.incomplete:
-            result = f'<span class="u-txt-warning"><span>⚠️ </span>{order.client.first_15()}</span>'
-        else:
-            result = f'<span class="u-txt-success"><i class="fa-solid fa-check me-1"></i>{order.client.first_15()}</span>'
+            css = "u-txt-warning"
+            icon = (
+                '<i class="fa-solid fa-triangle-exclamation me-1 '
+                'u-txt-warning-color"></i>'
+            )
+
+        result: str = (
+            f'<span>{icon}<span class="{css}">{order.client.first_15()}</span></span>'
+        )
         return result
 
     def team_type_coll(self, order) -> str:
@@ -137,6 +148,77 @@ class JsonOrders:
         if order.team_type == "By_assembly_crew":
             css += " u-txt-success"
         result: str = f'<span class="{css}">{order.get_team_type_display()}</span>'
+        return result
+
+    def team_coll(self, order) -> str:
+        """Vraci team type"""
+
+        css: str = "u-s-none"
+        content: str = "-"
+        icon: str = ""
+
+        if order.is_missing_team():
+            css += " u-txt-warning"
+            icon = (
+                '<i class="fa-solid fa-triangle-exclamation me-1 '
+                'u-txt-warning-color"></i>'
+            )
+            content = "Nevybráno"
+        elif order.team:
+            css += " u-txt-success"
+            icon = '<i class="fa-solid fa-check me-1 u-txt-success-color"></i>'
+            content = f"{order.team}"
+
+        result: str = f'<span>{icon}<span class="{css}">{content}</span></span>'
+
+        return result
+
+    def montage_termin_coll(self, order) -> str:
+        """Vrací montage_termin jako HTML nebo varování."""
+
+        css: str = "u-s-none"
+        content: str = "–"
+        icon: str = ""
+
+        if order.montage_termin:
+            content = (
+                f"<strong>{order.montage_termin.strftime('%d.%m.%Y %H:%M')}</strong>"
+            )
+        elif order.team_type == "By_assembly_crew":
+            icon = (
+                '<i class="fa-solid fa-triangle-exclamation me-1 '
+                'u-txt-warning-color"></i>'
+            )
+            css += " u-txt-warning"
+            content = "Nevybráno"
+
+        result = f'<span>{icon}<span class="{css}">{content}</span></span>'
+        return result
+
+    def status_coll(self, order) -> str:
+        """Vrací status  + případnou ikonu odkazu na protokol."""
+
+        content = order.get_status_display()[:8]
+        icon: str = ""
+
+        if order.status == "Adviced":
+            warning_icon: str = "fa-solid fa-envelope fa-beat u-txt-warning-color"
+            success_icon: str = (
+                "fa-solid fa-envelope-circle-check u-txt-success-light-color"
+            )
+            icon_class: str = ""
+            if order.mail_datum_sended:
+                icon_class = success_icon
+            else:
+                icon_class = warning_icon
+
+            icon = (
+                f'<a href="{reverse("protocol", kwargs={"pk": order.pk})}" '
+                f'title="Zobrazit protokol">'
+                f'<i class="{icon_class}"></i></a>'
+            )
+
+        result = f"{content} {icon}"
         return result
 
 
