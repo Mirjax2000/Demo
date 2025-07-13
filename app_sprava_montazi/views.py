@@ -417,22 +417,13 @@ class OrderDeleteView(LoginRequiredMixin, View):
         return redirect("orders")
 
 
-class OrdersView(LoginRequiredMixin, ListView):
+class OrdersView(LoginRequiredMixin, TemplateView):
     """Vypis seznamu modelu Order s podporou server-side DataTables paginace."""
 
-    model = Order
     template_name = f"{APP_URL}/orders/orders_all.html"
-    context_object_name = "orders"
-    paginate_by = 15
-
-    def dispatch(self, request, *args, **kwargs):
-        self.filters = parse_order_filters(request)
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_queryset(self):
-        return filter_orders(self.filters)
 
     def get(self, request, *args, **kwargs):
+        self.filters = parse_order_filters(request)
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return self.get_json_data(request)
         return super().get(request, *args, **kwargs)
@@ -440,11 +431,23 @@ class OrdersView(LoginRequiredMixin, ListView):
     def get_json_data(self, request):
         draw = int(request.GET.get("draw", 1))
         start = int(request.GET.get("start", 0))
-        length = int(request.GET.get("length", self.paginate_by))
+        length = int(request.GET.get("length", 15))
 
         queryset = filter_orders(self.filters)
         total_records = Order.objects.count()
         records_filtered = queryset.count()
+
+        # --- ordering z DataTables ---
+        order_column_index = request.GET.get("order[0][column]")
+        order_dir = request.GET.get("order[0][dir]", "asc")
+
+        if order_column_index is not None:
+            # zjistíme název sloupce, podle kterého chceme řadit
+            col_name = request.GET.get(f"columns[{order_column_index}][data]")
+            if col_name:
+                # složíme Django order string, podle směru
+                order_prefix = "" if order_dir == "asc" else "-"
+                queryset = queryset.order_by(f"{order_prefix}{col_name}")
 
         queryset = queryset[start : start + length]
 

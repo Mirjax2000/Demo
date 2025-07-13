@@ -200,9 +200,9 @@
         $(clientOrderTable).DataTable({
             order: [[3, 'desc']],
             rowReorder: false,
-            fixedColumns: true,
-            pageLength: 15,
-            lengthMenu: [[15, 20, 30, -1], [15, 20, 30, "Vše"]],
+            fixedColumns: false,
+            pageLength: 5,
+            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "Vše"]],
             layout: {
                 topStart: {
                     search: {
@@ -217,7 +217,13 @@
                 { targets: [3, 4, 7], type: 'date' },
                 { targets: [0, 9, 10], orderable: false }],
             language: {
-                emptyTable: "Žádné objednávky"
+                emptyTable: "Žádné objednávky",
+                decimal: ",",
+                info: "Zobrazuji _START_ / _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
+                infoFiltered: "",
+                infoEmpty: "",
+                search: "Vyhledávání: ",
+                lengthMenu: "_MENU_ zakázek na stránku",
             },
         });
     }
@@ -225,17 +231,17 @@
     // DataTable for orders
     if (orderTable) {
         $(orderTable).DataTable({
-            // Enable server-side processing
+            // zapiname server side proccesing
             processing: true,
             serverSide: true,
-
-            // Specify the URL for your AJAX requests
+            // ajax mi posle do requestu json s pozadavky na strankovani
+            // odpoved bude qs s aplikovanyma filtrama 
             ajax: {
-                url: window.location.href, // This sends the request to the current URL
+                url: window.location.href,
                 type: "GET",
             },
 
-            order: [[0, 'desc']], // Initial order (evidence_termin desc)
+            // order: [[0, 'desc']],
             rowReorder: false,
             fixedColumns: false,
             pageLength: 15,
@@ -251,12 +257,17 @@
                 bottomEnd: 'paging'
             },
             columns: [
-                { data: 'order_number', name: 'order_number', orderable: false, searchable: true },
-                { data: 'distrib_hub', name: 'distrib_hub', orderable: true, searchable: true },
-                { data: 'mandant', name: 'mandant', orderable: true, searchable: true },
+                { data: 'order_number', orderable: false, searchable: true },
+                { data: 'distrib_hub', orderable: true, searchable: true },
+                { data: 'mandant', orderable: true, searchable: true },
             ],
             language: {
-                emptyTable: "Žádné objednávky"
+                emptyTable: "Žádné objednávky",
+                info: "Zobrazuji _START_ / _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
+                infoFiltered: "",
+                infoEmpty: "",
+                lengthMenu: "_MENU_ zakázek na stránku",
+                search: "Vyhledávání: "
             },
         });
     }
@@ -285,7 +296,12 @@
             ],
             language: {
                 emptyTable: "Žádné Teamy",
-                decimal: ","
+                decimal: ",",
+                info: "Zobrazuji _START_ / _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
+                infoFiltered: "",
+                infoEmpty: "",
+                lengthMenu: "_MENU_ zakázek na stránku",
+                search: "Vyhledávání: "
             },
         });
     }
@@ -302,6 +318,10 @@
             ],
             language: {
                 emptyTable: "Žádné Artikly !!!",
+                decimal: ",",
+                info: "počet záznamů: _TOTAL_",
+                infoEmpty: "",
+                infoFiltered: "",
             },
         });
     }
