@@ -245,7 +245,7 @@
             rowReorder: false,
             fixedColumns: false,
             pageLength: 15,
-            lengthMenu: [[15, 20, 30, -1], [15, 20, 30, "Vše"]],
+            lengthMenu: [[15, 20, 30], [15, 20, 30]],
             layout: {
                 topStart: {
                     search: {
