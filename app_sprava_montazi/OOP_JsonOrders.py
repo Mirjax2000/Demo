@@ -1,6 +1,6 @@
 """OOP pro datatables a filtrovani querysetu"""
 
-from typing import TypedDict
+from typing import Tuple, TypedDict, TypeAlias
 from rich.console import Console
 
 # --- django
@@ -20,14 +20,15 @@ class FilterDict(TypedDict):
     end_date: str | None
 
 
+JsonHeader: TypeAlias = Tuple[int, int, int, str | None, str]
+
 # ---
 cons: Console = Console()
 
 
-class Filter:
+class JsonOrders:
     def __init__(self, request) -> None:
         self.request = request
-        self.json_orders = JsonOrders(self.request, self)
 
     def get_filters(self) -> FilterDict:
         return Utils.parse_order_filters(self.request)
@@ -36,39 +37,35 @@ class Filter:
         filters = self.get_filters()
         return Utils.filter_orders(filters)
 
-
-class JsonOrders:
-    def __init__(self, request, parent: Filter) -> None:
-        self.request = request
-        self.parent: Filter = parent
-
-    def get_json_data(self) -> JsonResponse:
+    def get_datatebles_params(self) -> JsonHeader:
         request = self.request
         draw = int(request.GET.get("draw", 1))
         start = int(request.GET.get("start", 0))
         length = int(request.GET.get("length", 15))
-
-        queryset = self.parent.return_queryset()
-        total_records = Order.objects.count()
-        records_filtered = queryset.count()
-
-        # --- ordering z DataTables ---
         order_column_index = request.GET.get("order[0][column]")
         order_dir = request.GET.get("order[0][dir]", "asc")
+        return draw, start, length, order_column_index, order_dir
 
-        if order_column_index is not None:
+    def get_json_data(self) -> JsonResponse:
+        request = self.request
+        draw, start, length, order_coll_index, order_dir = self.get_datatebles_params()
+        qs = self.return_queryset()
+        records_total = Order.objects.count()
+        records_filtered = qs.count()
+
+        if order_coll_index is not None:
             # zjistíme název sloupce, podle kterého chceme řadit
-            col_name = request.GET.get(f"columns[{order_column_index}][data]")
+            col_name = request.GET.get(f"columns[{order_coll_index}][data]")
             if col_name:
                 # složíme Django order string, podle směru
                 order_prefix = "" if order_dir == "asc" else "-"
-                queryset = queryset.order_by(f"{order_prefix}{col_name}")
+                qs = qs.order_by(f"{order_prefix}{col_name}")
 
-        queryset = queryset[start : start + length]
+        qs = qs[start : start + length]
 
         # ---
         data = []
-        for order in queryset:
+        for order in qs:
             data.append(
                 {
                     "order_number": self.order_number_coll(order),
@@ -86,7 +83,7 @@ class JsonOrders:
 
         response = {
             "draw": draw,
-            "recordsTotal": total_records,
+            "recordsTotal": records_total,
             "recordsFiltered": records_filtered,
             "data": data,
         }
@@ -126,9 +123,10 @@ class JsonOrders:
         return result
 
     def client_coll(self, order) -> str:
-        """Vrací clienta – complete nebo incomplete"""
+        """Vrací clienta complete nebo incomplete"""
         css: str = "u-txt-success"
         icon: str = '<i class="fa-solid fa-check me-1 u-txt-success-color"></i>'
+        title: str = order.client
 
         if order.client.incomplete:
             css = "u-txt-warning"
@@ -138,7 +136,8 @@ class JsonOrders:
             )
 
         result: str = (
-            f'<span>{icon}<span class="{css}">{order.client.first_15()}</span></span>'
+            f'<span title="{title}">{icon}'
+            f'<span class="{css}">{order.client.first_15()}</span></span>'
         )
         return result
 

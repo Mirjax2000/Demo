@@ -31,7 +31,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 
-from app_sprava_montazi.OOP_filter import FilterDict
+from app_sprava_montazi.OOP_JsonOrders import FilterDict
 
 # --- formulare
 from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
@@ -51,7 +51,7 @@ from .utils import format_date, update_customers
 # 00P classes ---
 from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
 from .OOP_back_protocol import ProtocolUploader
-from .OOP_filter import Filter
+from .OOP_JsonOrders import JsonOrders
 
 cons: Console = Console()
 User = get_user_model()
@@ -426,10 +426,10 @@ class OrdersView(LoginRequiredMixin, TemplateView):
     template_name = f"{APP_URL}/orders/orders_all.html"
 
     def get(self, request, *args, **kwargs):
-        self.filter_obj = Filter(request=request)
-        self.filters = self.filter_obj.get_filters()
+        self.json_orders: JsonOrders = JsonOrders(request=request)
+        self.filters = self.json_orders.get_filters()
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
-            return self.filter_obj.json_orders.get_json_data()
+            return self.json_orders.get_json_data()
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs) -> dict:
@@ -756,9 +756,9 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
 class ExportOrdersExcelView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         # --- utils.py
-        self.filter_obj = Filter(request=request)
-        filters = self.filter_obj.get_filters()
-        orders = self.filter_obj.return_queryset()
+        self.json_orders: JsonOrders = JsonOrders(request=request)
+        filters = self.json_orders.get_filters()
+        orders = self.json_orders.return_queryset()
 
         wb = Workbook()
         ws = wb.active
