@@ -27,6 +27,7 @@ cons: Console = Console()
 class Filter:
     def __init__(self, request) -> None:
         self.request = request
+        self.json_orders = JsonOrders(self.request, self)
 
     def get_filters(self) -> FilterDict:
         return Utils.parse_order_filters(self.request)
@@ -35,13 +36,19 @@ class Filter:
         filters = self.get_filters()
         return Utils.filter_orders(filters)
 
+
+class JsonOrders:
+    def __init__(self, request, parent: Filter) -> None:
+        self.request = request
+        self.parent: Filter = parent
+
     def get_json_data(self) -> JsonResponse:
         request = self.request
         draw = int(request.GET.get("draw", 1))
         start = int(request.GET.get("start", 0))
         length = int(request.GET.get("length", 15))
 
-        queryset = self.return_queryset()
+        queryset = self.parent.return_queryset()
         total_records = Order.objects.count()
         records_filtered = queryset.count()
 

@@ -263,10 +263,10 @@
             ],
             language: {
                 emptyTable: "Žádné objednávky",
-                info: "od _START_ do _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
+                info: "<small>od <strong>_START_</strong> do <strong>_END_</strong> z <strong>_TOTAL_</strong> záznamů (filtr z <strong>_MAX_</strong> záznamů)</small>",
                 infoFiltered: "",
                 infoEmpty: "",
-                lengthMenu: "_MENU_ zakázek na stránku",
+                lengthMenu: "<small>_MENU_ zakázek na stránku</small>",
                 search: "Vyhledávání: "
             },
         });
