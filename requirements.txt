@@ -25,6 +25,7 @@ fonttools==4.58.0
 gunicorn==23.0.0
 h11==0.16.0
 idna==3.10
+inflection==0.5.1
 isort==6.0.1
 jsbeautifier==1.15.4
 json5==0.12.0
@@ -78,6 +79,7 @@ trio==0.30.0
 trio-websocket==0.12.2
 typing_extensions==4.13.2
 tzdata==2025.2
+uritemplate==4.2.0
 urllib3==2.4.0
 webencodings==0.5.1
 websocket-client==1.8.0
