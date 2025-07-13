@@ -69,19 +69,15 @@ class JsonOrders:
         # ---
         data = []
         for order in queryset:
-            order_link = reverse("order_detail", args=[order.pk])
             data.append(
                 {
-                    "order_number": (
-                        f'<a href="{order_link}" class="L-table__link">'
-                        f"{order.order_number}</a>"
-                    ),
-                    # ---
-                    "distrib_hub": (
-                        f"{order.distrib_hub.code} - {order.distrib_hub.city}"
-                    ),
-                    # ---
-                    "mandant": order.mandant,
+                    "order_number": self.order_number_coll(order),
+                    "distrib_hub": self.distrib_hub_coll(order),
+                    "mandant": self.mandant_coll(order),
+                    "evidence_termin": self.evidence_termin_coll(order),
+                    "delivery_termin": self.deliver_termin_coll(order),
+                    "client": self.client_coll(order),
+                    "team_type": self.team_type_coll(order),
                 }
             )
 
@@ -93,6 +89,55 @@ class JsonOrders:
         }
 
         return JsonResponse(response)
+
+    def order_number_coll(self, order) -> str:
+        """vraci i s linkem na order"""
+        order_link = reverse("order_detail", args=[order.pk])
+        result = (
+            f'<a href="{order_link}" class="L-table__link">{order.order_number}</a>'
+        )
+        return result
+
+    def distrib_hub_coll(self, order) -> str:
+        """Vraci __str__ z modelu"""
+        result: str = str(order.distrib_hub)
+        return result
+
+    def mandant_coll(self, order) -> str:
+        """Vraci mandant"""
+        result: str = str(order.mandant)
+        return result
+
+    def evidence_termin_coll(self, order) -> str:
+        """Vraci evidence termin nebo -"""
+        result = (
+            order.evidence_termin.strftime("%d.%m.%Y") if order.evidence_termin else "-"
+        )
+        return result
+
+    def deliver_termin_coll(self, order) -> str:
+        """Vraci delivery termin nebo -"""
+        result = (
+            order.delivery_termin.strftime("%d.%m.%Y") if order.delivery_termin else "-"
+        )
+        return result
+
+    def client_coll(self, order) -> str:
+        """Vraci clienta - complete or incomplete"""
+        result: str = ""
+        if order.client.incomplete:
+            result = f'<span class="u-txt-warning"><span>⚠️ </span>{order.client.first_15()}</span>'
+        else:
+            result = f'<span class="u-txt-success"><i class="fa-solid fa-check me-1"></i>{order.client.first_15()}</span>'
+        return result
+
+    def team_type_coll(self, order) -> str:
+        """Vraci team type"""
+        css: str = "u-s-none"
+        if order.team_type == "By_assembly_crew":
+            css += " u-txt-success"
+        result: str = f'<span class="{css}">{order.get_team_type_display()}</span>'
+        return result
 
 
 class Utils:

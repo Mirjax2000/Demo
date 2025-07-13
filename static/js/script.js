@@ -241,7 +241,7 @@
                 type: "GET",
             },
 
-            // order: [[0, 'desc']],
+            order: [[3, 'desc']],
             rowReorder: false,
             fixedColumns: false,
             pageLength: 15,
@@ -260,6 +260,10 @@
                 { data: 'order_number', orderable: false, searchable: true },
                 { data: 'distrib_hub', orderable: true, searchable: true },
                 { data: 'mandant', orderable: true, searchable: true },
+                { data: 'evidence_termin', orderable: true, searchable: true },
+                { data: 'delivery_termin', orderable: true, searchable: true },
+                { data: 'client', orderable: true, searchable: true },
+                { data: 'team_type', orderable: true, searchable: true },
             ],
             language: {
                 emptyTable: "Žádné objednávky",
