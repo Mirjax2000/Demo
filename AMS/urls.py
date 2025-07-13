@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls.conf import include
 from accounts.views import RegisterView, CustomLoginView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from app_sprava_montazi.views import (
     PdfView as Pdf,
     IndexView as Index,
@@ -116,7 +117,11 @@ api_urls: list = [
     ),
     path("api/update-customers/", CustomerUpdate.as_view(), name="update-customers"),
     path("api-token-auth/", obtain_auth_token),
+    # --- swagger
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
 ]
+
 #
 urlpatterns += app_sprava_montazi
 urlpatterns += app_accounts_urls
