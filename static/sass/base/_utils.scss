@@ -254,3 +254,10 @@
 #id_status option[value="Canceled"] {
   color: var(--error);
 }
+
+.u-error-special1 {
+  margin: 0;
+  margin-left: 0.25em;
+  min-height: 1em;
+  line-height: 1.3;
+}

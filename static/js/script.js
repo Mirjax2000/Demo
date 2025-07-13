@@ -101,11 +101,17 @@
                 const file_from_csv = CsvFormFile.files[0];
                 csv_error_message.textContent = "";
 
+                // Přeskoč kontrolu velikosti, pokud je checkbox zaškrtnutý
+                const checkbox = document.getElementById("potlacitVelikostCsvChckBox");
+                const ignoreSizeLimit = checkbox?.checked;
+
                 if (file_from_csv) {
+                    const maxSize = 10
+                    let countSize = maxSize * 1024 * 1024
                     const fileName = file_from_csv.name.toLowerCase();
-                    if (file_from_csv.size > 10 * 1024 * 1024) { // 10 MB
+                    if (!ignoreSizeLimit && file_from_csv.size > countSize) {
                         const sizeMB = (file_from_csv.size / 1024 / 1024).toFixed(2);
-                        csv_error_message.innerHTML = `Soubor je příliš velký <strong>${sizeMB} MB</strong>.<br> Max. velikost je 10 MB.`;
+                        csv_error_message.innerHTML = `File too big <strong>${sizeMB} </strong>MB. Max. size is <strong>${maxSize}</strong> MB.`;
                         CsvFormFile.value = "";
                         return;
                     }
@@ -116,14 +122,9 @@
                         CsvFormFile.value = "";
                         return;
                     }
-
-                    if (CsvFormFile.form) {
-                        CsvFormFile.form.submit();
-                    }
                 }
             });
         }
-
     });
 
     window.addEventListener("load", () => {
