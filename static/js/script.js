@@ -219,7 +219,7 @@
             language: {
                 emptyTable: "Žádné objednávky",
                 decimal: ",",
-                info: "Zobrazuji _START_ / _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
+                info: "Zobrazuji _START_ až _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
                 infoFiltered: "",
                 infoEmpty: "",
                 search: "Vyhledávání: ",
@@ -263,7 +263,7 @@
             ],
             language: {
                 emptyTable: "Žádné objednávky",
-                info: "Zobrazuji _START_ / _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
+                info: "od _START_ do _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
                 infoFiltered: "",
                 infoEmpty: "",
                 lengthMenu: "_MENU_ zakázek na stránku",
@@ -277,7 +277,7 @@
         $(teamTable).DataTable({
             order: [[3, 'asc']],
             rowReorder: false,
-            fixedColumns: true,
+            fixedColumns: false,
             pageLength: 15,
             lengthMenu: [[15, 20, 30, -1], [15, 20, 30, "Vše"]],
             layout: {
@@ -297,7 +297,7 @@
             language: {
                 emptyTable: "Žádné Teamy",
                 decimal: ",",
-                info: "Zobrazuji _START_ / _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
+                info: "Zobrazuji _START_ až _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
                 infoFiltered: "",
                 infoEmpty: "",
                 lengthMenu: "_MENU_ zakázek na stránku",
@@ -310,7 +310,7 @@
     if (articleTable) {
         $(articleTable).DataTable({
             rowReorder: false,
-            fixedColumns: true,
+            fixedColumns: false,
             searching: false,
             paging: false,
             columnDefs: [

@@ -44,11 +44,12 @@ from .models import OrderPDFStorage, OrderBackProtocolToken, OrderBackProtocol
 from .models import HistoricalArticle  # type: ignore  # pylint: disable=no-name-in-module
 
 # pomocne funkce ---
-from .utils import filter_orders, format_date, parse_order_filters, update_customers
+from .utils import format_date, parse_order_filters, filter_orders, update_customers
 
 # 00P classes ---
 from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
 from .OOP_back_protocol import ProtocolUploader
+from .OOP_filter import Filter
 
 cons: Console = Console()
 User = get_user_model()
@@ -423,61 +424,11 @@ class OrdersView(LoginRequiredMixin, TemplateView):
     template_name = f"{APP_URL}/orders/orders_all.html"
 
     def get(self, request, *args, **kwargs):
-        self.filters = parse_order_filters(request)
+        self.filter_obj = Filter(request=request)
+        self.filters = self.filter_obj.get_filters()
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
-            return self.get_json_data(request)
+            return self.filter_obj.get_json_data()
         return super().get(request, *args, **kwargs)
-
-    def get_json_data(self, request):
-        draw = int(request.GET.get("draw", 1))
-        start = int(request.GET.get("start", 0))
-        length = int(request.GET.get("length", 15))
-
-        queryset = filter_orders(self.filters)
-        total_records = Order.objects.count()
-        records_filtered = queryset.count()
-
-        # --- ordering z DataTables ---
-        order_column_index = request.GET.get("order[0][column]")
-        order_dir = request.GET.get("order[0][dir]", "asc")
-
-        if order_column_index is not None:
-            # zjistíme název sloupce, podle kterého chceme řadit
-            col_name = request.GET.get(f"columns[{order_column_index}][data]")
-            if col_name:
-                # složíme Django order string, podle směru
-                order_prefix = "" if order_dir == "asc" else "-"
-                queryset = queryset.order_by(f"{order_prefix}{col_name}")
-
-        queryset = queryset[start : start + length]
-
-        # ---
-        data = []
-        for order in queryset:
-            order_link = reverse("order_detail", args=[order.pk])
-            data.append(
-                {
-                    "order_number": (
-                        f'<a href="{order_link}" class="L-table__link">'
-                        f"{order.order_number}</a>"
-                    ),
-                    # ---
-                    "distrib_hub": (
-                        f"{order.distrib_hub.code} - {order.distrib_hub.city}"
-                    ),
-                    # ---
-                    "mandant": order.mandant,
-                }
-            )
-
-        response = {
-            "draw": draw,
-            "recordsTotal": total_records,
-            "recordsFiltered": records_filtered,
-            "data": data,
-        }
-
-        return JsonResponse(response)
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
@@ -803,6 +754,7 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
 class ExportOrdersExcelView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         # --- utils.py
+        self.filter_obj = Filter(request)
         filters = parse_order_filters(request)
         orders = filter_orders(filters)
 
