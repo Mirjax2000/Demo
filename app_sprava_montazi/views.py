@@ -7,7 +7,6 @@ from openpyxl import Workbook
 from rich.console import Console
 
 # --- Django
-from django.db.models import Q
 from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from django.conf import settings
@@ -19,7 +18,6 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.forms import BaseModelForm, inlineformset_factory
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse, FileResponse, HttpResponseForbidden
-from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import View, UpdateView, TemplateView
 from django.views.generic import CreateView, DetailView, FormView, ListView
@@ -31,7 +29,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 
-from app_sprava_montazi.OOP_JsonOrders import FilterDict
 
 # --- formulare
 from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
