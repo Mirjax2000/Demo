@@ -1041,7 +1041,7 @@ class ProtocolUploadView(LoginRequiredMixin, View):
 
     def post(self, request):
         image = request.FILES.get("image")
-        order_number = str(request.POST.get("order_number", "")).lower()
+        order_number = str(request.POST.get("order_number", ""))
         realizovano = request.POST.get("realizovano") == "on"
 
         try:

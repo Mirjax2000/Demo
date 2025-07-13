@@ -74,23 +74,21 @@
                 errorMessageProtocolfile.textContent = "";
 
                 if (file_from_fallback) {
+                    const maxSize = 10
+                    let countSize = maxSize * 1024 * 1024
 
-                    if (file_from_fallback.size > 10 * 1024 * 1024) { // 1 MB
+                    if (file_from_fallback.size > countSize) {
                         const sizeMB = (file_from_fallback.size / 1024 / 1024).toFixed(2);
-                        errorMessageProtocolfile.innerHTML = `Soubor je příliš velký <strong>${sizeMB} MB</strong>.<br> Max. velikost je 10 MB.`;
+                        errorMessageProtocolfile.innerHTML = `File too big <strong>${sizeMB} </strong>MB. Max. size is <strong>${maxSize}</strong> MB.`;
                         fileInputProtocol.value = "";
                         return;
                     }
 
 
                     if (!allowedImageTypes.includes(file_from_fallback.type)) {
-                        errorMessageProtocolfile.innerHTML = `Soubor musí být ve formátu obrázku (např. JPG, PNG, WebP).<br> Nepovolený typ souboru: ${file_from_fallback.type}</strong>.`;
+                        errorMessageProtocolfile.innerHTML = "Povolené formáty (např. JPG, PNG, WebP).";
                         fileInputProtocol.value = "";
                         return;
-                    }
-
-                    if (fileInputProtocol.form) {
-                        fileInputProtocol.form.submit();
                     }
                 }
             });
@@ -116,9 +114,8 @@
                         return;
                     }
 
-
                     if (!fileName.endsWith(".csv")) {
-                        csv_error_message.innerHTML = `Soubor musí být ve formátu CSV. Nepovolený typ souboru: ${file_from_csv.type}</strong>.`;
+                        csv_error_message.innerHTML = `Soubor musí být ve formátu CSV. Nepovolený typ souboru: ${file_from_csv.type}`;
                         CsvFormFile.value = "";
                         return;
                     }
