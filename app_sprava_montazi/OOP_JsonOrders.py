@@ -4,7 +4,8 @@ from typing import Tuple, TypedDict, TypeAlias
 from rich.console import Console
 
 # --- django
-from django.db.models import QuerySet, Q
+from django.db.models import QuerySet, Q, Value
+from django.db.models.functions import Concat
 from django.http import JsonResponse
 from django.urls import reverse
 
@@ -48,14 +49,16 @@ class JsonOrders:
     def return_queryset(self) -> QuerySet:
         filters = self.get_filters()
         qs = Utils.filter_orders(filters)
+        qs = qs.annotate(
+            code_city=Concat("distrib_hub__code", Value("-"), "distrib_hub__city")
+        )
 
         # Fulltext search z DataTables (globální vyhledávání)
         search_value = self.request.GET.get("search[value]", "").strip()
         if search_value:
             qs = qs.filter(
                 Q(order_number__contains=search_value)
-                | Q(distrib_hub__code__icontains=search_value)
-                | Q(distrib_hub__city__icontains=search_value)
+                | Q(code_city__icontains=search_value)
                 | Q(mandant__icontains=search_value)
                 | Q(client__name__icontains=search_value)
                 | Q(team__name__icontains=search_value)
