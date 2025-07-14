@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from django.urls import reverse
 
 # --- models
-from .models import Order
+from .models import Order, Client, Article
 
 
 # --- type aliases
@@ -24,6 +24,18 @@ JsonHeader: TypeAlias = Tuple[int, int, int, str | None, str]
 
 # ---
 cons: Console = Console()
+# ---
+
+exclamation_icon: str = (
+    '<i class="fa-solid fa-triangle-exclamation me-1 u-txt-warning-color"></i>'
+)
+success_icon: str = '<i class="fa-solid fa-check me-1 u-txt-success-color"></i>'
+warning_mail_icon: str = (
+    '<i class="fa-solid fa-envelope fa-beat u-txt-warning-color"></i>'
+)
+success_mail_icon: str = (
+    '<i class="fa-solid fa-envelope-circle-check u-txt-success-light-color"></i>'
+)
 
 
 class JsonOrders:
@@ -42,16 +54,16 @@ class JsonOrders:
         draw = int(request.GET.get("draw", 1))
         start = int(request.GET.get("start", 0))
         length = int(request.GET.get("length", 15))
-        order_column_index = request.GET.get("order[0][column]")
+        order_coll_index: str = request.GET.get("order[0][column]")
         order_dir = request.GET.get("order[0][dir]", "asc")
-        return draw, start, length, order_column_index, order_dir
+        return draw, start, length, order_coll_index, order_dir
 
     def get_json_data(self) -> JsonResponse:
         request = self.request
         draw, start, length, order_coll_index, order_dir = self.get_datatebles_params()
-        qs = self.return_queryset()
-        records_total = Order.objects.count()
-        records_filtered = qs.count()
+        qs: QuerySet = self.return_queryset()
+        records_total: int = Order.objects.count()
+        records_filtered: int = qs.count()
 
         if order_coll_index is not None:
             # zjistíme název sloupce, podle kterého chceme řadit
@@ -78,6 +90,7 @@ class JsonOrders:
                     "team": self.team_coll(order),
                     "montage_termin": self.montage_termin_coll(order),
                     "status": self.status_coll(order),
+                    "articles": self.articles_coll(order),
                 }
             )
 
@@ -90,7 +103,7 @@ class JsonOrders:
 
         return JsonResponse(response)
 
-    def order_number_coll(self, order) -> str:
+    def order_number_coll(self, order: Order) -> str:
         """vraci i s linkem na order"""
         order_link = reverse("order_detail", args=[order.pk])
         result = (
@@ -98,58 +111,59 @@ class JsonOrders:
         )
         return result
 
-    def distrib_hub_coll(self, order) -> str:
+    def distrib_hub_coll(self, order: Order) -> str:
         """Vraci __str__ z modelu"""
         result: str = str(order.distrib_hub)
         return result
 
-    def mandant_coll(self, order) -> str:
+    def mandant_coll(self, order: Order) -> str:
         """Vraci mandant"""
         result: str = str(order.mandant)
         return result
 
-    def evidence_termin_coll(self, order) -> str:
+    def evidence_termin_coll(self, order: Order) -> str:
         """Vraci evidence termin nebo -"""
-        result = (
-            order.evidence_termin.strftime("%d.%m.%Y") if order.evidence_termin else "-"
-        )
+        result: str = "-"
+        if order.evidence_termin:
+            result = order.evidence_termin.strftime("%d.%m.%Y")
         return result
 
-    def deliver_termin_coll(self, order) -> str:
+    def deliver_termin_coll(self, order: Order) -> str:
         """Vraci delivery termin nebo -"""
-        result = (
-            order.delivery_termin.strftime("%d.%m.%Y") if order.delivery_termin else "-"
-        )
+        result: str = "-"
+        if order.delivery_termin:
+            result = order.delivery_termin.strftime("%d.%m.%Y")
         return result
 
-    def client_coll(self, order) -> str:
+    def client_coll(self, order: Order) -> str:
         """Vrací clienta complete nebo incomplete"""
-        css: str = "u-txt-success"
-        icon: str = '<i class="fa-solid fa-check me-1 u-txt-success-color"></i>'
-        title: str = order.client
+        client: Client | None = order.client
+        if not client:
+            return '<span class="u-txt-error">Žádný klient</span>'
 
-        if order.client.incomplete:
+        css: str = "u-txt-success"
+        icon: str = success_icon
+        title: str = str(client)
+
+        if client.incomplete:
             css = "u-txt-warning"
-            icon = (
-                '<i class="fa-solid fa-triangle-exclamation me-1 '
-                'u-txt-warning-color"></i>'
-            )
+            icon = exclamation_icon
 
         result: str = (
             f'<span title="{title}">{icon}'
-            f'<span class="{css}">{order.client.first_15()}</span></span>'
+            f'<span class="{css}">{client.first_15()}</span></span>'
         )
         return result
 
-    def team_type_coll(self, order) -> str:
+    def team_type_coll(self, order: Order) -> str:
         """Vraci team type"""
         css: str = "u-s-none"
         if order.team_type == "By_assembly_crew":
             css += " u-txt-success"
-        result: str = f'<span class="{css}">{order.get_team_type_display()}</span>'
+        result: str = f'<span class="{css}">{order.get_team_type_display()}</span>'  # type: ignore
         return result
 
-    def team_coll(self, order) -> str:
+    def team_coll(self, order: Order) -> str:
         """Vraci team type"""
 
         css: str = "u-s-none"
@@ -158,21 +172,19 @@ class JsonOrders:
 
         if order.is_missing_team():
             css += " u-txt-warning"
-            icon = (
-                '<i class="fa-solid fa-triangle-exclamation me-1 '
-                'u-txt-warning-color"></i>'
-            )
+            icon = exclamation_icon
             content = "Nevybráno"
+
         elif order.team:
             css += " u-txt-success"
-            icon = '<i class="fa-solid fa-check me-1 u-txt-success-color"></i>'
+            icon = success_icon
             content = f"{order.team}"
 
         result: str = f'<span>{icon}<span class="{css}">{content}</span></span>'
 
         return result
 
-    def montage_termin_coll(self, order) -> str:
+    def montage_termin_coll(self, order: Order) -> str:
         """Vrací montage_termin jako HTML nebo varování."""
 
         css: str = "u-s-none"
@@ -184,40 +196,47 @@ class JsonOrders:
                 f"<strong>{order.montage_termin.strftime('%d.%m.%Y %H:%M')}</strong>"
             )
         elif order.team_type == "By_assembly_crew":
-            icon = (
-                '<i class="fa-solid fa-triangle-exclamation me-1 '
-                'u-txt-warning-color"></i>'
-            )
+            icon = exclamation_icon
             css += " u-txt-warning"
             content = "Nevybráno"
 
         result = f'<span>{icon}<span class="{css}">{content}</span></span>'
         return result
 
-    def status_coll(self, order) -> str:
-        """Vrací status  + případnou ikonu odkazu na protokol."""
+    def status_coll(self, order: Order) -> str:
+        """Vrací status + případnou ikonu odkazu na protokol."""
 
-        content = order.get_status_display()[:8]
+        content = order.get_status_display()[:8]  # type: ignore
         icon: str = ""
 
         if order.status == "Adviced":
-            warning_icon: str = "fa-solid fa-envelope fa-beat u-txt-warning-color"
-            success_icon: str = (
-                "fa-solid fa-envelope-circle-check u-txt-success-light-color"
-            )
-            icon_class: str = ""
+            icon_link: str = ""
             if order.mail_datum_sended:
-                icon_class = success_icon
+                icon_link = success_mail_icon
             else:
-                icon_class = warning_icon
+                icon_link = warning_mail_icon
 
             icon = (
-                f'<a href="{reverse("protocol", kwargs={"pk": order.pk})}" '
+                f'<a href="{reverse("protocol", kwargs={"pk": order.pk})}"'
                 f'title="Zobrazit protokol">'
-                f'<i class="{icon_class}"></i></a>'
+                f"{icon_link}</a>"
             )
 
         result = f"{content} {icon}"
+        return result
+
+    def articles_coll(self, order: Order) -> str:
+        # {% if order.articles.count == 0 %}
+        #     <td class="u-s-none u-txt-center u-txt-error">{{ order.articles.count }}</td>
+        # {% else %}
+        #     <td class="u-s-none u-txt-center">{{ order.articles.count }}</td>
+        # {% endif %}
+        css = "u-s-none u-txt-center"
+        article_count: str = str(order.articles.count())  # type: ignore
+        if article_count == "0":
+            css += " u-txt-error"
+        result: str = f'<div class="{css}">{article_count}</div>'
+
         return result
 
 
@@ -269,4 +288,4 @@ class Utils:
 
 
 if __name__ == "__main__":
-    pass
+    ...

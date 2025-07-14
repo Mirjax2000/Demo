@@ -424,7 +424,7 @@ class OrdersView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         self.json_orders: JsonOrders = JsonOrders(request=request)
-        self.filters = self.json_orders.get_filters()
+        self.filters = self.json_orders.get_filters() 
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return self.json_orders.get_json_data()
         return super().get(request, *args, **kwargs)

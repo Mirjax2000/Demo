@@ -265,6 +265,7 @@
                 { data: 'team', orderable: true, searchable: true },
                 { data: 'montage_termin', orderable: true, searchable: true },
                 { data: 'status', orderable: true, searchable: true },
+                { data: 'articles', orderable: false, searchable: false },
             ],
             language: {
                 emptyTable: "Žádné objednávky",
