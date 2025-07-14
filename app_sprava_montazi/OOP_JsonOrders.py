@@ -1,11 +1,10 @@
 """OOP pro datatables a filtrovani querysetu"""
 
-
 from typing import Tuple, TypedDict, TypeAlias
 from rich.console import Console
 
 # --- django
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from django.http import JsonResponse
 from django.urls import reverse
 
@@ -48,7 +47,24 @@ class JsonOrders:
 
     def return_queryset(self) -> QuerySet:
         filters = self.get_filters()
-        return Utils.filter_orders(filters)
+        qs = Utils.filter_orders(filters)
+
+        # Fulltext search z DataTables (globální vyhledávání)
+        search_value = self.request.GET.get("search[value]", "").strip()
+        if search_value:
+            qs = qs.filter(
+                Q(order_number__contains=search_value)
+                | Q(distrib_hub__code__icontains=search_value)
+                | Q(distrib_hub__city__icontains=search_value)
+                | Q(mandant__icontains=search_value)
+                | Q(client__name__icontains=search_value)
+                | Q(team__name__icontains=search_value)
+                | Q(evidence_termin__icontains=search_value)
+                | Q(delivery_termin__icontains=search_value)
+                | Q(montage_termin__icontains=search_value)
+            )
+
+        return qs
 
     def get_datatebles_params(self) -> JsonHeader:
         request = self.request
