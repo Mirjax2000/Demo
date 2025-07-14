@@ -91,6 +91,7 @@ class JsonOrders:
                     "montage_termin": self.montage_termin_coll(order),
                     "status": self.status_coll(order),
                     "articles": self.articles_coll(order),
+                    "notes": self.notes_coll(order),
                 }
             )
 
@@ -210,11 +211,9 @@ class JsonOrders:
         icon: str = ""
 
         if order.status == "Adviced":
-            icon_link: str = ""
+            icon_link: str = warning_mail_icon
             if order.mail_datum_sended:
                 icon_link = success_mail_icon
-            else:
-                icon_link = warning_mail_icon
 
             icon = (
                 f'<a href="{reverse("protocol", kwargs={"pk": order.pk})}"'
@@ -226,16 +225,18 @@ class JsonOrders:
         return result
 
     def articles_coll(self, order: Order) -> str:
-        # {% if order.articles.count == 0 %}
-        #     <td class="u-s-none u-txt-center u-txt-error">{{ order.articles.count }}</td>
-        # {% else %}
-        #     <td class="u-s-none u-txt-center">{{ order.articles.count }}</td>
-        # {% endif %}
         css = "u-s-none u-txt-center"
         article_count: str = str(order.articles.count())  # type: ignore
         if article_count == "0":
             css += " u-txt-error"
         result: str = f'<div class="{css}">{article_count}</div>'
+
+        return result
+
+    def notes_coll(self, order: Order) -> str:
+        title: str = order.notes
+        content: str = order.notes_first_10()
+        result: str = f'<span title="{title}">{content}</span>'
 
         return result
 
