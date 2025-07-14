@@ -258,30 +258,21 @@ class Order(Model):
         return self.team is None and self.team_type == TeamType.BY_ASSEMBLY_CREW
 
     def zaterminovano(self) -> None:
-        is_ready = all(
-            [
-                self.team,
-                self.team_type == TeamType.BY_ASSEMBLY_CREW,
-                self.status == Status.NEW,
-                self.client,
-                not self.client.incomplete,  # type: ignore
-                self.montage_termin,
-                self.delivery_termin,
-            ]
+        ready = (
+            self.team
+            and self.team_type == TeamType.BY_ASSEMBLY_CREW
+            and self.status == Status.NEW
+            and self.client
+            and not self.client.incomplete
+            and self.montage_termin
+            and self.delivery_termin
         )
-        if is_ready:
+        if ready:
             self.status = Status.ADVICED
             if settings.DEBUG:
                 cons.log(
                     f"zakazka: {self.order_number} presla do stavu: {Status.ADVICED}",
                     style="blue",
-                )
-        else:
-            if settings.DEBUG:
-                cons.log(
-                    f"info - zakazka: {self.order_number} nesplnuje podminky na "
-                    f"{Status.ADVICED}",
-                    style="green",
                 )
 
     def __str__(self) -> str:
