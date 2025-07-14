@@ -1,7 +1,7 @@
 """Form testy"""
 
 from django.test import TestCase
-from .forms import (
+from ..forms import (
     ClientForm,
     DistribHubForm,
     OrderForm,
@@ -9,7 +9,7 @@ from .forms import (
     TeamForm,
     CallLogForm,
 )
-from .models import DistribHub, Order, Team, Status, TeamType, CallLog
+from ..models import DistribHub, Order, Team, Status, TeamType
 
 
 class ClientFormTest(TestCase):

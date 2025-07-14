@@ -1,7 +1,6 @@
 """View tests"""
 
 import io
-import os
 import logging
 from datetime import date, datetime
 from unittest.mock import patch
@@ -16,7 +15,6 @@ from django.contrib.messages import get_messages
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client as CL
-from django.db.models.deletion import ProtectedError
 from django.test import TestCase
 from django.utils import timezone
 from django.test import override_settings
@@ -36,10 +34,9 @@ from app_sprava_montazi.models import (
 from accounts.views import CustomLoginView
 
 # --- oop
-from .OOP_protokols import PdfGenerator, DefaultPdfGenerator, pdf_generator_classes
 
 # --- utils
-from .utils import filter_orders, format_date, parse_order_filters
+from ..utils import format_date
 
 # ---
 test_logger = logging.getLogger("test_logger_login")
