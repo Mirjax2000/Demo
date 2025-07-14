@@ -1,5 +1,6 @@
 """OOP pro datatables a filtrovani querysetu"""
 
+
 from typing import Tuple, TypedDict, TypeAlias
 from rich.console import Console
 
@@ -9,7 +10,7 @@ from django.http import JsonResponse
 from django.urls import reverse
 
 # --- models
-from .models import Order, Client, Article
+from .models import Order, Client
 
 
 # --- type aliases
