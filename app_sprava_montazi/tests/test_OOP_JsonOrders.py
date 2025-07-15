@@ -47,51 +47,60 @@ class OrderDataTablesTest(TestCase):
         self.range: int = 10
         self.pagination: int = 15
 
+        self.date_evidence = date(2025, 1, 1)
+        self.date_evidence_cz = self.date_evidence.strftime("%d.%m.%Y")
+
+        self.date_delivery = date(2025, 2, 10)
+        self.date_delivery_cz = self.date_delivery.strftime("%d.%m.%Y")
+
+        self.date_montage = timezone.make_aware(datetime(2025, 4, 10, 10, 0))
+        self.date_montage_cz = self.date_montage.strftime("%d.%m.%Y %H:%M")
+
         # Vytvoříme  objednávky
         # ---
         # 1 status new by assembly crew
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-1-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"NEW-BY-CREW-{i:05}-R",
                 distrib_hub=self.hub,
                 mandant=self.mandant,
                 client=customer,
-                evidence_termin=date(2025, 1, 1),
-                delivery_termin=date(2025, 2, 10),
+                evidence_termin=self.date_evidence,
+                delivery_termin=self.date_delivery,
                 status=Status.NEW,
                 team_type=TeamType.BY_ASSEMBLY_CREW,
             )
         # 2 status new by customer
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-2-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"NEW-BY-CUSTOMER-{i:05}-R",
                 distrib_hub=self.hub,
                 mandant=self.mandant,
                 client=customer,
-                evidence_termin=date(2025, 1, 1),
-                delivery_termin=date(2025, 2, 10),
+                evidence_termin=self.date_evidence,
+                delivery_termin=self.date_delivery,
                 status=Status.NEW,
                 team_type=TeamType.BY_CUSTOMER,
             )
         # 3 status adviced no mail sended !!!
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-3-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"ADVICED-NOMAIL-{i:05}-R",
                 distrib_hub=self.hub,
                 mandant=self.mandant,
                 client=customer,
-                evidence_termin=date(2025, 2, 2),
-                delivery_termin=date(2025, 3, 4),
-                montage_termin=timezone.make_aware(datetime(2025, 4, 10, 10, 0)),
+                evidence_termin=self.date_evidence,
+                delivery_termin=self.date_delivery,
+                montage_termin=self.date_montage,
                 status=Status.ADVICED,
                 team_type=TeamType.BY_ASSEMBLY_CREW,
                 team=self.team,
@@ -99,16 +108,16 @@ class OrderDataTablesTest(TestCase):
         # 4 status adviced mail sended !!!
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-4-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"ADVICED-MAIL-{i:05}-R",
                 distrib_hub=self.hub,
                 mandant=self.mandant,
                 client=customer,
-                evidence_termin=date(2025, 2, 2),
-                delivery_termin=date(2025, 3, 4),
-                montage_termin=timezone.make_aware(datetime(2025, 4, 10, 10, 0)),
+                evidence_termin=self.date_evidence,
+                delivery_termin=self.date_delivery,
+                montage_termin=self.date_montage,
                 status=Status.ADVICED,
                 team_type=TeamType.BY_ASSEMBLY_CREW,
                 team=self.team,
@@ -117,31 +126,31 @@ class OrderDataTablesTest(TestCase):
         # 5 status Hidden by customer
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-5-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"HIDDEN-CUSTOMER-{i:05}-R",
                 distrib_hub=self.hub,
                 mandant=self.mandant,
                 client=customer,
-                evidence_termin=date(2025, 2, 2),
-                delivery_termin=date(2025, 3, 4),
+                evidence_termin=self.date_evidence,
+                delivery_termin=self.date_delivery,
                 status=Status.HIDDEN,
                 team_type=TeamType.BY_CUSTOMER,
             )
         # 6 status Realized
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-6-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"REALIZED-{i:05}-R",
                 distrib_hub=self.hub,
                 mandant=self.mandant,
                 client=customer,
-                evidence_termin=date(2025, 2, 2),
-                delivery_termin=date(2025, 3, 4),
-                montage_termin=timezone.make_aware(datetime(2025, 4, 10, 10, 0)),
+                evidence_termin=self.date_evidence,
+                delivery_termin=self.date_delivery,
+                montage_termin=self.date_montage,
                 status=Status.REALIZED,
                 team_type=TeamType.BY_ASSEMBLY_CREW,
                 team=self.team,
@@ -149,16 +158,16 @@ class OrderDataTablesTest(TestCase):
         # 7 status Canceled
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-7-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"CANCELED-{i:05}-R",
                 distrib_hub=self.hub,
                 mandant=self.mandant,
                 client=customer,
-                evidence_termin=date(2025, 2, 2),
-                delivery_termin=date(2025, 3, 4),
-                montage_termin=timezone.make_aware(datetime(2025, 4, 10, 10, 0)),
+                evidence_termin=self.date_evidence,
+                delivery_termin=self.date_delivery,
+                montage_termin=self.date_montage,
                 status=Status.CANCELED,
                 team_type=TeamType.BY_ASSEMBLY_CREW,
                 team=self.team,
@@ -166,16 +175,16 @@ class OrderDataTablesTest(TestCase):
         # 8 status Billed
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-8-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"BILLED-{i:05}-R",
                 distrib_hub=self.hub,
                 mandant=self.mandant,
                 client=customer,
-                evidence_termin=date(2025, 2, 2),
-                delivery_termin=date(2025, 3, 4),
-                montage_termin=timezone.make_aware(datetime(2025, 4, 10, 10, 0)),
+                evidence_termin=self.date_evidence,
+                delivery_termin=self.date_delivery,
+                montage_termin=self.date_montage,
                 status=Status.BILLED,
                 team_type=TeamType.BY_ASSEMBLY_CREW,
                 team=self.team,
@@ -210,7 +219,7 @@ class OrderDataTablesTest(TestCase):
 
         # --- kontrola počtu (máš tam 80 objednávek, 10 z každého typu)
         self.assertEqual(data["recordsTotal"], Order.objects.count())
-        
+
         # order number v datech z JSONA
         order_html = data["data"][0]["order_number"]
         order_pattern = (
@@ -241,6 +250,8 @@ class OrderDataTablesTest(TestCase):
             r'<span\s+name="evidence-termin"(?:\s+class="[^"]*")?>'
             r"\d{2}\.\d{2}\.\d{4}</span>"
         )
+
+        self.assertIn(self.date_evidence_cz, evidence_termin_html)  # obsah
         self.assertRegex(evidence_termin_html, evidence_termin_pattern)  # regex
         self.assertIn('name="evidence-termin"', evidence_termin_html)  # name
 
@@ -250,6 +261,7 @@ class OrderDataTablesTest(TestCase):
             r'<span\s+name="delivery-termin"(?:\s+class="[^"]*")?>'
             r"\d{2}\.\d{2}\.\d{4}</span>"
         )
+        self.assertIn(self.date_delivery_cz, delivery_termin_html)  # obsah
         self.assertRegex(delivery_termin_html, delivery_termin_pattern)  # regex
         self.assertIn('name="delivery-termin"', delivery_termin_html)  # name
 
@@ -262,6 +274,7 @@ class OrderDataTablesTest(TestCase):
             re.DOTALL,
         )
         self.assertRegex(client_html, client_pattern)  # regex
+        self.assertIn("Customer", client_html)  # obsah
         self.assertIn('name="client"', client_html)  # name
 
         # team_type v datech z JSONA
@@ -288,6 +301,8 @@ class OrderDataTablesTest(TestCase):
             r".*?"  # cokoliv (non-greedy)
             r"\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}"  # datum a čas
         )
+
+        # self.assertIn(self.date_montage_cz, montage_termin_html)  # obsah
         self.assertRegex(montage_termin_html, montage_termin_pattern)  # regex
         self.assertIn('name="montage-termin"', montage_termin_html)  # name
 

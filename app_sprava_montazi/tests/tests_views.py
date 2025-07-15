@@ -139,7 +139,7 @@ class CustomLoginViewTests(TestCase):
         self.assertEqual(view.get_client_ip(), "10.0.0.1")
 
 
-class IndexViewTest(TestCase):
+class OrderProtocolView(TestCase):
     def setUp(self):
         # Vytvoříme testovacího uživatele
         self.user = User.objects.create_user(username="testuser", password="testpass")
