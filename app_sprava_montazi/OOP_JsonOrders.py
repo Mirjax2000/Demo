@@ -126,34 +126,49 @@ class JsonOrders:
 
     def order_number_coll(self, order: Order) -> str:
         """vraci i s linkem na order"""
+        name: str = "order-number"
+        css: str = "L-table__link"
+        content: str = str(order.order_number)
         order_link = reverse("order_detail", args=[order.pk])
-        result = (
-            f'<a href="{order_link}" class="L-table__link">{order.order_number}</a>'
-        )
+        result = f'<a href="{order_link}" name="{name}" class="{css}">{content}</a>'
         return result
 
     def distrib_hub_coll(self, order: Order) -> str:
         """Vraci __str__ z modelu"""
-        result: str = str(order.distrib_hub)
+        name: str = "distrib-hub"
+        content: str = str(order.distrib_hub)
+        result: str = f'<span name="{name}">{content}</span>'
         return result
 
     def mandant_coll(self, order: Order) -> str:
         """Vraci mandant"""
-        result: str = str(order.mandant)
+        name: str = "mandant"
+        content: str = str(order.mandant)
+        result: str = f'<span name="{name}">{content}</span>'
         return result
 
     def evidence_termin_coll(self, order: Order) -> str:
         """Vraci evidence termin nebo -"""
-        result: str = "-"
+        name: str = "evidence-termin"
+        content: str = "-"
+        css: str = "u-s-none"
+
         if order.evidence_termin:
-            result = order.evidence_termin.strftime("%d.%m.%Y")
+            content = order.evidence_termin.strftime("%d.%m.%Y")
+
+        result: str = f'<span name="{name}" class="{css}">{content}</span>'
         return result
 
     def deliver_termin_coll(self, order: Order) -> str:
         """Vraci delivery termin nebo -"""
-        result: str = "-"
+        name: str = "delivery-termin"
+        content: str = "-"
+        css: str = "u-s-none"
+
         if order.delivery_termin:
-            result = order.delivery_termin.strftime("%d.%m.%Y")
+            content = order.delivery_termin.strftime("%d.%m.%Y")
+
+        result: str = f'<span name="{name}" class="{css}">{content}</span>'
         return result
 
     def client_coll(self, order: Order) -> str:
@@ -162,6 +177,8 @@ class JsonOrders:
         if not client:
             return '<span class="u-txt-error">Žádný klient</span>'
 
+        name: str = "client"
+        content: str = client.first_15()
         css: str = "u-txt-success"
         icon: str = success_icon
         title: str = str(client)
@@ -171,22 +188,26 @@ class JsonOrders:
             icon = exclamation_icon
 
         result: str = (
-            f'<span title="{title}">{icon}'
-            f'<span class="{css}">{client.first_15()}</span></span>'
+            f'<div title="{title}" name="{name}">{icon}'
+            f'<span class="{css}">{content}</span></div>'
         )
         return result
 
     def team_type_coll(self, order: Order) -> str:
         """Vraci team type"""
+        name: str = "team-type"
         css: str = "u-s-none"
+        content: str = str(order.get_team_type_display())  # type: ignore
+
         if order.team_type == "By_assembly_crew":
             css += " u-txt-success"
-        result: str = f'<span class="{css}">{order.get_team_type_display()}</span>'  # type: ignore
+
+        result: str = f'<span name="{name}" class="{css}">{content}</span>'
         return result
 
     def team_coll(self, order: Order) -> str:
         """Vraci team type"""
-
+        name: str = "team"
         css: str = "u-s-none"
         content: str = "-"
         icon: str = ""
@@ -201,13 +222,15 @@ class JsonOrders:
             icon = success_icon
             content = f"{order.team}"
 
-        result: str = f'<span>{icon}<span class="{css}">{content}</span></span>'
+        result: str = (
+            f'<div name="{name}">{icon}<span class="{css}">{content}</span></div>'
+        )
 
         return result
 
     def montage_termin_coll(self, order: Order) -> str:
         """Vrací montage_termin jako HTML nebo varování."""
-
+        name: str = "montage-termin"
         css: str = "u-s-none"
         content: str = "–"
         icon: str = ""
@@ -221,12 +244,12 @@ class JsonOrders:
             css += " u-txt-warning"
             content = "Nevybráno"
 
-        result = f'<span>{icon}<span class="{css}">{content}</span></span>'
+        result = f'<div name="{name}" class="{css}">{icon}<span>{content}</span></div>'
         return result
 
     def status_coll(self, order: Order) -> str:
         """Vrací status + případnou ikonu odkazu na protokol."""
-
+        name: str = "status"
         content = order.get_status_display()[:8]  # type: ignore
         icon: str = ""
 
@@ -241,22 +264,25 @@ class JsonOrders:
                 f"{icon_link}</a>"
             )
 
-        result = f"{content} {icon}"
+        result = f'<div name="{name}">{content} {icon}</div>'
         return result
 
     def articles_coll(self, order: Order) -> str:
+        name: str = "articles"
         css = "u-s-none u-txt-center"
         article_count: str = str(order.articles.count())  # type: ignore
+
         if article_count == "0":
             css += " u-txt-error"
-        result: str = f'<div class="{css}">{article_count}</div>'
+        result: str = f'<div name="{name}" "class="{css}">{article_count}</div>'
 
         return result
 
     def notes_coll(self, order: Order) -> str:
+        name: str = "notes"
         title: str = order.notes
         content: str = order.notes_first_10()
-        result: str = f'<span title="{title}">{content}</span>'
+        result: str = f'<span name="{name}" title="{title}">{content}</span>'
 
         return result
 
