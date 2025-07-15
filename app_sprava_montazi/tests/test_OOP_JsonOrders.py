@@ -6,7 +6,6 @@ import re
 
 # --- django
 from django.test import TestCase, RequestFactory
-from django.urls import reverse
 from django.utils import timezone
 from django.db.models import QuerySet
 from django.contrib.auth.models import User
@@ -54,8 +53,8 @@ class OrderDataTablesTest(TestCase):
         self.date_delivery_cz = self.date_delivery.strftime("%d.%m.%Y")
 
         self.date_montage = timezone.make_aware(datetime(2025, 4, 10, 10, 0))
-        self.date_montage_cz = self.date_montage.strftime("%d.%m.%Y %H:%M")
-
+        self.time_zone = timezone.localtime(self.date_montage)
+        self.date_montage_cz = self.time_zone.strftime("%d.%m.%Y %H:%M")
         # Vytvoříme  objednávky
         # ---
         # 1 status new by assembly crew
@@ -302,7 +301,7 @@ class OrderDataTablesTest(TestCase):
             r"\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}"  # datum a čas
         )
 
-        # self.assertIn(self.date_montage_cz, montage_termin_html)  # obsah
+        self.assertIn(self.date_montage_cz, montage_termin_html)  # obsah
         self.assertRegex(montage_termin_html, montage_termin_pattern)  # regex
         self.assertIn('name="montage-termin"', montage_termin_html)  # name
 
