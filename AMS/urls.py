@@ -1,6 +1,7 @@
 """URLs config"""
 
 from rest_framework.authtoken.views import obtain_auth_token
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -35,7 +36,7 @@ from app_sprava_montazi.views import (
     UploadBackProtocolView as UplBckPrtcl,
     CheckPDFProtocolView as CheckPDFProtocol,
     ExportOrdersExcelView as ExportOrdersExcel,
-    IncompleteCustomersView as IncompleteCustomers,
+    IncompleteCustomersView as IncmpCstmrs,
 )
 from app_sprava_montazi.views_services import (
     AutocompleteOrdersView as AutocompleteOrders,
@@ -110,13 +111,15 @@ app_accounts_urls: list = [
 
 api_urls: list = [
     path(
-        "api/incomplete-customers/",
-        IncompleteCustomers.as_view(),
-        name="incomplete-customers",
+        "api/incomplete-customers/", IncmpCstmrs.as_view(), name="incomplete-customers"
     ),
     path("api/update-customers/", CustomerUpdate.as_view(), name="update-customers"),
     path("api-token-auth/", obtain_auth_token),
+    # --- swagger
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
 ]
+
 #
 urlpatterns += app_sprava_montazi
 urlpatterns += app_accounts_urls

@@ -35,6 +35,7 @@ class Command(BaseCommand):
         self.run_migrations()
         self.create_users()
         self.collect_static()
+        self.run_distrib_hubs()
         cons.log("\n")
         cons.rule(
             "[bold yellow]⚡ Aktivace dokončena. Systém je připraven.[/bold yellow]"
@@ -62,6 +63,17 @@ class Command(BaseCommand):
             )
         except Exception as e:
             cons.log(f"[red]❌ Migrace selhala: {e}[/red]")
+
+    def run_distrib_hubs(self) -> None:
+        try:
+            cons.log("📦 Spouštím distrib huby instalaci...", style="blue")
+            call_command("distrib_hub")
+            cons.log(
+                "✅ Všechny distrib huby jsou pripraveny na naklad.",
+                style="green",
+            )
+        except Exception as e:
+            cons.log(f"❌ Distrib hub instalace selhala: {e}", style="red")
 
     def create_users(self) -> None:
         users: list[SysUser] = [

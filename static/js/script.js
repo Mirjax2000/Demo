@@ -3,6 +3,7 @@
     const html = document.documentElement;
     const themeToggler = document.getElementById("themeToggler");
     const orderTable = document.getElementById("orderTable");
+    const clientOrderTable = document.getElementById("clientOrderTable");
     const teamTable = document.getElementById("teamTable");
     const articleTable = document.getElementById("articleTable");
     const numberInputs = document.querySelectorAll(".number");
@@ -73,23 +74,21 @@
                 errorMessageProtocolfile.textContent = "";
 
                 if (file_from_fallback) {
+                    const maxSize = 10
+                    let countSize = maxSize * 1024 * 1024
 
-                    if (file_from_fallback.size > 10 * 1024 * 1024) { // 1 MB
+                    if (file_from_fallback.size > countSize) {
                         const sizeMB = (file_from_fallback.size / 1024 / 1024).toFixed(2);
-                        errorMessageProtocolfile.innerHTML = `Soubor je příliš velký <strong>${sizeMB} MB</strong>.<br> Max. velikost je 10 MB.`;
+                        errorMessageProtocolfile.innerHTML = `File too big <strong>${sizeMB} </strong>MB. Max. size is <strong>${maxSize}</strong> MB.`;
                         fileInputProtocol.value = "";
                         return;
                     }
 
 
                     if (!allowedImageTypes.includes(file_from_fallback.type)) {
-                        errorMessageProtocolfile.innerHTML = `Soubor musí být ve formátu obrázku (např. JPG, PNG, WebP).<br> Nepovolený typ souboru: ${file_from_fallback.type}</strong>.`;
+                        errorMessageProtocolfile.innerHTML = "Povolené formáty (např. JPG, PNG, WebP).";
                         fileInputProtocol.value = "";
                         return;
-                    }
-
-                    if (fileInputProtocol.form) {
-                        fileInputProtocol.form.submit();
                     }
                 }
             });
@@ -100,29 +99,29 @@
                 const file_from_csv = CsvFormFile.files[0];
                 csv_error_message.textContent = "";
 
+                // Přeskoč kontrolu velikosti, pokud je checkbox zaškrtnutý
+                const checkbox = document.getElementById("potlacitVelikostCsvChckBox");
+                const ignoreSizeLimit = checkbox?.checked;
+
                 if (file_from_csv) {
+                    const maxSize = 10
+                    let countSize = maxSize * 1024 * 1024
                     const fileName = file_from_csv.name.toLowerCase();
-                    if (file_from_csv.size > 10 * 1024 * 1024) { // 10 MB
+                    if (!ignoreSizeLimit && file_from_csv.size > countSize) {
                         const sizeMB = (file_from_csv.size / 1024 / 1024).toFixed(2);
-                        csv_error_message.innerHTML = `Soubor je příliš velký <strong>${sizeMB} MB</strong>.<br> Max. velikost je 10 MB.`;
+                        csv_error_message.innerHTML = `File too big <strong>${sizeMB} </strong>MB. Max. size is <strong>${maxSize}</strong> MB.`;
                         CsvFormFile.value = "";
                         return;
                     }
-
 
                     if (!fileName.endsWith(".csv")) {
-                        csv_error_message.innerHTML = `Soubor musí být ve formátu CSV. Nepovolený typ souboru: ${file_from_csv.type}</strong>.`;
+                        csv_error_message.innerHTML = `Soubor musí být ve formátu CSV. Nepovolený typ souboru: ${file_from_csv.type}`;
                         CsvFormFile.value = "";
                         return;
-                    }
-
-                    if (CsvFormFile.form) {
-                        CsvFormFile.form.submit();
                     }
                 }
             });
         }
-
     });
 
     window.addEventListener("load", () => {
@@ -194,15 +193,14 @@
     if (themeToggler) { // Ensure themeToggler exists
         themeToggler.addEventListener("click", toggleTheme);
     }
-
-    // DataTable for orders
-    if (orderTable) {
-        $(orderTable).DataTable({
+    // datatables for client orders
+    if (clientOrderTable) {
+        $(clientOrderTable).DataTable({
             order: [[3, 'desc']],
             rowReorder: false,
-            fixedColumns: true,
-            pageLength: 15,
-            lengthMenu: [[15, 20, 30, -1], [15, 20, 30, "Vše"]],
+            fixedColumns: false,
+            pageLength: 5,
+            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "Vše"]],
             layout: {
                 topStart: {
                     search: {
@@ -214,10 +212,69 @@
                 bottomEnd: 'paging'
             },
             columnDefs: [
-                { targets: [3, 4, 8], type: 'date' },
-                { targets: [0, 10], orderable: false }],
+                { targets: [3, 4, 7], type: 'date' },
+                { targets: [0, 9, 10], orderable: false }],
             language: {
-                emptyTable: "Žádné objednávky"
+                emptyTable: "Žádné objednávky",
+                decimal: ",",
+                info: "Zobrazuji _START_ až _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
+                infoFiltered: "",
+                infoEmpty: "",
+                search: "Vyhledávání: ",
+                lengthMenu: "_MENU_ zakázek na stránku",
+            },
+        });
+    }
+
+    // DataTable for orders
+    if (orderTable) {
+        $(orderTable).DataTable({
+            // zapiname server side proccesing
+            processing: true,
+            serverSide: true,
+            // ajax mi posle do requestu json s pozadavky na strankovani
+            // odpoved bude qs s aplikovanyma filtrama 
+            ajax: {
+                url: window.location.href,
+                type: "GET",
+            },
+
+            order: [[3, 'desc']],
+            rowReorder: false,
+            fixedColumns: false,
+            pageLength: 15,
+            lengthMenu: [[15, 20, 30], [15, 20, 30]],
+            layout: {
+                topStart: {
+                    search: {
+                        placeholder: "Hledej ..."
+                    }
+                },
+                topEnd: 'pageLength',
+                bottomStart: 'info',
+                bottomEnd: 'paging'
+            },
+            columns: [
+                { data: 'order_number', orderable: false, searchable: true },
+                { data: 'distrib_hub', orderable: true, searchable: true },
+                { data: 'mandant', orderable: true, searchable: true },
+                { data: 'evidence_termin', orderable: true, searchable: true },
+                { data: 'delivery_termin', orderable: true, searchable: true },
+                { data: 'client', orderable: true, searchable: true },
+                { data: 'team_type', orderable: true, searchable: false },
+                { data: 'team', orderable: true, searchable: true },
+                { data: 'montage_termin', orderable: true, searchable: true },
+                { data: 'status', orderable: true, searchable: false },
+                { data: 'articles', orderable: false, searchable: false },
+                { data: 'notes', orderable: false, searchable: false },
+            ],
+            language: {
+                emptyTable: "Žádné objednávky",
+                info: "<small>od <strong>_START_</strong> do <strong>_END_</strong> z <strong>_TOTAL_</strong> záznamů (filtr z <strong>_MAX_</strong> záznamů)</small>",
+                infoFiltered: "",
+                infoEmpty: "",
+                lengthMenu: "<small>_MENU_ zakázek na stránku</small>",
+                search: "Vyhledávání: "
             },
         });
     }
@@ -227,7 +284,7 @@
         $(teamTable).DataTable({
             order: [[3, 'asc']],
             rowReorder: false,
-            fixedColumns: true,
+            fixedColumns: false,
             pageLength: 15,
             lengthMenu: [[15, 20, 30, -1], [15, 20, 30, "Vše"]],
             layout: {
@@ -246,7 +303,12 @@
             ],
             language: {
                 emptyTable: "Žádné Teamy",
-                decimal: ","
+                decimal: ",",
+                info: "Zobrazuji _START_ až _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
+                infoFiltered: "",
+                infoEmpty: "",
+                lengthMenu: "_MENU_ zakázek na stránku",
+                search: "Vyhledávání: "
             },
         });
     }
@@ -255,7 +317,7 @@
     if (articleTable) {
         $(articleTable).DataTable({
             rowReorder: false,
-            fixedColumns: true,
+            fixedColumns: false,
             searching: false,
             paging: false,
             columnDefs: [
@@ -263,6 +325,10 @@
             ],
             language: {
                 emptyTable: "Žádné Artikly !!!",
+                decimal: ",",
+                info: "počet záznamů: _TOTAL_",
+                infoEmpty: "",
+                infoFiltered: "",
             },
         });
     }

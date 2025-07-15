@@ -10,8 +10,8 @@ from django.db import IntegrityError
 from django.utils.text import slugify
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
-from .models import DistribHub, Client, Order, Team, Status, TeamType
-from .models import Article, CallLog, Upload, AdviceStatus
+from ..models import DistribHub, Client, Order, Team, Status, TeamType
+from ..models import Article, CallLog, Upload, AdviceStatus
 
 User = get_user_model()
 

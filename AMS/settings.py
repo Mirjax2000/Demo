@@ -51,11 +51,14 @@ INSTALLED_APPS = [
     # --- restframework
     "rest_framework",
     "rest_framework.authtoken",
+    "drf_spectacular",
     # --- model Phone
     "phonenumber_field",
 ]
 
+
 REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
     ],
@@ -201,6 +204,23 @@ LOGGING = {
             "handlers": ["login_file"],
             "level": "INFO",
             "propagate": False,
+        },
+    },
+}
+# --- swagger
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Moje API",
+    "VERSION": "1.0.0",
+    "DESCRIPTION": "Dokumentace pro moje Django API",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SECURITY": [{"TokenAuth": []}],
+    "COMPONENTS": {
+        "securitySchemes": {
+            "TokenAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+            },
         },
     },
 }

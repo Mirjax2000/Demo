@@ -1,5 +1,7 @@
 <div class="L-table__nav-panel">
-    <form class="L-table__nav-panel__form" action="{% url filtr_url %}">
+    <form class="L-table__nav-panel__form"
+          action="{% url filtr_url %}"
+          method="get">
         <!--status-->
         <div class="L-table__nav-panel__form__group">
             <label for="status">Filter status</label>

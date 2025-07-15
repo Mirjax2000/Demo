@@ -1,26 +1,25 @@
 """app_sprava_montazi View"""
 
 import os
-import logging
 from typing import Any
 from datetime import datetime
 from openpyxl import Workbook
 from rich.console import Console
 
 # --- Django
-from django.conf import settings
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
+from django.conf import settings
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model
-from django.db.models.deletion import ProtectedError
 from django.core.management import call_command
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.forms import BaseModelForm, inlineformset_factory
-from django.views.generic import View, UpdateView, TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpResponse, FileResponse, HttpResponseForbidden, JsonResponse
+from django.http import HttpResponse, FileResponse, HttpResponseForbidden
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import View, UpdateView, TemplateView
 from django.views.generic import CreateView, DetailView, FormView, ListView
 
 # API rest ---
@@ -29,6 +28,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
+
 
 # --- formulare
 from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
@@ -43,11 +43,12 @@ from .models import OrderPDFStorage, OrderBackProtocolToken, OrderBackProtocol
 from .models import HistoricalArticle  # type: ignore  # pylint: disable=no-name-in-module
 
 # pomocne funkce ---
-from .utils import filter_orders, format_date, parse_order_filters, update_customers
+from .utils import format_date, update_customers
 
 # 00P classes ---
 from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
 from .OOP_back_protocol import ProtocolUploader
+from .OOP_JsonOrders import JsonOrders
 
 cons: Console = Console()
 User = get_user_model()
@@ -416,20 +417,17 @@ class OrderDeleteView(LoginRequiredMixin, View):
         return redirect("orders")
 
 
-class OrdersView(LoginRequiredMixin, ListView):
-    """Vypis seznamu modelu Order"""
+class OrdersView(LoginRequiredMixin, TemplateView):
+    """Vypis seznamu modelu Order s podporou server-side DataTables paginace."""
 
-    model = Order
     template_name = f"{APP_URL}/orders/orders_all.html"
-    context_object_name = "orders"
 
-    def dispatch(self, request, *args, **kwargs):
-        self.filters = parse_order_filters(request)  # pylint: disable=W0201
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_queryset(self):
-        # --- utils.py
-        return filter_orders(self.filters)
+    def get(self, request, *args, **kwargs):
+        self.json_orders: JsonOrders = JsonOrders(request=request)
+        self.filters = self.json_orders.get_filters() 
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return self.json_orders.get_json_data()
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
@@ -446,7 +444,6 @@ class OrdersView(LoginRequiredMixin, ListView):
             else None
         )
 
-        # get status pro context
         status_filter = self.filters["status"]
         if status_filter == "all":
             get_status = "Všechny"
@@ -468,11 +465,9 @@ class OrdersView(LoginRequiredMixin, ListView):
                 "get_start": get_start,
                 "get_end": get_end,
                 "request": self.request,
-                # --- navigace
                 "active": "orders_all",
             }
         )
-
         return context
 
 
@@ -758,8 +753,9 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
 class ExportOrdersExcelView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         # --- utils.py
-        filters = parse_order_filters(request)
-        orders = filter_orders(filters)
+        self.json_orders: JsonOrders = JsonOrders(request=request)
+        filters = self.json_orders.get_filters()
+        orders = self.json_orders.return_queryset()
 
         wb = Workbook()
         ws = wb.active
@@ -1042,7 +1038,7 @@ class ProtocolUploadView(LoginRequiredMixin, View):
 
     def post(self, request):
         image = request.FILES.get("image")
-        order_number = str(request.POST.get("order_number", "")).lower()
+        order_number = str(request.POST.get("order_number", ""))
         realizovano = request.POST.get("realizovano") == "on"
 
         try:

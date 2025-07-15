@@ -74,7 +74,7 @@ def update_customers(customer_details: list) -> None:
     for item in customer_details:
         for order_number, data in item.items():
             try:
-                order = Order.objects.get(order_number=order_number.lower())
+                order = Order.objects.get(order_number=order_number)
                 client = order.client
                 if client:
                     cons.log(

@@ -84,8 +84,9 @@ class OrderStatusView(LoginRequiredMixin, View):
     def get(self, request):
         number = request.GET.get("order_number", "")
         try:
-            order = Order.objects.get(order_number=number.lower())
+            order = Order.objects.get(order_number=number)
             status = order.get_status_display()  # type:ignore
             return JsonResponse({"status": status}, status=200)
+
         except Order.DoesNotExist:
             return JsonResponse({"status": "Neznámé číslo zakázky"}, status=404)
