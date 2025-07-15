@@ -150,10 +150,10 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "cs"
 
 TIME_ZONE = "Europe/Prague"
+USE_TZ = True
 
 USE_I18N = True
 
-USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)

@@ -239,7 +239,7 @@ class JsonOrders:
 
         if order.montage_termin:
             content = f"<strong>{time.strftime('%d.%m.%Y %H:%M')}</strong>"
-            
+
         elif order.team_type == "By_assembly_crew":
             icon = exclamation_icon
             css += " u-txt-warning"

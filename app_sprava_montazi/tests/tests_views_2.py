@@ -41,7 +41,7 @@ test_logger.propagate = False  # Prevent logs from going to the root logger
 LOGIN_URL = reverse("login")
 
 
-class IndexViewTest(TestCase):
+class OrderProtocolView(TestCase):
     def setUp(self):
         # Vytvoříme testovacího uživatele
         self.user = User.objects.create_user(username="testuser", password="testpass")
@@ -65,7 +65,7 @@ class IndexViewTest(TestCase):
             phone=self.team_phone,
             email=self.team_email,
         )
-        self.order = Order.objects.create(
+        self.order_with_team = Order.objects.create(
             order_number="703777143100437749-R",
             distrib_hub=self.hub,
             status=Status.NEW,
@@ -75,8 +75,17 @@ class IndexViewTest(TestCase):
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=self.team,
         )
-        base_url = reverse("protocol", kwargs={"pk": self.order.pk})
-        self.url = f"{base_url}?pk={self.order.pk}"
+        self.order_without_team = Order.objects.create(
+            order_number="703777143100437750-R",
+            distrib_hub=self.hub,
+            status=Status.NEW,
+            client=self.customer,
+            mandant="SCCZ",
+            evidence_termin=date.today(),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+        )
+        base_url = reverse("protocol", kwargs={"pk": self.order_with_team.pk})
+        self.url = f"{base_url}?pk={self.order_with_team.pk}"
 
     def test_logged_in(self):
         """
@@ -95,3 +104,51 @@ class IndexViewTest(TestCase):
         self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_protocol_view_context_data(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
+
+        # Context
+        context = response.context
+        self.assertIn("order", context)
+        self.assertIn("pdf_exists", context)
+        self.assertIn("team", context)
+        self.assertIn("recieved_protokol", context)
+        self.assertIn("active", context)
+
+        # Konkrétní hodnoty
+        self.assertEqual(context["order"], self.order_with_team)
+        self.assertEqual(context["team"], self.team)
+        self.assertFalse(context["pdf_exists"])
+        self.assertIsNone(context["recieved_protokol"])
+        self.assertEqual(context["active"], "orders_all")
+
+    def test_protocol_view_without_team_redirects(self):
+        url = reverse("protocol", kwargs={"pk": self.order_without_team.pk})
+        referer_url = reverse("order_detail", kwargs={"pk": self.order_without_team.pk})
+        response = self.client.get(url, HTTP_REFERER=referer_url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/", response.url)
+        self.assertEqual(response.url, referer_url)
+
+    def test_protocol_view_without_team_redirects_message(self):
+        url = reverse("protocol", kwargs={"pk": self.order_without_team.pk})
+        referer_url = reverse("order_detail", kwargs={"pk": self.order_without_team.pk})
+        response = self.client.get(url, HTTP_REFERER=referer_url, follow=True)
+
+        messages = [msg.message for msg in get_messages(response.wsgi_request)]
+        self.assertIn("Není vybraný žádný montážní tým!", messages)
+        self.assertEqual(response.status_code, 200)
+
+    def test_protocol_view_contains_html_tags(self):
+        url = reverse("protocol", kwargs={"pk": self.order_with_team.pk})
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode().lower()
+        self.assertIn("montazni protokol", html)
