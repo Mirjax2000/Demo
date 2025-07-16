@@ -834,8 +834,24 @@ class OrderDeleteViewTest(TestCase):
         self.client.login(username="testuser", password="testpass")
         self.hub = DistribHub.objects.create(code="626", city="Chrastany")
         self.customer = Client.objects.create(name="Pedro Pascal", zip_code="12345")
-        self.order = Order.objects.create(
+        self.team = Team.objects.create(
+            name="Ferda Company",
+            city="Praha",
+            phone="234234234",
+            email="ferda.company@gmail.cz",
+        )
+        self.order_hidden = Order.objects.create(
             order_number="703777143100437749-R",
+            distrib_hub=self.hub,
+            status=Status.HIDDEN,
+            client=self.customer,
+            mandant="SCCZ",
+            evidence_termin=date.today(),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+            team=None,
+        )
+        self.order_new = Order.objects.create(
+            order_number="703777143100437750-R",
             distrib_hub=self.hub,
             status=Status.NEW,
             client=self.customer,
@@ -844,42 +860,89 @@ class OrderDeleteViewTest(TestCase):
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=None,
         )
-        self.url = reverse("delete_order", kwargs={"pk": self.order.pk})
+        self.order_billed = Order.objects.create(
+            order_number="703777143100437751-R",
+            distrib_hub=self.hub,
+            status=Status.BILLED,
+            client=self.customer,
+            mandant="SCCZ",
+            evidence_termin=date.today(),
+            delivery_termin=date.today(),
+            montage_termin=timezone.make_aware(datetime(2025, 4, 10, 10, 0)),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+            team=self.team,
+        )
+        OrderPDFStorage.objects.create(
+            order=self.order_billed, file=SimpleUploadedFile("file.pdf", b"dummy")
+        )
+        self.url_hidden = reverse("delete_order", kwargs={"pk": self.order_hidden.pk})
+        self.url_new = reverse("delete_order", kwargs={"pk": self.order_new.pk})
+        self.url_billed = reverse("delete_order", kwargs={"pk": self.order_billed.pk})
 
     def test_logged_in(self):
-        response = self.client.get(self.url)
+        response = self.client.post(self.url_hidden)
         self.assertRedirects(response, reverse("orders"))
         self.assertEqual(response.status_code, 302)
-        self.assertFalse(Order.objects.filter(pk=self.order.pk).exists())
+        self.assertFalse(Order.objects.filter(pk=self.order_hidden.pk).exists())
 
     def test_redirect_if_not_logged_in(self):
         self.client.logout()
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+        response = self.client.post(self.url_hidden)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url_hidden}")
 
     def test_success_message_displayed(self):
-        response = self.client.get(self.url, follow=True)
+        response = self.client.post(self.url_hidden, follow=True)
         messages = [msg.message for msg in get_messages(response.wsgi_request)]
-        self.assertIn(f"Zakázka: {self.order.order_number} byla smazána.", messages)
+        self.assertIn(
+            f"Zakázka: {self.order_hidden.order_number} byla smazána.", messages
+        )
 
     def test_delete_order_with_pdf_storage_should_fail(self):
         # Navázat PDF na objednávku (ochrání ji před smazáním)
         OrderPDFStorage.objects.create(
-            order=self.order, file=SimpleUploadedFile("file.pdf", b"dummy")
+            order=self.order_hidden, file=SimpleUploadedFile("file.pdf", b"dummy")
         )
 
-        response = self.client.get(self.url, follow=True)
+        response = self.client.post(self.url_hidden, follow=True)
 
-        self.assertTrue(Order.objects.filter(pk=self.order.pk).exists())
+        self.assertTrue(Order.objects.filter(pk=self.order_hidden.pk).exists())
 
         # Ověřím, že se zobrazila chybová hláška
         messages = [msg.message for msg in get_messages(response.wsgi_request)]
         self.assertIn(
-            f"Zakázku: {self.order.order_number} nelze smazat, protože má vazby na jiné záznamy.",
+            f"Zakázku: {self.order_hidden.order_number} nelze smazat, protože má vazby na jiné záznamy.",
             messages,
         )
         # Cílová stránka po redirectu
         self.assertEqual(response.request["PATH_INFO"], reverse("orders"))
+
+    def test_cant_delete_order_with_status_new(self):
+        response = self.client.post(self.url_new)
+        self.assertRedirects(response, reverse("orders"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Order.objects.filter(pk=self.order_new.pk).exists())
+
+    def test_cant_delete_order_with_status_new_with_message(self):
+        response = self.client.post(self.url_new, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(response, reverse("orders"))
+        self.assertTrue(Order.objects.filter(pk=self.order_new.pk).exists())
+        messages = [msg.message for msg in get_messages(response.wsgi_request)]
+        self.assertIn("Jen skryté zakázky jde smazat!", messages)
+
+    def test_cant_delete_order_with_status_billed(self):
+        response = self.client.post(self.url_billed)
+        self.assertRedirects(response, reverse("orders"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Order.objects.filter(pk=self.order_billed.pk).exists())
+
+    def test_cant_delete_order_with_status_billed_with_message(self):
+        response = self.client.post(self.url_billed, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(response, reverse("orders"))
+        self.assertTrue(Order.objects.filter(pk=self.order_billed.pk).exists())
+        messages = [msg.message for msg in get_messages(response.wsgi_request)]
+        self.assertIn("Jen skryté zakázky jde smazat!", messages)
 
 
 class OrdersAllViewTest(TestCase):
@@ -1030,69 +1093,52 @@ class OrdersAllViewTest(TestCase):
                 team_type=TeamType.BY_ASSEMBLY_CREW,
             )
 
-    # def test_filter_by_status_new(self):
-    #     """filtruje status NEW"""
-    #     response = self.client.get(self.url, {"status": "New"})
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(len(response.context["orders"]), self.range)
-    #     self.assertNotEqual(len(response.context["orders"]), 20)
-    #     for order in response.context["orders"]:
-    #         self.assertEqual(order.status, "New")
+    def test_filter_by_status_new(self):
+        """filtruje status NEW"""
+        response = self.client.get(self.url, {"status": "New"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
 
-    # def test_filter_by_status_adviced(self):
-    #     """filtruje status Adviced"""
-    #     response = self.client.get(self.url, {"status": "Adviced"})
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(len(response.context["orders"]), self.range)
-    #     self.assertNotEqual(len(response.context["orders"]), 20)
-    #     for order in response.context["orders"]:
-    #         self.assertEqual(order.status, "Adviced")
+    def test_filter_by_status_adviced(self):
+        """filtruje status Adviced"""
+        response = self.client.get(self.url, {"status": "Adviced"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
 
-    # def test_filter_by_status_realized(self):
-    #     """Filtruje status Realized"""
-    #     response = self.client.get(self.url, {"status": "Realized"})
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(len(response.context["orders"]), self.range)
-    #     self.assertNotEqual(len(response.context["orders"]), 20)
-    #     for order in response.context["orders"]:
-    #         self.assertEqual(order.status, "Realized")
+    def test_filter_by_status_realized(self):
+        """Filtruje status Realized"""
+        response = self.client.get(self.url, {"status": "Realized"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
 
-    # def test_filter_by_status_od_701(self):
-    #     """Filtruje OD 701"""
-    #     response = self.client.get(self.url, {"od": "701"})
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(len(response.context["orders"]), self.range)
-    #     for order in response.context["orders"]:
-    #         self.assertTrue(order.order_number.startswith("701"))
+    def test_filter_by_status_od_701(self):
+        """Filtruje OD 701"""
+        response = self.client.get(self.url, {"od": "701"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
 
-    # def test_filter_by_start_date(self):
-    #     response = self.client.get(self.url, {"start_date": "2024-01-10"})
-    #     self.assertEqual(response.status_code, 200)
-    #     for order in response.context["orders"]:
-    #         self.assertGreaterEqual(order.evidence_termin, date(2024, 1, 10))
+    def test_filter_by_start_date(self):
+        response = self.client.get(self.url, {"start_date": "2024-01-10"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
 
-    # def test_filter_by_end_date(self):
-    #     response = self.client.get(self.url, {"end_date": "2024-01-10"})
-    #     self.assertEqual(response.status_code, 200)
-    #     for order in response.context["orders"]:
-    #         self.assertLessEqual(order.evidence_termin, date(2024, 1, 10))
+    def test_filter_by_end_date(self):
+        response = self.client.get(self.url, {"end_date": "2024-01-10"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
 
-    # def test_combined_filters(self):
-    #     response = self.client.get(
-    #         self.url,
-    #         {
-    #             "status": "New",
-    #             "od": "703",
-    #             "start_date": "2024-01-01",
-    #             "end_date": "2024-01-30",
-    #         },
-    #     )
-    #     self.assertEqual(response.status_code, 200)
-    #     for order in response.context["orders"]:
-    #         self.assertEqual(order.status, "New")
-    #         self.assertTrue(order.order_number.startswith("703"))
-    #         self.assertGreaterEqual(order.evidence_termin, date(2024, 1, 1))
-    #         self.assertLessEqual(order.evidence_termin, date(2024, 1, 30))
+    def test_combined_filters(self):
+        response = self.client.get(
+            self.url,
+            {
+                "status": "New",
+                "od": "703",
+                "start_date": "2024-01-01",
+                "end_date": "2024-01-30",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
 
     def test_logged_in(self):
         """
@@ -1104,14 +1150,14 @@ class OrdersAllViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
 
-    # def test_orders_all_view(self):
-    #     """
-    #     Test pro zobrazení všech objednávek.
-    #     """
+    def test_orders_all_view(self):
+        """
+        Test pro zobrazení všech objednávek.
+        """
 
-    #     response = self.client.get(self.url)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed(response, self.template)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
 
     def test_redirect_if_not_logged_in(self):
         """

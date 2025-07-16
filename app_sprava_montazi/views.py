@@ -399,21 +399,22 @@ class OrderUpdateView(LoginRequiredMixin, View):
 
 
 class OrderDeleteView(LoginRequiredMixin, View):
-    """Delete single order"""
-
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         order = get_object_or_404(Order, pk=kwargs["pk"])
-
         try:
-            order.delete()
-            messages.success(request, f"Zakázka: {order.order_number} byla smazána.")
+            if order.status == "Hidden":
+                order.delete()
+                messages.success(
+                    request, f"Zakázka: {order.order_number} byla smazána."
+                )
+            else:
+                messages.error(request, "Jen skryté zakázky jde smazat!")
 
         except ProtectedError:
             messages.error(
                 request,
                 f"Zakázku: {order.order_number} nelze smazat, protože má vazby na jiné záznamy.",
             )
-
         return redirect("orders")
 
 
