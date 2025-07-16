@@ -1360,8 +1360,8 @@ class OrderDetailViewTest(TestCase):
     def setUp(self):
         # Vytvoříme testovacího uživatele
         self.user = User.objects.create_user(username="testuser", password="testpass")
-        self.template = "app_sprava_montazi/orders/order_detail.html"
         self.client.login(username="testuser", password="testpass")
+        self.template = "app_sprava_montazi/orders/order_detail.html"
         self.hub = DistribHub.objects.create(code="626", city="Chrastany")
         self.customer = Client.objects.create(name="Franta test", zip_code="12345")
         self.order = Order.objects.create(
@@ -1424,6 +1424,32 @@ class OrderDetailViewTest(TestCase):
         self.assertEqual(len(response.context["articles"]), 2)
         self.assertEqual(response.context["articles"][0].name, "Test Article 1")
         self.assertEqual(response.context["articles"][1].name, "Test Article 2")
+
+    def test_order_fields_in_context(self):
+        response = self.client.get(self.url)
+        order = response.context["order"]
+
+        self.assertEqual(order.evidence_termin, date(2024, 1, 1))
+        self.assertEqual(order.delivery_termin, date(2024, 4, 10))
+        self.assertEqual(
+            order.montage_termin, timezone.make_aware(datetime(2024, 5, 20, 8, 0))
+        )
+        self.assertEqual(order.status, Status.NEW)
+        self.assertEqual(order.team_type, TeamType.BY_ASSEMBLY_CREW)
+
+    def test_order_dates_rendered_in_template(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, "01. 01. 2024")  # evidence_termin
+        self.assertContains(response, "10. 04. 2024")  # delivery_termin
+        self.assertContains(response, "20. 05. 2024 08:00")  # montage_termin
+
+    def test_polozky_rendered(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, "Nový")
+        self.assertContains(response, "Montážníky")
+        self.assertContains(response, str(self.customer))
+        self.assertContains(response, "SCCZ")
+        self.assertContains(response, str(self.hub))
 
 
 class ExportOrdersExcelViewTest(TestCase):
