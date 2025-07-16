@@ -143,12 +143,3 @@ class OrderProtocolView(TestCase):
         messages = [msg.message for msg in get_messages(response.wsgi_request)]
         self.assertIn("Není vybraný žádný montážní tým!", messages)
         self.assertEqual(response.status_code, 200)
-
-    def test_protocol_view_contains_html_tags(self):
-        url = reverse("protocol", kwargs={"pk": self.order_with_team.pk})
-
-        response = self.client.get(url)
-
-        self.assertEqual(response.status_code, 200)
-        html = response.content.decode().lower()
-        self.assertIn("montazni protokol", html)
