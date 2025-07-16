@@ -55,6 +55,17 @@
   }
 
   &__body {
+    & > tr {
+      border-color: var(--border);
+      border-left: 3px solid transparent;
+      border-right: 3px solid transparent;
+
+      &:hover {
+        border-left: 3px solid var(--success);
+        border-right: 3px solid var(--success);
+      }
+    }
+
     &__row {
       border-color: var(--border);
       border-left: 3px solid transparent;

@@ -30,8 +30,12 @@
         <label class="form-check-label" for="checkBoxDeleteOrder">Opravdu smazat?</label>
     </div>
     <!---->
-    <a href="{% url 'delete_order' order.pk %} "
-       id="deleteOrderButton"
-       class="btn btn-danger btn-sm u-width-180 text-nowrap me-2 disabled">
-        <i class="fa-solid fa-trash me-2"></i>Smazat objednávku</a>
+    <form method="post" action="{% url 'delete_order' order.pk %}">
+        {% csrf_token %}
+        <button type="submit"
+                id="deleteOrderButton"
+                class="btn btn-danger btn-sm u-width-180 text-nowrap me-2 disabled">
+            <i class="fa-solid fa-trash me-2"></i>Smazat objednávku
+        </button>
+    </form>
 {% endif %}

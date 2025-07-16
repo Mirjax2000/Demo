@@ -399,21 +399,22 @@ class OrderUpdateView(LoginRequiredMixin, View):
 
 
 class OrderDeleteView(LoginRequiredMixin, View):
-    """Delete single order"""
-
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         order = get_object_or_404(Order, pk=kwargs["pk"])
-
         try:
-            order.delete()
-            messages.success(request, f"Zakázka: {order.order_number} byla smazána.")
+            if order.status == "Hidden":
+                order.delete()
+                messages.success(
+                    request, f"Zakázka: {order.order_number} byla smazána."
+                )
+            else:
+                messages.error(request, "Jen skryté zakázky jde smazat!")
 
         except ProtectedError:
             messages.error(
                 request,
                 f"Zakázku: {order.order_number} nelze smazat, protože má vazby na jiné záznamy.",
             )
-
         return redirect("orders")
 
 
@@ -424,7 +425,7 @@ class OrdersView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         self.json_orders: JsonOrders = JsonOrders(request=request)
-        self.filters = self.json_orders.get_filters() 
+        self.filters = self.json_orders.get_filters()
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return self.json_orders.get_json_data()
         return super().get(request, *args, **kwargs)
@@ -838,9 +839,18 @@ class OrderProtocolView(LoginRequiredMixin, DetailView):
     context_object_name = "order"
     template_name = f"{APP_URL}/orders/montazni_protokol.html"
 
+    def get(self, request, *args, **kwargs) -> HttpResponse:
+        self.object = self.get_object()
+
+        if not self.object.team:
+            messages.error(request, "Není vybraný žádný montážní tým!")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        order = context["object"]
+        order = self.object
         pdf_exists: bool = OrderPDFStorage.objects.filter(order=order.pk).exists()
         # ---
         back_protocol: OrderBackProtocol | None = None

@@ -208,11 +208,7 @@ class CreateRecords:
     """Vytvareni zaznamu v DB"""
 
     @staticmethod
-    def create_client(
-        prijmeni: str,
-        krestni_jmeno: str,
-        psc: str,
-    ) -> ClientRecord:
+    def create_client(prijmeni: str, krestni_jmeno: str, psc: str) -> ClientRecord:
         """Vytvoreni zaznam clienta"""
 
         name: str = f"{prijmeni} {krestni_jmeno}"

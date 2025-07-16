@@ -6,6 +6,7 @@ from simple_history.admin import SimpleHistoryAdmin
 # --- models
 from .models import Order, Team, DistribHub, Upload, Client, Article, CallLog
 from .models import OrderPDFStorage, OrderBackProtocol, OrderBackProtocolToken
+from .models import AppSetting
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -99,8 +100,9 @@ admin.site.register(Client, ClientHistoryAdmin)
 admin.site.register(Order, OrderHistoryAdmin)
 admin.site.register(Team, TeamHistoryAdmin)
 admin.site.register(Article, ArticleHistoryAdmin)
-admin.site.register(Upload, SimpleHistoryAdmin)  # Pro model bez vlastní Admin třídy
+admin.site.register(Upload, SimpleHistoryAdmin)
 admin.site.register(CallLog, CallLogHistoryAdmin)
 admin.site.register(OrderPDFStorage)
 admin.site.register(OrderBackProtocol)
 admin.site.register(OrderBackProtocolToken, OrderBackProtocolTokenAdmin)
+admin.site.register(AppSetting)

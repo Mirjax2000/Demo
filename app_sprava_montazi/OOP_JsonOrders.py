@@ -4,6 +4,7 @@ from typing import Tuple, TypedDict, TypeAlias
 from rich.console import Console
 
 # --- django
+from django.utils import timezone
 from django.db.models import QuerySet, Q, Value
 from django.db.models.functions import Concat
 from django.http import JsonResponse
@@ -234,11 +235,11 @@ class JsonOrders:
         css: str = "u-s-none"
         content: str = "–"
         icon: str = ""
+        time = timezone.localtime(order.montage_termin)
 
         if order.montage_termin:
-            content = (
-                f"<strong>{order.montage_termin.strftime('%d.%m.%Y %H:%M')}</strong>"
-            )
+            content = f"<strong>{time.strftime('%d.%m.%Y %H:%M')}</strong>"
+
         elif order.team_type == "By_assembly_crew":
             icon = exclamation_icon
             css += " u-txt-warning"
