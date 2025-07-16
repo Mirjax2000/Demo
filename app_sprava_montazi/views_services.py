@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import View
+from django.views.generic import View, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 
@@ -90,3 +90,10 @@ class OrderStatusView(LoginRequiredMixin, View):
 
         except Order.DoesNotExist:
             return JsonResponse({"status": "Neznámé číslo zakázky"}, status=404)
+
+
+# --- App settings ---
+
+
+class SettingsView(LoginRequiredMixin, TemplateView):
+    template_name = f"{APP_URL}/create/settings.html"
