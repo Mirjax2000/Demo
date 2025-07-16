@@ -1,30 +1,20 @@
 """app_sprava_montazi_models"""
 
 from rich.console import Console
-from simple_history.models import HistoricalRecords
 
-from django.conf import settings
-from django.contrib.auth import get_user_model
+# --- django
 from django.db import models
-from django.db.models import (
-    PROTECT,
-    BooleanField,
-    CharField,
-    DateField,
-    DateTimeField,
-    DecimalField,
-    EmailField,
-    FileField,
-    ForeignKey,
-    Model,
-    PositiveIntegerField,
-    SlugField,
-    TextChoices,
-    TextField,
-    OneToOneField,
-)
+from django.conf import settings
 from django.utils.text import slugify
+from django.contrib.auth import get_user_model
+from django.db.models import DecimalField, DateTimeField
+from django.db.models import PROTECT, BooleanField, CharField, DateField, EmailField
+from django.db.models import SlugField, PositiveIntegerField, ForeignKey, FileField
+from django.db.models import JSONField, OneToOneField, TextField, TextChoices, Model
 from django.core.validators import MaxValueValidator, MinValueValidator
+
+# --- pluginy
+from simple_history.models import HistoricalRecords
 from phonenumber_field.modelfields import PhoneNumberField
 
 User = get_user_model()
@@ -395,3 +385,11 @@ class OrderBackProtocolToken(Model):
 
     def __str__(self):
         return f"{self.order} - {self.token}"
+
+
+class AppSetting(Model):
+    name: CharField = CharField(max_length=100, unique=True)
+    data: JSONField = JSONField()
+
+    def __str__(self) -> str:
+        return str(self.name)
