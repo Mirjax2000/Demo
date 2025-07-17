@@ -35,7 +35,7 @@ from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
 from .forms import UploadForm, TeamForm, OrderForm
 
 # --- serializer
-from .serializer import OrderCustomerUpdateSerializer
+from ..API.serializer import OrderCustomerUpdateSerializer
 
 # --- modely z DB
 from .models import Article, CallLog, Client, Order, Team, TeamType, Status
@@ -1084,28 +1084,4 @@ class ProtocolUploadView(LoginRequiredMixin, View):
         return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
-# --- API ---
-class IncompleteCustomersView(APIView):
-    permission_classes = [IsAuthenticated]  # jen pro přihlášené uživatele
 
-    def get(self, request) -> Response:
-        qs = Order.objects.filter(client__incomplete=True).exclude(status="Hidden")
-        seznam = [record.order_number.upper() for record in qs]
-        if settings.DEBUG:
-            cons.log(f"pocet nekompletnych klientu je: {len(seznam)}")
-            cons.log(f"seznam nekompletnich klientu: {seznam}")
-        return Response(seznam)
-
-
-class CustomerUpdateView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        serializer = OrderCustomerUpdateSerializer(data=request.data)
-        if serializer.is_valid():
-            updates = serializer.validated_data["updates"]  # type: ignore
-
-            update_customers(updates)
-
-            return Response({"message": "Zákazníci byli aktualizováni."})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -31,17 +31,21 @@ from app_sprava_montazi.views import (
     ClientUpdateSecondaryView as CUS,
     OrderProtocolView as OrderProtocol,
     ClientsOrdersView as ClientsOrders,
-    CustomerUpdateView as CustomerUpdate,
     ProtocolUploadView as ProtocolUpload,
     UploadBackProtocolView as UplBckPrtcl,
     CheckPDFProtocolView as CheckPDFProtocol,
     ExportOrdersExcelView as ExportOrdersExcel,
-    IncompleteCustomersView as IncmpCstmrs,
 )
+
 from app_sprava_montazi.views_services import (
     AutocompleteOrdersView as AutocompleteOrders,
     OrderStatusView as OrderStatus,
     SendMailView as SendMail,
+)
+
+from API.views import (
+    CustomerUpdateView as CustomerUpdate,
+    IncompleteCustomersView as IncmpCstmrs,
 )
 
 
