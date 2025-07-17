@@ -21,27 +21,30 @@ class Command(BaseCommand):
         parser.add_argument("file", type=str, help="cesta k json souboru")
 
     def handle(self, *args, **kwargs) -> None:
-        base_dir = Path(__file__).resolve().parent.parent.parent.parent
-        file_path = base_dir / "configs" / "app" / kwargs["file"]
+        base_dir: Path = Path(__file__).resolve().parent.parent.parent.parent
+        file_path: Path = base_dir / "configs" / "app" / kwargs["file"]
+
+        cons.rule("⚡ Nastavujeme system z app_setting.json.", style="yellow")
 
         if not file_path.exists():
-            cons.log(f"[bold red]❌ Soubor '{file_path}' neexistuje.[/bold red]")
+            cons.log(f"❌ Soubor '{file_path}' neexistuje.", style="red")
             return
 
+        cons.log("✅ Cesta nalezena", style="green")
         try:
             data = json.loads(file_path.read_text(encoding="utf-8"))
         except json.JSONDecodeError as e:
-            cons.log(f"[bold red]❌ Chyba v JSON: {e}[/bold red]")
+            cons.log(f"❌ Chyba v JSON: {e}", style="red")
             return
 
-        # for name, content in data.items():
-        #     obj, created = AppSetting.objects.update_or_create(
-        #         name=name,
-        #         defaults={"data": content},
-        #     )
-        #     if created:
-        #         cons.log(f"[green]✅ Vytvořeno:[/green] {name}")
-        #     else:
-        #         cons.log(f"[yellow]✏️ Aktualizováno:[/yellow] {name}")
+        for name, content in data.items():
+            _, created = AppSetting.objects.update_or_create(
+                name=name,
+                defaults={"data": content},
+            )
+            if created:
+                cons.log(f"✅ Vytvořeno: {name}", style="green")
+            else:
+                cons.log(f"✏️ Aktualizováno: {name}", style="yellow")
 
-        cons.log("[bold green]🎉 Hotovo.[/bold green]")
+        cons.rule("🎉 Hotovo.", style="green")
