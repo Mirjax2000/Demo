@@ -36,6 +36,7 @@ class Command(BaseCommand):
         self.create_users()
         self.collect_static()
         self.run_distrib_hubs()
+        self.settings_fill_database()
         cons.log("\n")
         cons.rule(
             "[bold yellow]⚡ Aktivace dokončena. Systém je připraven.[/bold yellow]"
@@ -148,6 +149,17 @@ class Command(BaseCommand):
             )
         except Exception as e:
             cons.log(f"❌ Collectstatic selhal: {e}", style="red")
+
+    def settings_fill_database(self) -> None:
+        try:
+            cons.log("📦 Spouštím nastavovani aplikace...", style="blue")
+            call_command(
+                "settings_fill_db", "app_settings.json",  verbosity=0
+            )
+            cons.log("✅ App Settings databaze zaplnena.", style="green")
+
+        except Exception as e:
+            cons.log(f"❌ Nastaveni AppSettings databaze selhalo: {e}", style="red")
 
     def print_host(self) -> str:
         hosts = os.getenv("ALLOWED_HOSTS", "localhost")

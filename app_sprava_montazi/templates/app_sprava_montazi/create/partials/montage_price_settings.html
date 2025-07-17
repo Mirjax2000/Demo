@@ -1,0 +1,26 @@
+<fieldset class="L-form__fieldset">
+    <legend>
+        <i class="fa-solid fa-file-import me-2"></i>Upravit ceny montáže
+    </legend>
+    <form method="post">
+        {% csrf_token %}
+        <ul class="list-unstyled">
+            {% for nazev, cena in ceny_montaze.data.items %}
+                <li class="L-form__group">
+                    <label>{{ nazev }}:</label>
+                    <input type="number"
+                           name="ceny_montaze_{{ nazev }}"
+                           value="{{ cena }}"
+                           min="0"
+                           step="0.01"
+                           required>
+                </li>
+            {% endfor %}
+        </ul>
+        <div class="u-txt-right">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-plus me-2"></i>Uložit změny
+            </button>
+        </div>
+    </form>
+</fieldset>

@@ -64,6 +64,13 @@ class CallLogAdmin(admin.ModelAdmin):
     list_per_page = 15
 
 
+class OrderBackProtocolTokenAdmin(admin.ModelAdmin):
+    list_display = ("order", "token", "created")
+    readonly_fields = ("token", "created")
+    search_fields = ("order__order_number", "token")
+    ordering = ("-created",)
+
+
 class OrderHistoryAdmin(SimpleHistoryAdmin, OrderAdmin):
     pass
 
@@ -88,12 +95,11 @@ class CallLogHistoryAdmin(SimpleHistoryAdmin, CallLogAdmin):
     pass
 
 
-class OrderBackProtocolTokenAdmin(admin.ModelAdmin):
-    list_display = ("order", "token", "created")
-    readonly_fields = ("token", "created")
-    search_fields = ("order__order_number", "token")
-    ordering = ("-created",)
+class AppSettingHistoryAdmin(SimpleHistoryAdmin):
+    pass
 
+
+admin.site.register(AppSetting, AppSettingHistoryAdmin)
 
 admin.site.register(DistribHub, DistribHubHistoryAdmin)
 admin.site.register(Client, ClientHistoryAdmin)
@@ -105,4 +111,3 @@ admin.site.register(CallLog, CallLogHistoryAdmin)
 admin.site.register(OrderPDFStorage)
 admin.site.register(OrderBackProtocol)
 admin.site.register(OrderBackProtocolToken, OrderBackProtocolTokenAdmin)
-admin.site.register(AppSetting)

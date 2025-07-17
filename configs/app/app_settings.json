@@ -1,0 +1,21 @@
+{
+    "ceny montaze":{
+        "montaz sedacky":495,
+        "minimalni cena montaze":454,
+        "procentualni hodnota":12,
+        "cena za kilometr":20,
+        "zona 1": 313,
+        "zona 2": 379,
+        "zona 3":470,
+        "zona 4":470
+    },
+    
+    "firma":{
+        "jmeno":"RHENUS Home Delivery s.r.o.",
+        "adresa":"Plzeňská 256, 252 19 Chrášťany",
+        "ico":"IČO: 27629325",
+        "dic":"DIČ: CZ27629325",
+        "reference":"Zapsaná v OR: C 120048, Městský soud v Praze."
+    }
+}
+
