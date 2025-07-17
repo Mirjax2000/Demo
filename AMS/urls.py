@@ -42,7 +42,6 @@ from app_sprava_montazi.views_services import (
     AutocompleteOrdersView as AutocompleteOrders,
     OrderStatusView as OrderStatus,
     SendMailView as SendMail,
-    SettingsView as Settings,
 )
 
 
@@ -83,7 +82,6 @@ app_sprava_montazi: list = [
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),
     path("createpage/upload/", ProtocolUpload.as_view(), name="upload_protocol"),
-    path("createpage/settings/", Settings.as_view(), name="settings"),
     #
     # --- teams ---
     path("teams/", Teams.as_view(), name="teams"),
