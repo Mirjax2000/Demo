@@ -1,5 +1,6 @@
 (function () {
     console.log("script.js");
+    console.log("Kontrola hashe pri zmene souboru");
     const html = document.documentElement;
     const themeToggler = document.getElementById("themeToggler");
     const orderTable = document.getElementById("orderTable");
