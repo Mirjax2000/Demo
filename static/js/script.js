@@ -1,6 +1,5 @@
 (function () {
     console.log("script.js");
-    console.log("Kontrola hashe pri zmene souboru");
     const html = document.documentElement;
     const themeToggler = document.getElementById("themeToggler");
     const orderTable = document.getElementById("orderTable");
@@ -17,6 +16,8 @@
 
     // delete Order
     document.addEventListener("DOMContentLoaded", deleteOrder);
+    // hiden Order
+    document.addEventListener("DOMContentLoaded", hiddenOrder);
     // copy to schranka
     document.addEventListener("DOMContentLoaded", setupAutobotCopy);
     // File input validation
@@ -584,4 +585,39 @@
             }
         })
     }
+    // hidden Order
+    function hiddenOrder() {
+        const checkBoxHiddenOrder = document.getElementById("checkBoxHiddenOrder");
+        const hiddenOrderButton = document.getElementById("hiddenOrderButton")
+
+        if (!checkBoxHiddenOrder && !hiddenOrderButton) {
+            return
+        }
+        checkBoxHiddenOrder.addEventListener("change", function () {
+            if (checkBoxHiddenOrder.checked) {
+                hiddenOrderButton.classList.remove("disabled")
+            } else {
+                hiddenOrderButton.classList.add("disabled")
+            }
+        })
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        // Vybere všechny odkazy se třídou "copy-link"
+        const links = document.querySelectorAll(".copy_link_order_number");
+
+        links.forEach(link => {
+            link.addEventListener("click", function (e) {
+                e.preventDefault(); // zamezí přechodu na detail
+                const text = this.innerText;
+
+                navigator.clipboard.writeText(text).then(() => {
+                    alert("Zkopírováno: " + text);
+                    // volitelně pak přejdeš na detail, pokud chceš
+                    // window.location.href = this.href;
+                }).catch(err => {
+                    alert("Nepodařilo se zkopírovat");
+                });
+            });
+        });
+    });
 })();

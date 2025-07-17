@@ -1,9 +1,9 @@
 import logging
 from datetime import date, datetime
 
+# --- django
 from django.urls import reverse
 from django.contrib.auth.models import User
-
 from django.conf import settings
 from django.contrib.messages import get_messages
 from django.core.files.storage import default_storage
@@ -13,6 +13,7 @@ from django.test import TestCase
 from django.utils import timezone
 from django.test import override_settings
 
+# --- modely
 from app_sprava_montazi.models import (
     Article,
     Client,
@@ -143,3 +144,73 @@ class OrderProtocolView(TestCase):
         messages = [msg.message for msg in get_messages(response.wsgi_request)]
         self.assertIn("Není vybraný žádný montážní tým!", messages)
         self.assertEqual(response.status_code, 200)
+
+
+class OrderHiddenView(TestCase):
+    def setUp(self):
+        # Vytvoříme testovacího uživatele
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.client.login(username="testuser", password="testpass")
+        # --- ditrib hub
+        self.distrib_hub_code: str = "626"
+        self.distrib_hub_city: str = "Chrastany"
+        self.hub = DistribHub.objects.create(
+            code=self.distrib_hub_code, city=self.distrib_hub_city
+        )
+        self.customer = Client.objects.create(name="franta", zip_code="11111")
+        # --- team
+        self.team_name: str = "Ferda Company"
+        self.team_city: str = "Praha"
+        self.team_phone: str = "234234234"
+        self.team_email: str = "ferda.company@gmail.cz"
+        self.team = Team.objects.create(
+            name=self.team_name,
+            city=self.team_city,
+            phone=self.team_phone,
+            email=self.team_email,
+        )
+        self.order_with_new = Order.objects.create(
+            order_number="703777143100437749-R",
+            distrib_hub=self.hub,
+            status=Status.NEW,
+            client=self.customer,
+            mandant="SCCZ",
+            evidence_termin=date.today(),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+            team=self.team,
+        )
+
+        base_url = reverse("order_hidden", kwargs={"pk": self.order_with_new.pk})
+        self.url = f"{base_url}?pk={self.order_with_new.pk}"
+
+    def test_logged_in(self):
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_redirect_if_not_logged_in(self):
+        self.client.logout()
+        response = self.client.post(self.url)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+
+    def test_protocol_view_redirects_message_success(self):
+        response = self.client.post(self.url, follow=True)
+
+        messages = [msg.message for msg in get_messages(response.wsgi_request)]
+        self.assertIn(
+            f"Zakázka: {self.order_with_new.order_number} byla skryta.", messages
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_protocol_view_redirects_message_error(self):
+        old_record = self.order_with_new.status
+        self.assertEqual(old_record, Status.NEW)
+        self.order_with_new.status = Status.HIDDEN
+        self.order_with_new.save()
+        response = self.client.post(self.url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.order_with_new.refresh_from_db()
+        new_record = self.order_with_new.status
+        self.assertEqual(new_record, Status.HIDDEN)
+
+        messages = [msg.message for msg in get_messages(response.wsgi_request)]
+        self.assertIn("Zakázka: nemohla být skryta.", messages)

@@ -69,7 +69,7 @@ app_sprava_montazi: list = [
     # --- orders ---
     path("orders/", Orders.as_view(), name="orders"),
     path("order/create/", OrderCreate.as_view(), name="order_create"),
-    path("order/hidden/", OrderHidden.as_view(), name="order_hidden"),
+    path(f"order/{PK}/hidden/", OrderHidden.as_view(), name="order_hidden"),
     path(f"order/{PK}/order_update/", OrderUpdate.as_view(), name="order_update"),
     path(f"order/{PK}/delete_order/", OrderDelete.as_view(), name="delete_order"),
     path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),

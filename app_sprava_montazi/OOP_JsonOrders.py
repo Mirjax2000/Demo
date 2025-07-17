@@ -128,7 +128,7 @@ class JsonOrders:
     def order_number_coll(self, order: Order) -> str:
         """vraci i s linkem na order"""
         name: str = "order-number"
-        css: str = "L-table__link"
+        css: str = "L-table__link copy_link_order_number"
         content: str = str(order.order_number)
         order_link = reverse("order_detail", args=[order.pk])
         result = f'<a href="{order_link}" name="{name}" class="{css}">{content}</a>'

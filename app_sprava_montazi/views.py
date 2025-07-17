@@ -247,7 +247,7 @@ class ClientUpdateSecondaryView(LoginRequiredMixin, UpdateView):
 
 class OrderHiddenView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        pk = request.POST.get("pk")
+        pk = kwargs["pk"]
         order: Order = get_object_or_404(Order, pk=pk)
 
         if order.status == Status.NEW:
@@ -257,7 +257,7 @@ class OrderHiddenView(LoginRequiredMixin, View):
         else:
             messages.error(request, "Zakázka: nemohla být skryta.")
 
-        return redirect(request, "orders")
+        return redirect("orders")
 
 
 class OrderCreateView(LoginRequiredMixin, View):
