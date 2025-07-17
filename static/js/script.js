@@ -225,7 +225,7 @@
             },
         });
     }
-
+    // 
     // DataTable for orders
     if (orderTable) {
         $(orderTable).DataTable({
