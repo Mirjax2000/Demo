@@ -279,6 +279,19 @@
                 search: "Vyhledávání: "
             },
         });
+        // Delegace - nasloucháme klikům na odkazy v tabulce
+        orderTable.addEventListener("click", function (e) {
+            const link = e.target.closest(".copy_link_order_number");
+
+            if (link) {
+                const text = link.innerText.trim();
+
+                navigator.clipboard.writeText(text).then(() => {
+                }).catch(() => {
+                    console.log("❌ Kopírování selhalo.");
+                });
+            }
+        });
     }
 
     // DataTable for teams
@@ -601,23 +614,5 @@
             }
         })
     }
-    document.addEventListener("DOMContentLoaded", function () {
-        // Vybere všechny odkazy se třídou "copy-link"
-        const links = document.querySelectorAll(".copy_link_order_number");
 
-        links.forEach(link => {
-            link.addEventListener("click", function (e) {
-                e.preventDefault(); // zamezí přechodu na detail
-                const text = this.innerText;
-
-                navigator.clipboard.writeText(text).then(() => {
-                    alert("Zkopírováno: " + text);
-                    // volitelně pak přejdeš na detail, pokud chceš
-                    // window.location.href = this.href;
-                }).catch(err => {
-                    alert("Nepodařilo se zkopírovat");
-                });
-            });
-        });
-    });
 })();
