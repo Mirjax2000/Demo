@@ -63,11 +63,9 @@ def safe_click(driver, locator, max_attempts=120, sleep_time=0.1):
     )
 
 
-TOKEN = "9b5ef8058c4b8083e9600a2b031b771155c7ba92"
-
-# Adresa API
-API_URL_GET = "http://localhost:8000/api/incomplete-customers/"
-# API_URL_UPDATE = "http://localhost:8000/api/update-customers/"
+TOKEN = "ce0ffe99c3359ba7f69ea85a4b63ade9d2d9ff68"
+API_URL_GET = "https://www.rhemove.cz/api/incomplete-customers/"
+# API_URL_UPDATE = "https://www.rhemove.cz/api/update-customers/"
 
 # Hlavičky s autorizací
 headers = {

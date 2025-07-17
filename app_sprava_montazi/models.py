@@ -390,6 +390,7 @@ class OrderBackProtocolToken(Model):
 class AppSetting(Model):
     name: CharField = CharField(max_length=100, unique=True)
     data: JSONField = JSONField()
+    history = HistoricalRecords()
 
     def __str__(self) -> str:
         return str(self.name)
