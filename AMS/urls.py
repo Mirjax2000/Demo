@@ -35,6 +35,7 @@ from app_sprava_montazi.views import (
     UploadBackProtocolView as UplBckPrtcl,
     CheckPDFProtocolView as CheckPDFProtocol,
     ExportOrdersExcelView as ExportOrdersExcel,
+    OrderHiddenView as OrderHidden,
 )
 
 from app_sprava_montazi.views_services import (
@@ -46,6 +47,7 @@ from app_sprava_montazi.views_services import (
 from API.views import (
     CustomerUpdateView as CustomerUpdate,
     IncompleteCustomersView as IncmpCstmrs,
+    ApiStatusView as ApiStatus,
 )
 
 
@@ -67,6 +69,7 @@ app_sprava_montazi: list = [
     # --- orders ---
     path("orders/", Orders.as_view(), name="orders"),
     path("order/create/", OrderCreate.as_view(), name="order_create"),
+    path("order/hidden/", OrderHidden.as_view(), name="order_hidden"),
     path(f"order/{PK}/order_update/", OrderUpdate.as_view(), name="order_update"),
     path(f"order/{PK}/delete_order/", OrderDelete.as_view(), name="delete_order"),
     path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),
@@ -118,6 +121,7 @@ api_urls: list = [
         "api/incomplete-customers/", IncmpCstmrs.as_view(), name="incomplete-customers"
     ),
     path("api/update-customers/", CustomerUpdate.as_view(), name="update-customers"),
+    path("api/status/", ApiStatus.as_view(), name="api-status"),
     path("api-token-auth/", obtain_auth_token),
     # --- swagger
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

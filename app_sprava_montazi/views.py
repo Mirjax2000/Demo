@@ -34,8 +34,6 @@ from rest_framework.authtoken.models import Token
 from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
 from .forms import UploadForm, TeamForm, OrderForm
 
-# --- serializer
-from ..API.serializer import OrderCustomerUpdateSerializer
 
 # --- modely z DB
 from .models import Article, CallLog, Client, Order, Team, TeamType, Status
@@ -245,6 +243,21 @@ class ClientUpdateSecondaryView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self) -> str:
         return reverse("client_orders", kwargs={"slug": self.object.slug})  # type: ignore
+
+
+class OrderHiddenView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        pk = request.POST.get("pk")
+        order: Order = get_object_or_404(Order, pk=pk)
+
+        if order.status == Status.NEW:
+            order.status = Status.HIDDEN
+            order.save()
+            messages.success(request, f"Zakázka: {order.order_number} byla skryta.")
+        else:
+            messages.error(request, "Zakázka: nemohla být skryta.")
+
+        return redirect(request, "orders")
 
 
 class OrderCreateView(LoginRequiredMixin, View):
@@ -1082,6 +1095,3 @@ class ProtocolUploadView(LoginRequiredMixin, View):
         save_message += change_status_message
         messages.success(request, save_message)
         return redirect(request.META.get("HTTP_REFERER", "/"))
-
-
-

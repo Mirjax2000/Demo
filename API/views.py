@@ -13,14 +13,16 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 
+# --- utils
+from app_sprava_montazi.utils import update_customers
+
 # --- modely z DB
 from app_sprava_montazi.models import Order
 
 # --- serializer
 from .serializer import OrderCustomerUpdateSerializer
 
-
-# 00P classes ---
+# --- 00P classes
 
 
 cons: Console = Console()
@@ -29,6 +31,14 @@ User = get_user_model()
 
 # Create your views here.
 # --- API ---
+class ApiStatusView(APIView):
+    permission_classes = [IsAuthenticated]  # jen pro přihlášené uživatele
+
+    def get(self, request) -> Response:
+        message: dict = {"api_status": "UP"}
+        return Response(message)
+
+
 class IncompleteCustomersView(APIView):
     permission_classes = [IsAuthenticated]  # jen pro přihlášené uživatele
 

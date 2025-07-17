@@ -3,7 +3,25 @@
     <span class="u-txt-success">{{ order.get_status_display }}</span>
 </p>
 <!--new novy-->
-{% if order.status == "New" %}<p>Zatím žádné možnosti</p>{% endif %}
+{% if order.status == "New" %}
+    <div class="form-check form-switch mb-1">
+        <input class="form-check-input"
+               type="checkbox"
+               role="switch"
+               id="checkBoxHiddenOrder"
+               aria-checked="false">
+        <label class="form-check-label" for="checkBoxHiddenOrder">Opravdu přepnout?</label>
+    </div>
+    <!---->
+    <form method="post" action="{% url 'order_hidden' %}">
+        {% csrf_token %}
+        <button type="submit"
+                id="hiddenOrderButton"
+                class="btn btn-danger btn-sm u-width-180 text-nowrap me-2 disabled">
+            <i class="fa-solid fa-trash me-2"></i>Skrýt zakázku
+        </button>
+    </form>
+{% endif %}
 <!---->
 <!--Zaterminovano Adviced-->
 {% if order.status == "Adviced" %}
