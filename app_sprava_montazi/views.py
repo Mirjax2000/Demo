@@ -540,7 +540,21 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
 
 
 class TeamDeleteView(LoginRequiredMixin, View):
-    pass
+    def post(self, request, *args, **kwargs):
+        team = get_object_or_404(Team, pk=kwargs["pk"])
+        try:
+            if not team.active:
+                team.delete()
+                messages.success(request, f"Tým: {team.name} byl smazán.")
+            else:
+                messages.error(request, f"Tým: {team.name} je stale aktivní")
+
+        except ProtectedError:
+            messages.error(
+                request,
+                f"Tým: {team.name} nelze smazat, protože má vazby na jiné záznamy.",
+            )
+        return redirect("teams")
 
 
 class TeamUpdateView(LoginRequiredMixin, UpdateView):

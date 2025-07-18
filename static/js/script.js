@@ -18,6 +18,8 @@
     document.addEventListener("DOMContentLoaded", deleteOrder);
     // hiden Order
     document.addEventListener("DOMContentLoaded", hiddenOrder);
+    // delete team
+    document.addEventListener("DOMContentLoaded", deleteTeam);
     // copy to schranka
     document.addEventListener("DOMContentLoaded", setupAutobotCopy);
     // File input validation
@@ -611,6 +613,22 @@
                 hiddenOrderButton.classList.remove("disabled")
             } else {
                 hiddenOrderButton.classList.add("disabled")
+            }
+        })
+    }
+    // hidden Order
+    function deleteTeam() {
+        const checkBoxDeleteTeam = document.getElementById("checkBoxDeleteTeam");
+        const deleteTeamButton = document.getElementById("deleteTeamButton")
+
+        if (!checkBoxDeleteTeam && !deleteTeamButton) {
+            return
+        }
+        checkBoxDeleteTeam.addEventListener("change", function () {
+            if (checkBoxDeleteTeam.checked) {
+                deleteTeamButton.classList.remove("disabled")
+            } else {
+                deleteTeamButton.classList.add("disabled")
             }
         })
     }
