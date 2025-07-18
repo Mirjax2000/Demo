@@ -1,5 +1,16 @@
 <section class="L-form__fieldset">
     <h3 class="L-detail__fieldset__header">Protokol</h3>
+    {% if order.team.name != order.mail_team_sended %}
+        <div class="mt-3 ms-5 me-5">
+            <div class="alert alert-danger" role="alert">
+                <p class="text-decoration-underline mb-1 u-txt-bolder">Nesoulad montážních týmů!</p>
+                <p class="mb-0">1. Generuj nový protokol</p>
+                <p class="mb-0">2. Zkontroluj protokol</p>
+                <p class="mb-0">3. Odešli nový email</p>
+            </div>
+            <hr>
+        </div>
+    {% endif %}
     <div>
         <a href="{% url 'generate_pdf' order.pk %}"
            class="btn btn-primary d-block ms-5 me-5 mb-2">
@@ -20,11 +31,12 @@
     <!-- mail datum-->
     <div class="mt-3 ms-5 me-5">
         {% if order.mail_datum_sended %}
-            <p class="alert alert-success u-txt-bolder">
-                Email byl odeslan:
-                <br>
-                {{ order.mail_datum_sended|date:"d. m. Y v H:i" }}
-            </p>
+            <div class="alert alert-success u-txt-bolder m-0">
+                <p class="text-decoration-underline mb-1">Email byl odeslán</p>
+                <p class="mb-1 d-block">montážnímu týmu:</p>
+                <p class="badge text-bg-success mb-1 d-block">{{ order.mail_team_sended }}</p>
+                <p class="badge text-bg-success mb-0 d-block">{{ order.mail_datum_sended|date:"d. m. Y v H:i" }}</p>
+            </div>
         {% else %}
             <p class="alert alert-danger">Mail ještě nebyl odeslán:</p>
         {% endif %}

@@ -185,12 +185,14 @@ class Order(Model):
         verbose_name="Místo určení",
     )
     mandant = CharField(max_length=4, verbose_name="Mandant")
+
     status = CharField(
         max_length=32,
         choices=Status.choices,
         default=Status.NEW,
         verbose_name="Stav",
     )
+
     client = ForeignKey(
         Client,
         null=True,
@@ -208,6 +210,7 @@ class Order(Model):
         null=True,
         verbose_name="Termín doručení",
     )
+
     montage_termin = DateTimeField(
         blank=True,
         null=True,
@@ -222,10 +225,16 @@ class Order(Model):
         verbose_name="Realizace kým",
     )
     notes = TextField(blank=True, verbose_name="Poznámky")
+
     mail_datum_sended = DateTimeField(
         blank=True,
         null=True,
         verbose_name="Protocol mail odeslan",
+    )
+
+    mail_team_sended = CharField(
+        blank=True,
+        verbose_name="jakemu tymu byl poslan email",
     )
 
     history = HistoricalRecords()

@@ -44,6 +44,7 @@ class SendMailView(LoginRequiredMixin, View):
         try:
             email.send_email_with_encrypted_pdf()
             order.mail_datum_sended = timezone.now()
+            order.mail_team_sended = order.team.name
             order.save()
             messages.success(
                 request,
