@@ -1,7 +1,7 @@
 """app_sprava_montazi View"""
 
 import os
-from typing import Any
+from typing import Any, cast
 from datetime import datetime
 from openpyxl import Workbook
 from rich.console import Console
@@ -881,18 +881,24 @@ class OrderProtocolView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        order = self.object
+        order: Order = cast(Order, self.object)
         pdf_exists: bool = OrderPDFStorage.objects.filter(order=order.pk).exists()
         # ---
         back_protocol: OrderBackProtocol | None = None
         back_protocol_exist: bool = OrderBackProtocol.objects.filter(
             order=order.pk
         ).exists()
-
         if back_protocol_exist:
             back_protocol = OrderBackProtocol.objects.filter(order=order.pk).first()
-        pdfko_tym: OrderPDFStorage = OrderPDFStorage.objects.get(order=order.pk)
-        soulad = pdfko_tym.team == order.team.name
+        # --- pdf team soulad
+        soulad: bool = False
+        try:
+            pdfko_tym = OrderPDFStorage.objects.get(order=order.pk)
+            soulad = pdfko_tym.team == order.team.name if order.team else False
+            cons.log(f"pdfko_team: {pdfko_tym.team} order_team:{order.team.name}")
+            cons.log(soulad)
+        except OrderPDFStorage.DoesNotExist:
+            cons.log("Záznam v OrderPDFStorage zatím neexistuje.")
         # ---
         context.update(
             {
