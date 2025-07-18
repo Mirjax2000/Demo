@@ -539,6 +539,10 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
         return response
 
 
+class TeamDeleteView(LoginRequiredMixin, View):
+    pass
+
+
 class TeamUpdateView(LoginRequiredMixin, UpdateView):
     model = Team
     form_class = TeamForm

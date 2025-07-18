@@ -60,10 +60,34 @@
         </ul>
     </div>
     <!---->
-    <div class="text-end">
-        <a href="{% url "team_update" team.slug %}?next={{ request.path }}"
-           class="btn btn-primary btn-sm w-50">
-            <i class="fa-solid fa-pen-to-square me-2"></i>Upravit tým
-        </a>
+    <div class="d-flex justify-content-between align-items-end">
+        {% if not team.active %}
+            <div>
+                <div class="form-check form-switch mb-1">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           role="switch"
+                           id="checkBoxDeleteTeam"
+                           aria-checked="false">
+                    <label class="form-check-label" for="checkBoxDeleteTeam">Opravdu smazat?</label>
+                </div>
+                <form method="post" action="{% url 'team_delete' team.pk %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            id="deleteTeamButton"
+                            class="btn btn-danger btn-sm u-width-180 text-nowrap me-2 disabled">
+                        <i class="fa-solid fa-trash me-2"></i>Vymazat tým
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <div></div>
+        {% endif %}
+        <div>
+            <a href="{% url "team_update" team.slug %}?next={{ request.path }}"
+               class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-pen-to-square me-2"></i>Upravit tým
+            </a>
+        </div>
     </div>
 </section>

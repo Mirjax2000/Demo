@@ -170,6 +170,15 @@ class Order(Model):
         unique=True,
         verbose_name="Číslo zakázky",
     )
+
+    team = ForeignKey(
+        Team,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        limit_choices_to={"active": True},
+        verbose_name="Montážní tým",
+    )
     distrib_hub = ForeignKey(
         DistribHub,
         on_delete=PROTECT,
@@ -211,14 +220,6 @@ class Order(Model):
         choices=TeamType.choices,
         default=TeamType.BY_ASSEMBLY_CREW,
         verbose_name="Realizace kým",
-    )
-    team = ForeignKey(
-        Team,
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        limit_choices_to={"active": True},
-        verbose_name="Montážní tým",
     )
     notes = TextField(blank=True, verbose_name="Poznámky")
     mail_datum_sended = DateTimeField(

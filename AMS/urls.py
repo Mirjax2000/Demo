@@ -36,6 +36,7 @@ from app_sprava_montazi.views import (
     CheckPDFProtocolView as CheckPDFProtocol,
     ExportOrdersExcelView as ExportOrdersExcel,
     OrderHiddenView as OrderHidden,
+    TeamDeleteView as TeamDelete,
 )
 
 from app_sprava_montazi.views_services import (
@@ -93,6 +94,7 @@ app_sprava_montazi: list = [
     # --- teams ---
     path("teams/", Teams.as_view(), name="teams"),
     path("teams/create/", TeamCreate.as_view(), name="team_create"),
+    path(f"teams/{PK}/delete/", TeamDelete.as_view(), name="team_delete"),
     path(f"teams/{SLUG}/detail/", TeamDetail.as_view(), name="team_detail"),
     path(f"teams/{SLUG}/update/", TeamUpdate.as_view(), name="team_update"),
     #
