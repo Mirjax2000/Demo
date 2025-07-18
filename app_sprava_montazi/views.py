@@ -895,6 +895,7 @@ class OrderProtocolView(LoginRequiredMixin, DetailView):
         context.update(
             {
                 "recieved_protokol": back_protocol,
+                "protocol_site": True,
                 "pdf_exists": pdf_exists,
                 "team": order.team,
                 "active": "orders_all",
@@ -925,6 +926,9 @@ class GeneratePDFView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         pk = kwargs["pk"]
         order = get_object_or_404(Order, pk=pk)
+        if not order.team.active:
+            messages.error(request, "Nelze generovat protokol, Tým je neaktivní")
+            return redirect("protocol", pk=pk)
 
         generator_class = pdf_generator_classes.get(order.mandant, DefaultPdfGenerator)
         generator_instance = generator_class()

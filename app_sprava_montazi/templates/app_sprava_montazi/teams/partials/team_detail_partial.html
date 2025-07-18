@@ -61,7 +61,7 @@
     </div>
     <!---->
     <div class="d-flex justify-content-between align-items-end">
-        {% if not team.active %}
+        {% if not team.active and not protocol_site %}
             <div>
                 <div class="form-check form-switch mb-1">
                     <input class="form-check-input"
@@ -71,7 +71,9 @@
                            aria-checked="false">
                     <label class="form-check-label" for="checkBoxDeleteTeam">Opravdu smazat?</label>
                 </div>
-                <form method="post" action="{% url 'team_delete' team.pk %}">
+                <form method="post"
+                      action="{% url 'team_delete' team.pk %}"
+                      name="delete-team">
                     {% csrf_token %}
                     <button type="submit"
                             id="deleteTeamButton"
@@ -81,7 +83,7 @@
                 </form>
             </div>
         {% else %}
-            <div></div>
+            <div name="no-delete-team"></div>
         {% endif %}
         <div>
             <a href="{% url "team_update" team.slug %}?next={{ request.path }}"
