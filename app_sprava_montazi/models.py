@@ -344,12 +344,16 @@ class OrderPDFStorage(Model):
     order = OneToOneField(
         Order, on_delete=PROTECT, related_name="pdf", verbose_name="Objednávka"
     )
+    team = CharField(blank=False, max_length=32, verbose_name="montazni tym")
     file = FileField(upload_to="stored_pdfs/", verbose_name="PDF soubor")
     created = DateTimeField(auto_now=True, verbose_name="Čas uložení")
     history = HistoricalRecords()
 
     def __str__(self):
-        return f"PDF pro objednávku {self.order.order_number}"
+        return (
+            f"PDF pro objednávku {self.order.order_number} "
+            f"s montaznim tymem {self.team}"
+        )
 
     class Meta:
         ordering = ["-created"]

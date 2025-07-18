@@ -891,10 +891,13 @@ class OrderProtocolView(LoginRequiredMixin, DetailView):
 
         if back_protocol_exist:
             back_protocol = OrderBackProtocol.objects.filter(order=order.pk).first()
+        pdfko_tym: OrderPDFStorage = OrderPDFStorage.objects.get(order=order.pk)
+        soulad = pdfko_tym.team == order.team.name
         # ---
         context.update(
             {
                 "recieved_protokol": back_protocol,
+                "soulad": soulad,
                 "protocol_site": True,
                 "pdf_exists": pdf_exists,
                 "team": order.team,
