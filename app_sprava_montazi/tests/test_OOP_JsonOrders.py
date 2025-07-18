@@ -34,15 +34,24 @@ class OrderDataTablesTest(TestCase):
             code=self.distrib_hub_code, city=self.distrib_hub_city
         )
         # --- team
-        self.team_name: str = "Ferda Company"
+        self.team_name_active: str = "Active Company"
+        self.team_name_not_active: str = "Not Active Company"
         self.team_city: str = "Praha"
         self.team_phone: str = "234234234"
         self.team_email: str = "ferda.company@gmail.cz"
-        self.team = Team.objects.create(
-            name=self.team_name,
+        self.active_team = Team.objects.create(
+            name=self.team_name_active,
             city=self.team_city,
             phone=self.team_phone,
             email=self.team_email,
+            active=True,
+        )
+        self.not_active_team = Team.objects.create(
+            name=self.team_name_not_active,
+            city=self.team_city,
+            phone=self.team_phone,
+            email=self.team_email,
+            active=False,
         )
         # --- mandant
         self.mandant = "SCCZ"
@@ -108,7 +117,7 @@ class OrderDataTablesTest(TestCase):
                 montage_termin=self.date_montage,
                 status=Status.ADVICED,
                 team_type=TeamType.BY_ASSEMBLY_CREW,
-                team=self.team,
+                team=self.active_team,
                 notes="Zaterminovano",
             )
         # 4 status adviced mail sended !!!
@@ -126,7 +135,7 @@ class OrderDataTablesTest(TestCase):
                 montage_termin=self.date_montage,
                 status=Status.ADVICED,
                 team_type=TeamType.BY_ASSEMBLY_CREW,
-                team=self.team,
+                team=self.active_team,
                 mail_datum_sended=timezone.make_aware(datetime(2025, 4, 11, 12, 0)),
                 notes="Zaterminovano",
             )
@@ -161,7 +170,7 @@ class OrderDataTablesTest(TestCase):
                 montage_termin=self.date_montage,
                 status=Status.REALIZED,
                 team_type=TeamType.BY_ASSEMBLY_CREW,
-                team=self.team,
+                team=self.active_team,
                 notes="Realizovano",
             )
         # 7 status Canceled
@@ -179,7 +188,7 @@ class OrderDataTablesTest(TestCase):
                 montage_termin=self.date_montage,
                 status=Status.CANCELED,
                 team_type=TeamType.BY_ASSEMBLY_CREW,
-                team=self.team,
+                team=self.active_team,
                 notes="Zruseno",
             )
         # 8 status Billed
@@ -197,8 +206,26 @@ class OrderDataTablesTest(TestCase):
                 montage_termin=self.date_montage,
                 status=Status.BILLED,
                 team_type=TeamType.BY_ASSEMBLY_CREW,
-                team=self.team,
+                team=self.active_team,
                 notes="Vyuctovano",
+            )
+        # 9 status Adviced no active team
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Customer test-8-{i}", zip_code=f"123{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"ADVICED-NO-ACTIVE-TEAM-{i:03}-R",
+                distrib_hub=self.hub,
+                mandant=self.mandant,
+                client=customer,
+                evidence_termin=self.date_evidence,
+                delivery_termin=self.date_delivery,
+                montage_termin=self.date_montage,
+                status=Status.ADVICED,
+                team_type=TeamType.BY_ASSEMBLY_CREW,
+                team=self.not_active_team,
+                notes="Nevyuctovano",
             )
 
     def test_get_json_data_response(self):
@@ -227,7 +254,7 @@ class OrderDataTablesTest(TestCase):
         self.assertIn("recordsTotal", data)
         self.assertIn("recordsFiltered", data)
         self.assertIn("data", data)
-        # --- kontrola počtu (máš tam 80 objednávek, 10 z každého typu)
+        # --- kontrola počtu (máš tam 90 objednávek, 10 z každého typu)
         self.assertEqual(data["recordsTotal"], Order.objects.count())
         for i in range(0, self.pagination):
             # order number v datech z JSONA
@@ -297,9 +324,8 @@ class OrderDataTablesTest(TestCase):
 
             # team v datech z JSONA
             team_html = data["data"][i]["team"]
-            team_pattern = (
-                r'<div\s+name="team">(?:.|\s)*?<span[^>]*>.*?</span>(?:.|\s)*?</div>'
-            )
+            team_pattern = r'<div[^>]*\btitle="[^"]*"\s+name="team"[^>]*>.*?<span[^>]*>.*?</span>.*?</div>'
+
             self.assertRegex(team_html, team_pattern)  # regex
             self.assertIn('name="team"', team_html)  # name
 
@@ -417,9 +443,8 @@ class OrderDataTablesTest(TestCase):
 
             # team v datech z JSONA
             team_html = data["data"][i]["team"]
-            team_pattern = (
-                r'<div\s+name="team">(?:.|\s)*?<span[^>]*>.*?</span>(?:.|\s)*?</div>'
-            )
+            team_pattern = r'<div[^>]*\btitle="[^"]*"\s+name="team"[^>]*>.*?<span[^>]*>.*?</span>.*?</div>'
+
             team_pattern_new = (
                 r'<span class="u-s-none(?: u-txt-warning)?">'
                 r"(?:Nevybráno|-)</span>"
@@ -550,9 +575,8 @@ class OrderDataTablesTest(TestCase):
 
             # team v datech z JSONA
             team_html = data["data"][i]["team"]
-            team_pattern = (
-                r'<div\s+name="team">(?:.|\s)*?<span[^>]*>.*?</span>(?:.|\s)*?</div>'
-            )
+            team_pattern = r'<div[^>]*\btitle="[^"]*"\s+name="team"[^>]*>.*?<span[^>]*>.*?</span>.*?</div>'
+
             team_pattern_new = (
                 r'<span class="u-s-none(?: u-txt-warning)?">'
                 r"(?:Nevybráno|-)</span>"

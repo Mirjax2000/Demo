@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django.urls import reverse
 
 # --- models
-from .models import Order, Client
+from .models import Order, Client, Team
 
 
 # --- type aliases
@@ -37,6 +37,9 @@ warning_mail_icon: str = (
 )
 success_mail_icon: str = (
     '<i class="fa-solid fa-envelope-circle-check u-txt-success-light-color"></i>'
+)
+ringing_bell_icon: str = (
+    '<i class="fa-solid fa-bell fa-shake fa-sm u-txt-error-color me-1"></i>'
 )
 
 
@@ -207,25 +210,31 @@ class JsonOrders:
         return result
 
     def team_coll(self, order: Order) -> str:
-        """Vraci team type"""
-        name: str = "team"
-        css: str = "u-s-none"
-        content: str = "-"
-        icon: str = ""
+        """Vrací tým a jeho stav jako HTML fragment"""
+        name = "team"
+        css = "u-s-none"
+        content = "-"
+        icon = ""
+        title = ""
+
+        team = order.team
+        if team:
+            title = team.name
 
         if order.is_missing_team():
             css += " u-txt-warning"
             icon = exclamation_icon
             content = "Nevybráno"
 
-        elif order.team:
+        elif team:
             css += " u-txt-success"
             icon = success_icon
-            content = f"{order.team}"
+            content = team.name_first_15()
+            if not team.active:
+                css = "u-s-none u-txt-error"
+                icon = ringing_bell_icon
 
-        result: str = (
-            f'<div name="{name}">{icon}<span class="{css}">{content}</span></div>'
-        )
+        result: str = f'<div title="{title}" name="{name}">{icon}<span class="{css}">{content}</span></div>'
 
         return result
 

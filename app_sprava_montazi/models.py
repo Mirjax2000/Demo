@@ -94,6 +94,13 @@ class Team(Model):
             return str(self.notes)
         return "-"
 
+    def name_first_15(self) -> str:
+        if self.name:
+            if len(self.name) > 15:
+                return f"{str(self.name)[:15]}..."
+            return str(self.name)
+        return "No Name"
+
     def __str__(self) -> str:
         return str(self.name)
 

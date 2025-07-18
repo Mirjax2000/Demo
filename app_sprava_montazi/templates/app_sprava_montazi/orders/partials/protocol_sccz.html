@@ -1,6 +1,6 @@
 <section class="L-form__fieldset">
     <h3 class="L-detail__fieldset__header">Protokol</h3>
-    {% if order.team.name != order.mail_team_sended %}
+    {% if order.team.name != order.mail_team_sended and order.mail_datum_sended %}
         <div class="mt-3 ms-5 me-5">
             <div class="alert alert-danger" role="alert">
                 <p class="text-decoration-underline mb-1 u-txt-bolder">Nesoulad montážních týmů!</p>
@@ -28,7 +28,7 @@
            class="btn {% if pdf_exists %}btn-primary{% else %}btn-secondary disabled{% endif %} d-block ms-5 me-5">
             <i class="fa-solid fa-envelope-circle-check me-2"></i>Odeslat Email</a>
     </div>
-    <!-- mail datum-->
+    <!-- mail info name a datum-->
     <div class="mt-3 ms-5 me-5">
         {% if order.mail_datum_sended %}
             <div class="alert alert-success u-txt-bolder m-0">
