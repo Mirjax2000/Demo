@@ -27,7 +27,7 @@
 {% if order.status == "Adviced" %}
     <a href="{% url 'protocol' order.pk %}"
        class="btn btn-primary btn-sm u-width-180 text-nowrap me-2 position-relative">
-        {% if not order.mail_datum_sended or order.mail_datum_sended and order.team.name != order.mail_team_sended %}
+        {% if not order.mail_datum_sended or order.mail_datum_sended and order.team.name != order.mail_team_sended or not order.team.active %}
             <span class="position-absolute top-0 start-100 translate-middle bg-danger error_mark">
                 <i class="fa-solid fa-exclamation fa-beat-fade fa-sm"></i>
             </span>
