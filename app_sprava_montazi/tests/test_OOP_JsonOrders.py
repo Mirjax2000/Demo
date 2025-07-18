@@ -234,7 +234,7 @@ class OrderDataTablesTest(TestCase):
             order_html = data["data"][i]["order_number"]
             order_pattern = (
                 r'<a href="/order/\d+/detail/" name="order-number" '
-                r'class="L-table__link">\w+(?:-\w+)*-\d{5}-R</a>'
+                r'class="L-table__link copy_link_order_number">\w+(?:-\w+)*-\d{5}-R</a>'
             )
             self.assertRegex(order_html, order_pattern)  # regex
             self.assertIn('name="order-number"', order_html)  # name
@@ -361,7 +361,7 @@ class OrderDataTablesTest(TestCase):
             order_html = data["data"][i]["order_number"]
             order_pattern = (
                 r'<a href="/order/\d+/detail/" name="order-number" '
-                r'class="L-table__link">\w+(?:-\w+)*-\d{5}-R</a>'
+                r'class="L-table__link copy_link_order_number">\w+(?:-\w+)*-\d{5}-R</a>'
             )
             self.assertRegex(order_html, order_pattern)  # regex
             self.assertIn('name="order-number"', order_html)  # name
@@ -494,7 +494,7 @@ class OrderDataTablesTest(TestCase):
             order_html = data["data"][i]["order_number"]
             order_pattern = (
                 r'<a href="/order/\d+/detail/" name="order-number" '
-                r'class="L-table__link">\w+(?:-\w+)*-\d{5}-R</a>'
+                r'class="L-table__link copy_link_order_number">\w+(?:-\w+)*-\d{5}-R</a>'
             )
             self.assertRegex(order_html, order_pattern)  # regex
             self.assertIn('name="order-number"', order_html)  # name
