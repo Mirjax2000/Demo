@@ -46,6 +46,7 @@ from .utils import (
     check_order_error_adviced,
     check_order_adviced_email_sended_to_right_team,
     is_team_names_different,
+    team_soulad,
 )
 
 # 00P classes ---
@@ -936,19 +937,12 @@ class OrderProtocolView(LoginRequiredMixin, ErrorContextMixin, DetailView):
         ).exists()
         if back_protocol_exist:
             back_protocol = OrderBackProtocol.objects.filter(order=order.pk).first()
-        # --- pdf team soulad
-        soulad: bool = False
-        try:
-            pdfko_tym = OrderPDFStorage.objects.get(order=order.pk)
-            soulad = pdfko_tym.team == order.team.name if order.team else False
-        except OrderPDFStorage.DoesNotExist:
-            if settings.DEBUG:
-                cons.log("Záznam v OrderPDFStorage zatím neexistuje.")
+
         # ---
         context.update(
             {
                 "recieved_protokol": back_protocol,
-                "soulad": soulad,
+                "soulad": team_soulad(order),
                 "is_team_names_different": is_team_names_different(order.pk),
                 "protocol_site": True,
                 "pdf_exists": pdf_exists,

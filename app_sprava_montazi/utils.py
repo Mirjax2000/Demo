@@ -15,7 +15,7 @@ from django.core.files.base import ContentFile
 
 
 # --- models
-from .models import Order, Status
+from .models import Order, Status, OrderPDFStorage
 
 # ---
 cons: Console = Console()
@@ -213,13 +213,25 @@ def call_errors_adviced() -> tuple[bool, int]:
     is_errors: bool = False
     all_count: int = 0
 
-    # --- kontrolujeme adviced orders se špatnými podmínkami
-    error_orders = Order.objects.filter(status=Status.ADVICED).filter(
-        Q(mail_datum_sended__isnull=True)
-        | Q(mail_datum_sended__isnull=False, team__name__isnull=False)
-        & ~Q(team__name=F("mail_team_sended"))
-        | Q(team__active=False)
-    )
+    # --- Základní queryset pro všechny ADVICED objednávky
+    base_query = Order.objects.filter(status=Status.ADVICED)
+
+    # --- 1. Problém: E-mail nebyl odeslán
+    cond_mail_not_sent = Q(mail_datum_sended__isnull=True)
+
+    # --- 2. Problém: E-mail odeslán, ale jméno týmu nesouhlasí
+    cond_team_soulad = Q(
+        mail_datum_sended__isnull=False, team__name__isnull=False
+    ) & ~Q(team__name=F("mail_team_sended"))
+
+    # --- 3. Problém: Tým je neaktivní
+    cond_team_inactive = Q(team__active=False)
+
+    # --- Spojení všech tří podmínek přes OR
+    full_condition = cond_mail_not_sent | cond_team_soulad | cond_team_inactive
+
+    # --- Filtrování objednávek podle chybných stavů
+    error_orders = base_query.filter(full_condition)
 
     count = error_orders.count()
     if count > 0:
@@ -278,6 +290,18 @@ def check_order_adviced_email_sended_to_right_team(order_id: int) -> bool:
 
 
 def is_team_names_different(order_id: int) -> bool:
+    """
+    Vrací True, pokud má zakázka se statusem 'ADVICED' a daným ID odeslaný e-mail
+    a zároveň se název aktuálního týmu liší od názvu týmu, kterému byl e-mail odeslán.
+
+    Používá se ke kontrole, zda nedošlo ke změně týmu po odeslání e-mailu.
+
+    Args:
+        order_id (int): ID zakázky.
+
+    Returns:
+        bool: True pokud názvy týmů nesedí, jinak False.
+    """
     base_query = Order.objects.filter(pk=order_id, status=Status.ADVICED)
     is_different = (
         base_query.filter(
@@ -288,3 +312,26 @@ def is_team_names_different(order_id: int) -> bool:
         .exists()
     )
     return is_different
+
+
+def team_soulad(order):
+    """
+    Vrací True, pokud název týmu na PDF (uložený v OrderPDFStorage) souhlasí s aktuálním názvem týmu v zakázce.
+
+    Používá se ke kontrole, zda nebyl změněn tým po vygenerování PDF.
+
+    Args:
+        order (Order): Instance zakázky.
+
+    Returns:
+        bool: True pokud názvy týmů souhlasí, jinak False.
+    """
+    soulad: bool = False
+    try:
+        pdfko_tym = OrderPDFStorage.objects.get(order=order.pk)
+        soulad = pdfko_tym.team == order.team.name if order.team else False
+    except OrderPDFStorage.DoesNotExist:
+        if settings.DEBUG:
+            cons.log("Záznam v OrderPDFStorage zatím neexistuje.")
+
+    return soulad
