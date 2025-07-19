@@ -29,6 +29,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 
+# --- mixiny
+from .mixins import ErrorContextMixin
 
 # --- formulare
 from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
@@ -41,7 +43,7 @@ from .models import OrderPDFStorage, OrderBackProtocolToken, OrderBackProtocol
 from .models import HistoricalArticle  # type: ignore  # pylint: disable=no-name-in-module
 
 # pomocne funkce ---
-from .utils import format_date, update_customers
+from .utils import format_date, update_customers, call_errors
 
 # 00P classes ---
 from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
@@ -71,19 +73,20 @@ class IndexView(LoginRequiredMixin, TemplateView):
     template_name = "base.html"
 
 
-class HomePageView(LoginRequiredMixin, TemplateView):
+class HomePageView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
     """Homepage View"""
 
     template_name = f"{APP_URL}/homepage/homepage.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         # --- navigace
         context["active"] = "homepage"
         return context
 
 
-class CreatePageView(LoginRequiredMixin, FormView):
+class CreatePageView(LoginRequiredMixin, ErrorContextMixin, FormView):
     """Createpage View using FormView"""
 
     template_name = f"{APP_URL}/create/create.html"
@@ -176,7 +179,7 @@ class CreatePageView(LoginRequiredMixin, FormView):
             return redirect("createpage")
 
 
-class DashboardView(LoginRequiredMixin, TemplateView):
+class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
     """Dashboard View"""
 
     template_name = f"{APP_URL}/dashboard/dashboard.html"
@@ -188,7 +191,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class ClientUpdateView(LoginRequiredMixin, UpdateView):
+class ClientUpdateView(LoginRequiredMixin, ErrorContextMixin, UpdateView):
     """Uprav zakaznika"""
 
     model = Client
@@ -226,7 +229,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return reverse("order_detail", kwargs={"pk": order_pk})
 
 
-class ClientUpdateSecondaryView(LoginRequiredMixin, UpdateView):
+class ClientUpdateSecondaryView(LoginRequiredMixin, ErrorContextMixin, UpdateView):
     model = Client
     template_name = f"{APP_URL}/orders/client_update_secondary.html"
     form_class = ClientForm
@@ -289,7 +292,12 @@ class OrderCreateView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs) -> HttpResponse:
         order_form, client_form, article_formset = self.get_forms()
 
+        is_errors, count = call_errors()
         context = {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            },
             "order_form": order_form,
             "client_form": client_form,
             "article_formset": article_formset,
@@ -302,7 +310,12 @@ class OrderCreateView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         order_form, client_form, article_formset = self.get_forms(request.POST)
+        is_errors, count = call_errors()
         context = {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            },
             "order_form": order_form,
             "client_form": client_form,
             "article_formset": article_formset,
@@ -362,7 +375,12 @@ class OrderUpdateView(LoginRequiredMixin, View):
         order = self.get_object()
         order_form, article_formset = self.get_forms(order)
 
+        is_errors, count = call_errors()
         context = {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            },
             "order": order,
             "order_form": order_form,
             "article_formset": article_formset,
@@ -377,7 +395,12 @@ class OrderUpdateView(LoginRequiredMixin, View):
         order = self.get_object()
         order_form, article_formset = self.get_forms(order, request.POST)
 
+        is_errors, count = call_errors()
         context = {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            },
             "order": order,
             "order_form": order_form,
             "article_formset": article_formset,
@@ -437,7 +460,7 @@ class OrderDeleteView(LoginRequiredMixin, View):
         return redirect("orders")
 
 
-class OrdersView(LoginRequiredMixin, TemplateView):
+class OrdersView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
     """Vypis seznamu modelu Order s podporou server-side DataTables paginace."""
 
     template_name = f"{APP_URL}/orders/orders_all.html"
@@ -491,7 +514,7 @@ class OrdersView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class OrderDetailView(LoginRequiredMixin, DetailView):
+class OrderDetailView(LoginRequiredMixin, ErrorContextMixin, DetailView):
     model = Order
     template_name = f"{APP_URL}/orders/order_detail.html"
     context_object_name = "order"
@@ -508,7 +531,7 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class TeamsView(LoginRequiredMixin, ListView):
+class TeamsView(LoginRequiredMixin, ErrorContextMixin, ListView):
     """Vypis seznamu modelu Order"""
 
     model = Team
@@ -522,7 +545,7 @@ class TeamsView(LoginRequiredMixin, ListView):
         return context
 
 
-class TeamCreateView(LoginRequiredMixin, CreateView):
+class TeamCreateView(LoginRequiredMixin, ErrorContextMixin, CreateView):
     model = Team
     form_class = TeamForm
     template_name = f"{APP_URL}/teams/team_form.html"
@@ -563,7 +586,7 @@ class TeamDeleteView(LoginRequiredMixin, View):
         return redirect("teams")
 
 
-class TeamUpdateView(LoginRequiredMixin, UpdateView):
+class TeamUpdateView(LoginRequiredMixin, ErrorContextMixin, UpdateView):
     model = Team
     form_class = TeamForm
     template_name = f"{APP_URL}/teams/team_form.html"
@@ -589,7 +612,7 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
         return reverse("team_detail", kwargs={"slug": self.object.slug})  # type: ignore
 
 
-class TeamDetailView(LoginRequiredMixin, DetailView):
+class TeamDetailView(LoginRequiredMixin, ErrorContextMixin, DetailView):
     model = Team
     template_name = f"{APP_URL}/teams/team_detail.html"
     context_object_name = "team"
@@ -611,7 +634,12 @@ class ClientsOrdersView(LoginRequiredMixin, View):
 
         formset = CallLogFormSet(queryset=CallLog.objects.none())
 
+        is_errors, count = call_errors()
         context = {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            },
             "client": client,
             "call_logs": call_logs,
             "orders": orders,
@@ -628,7 +656,12 @@ class ClientsOrdersView(LoginRequiredMixin, View):
 
         formset = CallLogFormSet(request.POST, instance=client)
 
+        is_errors, count = call_errors()
         context = {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            },
             "client": client,
             "orders": orders,
             "formset": formset,
@@ -652,7 +685,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
 
-class OrderHistoryView(LoginRequiredMixin, ListView):
+class OrderHistoryView(LoginRequiredMixin, ErrorContextMixin, ListView):
     template_name = f"{APP_URL}/orders/order_detail_history.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -871,7 +904,7 @@ class PdfView(LoginRequiredMixin, View):
         return response
 
 
-class OrderProtocolView(LoginRequiredMixin, DetailView):
+class OrderProtocolView(LoginRequiredMixin, ErrorContextMixin, DetailView):
     model = Order
     context_object_name = "order"
     template_name = f"{APP_URL}/orders/montazni_protokol.html"

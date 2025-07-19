@@ -43,6 +43,7 @@
                     <!---->
                     <nav class="L-sidebar__nav" id="nav">
                         <ul class="L-sidebar__list">
+                            <!--home-->
                             <li class="L-sidebar__list__item">
                                 <a href="{% url "homepage" %}"
                                    class="L-sidebar__nav-link link {% if active == 'homepage' %}L-active{% endif %}">
@@ -50,7 +51,7 @@
                                     <span class="L-sidebar__span">Home</span>
                                 </a>
                             </li>
-                            <!---->
+                            <!--dahboard-->
                             <li class="L-sidebar__list__item">
                                 <a a
                                    href="{% url "dashboard" %}"
@@ -59,7 +60,7 @@
                                     <span class="L-sidebar__span">Dashboard</span>
                                 </a>
                             </li>
-                            <!---->
+                            <!--create-->
                             <li class="L-sidebar__list__item">
                                 <a href="{% url "createpage" %}"
                                    class="L-sidebar__nav-link link {% if active == 'create' %}L-active{% endif %}">
@@ -67,26 +68,21 @@
                                     <span class="L-sidebar__span">Vytvořit</span></a>
                             </li>
                             <!-- zakazky-->
-                            <li class="L-sidebar__list__item">
-                                <a href="{% url "orders" %}"
-                                   class="L-sidebar__nav-link link {% if active == 'orders_all' %}L-active{% endif %}">
-                                    <i class="bi bi-table"></i>
-                                    <span class="L-sidebar__span">Zakázky</span></a>
-                            </li>
-                            <!---->
+                            {% include "includes/zakazky.html" %}
+                            <!--sestavy-->
                             <li class="L-sidebar__list__item">
                                 <a href="#" class="L-sidebar__nav-link link">
                                     <i class="bi bi-grid"></i>
                                     <span class="L-sidebar__span">Sestavy</span></a>
                             </li>
-                            <!---->
+                            <!--teams-->
                             <li class="L-sidebar__list__item">
                                 <a href="{% url "teams" %}"
                                    class="L-sidebar__nav-link link {% if active == 'teams' %}L-active{% endif %}">
                                     <i class="bi bi-people"></i>
                                     <span class="L-sidebar__span">Týmy</span></a>
                             </li>
-                            <!---->
+                            <!--logout-->
                             <li class="L-sidebar__list__item">
                                 <form method="post" action="{% url 'logout' %}">
                                     {% csrf_token %}
@@ -98,11 +94,12 @@
                             </li>
                         </ul>
                     </nav>
+                    <!--theme-->
                     <button id="themeToggler" class="L-sidebar__btn">
                         <i class="fa-solid fa-toggle-off"></i><span class="L-sidebar__span">Theme</span>
                     </button>
                     {% include "app_sprava_montazi/partials/spinner.html" %}
-                    <!---->
+                    <!--log info-->
                     <div>
                         {% if user.is_authenticated %}
                             <p class="m-0">

@@ -1,6 +1,16 @@
 <li class="L-sidebar__list__item">
-    <a href="{% url "orders" %}"
-       class="L-sidebar__nav-link link {% if active == 'orders_all' %}L-active{% endif %}">
-        <i class="bi bi-table"></i>
-        <span class="L-sidebar__span">Zakázky</span></a>
+    <!---->
+    {% if errors.has_error %}
+        <a href="{% url "orders" %}"
+           class="L-sidebar__nav-link link position-relative  {% if active == 'orders_all' %}L-active{% endif %}">
+            <span class="position-absolute translate-middle bg-danger error_mark_nav">+{{ errors.count }}</span>
+            <i class="bi bi-table"></i>
+            <span class="L-sidebar__span">Zakázky</span></a>
+    {% else %}
+        <a href="{% url "orders" %}"
+           class="L-sidebar__nav-link link {% if active == 'orders_all' %}L-active{% endif %}">
+            <i class="bi bi-table"></i>
+            <span class="L-sidebar__span">Zakázky</span></a>
+    {% endif %}
+    <!---->
 </li>
