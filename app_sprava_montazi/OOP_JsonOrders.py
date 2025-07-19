@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django.urls import reverse
 
 # --- models
-from .models import Order, Client, Team
+from .models import Order, Client, Status, Team
 
 # --- utils
 from .utils import (
@@ -268,16 +268,13 @@ class JsonOrders:
 
     def status_coll(self, order: Order) -> str:
         """Vrací status + případnou ikonu odkazu na protokol."""
-        error = check_order_adviced_email_sended_to_right_team(order.pk)
+        error = check_order_error_adviced(order.pk)
         content = order.get_status_display()[:8]  # type: ignore
         icon = ""
 
-        if order.status == "Adviced":
+        if order.status == Status.ADVICED:
+            icon_link = success_mail_icon
             if error:
-                icon_link = warning_mail_icon
-            elif order.mail_datum_sended:
-                icon_link = success_mail_icon
-            else:
                 icon_link = warning_mail_icon
 
             if icon_link:

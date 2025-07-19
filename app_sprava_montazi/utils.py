@@ -210,6 +210,7 @@ def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | Content
 
 
 def call_errors_adviced() -> tuple[bool, int]:
+    """pocita chyby do navbaru u zakazky"""
     is_errors: bool = False
     all_count: int = 0
 
@@ -243,6 +244,7 @@ def call_errors_adviced() -> tuple[bool, int]:
 
 
 def check_order_error_adviced(order_id: int) -> bool:
+    """konkretni order kontrola stavu"""
     # --- Vybereme pouze objednávku se statusem ADVICED a daným ID
     base_query = Order.objects.filter(pk=order_id, status=Status.ADVICED)
 
@@ -268,6 +270,7 @@ def check_order_error_adviced(order_id: int) -> bool:
 
 
 def check_order_adviced_email_sended_to_right_team(order_id: int) -> bool:
+    """konkretni order kontrola stavu"""
     # --- Vybereme pouze objednávku se statusem ADVICED a daným ID
     base_query = Order.objects.filter(pk=order_id, status=Status.ADVICED)
 
