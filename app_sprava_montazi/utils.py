@@ -1,12 +1,13 @@
 """utilitky"""
 
 from PIL.ImageFile import ImageFile
-import cv2
 from io import BytesIO
 from PIL import Image, ImageOps
+import cv2
 from rich.console import Console
 
 # --- django
+from django.db.models import Q, F
 from django.conf import settings
 from django.db import transaction
 from django.db.models import QuerySet
@@ -208,19 +209,47 @@ def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | Content
     return webp_file
 
 
-def call_errors() -> tuple[bool, int]:
+def call_errors_adviced() -> tuple[bool, int]:
     is_errors: bool = False
     all_count: int = 0
 
-    # --- kontrolujeme adviced orders
-    adviced_orders_with_no_team_active = Order.objects.filter(
-        status=Status.ADVICED, team__active=False
+    # --- kontrolujeme adviced orders se špatnými podmínkami
+    error_orders = Order.objects.filter(status=Status.ADVICED).filter(
+        Q(mail_datum_sended__isnull=True)
+        | Q(mail_datum_sended__isnull=False, team__name__isnull=False)
+        & ~Q(team__name=F("mail_team_sended"))
+        | Q(team__active=False)
     )
 
-    count = adviced_orders_with_no_team_active.count()
+    count = error_orders.count()
     if count > 0:
         is_errors = True
 
     all_count += count
 
     return is_errors, all_count
+
+
+def check_order_error_adviced(order_id: int) -> bool:
+    # --- Vybereme pouze objednávku se statusem ADVICED a daným ID
+    base_query = Order.objects.filter(pk=order_id, status=Status.ADVICED)
+
+    # --- První problém: nebyl odeslán e-mail (mail_datum_sended je None)
+    cond_mail_not_sent = Q(mail_datum_sended__isnull=True)
+
+    # --- Druhý problém: e-mail byl odeslán, ale jméno týmu se liší
+    cond_team_soulad = Q(
+        mail_datum_sended__isnull=False,
+        team__name__isnull=False,  # jistota, že name existuje
+    ) & ~Q(team__name=F("mail_team_sended"))
+
+    # --- Třetí problém: tým není aktivní
+    cond_team_inactive = Q(team__active=False)
+
+    # --- Kombinace všech tří problémů pomocí OR
+    full_condition = cond_mail_not_sent | cond_team_soulad | cond_team_inactive
+
+    # --- Aplikujeme podmínky na základní query
+    error_exists: bool = base_query.filter(full_condition).exists()
+
+    return error_exists

@@ -43,7 +43,12 @@ from .models import OrderPDFStorage, OrderBackProtocolToken, OrderBackProtocol
 from .models import HistoricalArticle  # type: ignore  # pylint: disable=no-name-in-module
 
 # pomocne funkce ---
-from .utils import format_date, update_customers, call_errors
+from .utils import (
+    format_date,
+    update_customers,
+    call_errors_adviced,
+    check_order_error_adviced,
+)
 
 # 00P classes ---
 from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
@@ -292,7 +297,7 @@ class OrderCreateView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs) -> HttpResponse:
         order_form, client_form, article_formset = self.get_forms()
 
-        is_errors, count = call_errors()
+        is_errors, count = call_errors_adviced()
         context = {
             "errors": {
                 "has_error": is_errors,
@@ -310,7 +315,7 @@ class OrderCreateView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         order_form, client_form, article_formset = self.get_forms(request.POST)
-        is_errors, count = call_errors()
+        is_errors, count = call_errors_adviced()
         context = {
             "errors": {
                 "has_error": is_errors,
@@ -375,7 +380,7 @@ class OrderUpdateView(LoginRequiredMixin, View):
         order = self.get_object()
         order_form, article_formset = self.get_forms(order)
 
-        is_errors, count = call_errors()
+        is_errors, count = call_errors_adviced()
         context = {
             "errors": {
                 "has_error": is_errors,
@@ -395,7 +400,7 @@ class OrderUpdateView(LoginRequiredMixin, View):
         order = self.get_object()
         order_form, article_formset = self.get_forms(order, request.POST)
 
-        is_errors, count = call_errors()
+        is_errors, count = call_errors_adviced()
         context = {
             "errors": {
                 "has_error": is_errors,
@@ -521,10 +526,14 @@ class OrderDetailView(LoginRequiredMixin, ErrorContextMixin, DetailView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        order_pk = self.kwargs["pk"]
-        articles = Article.objects.filter(order=order_pk)
 
+        order: Order = self.object  # správné použití v DetailView
+        articles = Article.objects.filter(order=order.pk)
+
+        # --- tady už použiješ přímo order.pk
+        context["order_has_error"] = check_order_error_adviced(order.pk)
         context["articles"] = articles
+
         # --- navigace
         context["active"] = "orders_all"
 
@@ -634,7 +643,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
 
         formset = CallLogFormSet(queryset=CallLog.objects.none())
 
-        is_errors, count = call_errors()
+        is_errors, count = call_errors_adviced()
         context = {
             "errors": {
                 "has_error": is_errors,
@@ -656,7 +665,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
 
         formset = CallLogFormSet(request.POST, instance=client)
 
-        is_errors, count = call_errors()
+        is_errors, count = call_errors_adviced()
         context = {
             "errors": {
                 "has_error": is_errors,
