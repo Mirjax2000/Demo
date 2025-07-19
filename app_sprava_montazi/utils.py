@@ -278,11 +278,13 @@ def check_order_adviced_email_sended_to_right_team(order_id: int) -> bool:
 
 
 def is_team_names_different(order_id: int) -> bool:
-    try:
-        order = Order.objects.select_related("team").get(pk=order_id)
-    except Order.DoesNotExist:
-        return False
-
-    if order.mail_datum_sended and order.team and order.team.name:
-        return order.team.name != order.mail_team_sended
-    return False
+    base_query = Order.objects.filter(pk=order_id, status=Status.ADVICED)
+    is_different = (
+        base_query.filter(
+            mail_datum_sended__isnull=False,
+            team__name__isnull=False,
+        )
+        .exclude(team__name=F("mail_team_sended"))
+        .exists()
+    )
+    return is_different

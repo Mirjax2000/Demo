@@ -51,7 +51,11 @@
             <div class="alert alert-success u-txt-bolder m-0">
                 <p class="text-decoration-underline mb-1">Email byl odeslán</p>
                 <p class="mb-1 d-block">montážnímu týmu:</p>
-                <p class="badge text-bg-success mb-1 d-block">{{ order.mail_team_sended }}</p>
+                {% if is_team_names_different %}
+                    <p class="badge text-bg-danger mb-1 d-block">{{ order.mail_team_sended }}</p>
+                {% else %}
+                    <p class="badge text-bg-success mb-1 d-block">{{ order.mail_team_sended }}</p>
+                {% endif %}
                 <p class="badge text-bg-success mb-0 d-block">{{ order.mail_datum_sended|date:"d. m. Y v H:i" }}</p>
             </div>
         {% else %}
