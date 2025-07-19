@@ -212,19 +212,11 @@ class CreatePageViewTest(TestCase):
         self.client.login(username="testuser", password="testpass")
 
     def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
 
     def test_redirect_if_not_logged_in(self):
-        """
-        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
-        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
-        """
         self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
@@ -424,7 +416,10 @@ class CreatePageViewTest(TestCase):
 
         # Zpráva
         messages = list(get_messages(response.wsgi_request))
-        self.assertIn("Import dokončen.", str(messages[0]))
+        self.assertIn(
+            "Import dokončen. <strong>0</strong> nových zakázek",
+            str(messages[0]),
+        )
 
 
 class DashboardViewTest(TestCase):

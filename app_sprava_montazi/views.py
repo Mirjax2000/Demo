@@ -141,8 +141,14 @@ class CreatePageView(LoginRequiredMixin, FormView):
             call_command("distrib_hub")
 
         try:
+            db_count_old: int = Order.objects.count()
             call_command("import_data", upload.file.path)
-            messages.success(self.request, "Import dokončen.")
+            db_count_new: int = Order.objects.count()
+            result: int = db_count_new - db_count_old
+            messages.success(
+                self.request,
+                f"Import dokončen. <strong>{result}</strong> nových zakázek",
+            )
             return super().form_valid(form)
         # ---
         except KeyError as e:
