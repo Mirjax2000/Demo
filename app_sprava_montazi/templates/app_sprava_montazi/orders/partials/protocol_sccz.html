@@ -1,6 +1,7 @@
 <section class="L-form__fieldset">
     <h3 class="L-detail__fieldset__header">Protokol</h3>
-    {% if order.team.name != order.mail_team_sended and order.mail_datum_sended %}
+    {% comment %} {% if order.team.name != order.mail_team_sended and order.mail_datum_sended %} {% endcomment %}
+    {% if is_team_names_different %}
         <div class="mt-3 ms-5 me-5">
             <div class="alert alert-danger" role="alert">
                 <p class="text-decoration-underline mb-1 u-txt-bolder">Nesoulad montážních týmů!</p>
@@ -16,8 +17,11 @@
             <div class="alert alert-danger" role="alert">
                 <p class="text-decoration-underline mb-1 u-txt-bolder">Neaktivní montážní tým!</p>
                 <p class="mb-0">
-                    Změň montážní <a class="link-opacity-75-hover"
-    href="{% url "order_update" order.pk %}"><strong>team<i class="fa-solid fa-link ms-1"></i></strong></a>
+                    Změň montážní
+                    <a class="link-opacity-75-hover"
+                       href="{% url "order_update" order.pk %}">
+                        <strong>team<i class="fa-solid fa-link ms-1"></i></strong>
+                    </a>
                 </p>
             </div>
             <hr>

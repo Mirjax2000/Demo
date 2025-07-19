@@ -14,7 +14,10 @@ from django.urls import reverse
 from .models import Order, Client, Team
 
 # --- utils
-from .utils import check_order_error_adviced
+from .utils import (
+    check_order_error_adviced,
+    check_order_adviced_email_sended_to_right_team,
+)
 
 
 # --- type aliases
@@ -265,23 +268,25 @@ class JsonOrders:
 
     def status_coll(self, order: Order) -> str:
         """Vrací status + případnou ikonu odkazu na protokol."""
-        name: str = "status"
+        error = check_order_adviced_email_sended_to_right_team(order.pk)
         content = order.get_status_display()[:8]  # type: ignore
-        icon: str = ""
+        icon = ""
 
         if order.status == "Adviced":
-            icon_link: str = warning_mail_icon
-            if order.mail_datum_sended:
+            if error:
+                icon_link = warning_mail_icon
+            elif order.mail_datum_sended:
                 icon_link = success_mail_icon
+            else:
+                icon_link = warning_mail_icon
 
-            icon = (
-                f'<a href="{reverse("protocol", kwargs={"pk": order.pk})}"'
-                f'title="Zobrazit protokol">'
-                f"{icon_link}</a>"
-            )
+            if icon_link:
+                icon = (
+                    f'<a href="{reverse("protocol", kwargs={"pk": order.pk})}" '
+                    f'title="Zobrazit protokol">{icon_link}</a>'
+                )
 
-        result = f'<div name="{name}">{content} {icon}</div>'
-        return result
+        return f'<div name="status">{content} {icon}</div>'
 
     def articles_coll(self, order: Order) -> str:
         name: str = "articles"

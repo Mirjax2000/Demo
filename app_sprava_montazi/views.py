@@ -48,6 +48,8 @@ from .utils import (
     update_customers,
     call_errors_adviced,
     check_order_error_adviced,
+    check_order_adviced_email_sended_to_right_team,
+    is_team_names_different,
 )
 
 # 00P classes ---
@@ -951,6 +953,7 @@ class OrderProtocolView(LoginRequiredMixin, ErrorContextMixin, DetailView):
             {
                 "recieved_protokol": back_protocol,
                 "soulad": soulad,
+                "is_team_names_different": is_team_names_different(order.pk),
                 "protocol_site": True,
                 "pdf_exists": pdf_exists,
                 "team": order.team,
