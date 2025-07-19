@@ -901,10 +901,9 @@ class OrderProtocolView(LoginRequiredMixin, DetailView):
         try:
             pdfko_tym = OrderPDFStorage.objects.get(order=order.pk)
             soulad = pdfko_tym.team == order.team.name if order.team else False
-            cons.log(f"pdfko_team: {pdfko_tym.team} order_team:{order.team.name}")
-            cons.log(soulad)
         except OrderPDFStorage.DoesNotExist:
-            cons.log("Záznam v OrderPDFStorage zatím neexistuje.")
+            if settings.DEBUG:
+                cons.log("Záznam v OrderPDFStorage zatím neexistuje.")
         # ---
         context.update(
             {

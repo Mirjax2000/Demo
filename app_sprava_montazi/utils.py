@@ -14,7 +14,7 @@ from django.core.files.base import ContentFile
 
 
 # --- models
-from .models import Order
+from .models import Order, Status
 
 # ---
 cons: Console = Console()
@@ -206,3 +206,21 @@ def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | Content
     webp_file.name = f"{new_name}.webp"
 
     return webp_file
+
+
+def call_errors() -> tuple[bool, int]:
+    is_errors: bool = False
+    all_count: int = 0
+
+    # --- kontrolujeme adviced orders
+    adviced_orders_with_no_team_active = Order.objects.filter(
+        status=Status.ADVICED, team__active=False
+    )
+
+    count = adviced_orders_with_no_team_active.count()
+    if count > 0:
+        is_errors = True
+
+    all_count += count
+
+    return is_errors, all_count
