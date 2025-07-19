@@ -67,7 +67,7 @@ OD_DICT = dict(OD_CHOICES)
 # ---
 
 
-class IndexView(LoginRequiredMixin, TemplateView):
+class IndexView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
     """Index View"""
 
     template_name = "base.html"
