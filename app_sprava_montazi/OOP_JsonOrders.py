@@ -13,6 +13,9 @@ from django.urls import reverse
 # --- models
 from .models import Order, Client, Team
 
+# --- utils
+from .utils import check_order_error_adviced
+
 
 # --- type aliases
 class FilterDict(TypedDict):
@@ -130,10 +133,13 @@ class JsonOrders:
 
     def order_number_coll(self, order: Order) -> str:
         """vraci i s linkem na order"""
+        error: bool = check_order_error_adviced(order.pk)
         name: str = "order-number"
         css: str = "L-table__link copy_link_order_number"
         content: str = str(order.order_number)
         order_link = reverse("order_detail", args=[order.pk])
+        if error:
+            css += " u-txt-error"
         result = f'<a href="{order_link}" name="{name}" class="{css}">{content}</a>'
         return result
 
