@@ -81,10 +81,10 @@
                 <i class="bi bi-search"></i>
             </button>
             <div class="u-flex-row-between">
-                {% if errors.has_error %}
+                {% if errors.has_error and not invalid %}
                     <div class="u-txt-right" name="invalid_filtr">
                         <a href="{% url "orders" %}?invalid=true"
-                           class="shadow_button btn btn-sm btn-warning p-0 ps-1 pe-1 lh-sm">Invalid</a>
+                           class="shadow_button btn btn-sm btn-warning p-0 ps-1 pe-1 lh-sm"><i class="fa-solid fa-exclamation fa-fade me-1"></i>Invalid</a>
                     </div>
                 {% else %}
                     <div></div>
