@@ -472,6 +472,7 @@ class OrdersView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         self.json_orders: JsonOrders = JsonOrders(request=request)
         self.filters = self.json_orders.get_filters()
+        # --- datatables AJAX
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return self.json_orders.get_json_data()
         return super().get(request, *args, **kwargs)
@@ -501,6 +502,9 @@ class OrdersView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
         else:
             get_status = ""
 
+        # --- invalid filtr
+        invalid = self.request.GET.get("invalid", "false").lower() == "true"
+        # --- final context
         context.update(
             {
                 "statuses": Status,
@@ -513,6 +517,7 @@ class OrdersView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
                 "get_end": get_end,
                 "request": self.request,
                 "active": "orders_all",
+                "invalid": invalid,
             }
         )
         return context
