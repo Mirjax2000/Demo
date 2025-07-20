@@ -76,13 +76,23 @@
         </div>
         <!-- search btn-->
         <div class="L-table__nav-panel__form__group">
-            <button class="btn btn-primary mt-4" type="submit">
+            <button class="shadow_button btn btn-primary mt-4" type="submit">
                 <span class="me-2">Hledej</span>
                 <i class="bi bi-search"></i>
             </button>
-            <div class="u-txt-right">
-                <a href="{% url "orders" %}"
-                   class="btn btn-sm btn-primary p-0 ps-1 pe-1 lh-sm">reset</a>
+            <div class="u-flex-row-between">
+                {% if errors.has_error %}
+                    <div class="u-txt-right">
+                        <a href="{% url "orders" %}?invalid=true"
+                           class="shadow_button btn btn-sm btn-warning p-0 ps-1 pe-1 lh-sm">Invalid</a>
+                    </div>
+                {% else %}
+                    <div></div>
+                {% endif %}
+                <div class="u-txt-right">
+                    <a href="{% url "orders" %}"
+                       class="shadow_button btn btn-sm btn-primary p-0 ps-1 pe-1 lh-sm">reset</a>
+                </div>
             </div>
         </div>
         <!---->
