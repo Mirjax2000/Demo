@@ -376,8 +376,8 @@ class Utils:
     def get_filtered_orders(filters: FilterDict) -> QuerySet:
         """Vrátí objednávky podle statusu, datumu a obchodního domu."""
 
-        filter_cond = {}
-        exclude_cond = {}
+        filter_cond: dict = {}
+        exclude_cond: dict = {}
 
         status = filters.get("status", "")
         od_value = filters.get("od", "")

@@ -36,7 +36,7 @@ from accounts.views import CustomLoginView
 # --- oop
 
 # --- utils
-from ..utils import format_date
+from ..utils import format_date, call_errors_adviced
 
 # ---
 test_logger = logging.getLogger("test_logger_login")
@@ -1167,6 +1167,15 @@ class OrdersAllViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertIn("active", response.context)
         self.assertEqual(response.context["active"], "orders_all")
+
+    # --- adviced nema odeslany email takze 10 spatne
+    def test_invalid_filtr(self):
+        response = self.client.get(self.url, {"invalid": "true"})
+        self.assertEqual(response.status_code, 200)
+        is_error, invalid_count = call_errors_adviced()
+        self.assertTrue(is_error)
+        self.assertEqual(invalid_count, 10)
+        self.assertContains(response, 'name="invalid_filtr"', html=False)
 
 
 class TeamsViewTest(TestCase):

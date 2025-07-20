@@ -202,6 +202,7 @@ class OrderProtocolView(TestCase):
         self.assertContains(response, "234234234", html=False)
         self.assertContains(response, "ferda.company@gmail.cz", html=False)
         self.assertContains(response, "Neaktivní", html=False)
+    
 
 
 class OrderHiddenView(TestCase):
