@@ -15,7 +15,7 @@ from django.urls import reverse
 
 
 # --- modely z DB
-from .models import Order, OrderBackProtocolToken, AppSetting
+from .models import Order, OrderBackProtocolToken
 
 # --- OOP classes
 from .OOP_emails import CustomEmail
