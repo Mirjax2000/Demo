@@ -186,6 +186,17 @@ class Order(Model):
         limit_choices_to={"active": True},
         verbose_name="Montážní tým",
     )
+
+    mail_datum_sended = DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Protocol mail odeslan",
+    )
+
+    mail_team_sended = CharField(
+        blank=True,
+        verbose_name="jakemu tymu byl poslan email",
+    )
     distrib_hub = ForeignKey(
         DistribHub,
         on_delete=PROTECT,
@@ -232,17 +243,6 @@ class Order(Model):
         verbose_name="Realizace kým",
     )
     notes = TextField(blank=True, verbose_name="Poznámky")
-
-    mail_datum_sended = DateTimeField(
-        blank=True,
-        null=True,
-        verbose_name="Protocol mail odeslan",
-    )
-
-    mail_team_sended = CharField(
-        blank=True,
-        verbose_name="jakemu tymu byl poslan email",
-    )
 
     history = HistoricalRecords()
 

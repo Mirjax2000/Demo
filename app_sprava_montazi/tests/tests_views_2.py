@@ -10,6 +10,7 @@ from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client as CL
 from django.test import TestCase
+from unittest.mock import patch
 from django.utils import timezone
 from django.test import override_settings
 
@@ -24,9 +25,11 @@ from app_sprava_montazi.models import (
     Team,
     TeamType,
     Upload,
+    OrderBackProtocolToken,
 )
 
 # --- oop
+from app_sprava_montazi.OOP_emails import CustomEmail
 
 # --- utils
 from ..utils import format_date
@@ -269,3 +272,97 @@ class OrderHiddenView(TestCase):
 
         messages = [msg.message for msg in get_messages(response.wsgi_request)]
         self.assertIn("Zakázka: nemohla být skryta.", messages)
+
+
+class SendMailViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="pass")
+        self.client.login(username="testuser", password="pass")
+        # order creation
+        self.hub = DistribHub.objects.create(code="626", city="Chrastany")
+        self.team = Team.objects.create(
+            name="Ferda Company",
+            city="Praha",
+            phone="234234234",
+            email="miroslav.viktorin@seznam.cz",
+        )
+        self.range: int = 10
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"ADVICED-{i:05}-R",
+                distrib_hub=self.hub,
+                mandant="SCCZ",
+                client=customer,
+                evidence_termin=date(2025, 2, 2),
+                delivery_termin=date(2025, 3, 4),
+                montage_termin=timezone.make_aware(datetime(2025, 4, 10, 10, 0)),
+                status=Status.ADVICED,
+                team_type=TeamType.BY_ASSEMBLY_CREW,
+                team=self.team,
+            )
+
+    @patch(
+        "app_sprava_montazi.views_services.CustomEmail.send_email_with_encrypted_pdf"
+    )
+    def test_send_mail_view_success_for_all_orders(self, mock_send_email):
+        """Otestuje SendMailView pro všechny objednávky vytvořené v setUp."""
+        mock_send_email.return_value = True  # mockneme odeslání e-mailu
+
+        orders = Order.objects.all()
+
+        for order in orders:
+            response = self.client.get(reverse("send_mail", kwargs={"pk": order.pk}))
+
+            # redirect
+            self.assertEqual(response.status_code, 302)
+            self.assertRedirects(response, reverse("protocol", kwargs={"pk": order.pk}))
+
+            # token vytvořen
+            self.assertTrue(OrderBackProtocolToken.objects.filter(order=order).exists())
+
+            # email byl "odeslán"
+            mock_send_email.assert_called()
+
+            # order byl aktualizován
+            refreshed = Order.objects.get(pk=order.pk)
+            self.assertIsNotNone(refreshed.mail_datum_sended)
+            self.assertEqual(refreshed.mail_team_sended, self.team.name)
+
+            # kontrola messages (nemusíš kontrolovat každou zprávu, stačí že něco je)
+            messages = list(get_messages(response.wsgi_request))
+            self.assertTrue(any("byl odeslan" in str(m.message) for m in messages))
+
+    @patch(
+        "app_sprava_montazi.views_services.CustomEmail.send_email_with_encrypted_pdf"
+    )
+    def test_send_mail_view_overwrites_old_token(self, mock_send_email):
+        """Ověří, že starý token je smazán a nový vytvořen při každém odeslání e-mailu."""
+        mock_send_email.return_value = True
+        order = Order.objects.first()
+
+        # 1️⃣ vytvoříme ručně starý token
+        old_token_obj = OrderBackProtocolToken.objects.create(
+            order=order, token="old_token"
+        )
+
+        # 2️⃣ zavoláme view
+        response = self.client.get(reverse("send_mail", kwargs={"pk": order.pk}))
+
+        # 3️⃣ zkontrolujeme, že byl vytvořen nový token
+        new_token_obj = OrderBackProtocolToken.objects.get(order=order)
+        self.assertNotEqual(
+            new_token_obj.token, "old_token", msg="Token by se měl přepsat"
+        )
+
+        # 4️⃣ jen jeden token existuje
+        self.assertEqual(
+            OrderBackProtocolToken.objects.filter(order=order).count(),
+            1,
+            msg="Musí být přesně jeden token po přepsání",
+        )
+
+        # 5️⃣ zkontrolujeme redirect (pro jistotu)
+        self.assertEqual(response.status_code, 302)

@@ -30,16 +30,18 @@ class SendMailView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         pk = kwargs["pk"]
         order: Order = get_object_or_404(Order, pk=pk)
-        # ---
-        token_obj, _ = OrderBackProtocolToken.objects.get_or_create(order=order)
-        if not token_obj.token:
-            token_obj.token = secrets.token_urlsafe(16)
-            token_obj.save()
 
+        # --- vždy vytvoříme nový token (smažeme starý)
+        OrderBackProtocolToken.objects.filter(order=order).delete()
+        new_token = secrets.token_urlsafe(16)
+        token_obj = OrderBackProtocolToken.objects.create(order=order, token=new_token)
+
+        # --- vygenerujeme URL s tokenem
         back_url = request.build_absolute_uri(
             reverse("back_protocol", kwargs={"pk": pk}) + f"?token={token_obj.token}"
         )
-        # ---
+
+        # --- odeslání e-mailu
         email: CustomEmail = CustomEmail(pk=pk, back_url=back_url, user=request.user)
         try:
             email.send_email_with_encrypted_pdf()
@@ -50,7 +52,7 @@ class SendMailView(LoginRequiredMixin, View):
                 request,
                 (
                     f"Email pro montazni tym: <strong>{order.team}</strong> "
-                    f"na adresu <strong>{order.team.email}</strong> byl odeslan."  # type:ignore
+                    f"na adresu <strong>{order.team.email}</strong> byl odeslan."  # type: ignore
                 ),
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
@@ -58,8 +60,8 @@ class SendMailView(LoginRequiredMixin, View):
                 request,
                 (
                     f"Email pro montazni tym: <strong>{order.team}</strong> "
-                    f"na adresu <strong>{order.team.email}</strong> "  # type: ignore
-                    f"nebyl odeslan, Chyba {str(e)}"
+                    f"na adresu <strong>{order.team.email}</strong> "
+                    f"nebyl odeslan, Chyba: {str(e)}"
                 ),
             )
 
