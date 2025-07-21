@@ -3,6 +3,7 @@
 import os
 from typing import Any, cast, TypedDict, Tuple, List, Dict
 from datetime import datetime
+from django.utils import timezone
 from openpyxl import Workbook
 from rich.console import Console
 
@@ -913,9 +914,15 @@ class ExportOrdersExcelView(LoginRequiredMixin, View):
                 ]
             )
         # ---
+        cons.log(filters)
         suffix: str = (
-            f"{filters['status']}_{filters['od']}_"
-            f"{filters['start_date']}_{filters['end_date']}"
+            f"{filters.get('status') or 'vse'}_"
+            f"{filters.get('start_date') or 'od'}_"
+            f"{filters.get('end_date') or 'do'}_"
+            f"{filters.get('hub') or 'hub'}_"
+            f"{filters.get('mandant') or 'mandant'}_"
+            f"{filters.get('od') or 'OD'}_"
+            f"{timezone.now().strftime('%Y-%m-%d_%H-%M')}"
         )
         # ---
         response = HttpResponse(
