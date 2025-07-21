@@ -105,8 +105,9 @@ class Team(Model):
         return str(self.name)
 
     def save(self, *args, **kwargs):
-        if self.slug != self.name:
-            self.slug = slugify(self.name)
+        new_slug = slugify(self.name)
+        if self.slug != new_slug:
+            self.slug = new_slug
         super().save(*args, **kwargs)
 
 

@@ -409,17 +409,23 @@ class TeamForm(forms.ModelForm):
             "name": {
                 "required": "Jméno je povinné!",
                 "max_length": "Jméno je příliš dlouhé! (max. 32 znaků)",
-                "unique": "Tato spolecnost uz existuje",
+                "unique": "Tato společnost uz existuje",
             },
             "city": {
-                "required": "Jméno je povinné!",
-                "max_length": "Jméno je příliš dlouhé! (max. 32 znaků)",
+                "required": "Město je povinné!",
+                "max_length": "Město je příliš dlouhé! (max. 32 znaků)",
             },
             "phone": {
                 "required": "Telefon je povinný",
-                "invalid": "Zadej platné telefonní číslo ve formátu 212345678.",
+                "invalid": "Zadej platné telefonní číslo.",
             },
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance.pk:
+            self.fields["name"].widget.attrs["readonly"] = True
 
     def clean_name(self) -> str:
         name = str(self.cleaned_data.get("name"))
