@@ -179,6 +179,11 @@ class Order(Model):
         verbose_name="Číslo zakázky",
     )
 
+    distrib_hub = ForeignKey(
+        DistribHub,
+        on_delete=PROTECT,
+        verbose_name="Místo určení",
+    )
     team = ForeignKey(
         Team,
         on_delete=models.PROTECT,
@@ -197,11 +202,6 @@ class Order(Model):
     mail_team_sended = CharField(
         blank=True,
         verbose_name="jakemu tymu byl poslan email",
-    )
-    distrib_hub = ForeignKey(
-        DistribHub,
-        on_delete=PROTECT,
-        verbose_name="Místo určení",
     )
     mandant = CharField(max_length=4, verbose_name="Mandant")
 

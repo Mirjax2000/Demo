@@ -4,26 +4,25 @@ from typing import Tuple, TypedDict, TypeAlias
 from rich.console import Console
 
 # --- django
-from django.utils import timezone
-from django.db.models import QuerySet, Q, F, Value
-from django.db.models.functions import Concat
-from django.http import JsonResponse
+from django.conf import settings
 from django.urls import reverse
+from django.utils import timezone
+from django.http import JsonResponse
+from django.db.models.functions import Concat
+from django.db.models import QuerySet, Q, F, Value
 
 # --- models
 from .models import Order, Client, Status, Team
 
 # --- utils
-from .utils import (
-    check_order_error_adviced,
-    check_order_adviced_email_sended_to_right_team,
-)
+from .utils import check_order_error_adviced
 
 
 # --- type aliases
 class FilterDict(TypedDict):
     status: str
     od: str
+    hub: str
     start_date: str | None
     end_date: str | None
     invalid: str | None
@@ -314,6 +313,7 @@ class Utils:
         return {
             "status": request.GET.get("status", "").strip(),
             "od": request.GET.get("od", "").strip(),
+            "hub": request.GET.get("hub", "").strip(),
             "start_date": request.GET.get("start_date", "").strip() or None,
             "end_date": request.GET.get("end_date", "").strip() or None,
             "invalid": request.GET.get("invalid", "").strip() or None,
@@ -383,6 +383,7 @@ class Utils:
 
         status = filters.get("status", "")
         od_value = filters.get("od", "")
+        hub_value = filters.get("hub", "")
         start_date = filters.get("start_date")
         end_date = filters.get("end_date")
         mandant = filters.get("mandant")
@@ -396,9 +397,11 @@ class Utils:
             filter_cond["status"] = status
         else:
             exclude_cond["status__in"] = ["Hidden", "Billed", "Canceled"]
+
         # --- mandant
         if mandant:
             filter_cond["mandant"] = mandant
+
         # --- Datum od-do
         if start_date:
             filter_cond["evidence_termin__gte"] = start_date
@@ -408,6 +411,10 @@ class Utils:
         # --- Obchodní dům
         if od_value:
             filter_cond["order_number__startswith"] = od_value
+
+        # --- Distrib Hub
+        if hub_value:
+            filter_cond["distrib_hub__slug"] = hub_value
 
         # --- Dotaz
         orders = Order.objects.filter(**filter_cond)

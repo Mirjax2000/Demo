@@ -1,7 +1,7 @@
 """app_sprava_montazi View"""
 
 import os
-from typing import Any, cast
+from typing import Any, cast, TypedDict, Tuple, List, Dict
 from datetime import datetime
 from openpyxl import Workbook
 from rich.console import Console
@@ -41,10 +41,8 @@ from .models import HistoricalArticle  # type: ignore  # pylint: disable=no-name
 # pomocne funkce ---
 from .utils import (
     format_date,
-    update_customers,
     call_errors_adviced,
     check_order_error_adviced,
-    check_order_adviced_email_sended_to_right_team,
     is_team_names_different,
     team_soulad,
 )
@@ -54,11 +52,19 @@ from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
 from .OOP_back_protocol import ProtocolUploader
 from .OOP_JsonOrders import JsonOrders
 
+# --- typove aliasy
+OdChoice = Tuple[str, str]
+OdChoices = List[OdChoice]
+OdDict = Dict[str, str]
+
 cons: Console = Console()
 User = get_user_model()
 # ---
 APP_URL = "app_sprava_montazi"
-OD_CHOICES = [
+# ---
+HUB_CHOICES = DistribHub.objects.all()
+# ---
+OD_CHOICES: OdChoices = [
     ("701", "OD Stodůlky"),
     ("703", "OD Černý Most"),
     ("705", "OD Liberec"),
@@ -67,7 +73,7 @@ OD_CHOICES = [
     ("708", "OD Hradec Králové"),
     ("709", "OD Plzeň"),
 ]
-OD_DICT = dict(OD_CHOICES)
+OD_DICT: OdDict = dict(OD_CHOICES)
 # ---
 
 
@@ -480,21 +486,7 @@ class OrdersView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
 
-        get_start = (
-            datetime.strptime(self.filters["start_date"], "%Y-%m-%d")
-            if self.filters["start_date"]
-            else None
-        )
-
-        get_end = (
-            datetime.strptime(self.filters["end_date"], "%Y-%m-%d")
-            if self.filters["end_date"]
-            else None
-        )
-
-        # --- mandant
-        mandant = self.filters["mandant"]
-
+        # --- status
         status_filter = self.filters["status"]
         if status_filter == "all":
             get_status = "Všechny"
@@ -505,23 +497,59 @@ class OrdersView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
         else:
             get_status = ""
 
+        # --- distrib hub
+        hub_slug = self.filters["hub"]
+        hub_value = ""
+        if hub_slug:
+            hub_obj = DistribHub.objects.filter(slug=hub_slug).first()
+            if hub_obj:
+                hub_value = f"{hub_obj.code}-{hub_obj.city}"
+
+        # --- mandant
+        mandant = self.filters["mandant"]
+
+        # --- zacatek filtru
+        get_start = (
+            datetime.strptime(self.filters["start_date"], "%Y-%m-%d")
+            if self.filters["start_date"]
+            else None
+        )
+
+        # --- konec filtru
+        get_end = (
+            datetime.strptime(self.filters["end_date"], "%Y-%m-%d")
+            if self.filters["end_date"]
+            else None
+        )
+
         # --- invalid filtr
         invalid = self.request.GET.get("invalid", "false").lower() == "true"
+
         # --- final context
         context.update(
-            {
+            {  # --- status
                 "statuses": Status,
                 "raw_status": status_filter,
                 "get_status": get_status,
+                # --- distrib hub
+                "hub_choices": HUB_CHOICES,
+                "raw_hub": self.filters["hub"],
+                "hub_value": hub_value,
+                # --- mandant
                 "get_mandant": mandant,
+                # --- SCCZ Obchodni domy
                 "od_choices": OD_CHOICES,
                 "raw_od": self.filters["od"],
                 "od_value": OD_DICT.get(self.filters["od"], ""),
+                # --- zacatek konec
                 "get_start": get_start,
                 "get_end": get_end,
+                # ---
                 "request": self.request,
-                "active": "orders_all",
+                # --- invalid filtr
                 "invalid": invalid,
+                # --- navigace
+                "active": "orders_all",
             }
         )
         return context

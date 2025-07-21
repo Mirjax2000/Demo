@@ -582,11 +582,12 @@ body.home {
   gap: 2%;
 }
 .L-table__nav-panel__form__group {
-  width: 9.625rem;
+  font-size: 0.9rem;
+  width: 8.5rem;
 }
 .L-table__nav-panel__form__group.od {
-  width: 11.5rem;
-  transition: 1s ease-in-out all;
+  width: 10rem;
+  transition: 0.5s ease-in-out all;
 }
 .L-table__nav-panel__form__group label {
   user-select: none;
@@ -594,8 +595,9 @@ body.home {
 }
 .L-table__nav-panel__form__group input,
 .L-table__nav-panel__form__group select {
+  font-size: 0.89rem;
   display: block;
-  padding: 0.3em 0.5em;
+  padding: 0.25em 0.5em;
   border: 1px solid var(--border);
   box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4117647059);
   cursor: pointer;

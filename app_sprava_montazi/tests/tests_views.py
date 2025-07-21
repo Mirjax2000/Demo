@@ -35,7 +35,7 @@ from app_sprava_montazi.models import (
     Upload,
 )
 from accounts.views import CustomLoginView
-from app_sprava_montazi.views import OD_CHOICES
+from app_sprava_montazi.views import OD_CHOICES, HUB_CHOICES
 
 
 # --- utils
@@ -1174,16 +1174,26 @@ class OrdersAllViewTest(TestCase):
         is_error, invalid_count = call_errors_adviced()
         self.assertTrue(is_error)
         self.assertEqual(invalid_count, 10)
+        # invalid
         self.assertEqual(response.context["invalid"], False)
+        # status
         self.assertEqual(response.context["statuses"], Status)
         self.assertEqual(response.context["raw_status"], "")
         self.assertEqual(response.context["get_status"], "")
+        # mandant
         self.assertEqual(response.context["get_mandant"], None)
+        # od
         self.assertEqual(response.context["od_choices"], OD_CHOICES)
         self.assertEqual(response.context["raw_od"], "")
         self.assertEqual(response.context["od_value"], "")
+        # hub
+        self.assertEqual(response.context["hub_choices"], HUB_CHOICES)
+        self.assertEqual(response.context["raw_hub"], "")
+        self.assertEqual(response.context["hub_value"], "")
+        # start end
         self.assertEqual(response.context["get_start"], None)
         self.assertEqual(response.context["get_end"], None)
+
         self.assertEqual(response.context["request"].path, self.url)
         self.assertIsInstance(response.context["request"], HttpRequest)
 
@@ -1194,16 +1204,26 @@ class OrdersAllViewTest(TestCase):
         is_error, invalid_count = call_errors_adviced()
         self.assertTrue(is_error)
         self.assertEqual(invalid_count, 10)
+        # invalid
         self.assertEqual(response.context["invalid"], False)
+        # status
         self.assertEqual(response.context["statuses"], Status)
         self.assertEqual(response.context["raw_status"], "New")
         self.assertEqual(response.context["get_status"], "Nový")
+        # mandant
         self.assertEqual(response.context["get_mandant"], None)
+        # od
         self.assertEqual(response.context["od_choices"], OD_CHOICES)
         self.assertEqual(response.context["raw_od"], "")
         self.assertEqual(response.context["od_value"], "")
+        # start end
         self.assertEqual(response.context["get_start"], None)
         self.assertEqual(response.context["get_end"], None)
+        # hub
+        self.assertEqual(response.context["hub_choices"], HUB_CHOICES)
+        self.assertEqual(response.context["raw_hub"], "")
+        self.assertEqual(response.context["hub_value"], "")
+
         self.assertEqual(response.context["request"].path, self.url)
         self.assertIsInstance(response.context["request"], HttpRequest)
 
@@ -1214,16 +1234,26 @@ class OrdersAllViewTest(TestCase):
         is_error, invalid_count = call_errors_adviced()
         self.assertTrue(is_error)
         self.assertEqual(invalid_count, 10)
+        # invalid
         self.assertEqual(response.context["invalid"], False)
+        # status
         self.assertEqual(response.context["statuses"], Status)
         self.assertEqual(response.context["raw_status"], "New")
         self.assertEqual(response.context["get_status"], "Nový")
+        # mandant
         self.assertEqual(response.context["get_mandant"], "SCCZ")
+        # od
         self.assertEqual(response.context["od_choices"], OD_CHOICES)
         self.assertEqual(response.context["raw_od"], "")
         self.assertEqual(response.context["od_value"], "")
+        # hub
+        self.assertEqual(response.context["hub_choices"], HUB_CHOICES)
+        self.assertEqual(response.context["raw_hub"], "")
+        self.assertEqual(response.context["hub_value"], "")
+        # start end
         self.assertEqual(response.context["get_start"], None)
         self.assertEqual(response.context["get_end"], None)
+
         self.assertEqual(response.context["request"].path, self.url)
         self.assertIsInstance(response.context["request"], HttpRequest)
 
@@ -1236,16 +1266,56 @@ class OrdersAllViewTest(TestCase):
         is_error, invalid_count = call_errors_adviced()
         self.assertTrue(is_error)
         self.assertEqual(invalid_count, 10)
+        # invalid
         self.assertEqual(response.context["invalid"], False)
+        # status
         self.assertEqual(response.context["statuses"], Status)
         self.assertEqual(response.context["raw_status"], "New")
         self.assertEqual(response.context["get_status"], "Nový")
+        # mandant
         self.assertEqual(response.context["get_mandant"], "SCCZ")
+        # od
         self.assertEqual(response.context["od_choices"], OD_CHOICES)
         self.assertEqual(response.context["raw_od"], "701")
         self.assertEqual(response.context["od_value"], "OD Stodůlky")
+        # hub
+        self.assertEqual(response.context["hub_choices"], HUB_CHOICES)
+        self.assertEqual(response.context["raw_hub"], "")
+        self.assertEqual(response.context["hub_value"], "")
+        # start end
         self.assertEqual(response.context["get_start"], None)
         self.assertEqual(response.context["get_end"], None)
+
+        self.assertEqual(response.context["request"].path, self.url)
+        self.assertIsInstance(response.context["request"], HttpRequest)
+
+    def test_active_context_variable_distrib_hub_brno(self):
+        response = self.client.get(self.url, {"status": "New", "hub": "626-chrastany"})
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")
+        is_error, invalid_count = call_errors_adviced()
+        self.assertTrue(is_error)
+        self.assertEqual(invalid_count, 10)
+        # invalid
+        self.assertEqual(response.context["invalid"], False)
+        # status
+        self.assertEqual(response.context["statuses"], Status)
+        self.assertEqual(response.context["raw_status"], "New")
+        self.assertEqual(response.context["get_status"], "Nový")
+        # mandant
+        self.assertEqual(response.context["get_mandant"], None)
+        # od
+        self.assertEqual(response.context["od_choices"], OD_CHOICES)
+        self.assertEqual(response.context["raw_od"], "")
+        self.assertEqual(response.context["od_value"], "")
+        # hub
+        self.assertEqual(response.context["hub_choices"], HUB_CHOICES)
+        self.assertEqual(response.context["raw_hub"], "626-chrastany")
+        self.assertEqual(response.context["hub_value"], "626-Chrastany")
+        # start end
+        self.assertEqual(response.context["get_start"], None)
+        self.assertEqual(response.context["get_end"], None)
+
         self.assertEqual(response.context["request"].path, self.url)
         self.assertIsInstance(response.context["request"], HttpRequest)
 
