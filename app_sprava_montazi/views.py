@@ -617,12 +617,7 @@ class TeamUpdateView(LoginRequiredMixin, ErrorContextMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        next_url = self.request.POST.get("next") or self.request.GET.get("next")
-        if next_url and url_has_allowed_host_and_scheme(
-            next_url, allowed_hosts={self.request.get_host()}
-        ):
-            return next_url
-        return reverse("team_detail", kwargs={"slug": self.object.slug})  # type: ignore
+        return reverse("team_detail", kwargs={"slug": self.object.slug})
 
 
 class TeamDetailView(LoginRequiredMixin, ErrorContextMixin, DetailView):

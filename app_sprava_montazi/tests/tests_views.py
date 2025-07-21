@@ -1,5 +1,6 @@
 """View tests"""
 
+from decimal import Decimal
 import io
 import logging
 from datetime import date, datetime
@@ -1153,6 +1154,7 @@ class OrdersAllViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
+        self.assertContains(response, 'name="invalid_filtr"', html=False)
 
     def test_redirect_if_not_logged_in(self):
         """
@@ -1175,7 +1177,6 @@ class OrdersAllViewTest(TestCase):
         is_error, invalid_count = call_errors_adviced()
         self.assertTrue(is_error)
         self.assertEqual(invalid_count, 10)
-        self.assertContains(response, 'name="invalid_filtr"', html=False)
 
 
 class TeamsViewTest(TestCase):
@@ -1326,11 +1327,11 @@ class TeamUpdateViewTest(TestCase):
             name="Test Company",
             city="Praha",
             region="Střední Čechy",
-            phone="123456789",
+            phone="234234234",
             email="test@company.cz",
             active=True,
-            price_per_hour=150.50,
-            price_per_km=12.30,
+            price_per_hour=Decimal(150.50),
+            price_per_km=Decimal(12.30),
             notes="Toto je testovací poznámka.",
         )
         self.url = reverse("team_update", kwargs={"slug": self.team.slug})
@@ -1359,6 +1360,92 @@ class TeamUpdateViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertIn("active", response.context)
         self.assertEqual(response.context["active"], "teams")
+
+    def test_before_update(self):
+        response = self.client.get(self.url)
+        self.assertEqual(self.team.name, "Test Company")
+        self.assertEqual(self.team.city, "Praha")
+        self.assertEqual(self.team.region, "Střední Čechy")
+        self.assertEqual(self.team.phone, "234234234")
+        self.assertEqual(self.team.email, "test@company.cz")
+        self.assertEqual(self.team.price_per_hour, Decimal(150.50))
+        self.assertEqual(self.team.price_per_km, Decimal(12.30))
+        self.assertEqual(self.team.notes, "Toto je testovací poznámka.")
+
+    def test_team_update_post(self):
+        """
+        Testuje, že POST požadavek aktualizuje tým a přesměruje správně.
+        """
+        updated_data = {
+            "name": "Updated Company",
+            "city": "Brno",
+            "region": "Jižní Morava",
+            "phone": "234234234",
+            "email": "updated@company.cz",
+            "active": True,
+            "price_per_hour": Decimal(200.00),
+            "price_per_km": Decimal(15.00),
+            "notes": "Aktualizovaná poznámka.",
+        }
+
+        response = self.client.post(self.url, updated_data, follow=True)
+        # Dočasně si vypiš, jestli tam nebyla chyba
+        self.team.refresh_from_db()
+
+        # Ověříme, že data byla aktualizována
+        self.assertEqual(self.team.name, "Updated Company")
+        self.assertEqual(self.team.city, "Brno")
+        self.assertEqual(self.team.region, "Jižní Morava")
+        self.assertEqual(self.team.phone, "234234234")
+        self.assertEqual(self.team.email, "updated@company.cz")
+        self.assertEqual(self.team.price_per_hour, 200.00)
+        self.assertEqual(self.team.price_per_km, 15.00)
+        self.assertEqual(self.team.notes, "Aktualizovaná poznámka.")
+
+        # Ověříme, že došlo k přesměrování
+        expected_url = reverse("team_detail", kwargs={"slug": self.team.slug})
+        self.assertRedirects(response, expected_url)
+
+        # Ověříme, že zpráva byla přidána
+        messages_list = list(response.context["messages"])
+        self.assertTrue(any("byl aktualizovan" in str(msg) for msg in messages_list))
+
+    def test_team_update_duplicate_name_post(self):
+        # Vytvoříme další tým s unikátním jménem
+        Team.objects.create(
+            name="Existující Firma",
+            city="Brno",
+            region="Jižní Morava",
+            phone="233233233",
+            email="exist@firma.cz",
+            active=True,
+            price_per_hour=Decimal(100.00),
+            price_per_km=Decimal(10.00),
+            notes="Poznámka",
+        )
+
+        updated_data = {
+            "name": "Existující Firma",  # pokus o duplicitní jméno
+            "city": "Brno",
+            "region": "Jižní Morava",
+            "phone": "234234234",
+            "email": "updated@company.cz",
+            "active": True,
+            "price_per_hour": Decimal(200.00),
+            "price_per_km": Decimal(15.00),
+            "notes": "Aktualizovaná poznámka.",
+        }
+
+        response = self.client.post(self.url, updated_data)
+        form = response.context.get("form")
+
+        # Očekáváme chybu duplicitního jména
+        self.assertTrue(form.errors)
+        self.assertIn("name", form.errors)
+
+        # Záznam v DB zůstal nezměněný
+        self.team.refresh_from_db()
+        self.assertEqual(self.team.name, "Test Company")
 
 
 class ClientOrdersViewTest(TestCase):
