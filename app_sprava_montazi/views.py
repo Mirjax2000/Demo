@@ -492,6 +492,9 @@ class OrdersView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
             else None
         )
 
+        # --- mandant
+        mandant = self.filters["mandant"]
+
         status_filter = self.filters["status"]
         if status_filter == "all":
             get_status = "Všechny"
@@ -510,6 +513,7 @@ class OrdersView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
                 "statuses": Status,
                 "raw_status": status_filter,
                 "get_status": get_status,
+                "get_mandant": mandant,
                 "od_choices": OD_CHOICES,
                 "raw_od": self.filters["od"],
                 "od_value": OD_DICT.get(self.filters["od"], ""),
@@ -617,7 +621,7 @@ class TeamUpdateView(LoginRequiredMixin, ErrorContextMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse("team_detail", kwargs={"slug": self.object.slug})
+        return reverse("team_detail", kwargs={"slug": self.object.slug})  # type:ignore
 
 
 class TeamDetailView(LoginRequiredMixin, ErrorContextMixin, DetailView):

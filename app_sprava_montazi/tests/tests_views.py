@@ -1,16 +1,18 @@
 """View tests"""
 
-from decimal import Decimal
 import io
-import logging
-from datetime import date, datetime
-from unittest.mock import patch
-import tempfile
 import shutil
+import logging
+import tempfile
+from decimal import Decimal
+from unittest.mock import patch
+from openpyxl import load_workbook
+from datetime import date, datetime
 
+# --- django
+from django.http import HttpRequest
 from django.urls import reverse
 from django.contrib.auth.models import User
-
 from django.conf import settings
 from django.contrib.messages import get_messages
 from django.core.files.storage import default_storage
@@ -19,8 +21,8 @@ from django.test import Client as CL
 from django.test import TestCase
 from django.utils import timezone
 from django.test import override_settings
-from openpyxl import load_workbook
 
+# --- models
 from app_sprava_montazi.models import (
     Article,
     Client,
@@ -33,8 +35,8 @@ from app_sprava_montazi.models import (
     Upload,
 )
 from accounts.views import CustomLoginView
+from app_sprava_montazi.views import OD_CHOICES
 
-# --- oop
 
 # --- utils
 from ..utils import format_date, call_errors_adviced
@@ -1169,14 +1171,92 @@ class OrdersAllViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertIn("active", response.context)
         self.assertEqual(response.context["active"], "orders_all")
+        is_error, invalid_count = call_errors_adviced()
+        self.assertTrue(is_error)
+        self.assertEqual(invalid_count, 10)
+        self.assertEqual(response.context["invalid"], False)
+        self.assertEqual(response.context["statuses"], Status)
+        self.assertEqual(response.context["raw_status"], "")
+        self.assertEqual(response.context["get_status"], "")
+        self.assertEqual(response.context["get_mandant"], None)
+        self.assertEqual(response.context["od_choices"], OD_CHOICES)
+        self.assertEqual(response.context["raw_od"], "")
+        self.assertEqual(response.context["od_value"], "")
+        self.assertEqual(response.context["get_start"], None)
+        self.assertEqual(response.context["get_end"], None)
+        self.assertEqual(response.context["request"].path, self.url)
+        self.assertIsInstance(response.context["request"], HttpRequest)
+
+    def test_active_context_variable_status_new(self):
+        response = self.client.get(self.url, {"status": "New"})
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")
+        is_error, invalid_count = call_errors_adviced()
+        self.assertTrue(is_error)
+        self.assertEqual(invalid_count, 10)
+        self.assertEqual(response.context["invalid"], False)
+        self.assertEqual(response.context["statuses"], Status)
+        self.assertEqual(response.context["raw_status"], "New")
+        self.assertEqual(response.context["get_status"], "Nový")
+        self.assertEqual(response.context["get_mandant"], None)
+        self.assertEqual(response.context["od_choices"], OD_CHOICES)
+        self.assertEqual(response.context["raw_od"], "")
+        self.assertEqual(response.context["od_value"], "")
+        self.assertEqual(response.context["get_start"], None)
+        self.assertEqual(response.context["get_end"], None)
+        self.assertEqual(response.context["request"].path, self.url)
+        self.assertIsInstance(response.context["request"], HttpRequest)
+
+    def test_active_context_variable_status_new_manndant(self):
+        response = self.client.get(self.url, {"status": "New", "mandant": "SCCZ"})
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")
+        is_error, invalid_count = call_errors_adviced()
+        self.assertTrue(is_error)
+        self.assertEqual(invalid_count, 10)
+        self.assertEqual(response.context["invalid"], False)
+        self.assertEqual(response.context["statuses"], Status)
+        self.assertEqual(response.context["raw_status"], "New")
+        self.assertEqual(response.context["get_status"], "Nový")
+        self.assertEqual(response.context["get_mandant"], "SCCZ")
+        self.assertEqual(response.context["od_choices"], OD_CHOICES)
+        self.assertEqual(response.context["raw_od"], "")
+        self.assertEqual(response.context["od_value"], "")
+        self.assertEqual(response.context["get_start"], None)
+        self.assertEqual(response.context["get_end"], None)
+        self.assertEqual(response.context["request"].path, self.url)
+        self.assertIsInstance(response.context["request"], HttpRequest)
+
+    def test_active_context_variable_status_new_manndant_701(self):
+        response = self.client.get(
+            self.url, {"status": "New", "mandant": "SCCZ", "od": "701"}
+        )
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")
+        is_error, invalid_count = call_errors_adviced()
+        self.assertTrue(is_error)
+        self.assertEqual(invalid_count, 10)
+        self.assertEqual(response.context["invalid"], False)
+        self.assertEqual(response.context["statuses"], Status)
+        self.assertEqual(response.context["raw_status"], "New")
+        self.assertEqual(response.context["get_status"], "Nový")
+        self.assertEqual(response.context["get_mandant"], "SCCZ")
+        self.assertEqual(response.context["od_choices"], OD_CHOICES)
+        self.assertEqual(response.context["raw_od"], "701")
+        self.assertEqual(response.context["od_value"], "OD Stodůlky")
+        self.assertEqual(response.context["get_start"], None)
+        self.assertEqual(response.context["get_end"], None)
+        self.assertEqual(response.context["request"].path, self.url)
+        self.assertIsInstance(response.context["request"], HttpRequest)
 
     # --- adviced nema odeslany email takze 10 spatne
-    def test_invalid_filtr(self):
+    def test_invalid_filtr_is_true(self):
         response = self.client.get(self.url, {"invalid": "true"})
         self.assertEqual(response.status_code, 200)
         is_error, invalid_count = call_errors_adviced()
         self.assertTrue(is_error)
         self.assertEqual(invalid_count, 10)
+        self.assertEqual(response.context["invalid"], True)
 
 
 class TeamsViewTest(TestCase):

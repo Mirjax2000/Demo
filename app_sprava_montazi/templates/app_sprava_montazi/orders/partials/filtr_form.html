@@ -58,8 +58,26 @@
                 <span>Do dnes</span>
             {% endif %}
         </div>
+        <!-- mandant -->
+        <div class="L-table__nav-panel__form__group">
+            <label for="mandant">Mandant</label>
+            <input type="text"
+                   id="mandant"
+                   class="form-control"
+                   maxlength="4"
+                   placeholder="nevybráno"
+                   value="{{ get_mandant|default_if_none:'' }}"
+                   name="mandant">
+            <!---->
+            {% if get_mandant %}
+                <span class="u-txt-success-light">{{ get_mandant }}</span>
+            {% else %}
+                <span>Všechny mandanty:</span>
+            {% endif %}
+        </div>
         <!-- obchodni dum-->
-        <div class="L-table__nav-panel__form__group od">
+        <div class="L-table__nav-panel__form__group od od_inactive"
+             id="obchodniDumWrapper">
             <label for="od">Obchodní dům</label>
             <select name="od" class="form-select L-table__select" id="od">
                 <option value="" {% if not raw_od %}selected{% endif %}>Všechny OD</option>

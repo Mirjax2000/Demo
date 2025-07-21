@@ -16,6 +16,8 @@
 
     // delete Order
     document.addEventListener("DOMContentLoaded", deleteOrder);
+    // SCCZ filter
+    document.addEventListener("DOMContentLoaded", scczFilter);
     // hiden Order
     document.addEventListener("DOMContentLoaded", hiddenOrder);
     // delete team
@@ -632,5 +634,28 @@
             }
         })
     }
+
+    function scczFilter() {
+        const mandantInput = document.getElementById("mandant");
+        const odWrapper = document.getElementById("obchodniDumWrapper");
+
+        if (!mandantInput || !odWrapper) {
+            return;
+        }
+
+        function toggleOD() {
+            const value = mandantInput.value.trim().toUpperCase();
+            if (value === "SCCZ") {
+                odWrapper.classList.remove("od_inactive");
+            } else {
+                odWrapper.classList.add("od_inactive");
+            }
+        }
+
+        toggleOD();
+        
+        mandantInput.addEventListener("input", toggleOD);
+    }
+
 
 })();

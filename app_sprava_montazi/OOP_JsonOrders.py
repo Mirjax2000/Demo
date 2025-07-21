@@ -27,6 +27,7 @@ class FilterDict(TypedDict):
     start_date: str | None
     end_date: str | None
     invalid: str | None
+    mandant: str | None
 
 
 JsonHeader: TypeAlias = Tuple[int, int, int, str | None, str]
@@ -316,6 +317,7 @@ class Utils:
             "start_date": request.GET.get("start_date", "").strip() or None,
             "end_date": request.GET.get("end_date", "").strip() or None,
             "invalid": request.GET.get("invalid", "").strip() or None,
+            "mandant": request.GET.get("mandant", "").strip() or None,
         }
 
     @staticmethod
@@ -383,6 +385,7 @@ class Utils:
         od_value = filters.get("od", "")
         start_date = filters.get("start_date")
         end_date = filters.get("end_date")
+        mandant = filters.get("mandant")
 
         # --- Status logika
         if status == "all":
@@ -393,7 +396,9 @@ class Utils:
             filter_cond["status"] = status
         else:
             exclude_cond["status__in"] = ["Hidden", "Billed", "Canceled"]
-
+        # --- mandant
+        if mandant:
+            filter_cond["mandant"] = mandant
         # --- Datum od-do
         if start_date:
             filter_cond["evidence_termin__gte"] = start_date
