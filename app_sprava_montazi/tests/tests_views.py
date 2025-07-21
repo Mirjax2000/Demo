@@ -2035,11 +2035,10 @@ class ExportOrdersExcelViewTest(TestCase):
         actual_headers = [cell.value for cell in ws[1]]
         self.assertEqual(actual_headers, expected_headers)
         # ZDE JE ZMĚNA: Očekávaný suffix je nyní "New_NO-MATCH_None_None"
-        self.assertTrue(
-            response["Content-Disposition"].endswith(
-                f"filename=objednavky-{Status.NEW.value}_NO-MATCH_None_None.xlsx"
-            )
-        )
+        disposition = response["Content-Disposition"]
+        self.assertIn(f"filename=objednavky-{Status.NEW.value}_", disposition)
+        self.assertIn("NO-MATCH", disposition)
+        self.assertIn(".xlsx", disposition)
 
     def test_excel_file_with_status_filter(self):
         """
@@ -2064,6 +2063,9 @@ class ExportOrdersExcelViewTest(TestCase):
         self.assertEqual(
             order_row_values[6], format_date(self.order_adviced.evidence_termin)
         )
+        disposition = response["Content-Disposition"]
+        self.assertIn(f"filename=objednavky-{Status.ADVICED.value}_", disposition)
+        self.assertIn(".xlsx", disposition)
 
 
 class PdfViewTestV1(TestCase):

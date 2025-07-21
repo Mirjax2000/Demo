@@ -914,7 +914,6 @@ class ExportOrdersExcelView(LoginRequiredMixin, View):
                 ]
             )
         # ---
-        cons.log(filters)
         suffix: str = (
             f"{filters.get('status') or 'vse'}_"
             f"{filters.get('start_date') or 'od'}_"
