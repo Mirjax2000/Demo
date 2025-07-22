@@ -31,18 +31,24 @@ from app_sprava_montazi.views import (
     ClientUpdateSecondaryView as CUS,
     OrderProtocolView as OrderProtocol,
     ClientsOrdersView as ClientsOrders,
-    CustomerUpdateView as CustomerUpdate,
     ProtocolUploadView as ProtocolUpload,
     UploadBackProtocolView as UplBckPrtcl,
     CheckPDFProtocolView as CheckPDFProtocol,
     ExportOrdersExcelView as ExportOrdersExcel,
-    IncompleteCustomersView as IncmpCstmrs,
+    OrderHiddenView as OrderHidden,
+    TeamDeleteView as TeamDelete,
 )
+
 from app_sprava_montazi.views_services import (
     AutocompleteOrdersView as AutocompleteOrders,
     OrderStatusView as OrderStatus,
     SendMailView as SendMail,
-    SettingsView as Settings,
+)
+
+from API.views import (
+    CustomerUpdateView as CustomerUpdate,
+    IncompleteCustomersView as IncmpCstmrs,
+    ApiStatusView as ApiStatus,
 )
 
 
@@ -64,6 +70,7 @@ app_sprava_montazi: list = [
     # --- orders ---
     path("orders/", Orders.as_view(), name="orders"),
     path("order/create/", OrderCreate.as_view(), name="order_create"),
+    path(f"order/{PK}/hidden/", OrderHidden.as_view(), name="order_hidden"),
     path(f"order/{PK}/order_update/", OrderUpdate.as_view(), name="order_update"),
     path(f"order/{PK}/delete_order/", OrderDelete.as_view(), name="delete_order"),
     path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),
@@ -83,11 +90,11 @@ app_sprava_montazi: list = [
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),
     path("createpage/upload/", ProtocolUpload.as_view(), name="upload_protocol"),
-    path("createpage/settings/", Settings.as_view(), name="settings"),
     #
     # --- teams ---
     path("teams/", Teams.as_view(), name="teams"),
     path("teams/create/", TeamCreate.as_view(), name="team_create"),
+    path(f"teams/{PK}/delete/", TeamDelete.as_view(), name="team_delete"),
     path(f"teams/{SLUG}/detail/", TeamDetail.as_view(), name="team_detail"),
     path(f"teams/{SLUG}/update/", TeamUpdate.as_view(), name="team_update"),
     #
@@ -116,6 +123,7 @@ api_urls: list = [
         "api/incomplete-customers/", IncmpCstmrs.as_view(), name="incomplete-customers"
     ),
     path("api/update-customers/", CustomerUpdate.as_view(), name="update-customers"),
+    path("api/status/", ApiStatus.as_view(), name="api-status"),
     path("api-token-auth/", obtain_auth_token),
     # --- swagger
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

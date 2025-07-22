@@ -14,10 +14,12 @@
 
       &__group {
         &.od {
-          width: 11.5rem;
+          width: 10.5rem;
+          transition: 0.5s ease-in-out all;
         }
 
-        width: 9.625rem;
+        font-size: 0.9rem;
+        width: 8.5rem;
 
         label {
           user-select: none;
@@ -29,8 +31,9 @@
           @extend %border-radius;
           @extend %transition-theme;
 
+          font-size: 0.89rem;
           display: block;
-          padding: 0.3em 0.5em;
+          padding: 0.25em 0.5em;
           border: 1px solid var(--border);
           box-shadow: 1px 1px 1px #00000069;
           cursor: pointer;

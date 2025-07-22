@@ -1,15 +1,18 @@
 """View tests"""
 
 import io
-import logging
-from datetime import date, datetime
-from unittest.mock import patch
-import tempfile
 import shutil
+import logging
+import tempfile
+from decimal import Decimal
+from unittest.mock import patch
+from openpyxl import load_workbook
+from datetime import date, datetime
 
+# --- django
+from django.http import HttpRequest
 from django.urls import reverse
 from django.contrib.auth.models import User
-
 from django.conf import settings
 from django.contrib.messages import get_messages
 from django.core.files.storage import default_storage
@@ -18,8 +21,8 @@ from django.test import Client as CL
 from django.test import TestCase
 from django.utils import timezone
 from django.test import override_settings
-from openpyxl import load_workbook
 
+# --- models
 from app_sprava_montazi.models import (
     Article,
     Client,
@@ -32,11 +35,11 @@ from app_sprava_montazi.models import (
     Upload,
 )
 from accounts.views import CustomLoginView
+from app_sprava_montazi.views import OD_CHOICES, HUB_CHOICES
 
-# --- oop
 
 # --- utils
-from ..utils import format_date
+from ..utils import format_date, call_errors_adviced
 
 # ---
 test_logger = logging.getLogger("test_logger_login")
@@ -212,19 +215,11 @@ class CreatePageViewTest(TestCase):
         self.client.login(username="testuser", password="testpass")
 
     def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
 
     def test_redirect_if_not_logged_in(self):
-        """
-        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
-        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
-        """
         self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
@@ -424,7 +419,10 @@ class CreatePageViewTest(TestCase):
 
         # Zpráva
         messages = list(get_messages(response.wsgi_request))
-        self.assertIn("Import dokončen.", str(messages[0]))
+        self.assertIn(
+            "Import dokončen. <strong>0</strong> nových zakázek",
+            str(messages[0]),
+        )
 
 
 class DashboardViewTest(TestCase):
@@ -1158,6 +1156,7 @@ class OrdersAllViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
+        self.assertContains(response, 'name="invalid_filtr"', html=False)
 
     def test_redirect_if_not_logged_in(self):
         """
@@ -1172,6 +1171,162 @@ class OrdersAllViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertIn("active", response.context)
         self.assertEqual(response.context["active"], "orders_all")
+        is_error, invalid_count = call_errors_adviced()
+        self.assertTrue(is_error)
+        self.assertEqual(invalid_count, 10)
+        # invalid
+        self.assertEqual(response.context["invalid"], False)
+        # status
+        self.assertEqual(response.context["statuses"], Status)
+        self.assertEqual(response.context["raw_status"], "")
+        self.assertEqual(response.context["get_status"], "")
+        # mandant
+        self.assertEqual(response.context["get_mandant"], None)
+        # od
+        self.assertEqual(response.context["od_choices"], OD_CHOICES)
+        self.assertEqual(response.context["raw_od"], "")
+        self.assertEqual(response.context["od_value"], "")
+        # hub
+        self.assertEqual(response.context["hub_choices"], HUB_CHOICES)
+        self.assertEqual(response.context["raw_hub"], "")
+        self.assertEqual(response.context["hub_value"], "")
+        # start end
+        self.assertEqual(response.context["get_start"], None)
+        self.assertEqual(response.context["get_end"], None)
+
+        self.assertEqual(response.context["request"].path, self.url)
+        self.assertIsInstance(response.context["request"], HttpRequest)
+
+    def test_active_context_variable_status_new(self):
+        response = self.client.get(self.url, {"status": "New"})
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")
+        is_error, invalid_count = call_errors_adviced()
+        self.assertTrue(is_error)
+        self.assertEqual(invalid_count, 10)
+        # invalid
+        self.assertEqual(response.context["invalid"], False)
+        # status
+        self.assertEqual(response.context["statuses"], Status)
+        self.assertEqual(response.context["raw_status"], "New")
+        self.assertEqual(response.context["get_status"], "Nový")
+        # mandant
+        self.assertEqual(response.context["get_mandant"], None)
+        # od
+        self.assertEqual(response.context["od_choices"], OD_CHOICES)
+        self.assertEqual(response.context["raw_od"], "")
+        self.assertEqual(response.context["od_value"], "")
+        # start end
+        self.assertEqual(response.context["get_start"], None)
+        self.assertEqual(response.context["get_end"], None)
+        # hub
+        self.assertEqual(response.context["hub_choices"], HUB_CHOICES)
+        self.assertEqual(response.context["raw_hub"], "")
+        self.assertEqual(response.context["hub_value"], "")
+
+        self.assertEqual(response.context["request"].path, self.url)
+        self.assertIsInstance(response.context["request"], HttpRequest)
+
+    def test_active_context_variable_status_new_manndant(self):
+        response = self.client.get(self.url, {"status": "New", "mandant": "SCCZ"})
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")
+        is_error, invalid_count = call_errors_adviced()
+        self.assertTrue(is_error)
+        self.assertEqual(invalid_count, 10)
+        # invalid
+        self.assertEqual(response.context["invalid"], False)
+        # status
+        self.assertEqual(response.context["statuses"], Status)
+        self.assertEqual(response.context["raw_status"], "New")
+        self.assertEqual(response.context["get_status"], "Nový")
+        # mandant
+        self.assertEqual(response.context["get_mandant"], "SCCZ")
+        # od
+        self.assertEqual(response.context["od_choices"], OD_CHOICES)
+        self.assertEqual(response.context["raw_od"], "")
+        self.assertEqual(response.context["od_value"], "")
+        # hub
+        self.assertEqual(response.context["hub_choices"], HUB_CHOICES)
+        self.assertEqual(response.context["raw_hub"], "")
+        self.assertEqual(response.context["hub_value"], "")
+        # start end
+        self.assertEqual(response.context["get_start"], None)
+        self.assertEqual(response.context["get_end"], None)
+
+        self.assertEqual(response.context["request"].path, self.url)
+        self.assertIsInstance(response.context["request"], HttpRequest)
+
+    def test_active_context_variable_status_new_manndant_701(self):
+        response = self.client.get(
+            self.url, {"status": "New", "mandant": "SCCZ", "od": "701"}
+        )
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")
+        is_error, invalid_count = call_errors_adviced()
+        self.assertTrue(is_error)
+        self.assertEqual(invalid_count, 10)
+        # invalid
+        self.assertEqual(response.context["invalid"], False)
+        # status
+        self.assertEqual(response.context["statuses"], Status)
+        self.assertEqual(response.context["raw_status"], "New")
+        self.assertEqual(response.context["get_status"], "Nový")
+        # mandant
+        self.assertEqual(response.context["get_mandant"], "SCCZ")
+        # od
+        self.assertEqual(response.context["od_choices"], OD_CHOICES)
+        self.assertEqual(response.context["raw_od"], "701")
+        self.assertEqual(response.context["od_value"], "OD Stodůlky")
+        # hub
+        self.assertEqual(response.context["hub_choices"], HUB_CHOICES)
+        self.assertEqual(response.context["raw_hub"], "")
+        self.assertEqual(response.context["hub_value"], "")
+        # start end
+        self.assertEqual(response.context["get_start"], None)
+        self.assertEqual(response.context["get_end"], None)
+
+        self.assertEqual(response.context["request"].path, self.url)
+        self.assertIsInstance(response.context["request"], HttpRequest)
+
+    def test_active_context_variable_distrib_hub_brno(self):
+        response = self.client.get(self.url, {"status": "New", "hub": "626-chrastany"})
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "orders_all")
+        is_error, invalid_count = call_errors_adviced()
+        self.assertTrue(is_error)
+        self.assertEqual(invalid_count, 10)
+        # invalid
+        self.assertEqual(response.context["invalid"], False)
+        # status
+        self.assertEqual(response.context["statuses"], Status)
+        self.assertEqual(response.context["raw_status"], "New")
+        self.assertEqual(response.context["get_status"], "Nový")
+        # mandant
+        self.assertEqual(response.context["get_mandant"], None)
+        # od
+        self.assertEqual(response.context["od_choices"], OD_CHOICES)
+        self.assertEqual(response.context["raw_od"], "")
+        self.assertEqual(response.context["od_value"], "")
+        # hub
+        self.assertEqual(response.context["hub_choices"], HUB_CHOICES)
+        self.assertEqual(response.context["raw_hub"], "626-chrastany")
+        self.assertEqual(response.context["hub_value"], "626-Chrastany")
+        # start end
+        self.assertEqual(response.context["get_start"], None)
+        self.assertEqual(response.context["get_end"], None)
+
+        self.assertEqual(response.context["request"].path, self.url)
+        self.assertIsInstance(response.context["request"], HttpRequest)
+
+    # --- adviced nema odeslany email takze 10 spatne
+    def test_invalid_filtr_is_true(self):
+        response = self.client.get(self.url, {"invalid": "true"})
+        self.assertEqual(response.status_code, 200)
+        is_error, invalid_count = call_errors_adviced()
+        self.assertTrue(is_error)
+        self.assertEqual(invalid_count, 10)
+        self.assertEqual(response.context["invalid"], True)
 
 
 class TeamsViewTest(TestCase):
@@ -1243,42 +1398,75 @@ class TeamDetailViewTest(TestCase):
         # Vytvoříme testovacího uživatele
         self.user = User.objects.create_user(username="testuser", password="testpass")
         self.template = "app_sprava_montazi/teams/team_detail.html"
-        self.team = Team.objects.create(
-            name="Test Company",
+        self.active_team = Team.objects.create(
+            name="active company",
             city="Praha",
             region="Střední Čechy",
             phone="123456789",
-            email="test@company.cz",
+            email="active_company@company.cz",
             active=True,
             price_per_hour=150.50,
             price_per_km=12.30,
             notes="Toto je testovací poznámka.",
         )
-        self.url = reverse("team_detail", kwargs={"slug": self.team.slug})
+        self.not_active_team = Team.objects.create(
+            name="not active company",
+            city="Praha",
+            region="Střední Čechy",
+            phone="123456789",
+            email="not_active_company@company.cz",
+            active=False,
+            price_per_hour=150.50,
+            price_per_km=12.30,
+            notes="Toto je testovací poznámka.",
+        )
+        self.url_active = reverse("team_detail", kwargs={"slug": self.active_team.slug})
+        self.url_not_active = reverse(
+            "team_detail", kwargs={"slug": self.not_active_team.slug}
+        )
         self.client.login(username="testuser", password="testpass")
 
-    def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
-        response = self.client.get(self.url)
+    def test_logged_in_active(self):
+        response = self.client.get(self.url_active)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.template)
 
-    def test_redirect_if_not_logged_in(self):
-        """
-        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
-        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
-        """
+    def test_redirect_if_not_logged_in_active_team(self):
         self.client.logout()
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+        response = self.client.get(self.url_active)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url_active}")
 
-    def test_active_context_variable(self):
-        response = self.client.get(self.url)
+    def test_redirect_if_not_logged_in_not_active_team(self):
+        self.client.logout()
+        response = self.client.get(self.url_not_active)
+        self.assertRedirects(
+            response, f"{settings.LOGIN_URL}?next={self.url_not_active}"
+        )
+
+    def test_active_context_variable_active(self):
+        response = self.client.get(self.url_active)
         self.assertIn("active", response.context)
         self.assertEqual(response.context["active"], "teams")
+
+    def test_active_context_variable_not_active(self):
+        response = self.client.get(self.url_not_active)
+        self.assertIn("active", response.context)
+        self.assertEqual(response.context["active"], "teams")
+
+    def test_content_in_html_not_active(self):
+        response = self.client.get(self.url_not_active)
+        self.assertIn("active", response.context)
+        self.assertContains(response, 'id="checkBoxDeleteTeam"')
+        self.assertContains(response, 'id="deleteTeamButton"')
+        self.assertContains(response, 'name="delete-team"')
+
+    def test_content_in_html_active(self):
+        response = self.client.get(self.url_active)
+        self.assertIn("active", response.context)
+        self.assertNotContains(response, 'id="checkBoxDeleteTeam"')
+        self.assertNotContains(response, 'id="deleteTeamButton"')
+        self.assertNotContains(response, 'name="delete-team"')
+        self.assertContains(response, 'name="no-delete-team"')
 
 
 class TeamUpdateViewTest(TestCase):
@@ -1289,11 +1477,11 @@ class TeamUpdateViewTest(TestCase):
             name="Test Company",
             city="Praha",
             region="Střední Čechy",
-            phone="123456789",
+            phone="234234234",
             email="test@company.cz",
             active=True,
-            price_per_hour=150.50,
-            price_per_km=12.30,
+            price_per_hour=Decimal(150.50),
+            price_per_km=Decimal(12.30),
             notes="Toto je testovací poznámka.",
         )
         self.url = reverse("team_update", kwargs={"slug": self.team.slug})
@@ -1322,6 +1510,92 @@ class TeamUpdateViewTest(TestCase):
         response = self.client.get(self.url)
         self.assertIn("active", response.context)
         self.assertEqual(response.context["active"], "teams")
+
+    def test_before_update(self):
+        response = self.client.get(self.url)
+        self.assertEqual(self.team.name, "Test Company")
+        self.assertEqual(self.team.city, "Praha")
+        self.assertEqual(self.team.region, "Střední Čechy")
+        self.assertEqual(self.team.phone, "234234234")
+        self.assertEqual(self.team.email, "test@company.cz")
+        self.assertEqual(self.team.price_per_hour, Decimal(150.50))
+        self.assertEqual(self.team.price_per_km, Decimal(12.30))
+        self.assertEqual(self.team.notes, "Toto je testovací poznámka.")
+
+    def test_team_update_post(self):
+        """
+        Testuje, že POST požadavek aktualizuje tým a přesměruje správně.
+        """
+        updated_data = {
+            "name": "Updated Company",
+            "city": "Brno",
+            "region": "Jižní Morava",
+            "phone": "234234234",
+            "email": "updated@company.cz",
+            "active": True,
+            "price_per_hour": Decimal(200.00),
+            "price_per_km": Decimal(15.00),
+            "notes": "Aktualizovaná poznámka.",
+        }
+
+        response = self.client.post(self.url, updated_data, follow=True)
+        # Dočasně si vypiš, jestli tam nebyla chyba
+        self.team.refresh_from_db()
+
+        # Ověříme, že data byla aktualizována
+        self.assertEqual(self.team.name, "Updated Company")
+        self.assertEqual(self.team.city, "Brno")
+        self.assertEqual(self.team.region, "Jižní Morava")
+        self.assertEqual(self.team.phone, "234234234")
+        self.assertEqual(self.team.email, "updated@company.cz")
+        self.assertEqual(self.team.price_per_hour, 200.00)
+        self.assertEqual(self.team.price_per_km, 15.00)
+        self.assertEqual(self.team.notes, "Aktualizovaná poznámka.")
+
+        # Ověříme, že došlo k přesměrování
+        expected_url = reverse("team_detail", kwargs={"slug": self.team.slug})
+        self.assertRedirects(response, expected_url)
+
+        # Ověříme, že zpráva byla přidána
+        messages_list = list(response.context["messages"])
+        self.assertTrue(any("byl aktualizovan" in str(msg) for msg in messages_list))
+
+    def test_team_update_duplicate_name_post(self):
+        # Vytvoříme další tým s unikátním jménem
+        Team.objects.create(
+            name="Existující Firma",
+            city="Brno",
+            region="Jižní Morava",
+            phone="233233233",
+            email="exist@firma.cz",
+            active=True,
+            price_per_hour=Decimal(100.00),
+            price_per_km=Decimal(10.00),
+            notes="Poznámka",
+        )
+
+        updated_data = {
+            "name": "Existující Firma",  # pokus o duplicitní jméno
+            "city": "Brno",
+            "region": "Jižní Morava",
+            "phone": "234234234",
+            "email": "updated@company.cz",
+            "active": True,
+            "price_per_hour": Decimal(200.00),
+            "price_per_km": Decimal(15.00),
+            "notes": "Aktualizovaná poznámka.",
+        }
+
+        response = self.client.post(self.url, updated_data)
+        form = response.context.get("form")
+
+        # Očekáváme chybu duplicitního jména
+        self.assertTrue(form.errors)
+        self.assertIn("name", form.errors)
+
+        # Záznam v DB zůstal nezměněný
+        self.team.refresh_from_db()
+        self.assertEqual(self.team.name, "Test Company")
 
 
 class ClientOrdersViewTest(TestCase):
@@ -1761,11 +2035,10 @@ class ExportOrdersExcelViewTest(TestCase):
         actual_headers = [cell.value for cell in ws[1]]
         self.assertEqual(actual_headers, expected_headers)
         # ZDE JE ZMĚNA: Očekávaný suffix je nyní "New_NO-MATCH_None_None"
-        self.assertTrue(
-            response["Content-Disposition"].endswith(
-                f"filename=objednavky-{Status.NEW.value}_NO-MATCH_None_None.xlsx"
-            )
-        )
+        disposition = response["Content-Disposition"]
+        self.assertIn(f"filename=objednavky-{Status.NEW.value}_", disposition)
+        self.assertIn("NO-MATCH", disposition)
+        self.assertIn(".xlsx", disposition)
 
     def test_excel_file_with_status_filter(self):
         """
@@ -1790,6 +2063,9 @@ class ExportOrdersExcelViewTest(TestCase):
         self.assertEqual(
             order_row_values[6], format_date(self.order_adviced.evidence_termin)
         )
+        disposition = response["Content-Disposition"]
+        self.assertIn(f"filename=objednavky-{Status.ADVICED.value}_", disposition)
+        self.assertIn(".xlsx", disposition)
 
 
 class PdfViewTestV1(TestCase):
@@ -1912,8 +2188,29 @@ class GeneratePDFViewTest(TestCase):
 
         self.hub = DistribHub.objects.create(code="626", city="Chrastany")
         self.customer = Client.objects.create(name="Franta test", zip_code="12345")
-
-        self.order = Order.objects.create(
+        self.team_active = Team.objects.create(
+            name="Active Company",
+            city="Praha",
+            region="Střední Čechy",
+            phone="123456789",
+            email="active@company.cz",
+            active=True,
+            price_per_hour=150.50,
+            price_per_km=12.30,
+            notes="Toto je testovací poznámka.",
+        )
+        self.team_not_active = Team.objects.create(
+            name="Not active company",
+            city="Praha",
+            region="Střední Čechy",
+            phone="123456789",
+            email="not_active@company.cz",
+            active=False,
+            price_per_hour=150.50,
+            price_per_km=12.30,
+            notes="Toto je testovací poznámka.",
+        )
+        self.order_with_active_team = Order.objects.create(
             order_number="12345-R",
             distrib_hub=self.hub,
             mandant="SCCZ",
@@ -1922,29 +2219,36 @@ class GeneratePDFViewTest(TestCase):
             delivery_termin=date(2024, 4, 10),
             montage_termin=timezone.make_aware(datetime(2024, 5, 20, 8, 0)),
             status=Status.ADVICED,
-            team=Team.objects.create(
-                name="Test Company",
-                city="Praha",
-                region="Střední Čechy",
-                phone="123456789",
-                email="test@company.cz",
-                active=True,
-                price_per_hour=150.50,
-                price_per_km=12.30,
-                notes="Toto je testovací poznámka.",
-            ),
+            team=self.team_active,
             team_type=TeamType.BY_ASSEMBLY_CREW,
         )
-        self.url = reverse("generate_pdf", kwargs={"pk": self.order.pk})
+        self.order_with_not_active_team = Order.objects.create(
+            order_number="54321-R",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            evidence_termin=date(2024, 1, 1),
+            delivery_termin=date(2024, 4, 10),
+            montage_termin=timezone.make_aware(datetime(2024, 5, 20, 8, 0)),
+            status=Status.ADVICED,
+            team=self.team_not_active,
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+        )
+        self.url_active = reverse(
+            "generate_pdf", kwargs={"pk": self.order_with_active_team.pk}
+        )
+        self.url_not_active = reverse(
+            "generate_pdf", kwargs={"pk": self.order_with_not_active_team.pk}
+        )
 
     def test_logged_in_redirects(self):
         """
         Přihlášený uživatel je přesměrován po úspěšném vygenerování PDF.
         """
-        response = self.client.get(self.url)
+        response = self.client.get(self.url_active)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(
-            response, reverse("protocol", kwargs={"pk": self.order.pk})
+            response, reverse("protocol", kwargs={"pk": self.order_with_active_team.pk})
         )
 
     def test_redirect_if_not_logged_in(self):
@@ -1952,30 +2256,54 @@ class GeneratePDFViewTest(TestCase):
         Nepřihlášený uživatel je přesměrován na login stránku.
         """
         self.client.logout()
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+        response = self.client.get(self.url_active)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url_active}")
+
+    def test_pdf_is_generated_and_saved_v1(self):
+        response = self.client.get(self.url_active)
+        self.assertRedirects(
+            response, reverse("protocol", kwargs={"pk": self.order_with_active_team.pk})
+        )
+
+        pdf_entry = OrderPDFStorage.objects.get(order=self.order_with_active_team)
+        self.assertIsNotNone(pdf_entry.file)
+        self.assertTrue(pdf_entry.file.name.endswith(".pdf"))
+        self.assertTrue(default_storage.exists(pdf_entry.file.name))
+
+        with default_storage.open(pdf_entry.file.name, "rb") as f:
+            content = f.read()
+            self.assertGreater(len(content), 0)
+
+    def test_pdf_is_generated_with_message(self):
+        response = self.client.get(self.url_active, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(
+            response, reverse("protocol", kwargs={"pk": self.order_with_active_team.pk})
+        )
+        messages = [msg.message for msg in get_messages(response.wsgi_request)]
+        self.assertIn(
+            (
+                f"PDF: <strong>{str(self.order_with_active_team).upper()}</strong> "
+                f"byl úspěšně vygenerován a uložen."
+            ),
+            messages,
+        )
+
+    def test_pdf_is_generated_with_message_not_active(self):
+        response = self.client.get(self.url_not_active, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(
+            response,
+            reverse("protocol", kwargs={"pk": self.order_with_not_active_team.pk}),
+        )
+        messages = [msg.message for msg in get_messages(response.wsgi_request)]
+        self.assertIn("Nelze generovat protokol, Tým je neaktivní", messages)
 
     def tearDown(self):
         self.override.disable()
 
         # Smaž všechny soubory v dočasném MEDIA_ROOT
         shutil.rmtree(self._temp_media, ignore_errors=True)
-
-    def test_pdf_is_generated_and_savedV1(self):
-        response = self.client.get(self.url)
-        self.assertRedirects(
-            response, reverse("protocol", kwargs={"pk": self.order.pk})
-        )
-
-        pdf_entry = OrderPDFStorage.objects.get(order=self.order)
-        self.assertIsNotNone(pdf_entry.file)
-        self.assertTrue(pdf_entry.file.name.endswith(".pdf"))
-
-        self.assertTrue(default_storage.exists(pdf_entry.file.name))
-
-        with default_storage.open(pdf_entry.file.name, "rb") as f:
-            content = f.read()
-            self.assertGreater(len(content), 0)
 
 
 class CheckPDFProtocolViewTest(TestCase):

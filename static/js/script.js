@@ -1,6 +1,5 @@
 (function () {
     console.log("script.js");
-    console.log("Kontrola hashe pri zmene souboru");
     const html = document.documentElement;
     const themeToggler = document.getElementById("themeToggler");
     const orderTable = document.getElementById("orderTable");
@@ -17,6 +16,12 @@
 
     // delete Order
     document.addEventListener("DOMContentLoaded", deleteOrder);
+    // SCCZ filter
+    document.addEventListener("DOMContentLoaded", scczFilter);
+    // hiden Order
+    document.addEventListener("DOMContentLoaded", hiddenOrder);
+    // delete team
+    document.addEventListener("DOMContentLoaded", deleteTeam);
     // copy to schranka
     document.addEventListener("DOMContentLoaded", setupAutobotCopy);
     // File input validation
@@ -277,6 +282,19 @@
                 lengthMenu: "<small>_MENU_ zakázek na stránku</small>",
                 search: "Vyhledávání: "
             },
+        });
+        // Delegace - nasloucháme klikům na odkazy v tabulce
+        orderTable.addEventListener("click", function (e) {
+            const link = e.target.closest(".copy_link_order_number");
+
+            if (link) {
+                const text = link.innerText.trim();
+
+                navigator.clipboard.writeText(text).then(() => {
+                }).catch(() => {
+                    console.log("❌ Kopírování selhalo.");
+                });
+            }
         });
     }
 
@@ -584,4 +602,60 @@
             }
         })
     }
+    // hidden Order
+    function hiddenOrder() {
+        const checkBoxHiddenOrder = document.getElementById("checkBoxHiddenOrder");
+        const hiddenOrderButton = document.getElementById("hiddenOrderButton")
+
+        if (!checkBoxHiddenOrder && !hiddenOrderButton) {
+            return
+        }
+        checkBoxHiddenOrder.addEventListener("change", function () {
+            if (checkBoxHiddenOrder.checked) {
+                hiddenOrderButton.classList.remove("disabled")
+            } else {
+                hiddenOrderButton.classList.add("disabled")
+            }
+        })
+    }
+    // hidden Order
+    function deleteTeam() {
+        const checkBoxDeleteTeam = document.getElementById("checkBoxDeleteTeam");
+        const deleteTeamButton = document.getElementById("deleteTeamButton")
+
+        if (!checkBoxDeleteTeam && !deleteTeamButton) {
+            return
+        }
+        checkBoxDeleteTeam.addEventListener("change", function () {
+            if (checkBoxDeleteTeam.checked) {
+                deleteTeamButton.classList.remove("disabled")
+            } else {
+                deleteTeamButton.classList.add("disabled")
+            }
+        })
+    }
+
+    function scczFilter() {
+        const mandantInput = document.getElementById("mandant");
+        const odWrapper = document.getElementById("obchodniDumWrapper");
+
+        if (!mandantInput || !odWrapper) {
+            return;
+        }
+
+        function toggleOD() {
+            const value = mandantInput.value.trim().toUpperCase();
+            if (value === "SCCZ") {
+                odWrapper.classList.remove("od_inactive");
+            } else {
+                odWrapper.classList.add("od_inactive");
+            }
+        }
+
+        toggleOD();
+        
+        mandantInput.addEventListener("input", toggleOD);
+    }
+
+
 })();

@@ -7,6 +7,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.timezone import localtime
 from django.core.files.base import ContentFile
 from django.conf import settings
@@ -81,13 +82,28 @@ class PdfGenerator(ABC):
     def save_pdf_protocol_to_db(self, model, pdf: bytes) -> bool:
         pdf_content = ContentFile(pdf)
         filename = f"order_{model.order_number.upper()}.pdf"
-        pdf_file, created = OrderPDFStorage.objects.get_or_create(order=model)
+        pdf_content.name = filename
 
-        # Smaž předchozí soubor, pokud existuje
-        if not created and pdf_file.file and pdf_file.file.name:
-            pdf_file.file.delete(save=False)
+        try:
+            pdf_file = OrderPDFStorage.objects.get(order=model)
+            created = False
 
-        # Ulož nový PDF soubor
+            # Smaž starý soubor
+            if pdf_file.file and pdf_file.file.name:
+                pdf_file.file.delete(save=False)
+
+            # Změň tým (pokud třeba)
+            pdf_file.team = model.team.name if model.team else "Neznámý tým"
+
+        except OrderPDFStorage.DoesNotExist:
+            # Vytvoř nový
+            pdf_file = OrderPDFStorage(
+                order=model,
+                team=model.team.name if model.team else "Neznámý tým",
+            )
+            created = True
+
+        # Ulož nový soubor
         pdf_file.file.save(filename, pdf_content, save=True)
 
         if created and settings.DEBUG:

@@ -94,12 +94,20 @@ class Team(Model):
             return str(self.notes)
         return "-"
 
+    def name_first_15(self) -> str:
+        if self.name:
+            if len(self.name) > 15:
+                return f"{str(self.name)[:15]}..."
+            return str(self.name)
+        return "No Name"
+
     def __str__(self) -> str:
         return str(self.name)
 
     def save(self, *args, **kwargs):
-        if self.slug != self.name:
-            self.slug = slugify(self.name)
+        new_slug = slugify(self.name)
+        if self.slug != new_slug:
+            self.slug = new_slug
         super().save(*args, **kwargs)
 
 
@@ -170,18 +178,40 @@ class Order(Model):
         unique=True,
         verbose_name="Číslo zakázky",
     )
+
     distrib_hub = ForeignKey(
         DistribHub,
         on_delete=PROTECT,
         verbose_name="Místo určení",
     )
+    team = ForeignKey(
+        Team,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        limit_choices_to={"active": True},
+        verbose_name="Montážní tým",
+    )
+
+    mail_datum_sended = DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Protocol mail odeslan",
+    )
+
+    mail_team_sended = CharField(
+        blank=True,
+        verbose_name="jakemu tymu byl poslan email",
+    )
     mandant = CharField(max_length=4, verbose_name="Mandant")
+
     status = CharField(
         max_length=32,
         choices=Status.choices,
         default=Status.NEW,
         verbose_name="Stav",
     )
+
     client = ForeignKey(
         Client,
         null=True,
@@ -199,6 +229,7 @@ class Order(Model):
         null=True,
         verbose_name="Termín doručení",
     )
+
     montage_termin = DateTimeField(
         blank=True,
         null=True,
@@ -212,20 +243,7 @@ class Order(Model):
         default=TeamType.BY_ASSEMBLY_CREW,
         verbose_name="Realizace kým",
     )
-    team = ForeignKey(
-        Team,
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        limit_choices_to={"active": True},
-        verbose_name="Montážní tým",
-    )
     notes = TextField(blank=True, verbose_name="Poznámky")
-    mail_datum_sended = DateTimeField(
-        blank=True,
-        null=True,
-        verbose_name="Protocol mail odeslan",
-    )
 
     history = HistoricalRecords()
 
@@ -327,12 +345,16 @@ class OrderPDFStorage(Model):
     order = OneToOneField(
         Order, on_delete=PROTECT, related_name="pdf", verbose_name="Objednávka"
     )
+    team = CharField(blank=False, max_length=32, verbose_name="montazni tym")
     file = FileField(upload_to="stored_pdfs/", verbose_name="PDF soubor")
     created = DateTimeField(auto_now=True, verbose_name="Čas uložení")
     history = HistoricalRecords()
 
     def __str__(self):
-        return f"PDF pro objednávku {self.order.order_number}"
+        return (
+            f"PDF pro objednávku {self.order.order_number} "
+            f"s montaznim tymem {self.team}"
+        )
 
     class Meta:
         ordering = ["-created"]

@@ -22,7 +22,7 @@
       <!---->
       <div class="L-table__nav-panel__buttons">
         <a href="{% url 'order_export' %}?{{ request.GET.urlencode }}"
-           class="btn btn-primary btn-sm">
+           class="btn btn-primary btn-sm {% if invalid %}btn-secondary disabled{% endif %}">
           <i class="fa-regular fa-file-excel me-2 "></i>
           <span>Excel export</span>
         </a>

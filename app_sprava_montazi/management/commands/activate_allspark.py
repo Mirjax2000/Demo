@@ -36,7 +36,7 @@ class Command(BaseCommand):
         self.create_users()
         self.collect_static()
         self.run_distrib_hubs()
-        self.settings_fill_database()
+        # self.settings_fill_database()
         cons.log("\n")
         cons.rule(
             "[bold yellow]⚡ Aktivace dokončena. Systém je připraven.[/bold yellow]"
@@ -153,9 +153,7 @@ class Command(BaseCommand):
     def settings_fill_database(self) -> None:
         try:
             cons.log("📦 Spouštím nastavovani aplikace...", style="blue")
-            call_command(
-                "settings_fill_db", "app_settings.json",  verbosity=0
-            )
+            call_command("settings_fill_db", "app_settings.json", verbosity=0)
             cons.log("✅ App Settings databaze zaplnena.", style="green")
 
         except Exception as e:

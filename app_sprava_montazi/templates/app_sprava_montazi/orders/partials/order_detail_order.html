@@ -67,10 +67,17 @@
             {% if order.team %}
                 <li class="L-detail__item">
                     <strong>Montážní tým:</strong>
-                    <span class="ms-1">
-                        <a href="{% url "team_detail" order.team.slug %}"
-                           class="u-txt-success-light">{{ order.team }}</a>
-                    </span>
+                    {% if order.team.active %}
+                        <span class="ms-1">
+                            <a href="{% url "team_detail" order.team.slug %}"
+                               class="u-txt-success-light">{{ order.team.name_first_15 }}</a>
+                        </span>
+                    {% else %}
+                        <span class="ms-1">
+                            <a class="u-txt-error" href="{% url "team_detail" order.team.slug %}">
+                                <span>{{ order.team.name_first_15 }}</span><i class="fa-solid fa-triangle-exclamation fa-shake ms-1 u-txt-warning-color"></i></a>
+                        </span>
+                    {% endif %}
                 </li>
             {% else %}
                 <li class="L-detail__item">

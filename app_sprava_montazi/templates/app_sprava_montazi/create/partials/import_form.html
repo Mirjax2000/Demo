@@ -9,8 +9,7 @@
             {{ form.file }}
             <div class="L-form__error">
                 {% if form.file.errors %}{{ form.file.errors }}{% endif %}
-                <p class="u-txt-error u-error-special1"
-                   id="csv_error_message"></p>
+                <p class="u-txt-error u-error-special1" id="csv_error_message"></p>
             </div>
         </div>
         <!---->
@@ -24,9 +23,11 @@
                            aria-checked="true">
                     <label class="form-check-label" for="potlacitVelikostCsvChckBox">ignore size</label>
                 </div>
+            {% else %}
+                <div></div>
             {% endif %}
             <!---->
-            <div class="u-txt-right">
+            <div>
                 <button type="submit" class="btn btn-primary">
                     <i class="fa-solid fa-plus me-2"></i>importovat data
                 </button>

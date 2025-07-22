@@ -58,8 +58,43 @@
                 <span>Do dnes</span>
             {% endif %}
         </div>
+        <!-- Distrib hub -->
+        <div class="L-table__nav-panel__form__group">
+            <label for="hub">Místo určení</label>
+            <select name="hub" class="form-select L-table__select" id="hub">
+                <option value="" {% if not raw_hub %}selected{% endif %}>Všechny</option>
+                {% for hub in hub_choices %}
+                    <option value="{{ hub.slug }}"
+                            {% if raw_hub == hub.slug %}selected{% endif %}>{{ hub.city }}</option>
+                {% endfor %}
+            </select>
+            <!---->
+            {% if hub_value %}
+                MU: <span class="u-txt-success-light">{{ hub_value }}</span>
+            {% else %}
+                <span>Všechny:</span>
+            {% endif %}
+        </div>
+        <!-- mandant -->
+        <div class="L-table__nav-panel__form__group">
+            <label for="mandant">Mandant</label>
+            <input type="text"
+                   id="mandant"
+                   class="form-control"
+                   maxlength="4"
+                   placeholder="nevybráno"
+                   value="{{ get_mandant|default_if_none:'' }}"
+                   name="mandant">
+            <!---->
+            {% if get_mandant %}
+                Mandant: <span class="u-txt-success-light">{{ get_mandant }}</span>
+            {% else %}
+                <span>Všechny mandanty:</span>
+            {% endif %}
+        </div>
         <!-- obchodni dum-->
-        <div class="L-table__nav-panel__form__group od">
+        <div class="L-table__nav-panel__form__group od od_inactive"
+             id="obchodniDumWrapper">
             <label for="od">Obchodní dům</label>
             <select name="od" class="form-select L-table__select" id="od">
                 <option value="" {% if not raw_od %}selected{% endif %}>Všechny OD</option>
@@ -69,20 +104,30 @@
             </select>
             <!---->
             {% if od_value %}
-                <span class="u-txt-success-light">{{ od_value }}</span>
+                OD: <span class="u-txt-success-light">{{ od_value }}</span>
             {% else %}
                 <span>Všechny OD:</span>
             {% endif %}
         </div>
         <!-- search btn-->
         <div class="L-table__nav-panel__form__group">
-            <button class="btn btn-primary mt-4" type="submit">
+            <button class="shadow_button btn btn-primary btn-sm mt-4" type="submit">
                 <span class="me-2">Hledej</span>
                 <i class="bi bi-search"></i>
             </button>
-            <div class="u-txt-right">
-                <a href="{% url "orders" %}"
-                   class="btn btn-sm btn-primary p-0 ps-1 pe-1 lh-sm">reset</a>
+            <div class="u-flex-row-between">
+                {% if errors.has_error and not invalid %}
+                    <div class="u-txt-right" name="invalid_filtr">
+                        <a href="{% url "orders" %}?invalid=true"
+                           class="shadow_button btn btn-sm btn-warning p-0 ps-1 pe-1 lh-sm">Invalid</a>
+                    </div>
+                {% else %}
+                    <div name="not_invalid_filtr"></div>
+                {% endif %}
+                <div class="u-txt-right">
+                    <a href="{% url "orders" %}"
+                       class="shadow_button btn btn-sm btn-primary p-0 ps-1 pe-1 lh-sm">reset</a>
+                </div>
             </div>
         </div>
         <!---->

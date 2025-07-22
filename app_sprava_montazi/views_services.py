@@ -9,13 +9,13 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import View, TemplateView
+from django.views.generic import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 
 
 # --- modely z DB
-from .models import Order, OrderBackProtocolToken, AppSetting
+from .models import Order, OrderBackProtocolToken
 
 # --- OOP classes
 from .OOP_emails import CustomEmail
@@ -30,26 +30,29 @@ class SendMailView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         pk = kwargs["pk"]
         order: Order = get_object_or_404(Order, pk=pk)
-        # ---
-        token_obj, _ = OrderBackProtocolToken.objects.get_or_create(order=order)
-        if not token_obj.token:
-            token_obj.token = secrets.token_urlsafe(16)
-            token_obj.save()
 
+        # --- vždy vytvoříme nový token (smažeme starý)
+        OrderBackProtocolToken.objects.filter(order=order).delete()
+        new_token = secrets.token_urlsafe(16)
+        token_obj = OrderBackProtocolToken.objects.create(order=order, token=new_token)
+
+        # --- vygenerujeme URL s tokenem
         back_url = request.build_absolute_uri(
             reverse("back_protocol", kwargs={"pk": pk}) + f"?token={token_obj.token}"
         )
-        # ---
+
+        # --- odeslání e-mailu
         email: CustomEmail = CustomEmail(pk=pk, back_url=back_url, user=request.user)
         try:
             email.send_email_with_encrypted_pdf()
             order.mail_datum_sended = timezone.now()
+            order.mail_team_sended = order.team.name
             order.save()
             messages.success(
                 request,
                 (
                     f"Email pro montazni tym: <strong>{order.team}</strong> "
-                    f"na adresu <strong>{order.team.email}</strong> byl odeslan."  # type:ignore
+                    f"na adresu <strong>{order.team.email}</strong> byl odeslan."  # type: ignore
                 ),
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
@@ -57,8 +60,8 @@ class SendMailView(LoginRequiredMixin, View):
                 request,
                 (
                     f"Email pro montazni tym: <strong>{order.team}</strong> "
-                    f"na adresu <strong>{order.team.email}</strong> "  # type: ignore
-                    f"nebyl odeslan, Chyba {str(e)}"
+                    f"na adresu <strong>{order.team.email}</strong> "
+                    f"nebyl odeslan, Chyba: {str(e)}"
                 ),
             )
 
@@ -91,20 +94,3 @@ class OrderStatusView(LoginRequiredMixin, View):
 
         except Order.DoesNotExist:
             return JsonResponse({"status": "Neznámé číslo zakázky"}, status=404)
-
-
-# --- App settings ---
-
-
-class SettingsView(LoginRequiredMixin, TemplateView):
-    template_name = f"{APP_URL}/create/settings.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        ceny_montaze: AppSetting = get_object_or_404(AppSetting, name="ceny montaze")
-        firma: AppSetting = get_object_or_404(AppSetting, name="firma")
-        context["ceny_montaze"] = ceny_montaze
-        context["firma"] = firma
-        context["active"] = "create"
-
-        return context

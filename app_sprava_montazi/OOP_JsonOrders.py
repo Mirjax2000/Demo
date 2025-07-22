@@ -4,22 +4,29 @@ from typing import Tuple, TypedDict, TypeAlias
 from rich.console import Console
 
 # --- django
-from django.utils import timezone
-from django.db.models import QuerySet, Q, Value
-from django.db.models.functions import Concat
-from django.http import JsonResponse
+from django.conf import settings
 from django.urls import reverse
+from django.utils import timezone
+from django.http import JsonResponse
+from django.db.models.functions import Concat
+from django.db.models import QuerySet, Q, F, Value
 
 # --- models
-from .models import Order, Client
+from .models import Order, Client, Status, Team
+
+# --- utils
+from .utils import check_order_error_adviced
 
 
 # --- type aliases
 class FilterDict(TypedDict):
     status: str
     od: str
+    hub: str
     start_date: str | None
     end_date: str | None
+    invalid: str | None
+    mandant: str | None
 
 
 JsonHeader: TypeAlias = Tuple[int, int, int, str | None, str]
@@ -37,6 +44,9 @@ warning_mail_icon: str = (
 )
 success_mail_icon: str = (
     '<i class="fa-solid fa-envelope-circle-check u-txt-success-light-color"></i>'
+)
+ringing_bell_icon: str = (
+    '<i class="fa-solid fa-bell fa-shake fa-sm u-txt-error-color me-1"></i>'
 )
 
 
@@ -127,10 +137,13 @@ class JsonOrders:
 
     def order_number_coll(self, order: Order) -> str:
         """vraci i s linkem na order"""
+        error: bool = check_order_error_adviced(order.pk)
         name: str = "order-number"
-        css: str = "L-table__link"
+        css: str = "L-table__link copy_link_order_number"
         content: str = str(order.order_number)
         order_link = reverse("order_detail", args=[order.pk])
+        if error:
+            css += " u-txt-error"
         result = f'<a href="{order_link}" name="{name}" class="{css}">{content}</a>'
         return result
 
@@ -207,25 +220,31 @@ class JsonOrders:
         return result
 
     def team_coll(self, order: Order) -> str:
-        """Vraci team type"""
-        name: str = "team"
-        css: str = "u-s-none"
-        content: str = "-"
-        icon: str = ""
+        """Vrací tým a jeho stav jako HTML fragment"""
+        name = "team"
+        css = "u-s-none"
+        content = "-"
+        icon = ""
+        title = ""
+
+        team = order.team
+        if team:
+            title = team.name
 
         if order.is_missing_team():
             css += " u-txt-warning"
             icon = exclamation_icon
             content = "Nevybráno"
 
-        elif order.team:
+        elif team:
             css += " u-txt-success"
             icon = success_icon
-            content = f"{order.team}"
+            content = team.name_first_15()
+            if not team.active:
+                css = "u-s-none u-txt-error"
+                icon = ringing_bell_icon
 
-        result: str = (
-            f'<div name="{name}">{icon}<span class="{css}">{content}</span></div>'
-        )
+        result: str = f'<div title="{title}" name="{name}">{icon}<span class="{css}">{content}</span></div>'
 
         return result
 
@@ -250,23 +269,22 @@ class JsonOrders:
 
     def status_coll(self, order: Order) -> str:
         """Vrací status + případnou ikonu odkazu na protokol."""
-        name: str = "status"
+        error = check_order_error_adviced(order.pk)
         content = order.get_status_display()[:8]  # type: ignore
-        icon: str = ""
+        icon = ""
 
-        if order.status == "Adviced":
-            icon_link: str = warning_mail_icon
-            if order.mail_datum_sended:
-                icon_link = success_mail_icon
+        if order.status == Status.ADVICED:
+            icon_link = success_mail_icon
+            if error:
+                icon_link = warning_mail_icon
 
-            icon = (
-                f'<a href="{reverse("protocol", kwargs={"pk": order.pk})}"'
-                f'title="Zobrazit protokol">'
-                f"{icon_link}</a>"
-            )
+            if icon_link:
+                icon = (
+                    f'<a href="{reverse("protocol", kwargs={"pk": order.pk})}" '
+                    f'title="Zobrazit protokol">{icon_link}</a>'
+                )
 
-        result = f'<div name="{name}">{content} {icon}</div>'
-        return result
+        return f'<div name="status">{content} {icon}</div>'
 
     def articles_coll(self, order: Order) -> str:
         name: str = "articles"
@@ -295,44 +313,151 @@ class Utils:
         return {
             "status": request.GET.get("status", "").strip(),
             "od": request.GET.get("od", "").strip(),
+            "hub": request.GET.get("hub", "").strip(),
             "start_date": request.GET.get("start_date", "").strip() or None,
             "end_date": request.GET.get("end_date", "").strip() or None,
+            "invalid": request.GET.get("invalid", "").strip() or None,
+            "mandant": request.GET.get("mandant", "").strip() or None,
         }
 
     @staticmethod
     def filter_orders(filters: FilterDict) -> QuerySet:
-        """Vrátí queryset objednávek podle GET ale pres filters"""
+        """Vrátí queryset objednávek podle GET parametrů."""
+        if filters.get("invalid") == "true":
+            return Utils.get_invalid_orders()
+        # --- jinak normalni filtr
+        return Utils.get_filtered_orders(filters)
 
-        status = filters.get("status", "").strip()
-        od_value = filters.get("od", "").strip()
+    @staticmethod
+    def get_invalid_orders() -> QuerySet:
+        """Vrátí objednávky se statusem ADVICED, které mají chybu."""
+        filtr: QuerySet = Order.objects.filter(status=Status.ADVICED).filter(
+            Q(mail_datum_sended__isnull=True)
+            | (
+                Q(mail_datum_sended__isnull=False)
+                & Q(team__name__isnull=False)
+                & ~Q(team__name=F("mail_team_sended"))
+            )
+            | Q(team__active=False)
+        )
+
+        return filtr
+
+    # --- stara verze
+    # @staticmethod
+    # def get_filtered_orders(filters: FilterDict) -> QuerySet:
+    #     """Vrátí objednávky podle statusu, datumu a obchodního domu."""
+    #     status = filters.get("status", "").strip()
+    #     od_value = filters.get("od", "").strip()
+    #     start_date = filters.get("start_date")
+    #     end_date = filters.get("end_date")
+
+    #     orders = Order.objects.all()
+
+    #     if status == "all":
+    #         orders = orders.exclude(status="Hidden")
+    #     elif status == "closed":
+    #         orders = orders.filter(status__in=["Billed", "Canceled"])
+    #     elif status:
+    #         orders = orders.filter(status=status)
+    #     else:
+    #         orders = orders.exclude(status__in=["Hidden", "Billed", "Canceled"])
+
+    #     if start_date:
+    #         orders = orders.filter(evidence_termin__gte=start_date)
+
+    #     if end_date:
+    #         orders = orders.filter(evidence_termin__lte=end_date)
+
+    #     if od_value:
+    #         orders = orders.filter(order_number__startswith=od_value)
+
+    #     return orders
+
+    @staticmethod
+    def get_filtered_orders(filters: FilterDict) -> QuerySet:
+        """Vrátí objednávky podle statusu, datumu a obchodního domu."""
+
+        filter_cond: dict = {}
+        exclude_cond: dict = {}
+
+        status = filters.get("status", "")
+        od_value = filters.get("od", "")
+        hub_value = filters.get("hub", "")
         start_date = filters.get("start_date")
         end_date = filters.get("end_date")
-        # --- dotaz na vsechno a postupne se pridavaji dalsi filtry
-        orders = Order.objects.all()
-        # --- status filtr
-        # --- vsechny krome hidden
-        if status == "all":
-            orders = orders.exclude(status="Hidden")
-        elif status == "closed":
-            # --- Uzavrene
-            orders = orders.filter(status__in=["Billed", "Canceled"])
-        elif status:
-            # --- jednotlive
-            orders = orders.filter(status=status)
-        else:
-            # --- Otevrene - default filtr
-            orders = orders.exclude(status__in=["Hidden", "Billed", "Canceled"])
-        # --- casovy filtr
-        if start_date:
-            orders = orders.filter(evidence_termin__gte=start_date)
+        mandant = filters.get("mandant")
 
+        # --- Status logika
+        if status == "all":
+            exclude_cond["status"] = "Hidden"
+        elif status == "closed":
+            filter_cond["status__in"] = ["Billed", "Canceled"]
+        elif status:
+            filter_cond["status"] = status
+        else:
+            exclude_cond["status__in"] = ["Hidden", "Billed", "Canceled"]
+
+        # --- mandant
+        if mandant:
+            filter_cond["mandant"] = mandant
+
+        # --- Datum od-do
+        if start_date:
+            filter_cond["evidence_termin__gte"] = start_date
         if end_date:
-            orders = orders.filter(evidence_termin__lte=end_date)
-        # --- obchodni dum filtr
+            filter_cond["evidence_termin__lte"] = end_date
+
+        # --- Obchodní dům
         if od_value:
-            orders = orders.filter(order_number__startswith=od_value)
+            filter_cond["order_number__startswith"] = od_value
+
+        # --- Distrib Hub
+        if hub_value:
+            filter_cond["distrib_hub__slug"] = hub_value
+
+        # --- Dotaz
+        orders = Order.objects.filter(**filter_cond)
+
+        if exclude_cond:
+            orders = orders.exclude(**exclude_cond)
 
         return orders
+
+    # --- verze filtru 2
+    # @staticmethod
+    # def get_filtered_orders_verze_2(filters: FilterDict) -> QuerySet:
+    #     """Vrátí objednávky podle statusu, datumu a obchodního domu."""
+
+    #     status = filters.get("status", "")
+    #     od_value = filters.get("od", "")
+    #     start_date = filters.get("start_date")
+    #     end_date = filters.get("end_date")
+
+    #     query = Q()
+
+    #     # --- Status logika
+    #     if status == "all":
+    #         query &= ~Q(status="Hidden")  # vyřadit "Hidden"
+    #     elif status == "closed":
+    #         query &= Q(status__in=["Billed", "Canceled"])
+    #     elif status:
+    #         query &= Q(status=status)
+    #     else:
+    #         query &= ~Q(status__in=["Hidden", "Billed", "Canceled"])
+
+    #     # --- Datum od-do
+    #     if start_date:
+    #         query &= Q(evidence_termin__gte=start_date)
+    #     if end_date:
+    #         query &= Q(evidence_termin__lte=end_date)
+
+    #     # --- Obchodní dům
+    #     if od_value:
+    #         query &= Q(order_number__startswith=od_value)
+
+    #     orders = Order.objects.filter(query)
+    #     return orders
 
 
 if __name__ == "__main__":

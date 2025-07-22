@@ -1,8 +1,9 @@
 """app_sprava_montazi View"""
 
 import os
-from typing import Any
+from typing import Any, cast, TypedDict, Tuple, List, Dict
 from datetime import datetime
+from django.utils import timezone
 from openpyxl import Workbook
 from rich.console import Console
 
@@ -23,19 +24,15 @@ from django.views.generic import View, UpdateView, TemplateView
 from django.views.generic import CreateView, DetailView, FormView, ListView
 
 # API rest ---
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 
+# --- mixiny
+from .mixins import ErrorContextMixin
 
 # --- formulare
 from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
 from .forms import UploadForm, TeamForm, OrderForm
 
-# --- serializer
-from .serializer import OrderCustomerUpdateSerializer
 
 # --- modely z DB
 from .models import Article, CallLog, Client, Order, Team, TeamType, Status
@@ -43,18 +40,32 @@ from .models import OrderPDFStorage, OrderBackProtocolToken, OrderBackProtocol
 from .models import HistoricalArticle  # type: ignore  # pylint: disable=no-name-in-module
 
 # pomocne funkce ---
-from .utils import format_date, update_customers
+from .utils import (
+    format_date,
+    call_errors_adviced,
+    check_order_error_adviced,
+    is_team_names_different,
+    team_soulad,
+)
 
 # 00P classes ---
 from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
 from .OOP_back_protocol import ProtocolUploader
 from .OOP_JsonOrders import JsonOrders
 
+# --- typove aliasy
+OdChoice = Tuple[str, str]
+OdChoices = List[OdChoice]
+OdDict = Dict[str, str]
+
 cons: Console = Console()
 User = get_user_model()
 # ---
 APP_URL = "app_sprava_montazi"
-OD_CHOICES = [
+# ---
+HUB_CHOICES = DistribHub.objects.all()
+# ---
+OD_CHOICES: OdChoices = [
     ("701", "OD Stodůlky"),
     ("703", "OD Černý Most"),
     ("705", "OD Liberec"),
@@ -63,29 +74,30 @@ OD_CHOICES = [
     ("708", "OD Hradec Králové"),
     ("709", "OD Plzeň"),
 ]
-OD_DICT = dict(OD_CHOICES)
+OD_DICT: OdDict = dict(OD_CHOICES)
 # ---
 
 
-class IndexView(LoginRequiredMixin, TemplateView):
+class IndexView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
     """Index View"""
 
     template_name = "base.html"
 
 
-class HomePageView(LoginRequiredMixin, TemplateView):
+class HomePageView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
     """Homepage View"""
 
     template_name = f"{APP_URL}/homepage/homepage.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         # --- navigace
         context["active"] = "homepage"
         return context
 
 
-class CreatePageView(LoginRequiredMixin, FormView):
+class CreatePageView(LoginRequiredMixin, ErrorContextMixin, FormView):
     """Createpage View using FormView"""
 
     template_name = f"{APP_URL}/create/create.html"
@@ -143,8 +155,14 @@ class CreatePageView(LoginRequiredMixin, FormView):
             call_command("distrib_hub")
 
         try:
+            db_count_old: int = Order.objects.count()
             call_command("import_data", upload.file.path)
-            messages.success(self.request, "Import dokončen.")
+            db_count_new: int = Order.objects.count()
+            result: int = db_count_new - db_count_old
+            messages.success(
+                self.request,
+                f"Import dokončen. <strong>{result}</strong> nových zakázek",
+            )
             return super().form_valid(form)
         # ---
         except KeyError as e:
@@ -172,7 +190,7 @@ class CreatePageView(LoginRequiredMixin, FormView):
             return redirect("createpage")
 
 
-class DashboardView(LoginRequiredMixin, TemplateView):
+class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
     """Dashboard View"""
 
     template_name = f"{APP_URL}/dashboard/dashboard.html"
@@ -184,7 +202,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class ClientUpdateView(LoginRequiredMixin, UpdateView):
+class ClientUpdateView(LoginRequiredMixin, ErrorContextMixin, UpdateView):
     """Uprav zakaznika"""
 
     model = Client
@@ -222,7 +240,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return reverse("order_detail", kwargs={"pk": order_pk})
 
 
-class ClientUpdateSecondaryView(LoginRequiredMixin, UpdateView):
+class ClientUpdateSecondaryView(LoginRequiredMixin, ErrorContextMixin, UpdateView):
     model = Client
     template_name = f"{APP_URL}/orders/client_update_secondary.html"
     form_class = ClientForm
@@ -245,6 +263,21 @@ class ClientUpdateSecondaryView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self) -> str:
         return reverse("client_orders", kwargs={"slug": self.object.slug})  # type: ignore
+
+
+class OrderHiddenView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        pk = kwargs["pk"]
+        order: Order = get_object_or_404(Order, pk=pk)
+
+        if order.status == Status.NEW:
+            order.status = Status.HIDDEN
+            order.save()
+            messages.success(request, f"Zakázka: {order.order_number} byla skryta.")
+        else:
+            messages.error(request, "Zakázka: nemohla být skryta.")
+
+        return redirect("orders")
 
 
 class OrderCreateView(LoginRequiredMixin, View):
@@ -270,7 +303,12 @@ class OrderCreateView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs) -> HttpResponse:
         order_form, client_form, article_formset = self.get_forms()
 
+        is_errors, count = call_errors_adviced()
         context = {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            },
             "order_form": order_form,
             "client_form": client_form,
             "article_formset": article_formset,
@@ -283,7 +321,12 @@ class OrderCreateView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         order_form, client_form, article_formset = self.get_forms(request.POST)
+        is_errors, count = call_errors_adviced()
         context = {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            },
             "order_form": order_form,
             "client_form": client_form,
             "article_formset": article_formset,
@@ -343,7 +386,12 @@ class OrderUpdateView(LoginRequiredMixin, View):
         order = self.get_object()
         order_form, article_formset = self.get_forms(order)
 
+        is_errors, count = call_errors_adviced()
         context = {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            },
             "order": order,
             "order_form": order_form,
             "article_formset": article_formset,
@@ -358,7 +406,12 @@ class OrderUpdateView(LoginRequiredMixin, View):
         order = self.get_object()
         order_form, article_formset = self.get_forms(order, request.POST)
 
+        is_errors, count = call_errors_adviced()
         context = {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            },
             "order": order,
             "order_form": order_form,
             "article_formset": article_formset,
@@ -418,7 +471,7 @@ class OrderDeleteView(LoginRequiredMixin, View):
         return redirect("orders")
 
 
-class OrdersView(LoginRequiredMixin, TemplateView):
+class OrdersView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
     """Vypis seznamu modelu Order s podporou server-side DataTables paginace."""
 
     template_name = f"{APP_URL}/orders/orders_all.html"
@@ -426,6 +479,7 @@ class OrdersView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         self.json_orders: JsonOrders = JsonOrders(request=request)
         self.filters = self.json_orders.get_filters()
+        # --- datatables AJAX
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return self.json_orders.get_json_data()
         return super().get(request, *args, **kwargs)
@@ -433,18 +487,7 @@ class OrdersView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
 
-        get_start = (
-            datetime.strptime(self.filters["start_date"], "%Y-%m-%d")
-            if self.filters["start_date"]
-            else None
-        )
-
-        get_end = (
-            datetime.strptime(self.filters["end_date"], "%Y-%m-%d")
-            if self.filters["end_date"]
-            else None
-        )
-
+        # --- status
         status_filter = self.filters["status"]
         if status_filter == "all":
             get_status = "Všechny"
@@ -455,41 +498,86 @@ class OrdersView(LoginRequiredMixin, TemplateView):
         else:
             get_status = ""
 
+        # --- distrib hub
+        hub_slug = self.filters["hub"]
+        hub_value = ""
+        if hub_slug:
+            hub_obj = DistribHub.objects.filter(slug=hub_slug).first()
+            if hub_obj:
+                hub_value = f"{hub_obj.code}-{hub_obj.city}"
+
+        # --- mandant
+        mandant = self.filters["mandant"]
+
+        # --- zacatek filtru
+        get_start = (
+            datetime.strptime(self.filters["start_date"], "%Y-%m-%d")
+            if self.filters["start_date"]
+            else None
+        )
+
+        # --- konec filtru
+        get_end = (
+            datetime.strptime(self.filters["end_date"], "%Y-%m-%d")
+            if self.filters["end_date"]
+            else None
+        )
+
+        # --- invalid filtr
+        invalid = self.request.GET.get("invalid", "false").lower() == "true"
+
+        # --- final context
         context.update(
-            {
+            {  # --- status
                 "statuses": Status,
                 "raw_status": status_filter,
                 "get_status": get_status,
+                # --- distrib hub
+                "hub_choices": HUB_CHOICES,
+                "raw_hub": self.filters["hub"],
+                "hub_value": hub_value,
+                # --- mandant
+                "get_mandant": mandant,
+                # --- SCCZ Obchodni domy
                 "od_choices": OD_CHOICES,
                 "raw_od": self.filters["od"],
                 "od_value": OD_DICT.get(self.filters["od"], ""),
+                # --- zacatek konec
                 "get_start": get_start,
                 "get_end": get_end,
+                # ---
                 "request": self.request,
+                # --- invalid filtr
+                "invalid": invalid,
+                # --- navigace
                 "active": "orders_all",
             }
         )
         return context
 
 
-class OrderDetailView(LoginRequiredMixin, DetailView):
+class OrderDetailView(LoginRequiredMixin, ErrorContextMixin, DetailView):
     model = Order
     template_name = f"{APP_URL}/orders/order_detail.html"
     context_object_name = "order"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        order_pk = self.kwargs["pk"]
-        articles = Article.objects.filter(order=order_pk)
 
+        order: Order = self.object  # správné použití v DetailView
+        articles = Article.objects.filter(order=order.pk)
+
+        # --- tady už použiješ přímo order.pk
+        context["order_has_error"] = check_order_error_adviced(order.pk)
         context["articles"] = articles
+
         # --- navigace
         context["active"] = "orders_all"
 
         return context
 
 
-class TeamsView(LoginRequiredMixin, ListView):
+class TeamsView(LoginRequiredMixin, ErrorContextMixin, ListView):
     """Vypis seznamu modelu Order"""
 
     model = Team
@@ -503,7 +591,7 @@ class TeamsView(LoginRequiredMixin, ListView):
         return context
 
 
-class TeamCreateView(LoginRequiredMixin, CreateView):
+class TeamCreateView(LoginRequiredMixin, ErrorContextMixin, CreateView):
     model = Team
     form_class = TeamForm
     template_name = f"{APP_URL}/teams/team_form.html"
@@ -526,7 +614,25 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
         return response
 
 
-class TeamUpdateView(LoginRequiredMixin, UpdateView):
+class TeamDeleteView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        team = get_object_or_404(Team, pk=kwargs["pk"])
+        try:
+            if not team.active:
+                team.delete()
+                messages.success(request, f"Tým: {team.name} byl smazán.")
+            else:
+                messages.error(request, f"Tým: {team.name} je stale aktivní")
+
+        except ProtectedError:
+            messages.error(
+                request,
+                f"Tým: {team.name} nelze smazat, protože má vazby na jiné záznamy.",
+            )
+        return redirect("teams")
+
+
+class TeamUpdateView(LoginRequiredMixin, ErrorContextMixin, UpdateView):
     model = Team
     form_class = TeamForm
     template_name = f"{APP_URL}/teams/team_form.html"
@@ -544,15 +650,10 @@ class TeamUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        next_url = self.request.POST.get("next") or self.request.GET.get("next")
-        if next_url and url_has_allowed_host_and_scheme(
-            next_url, allowed_hosts={self.request.get_host()}
-        ):
-            return next_url
-        return reverse("team_detail", kwargs={"slug": self.object.slug})  # type: ignore
+        return reverse("team_detail", kwargs={"slug": self.object.slug})  # type:ignore
 
 
-class TeamDetailView(LoginRequiredMixin, DetailView):
+class TeamDetailView(LoginRequiredMixin, ErrorContextMixin, DetailView):
     model = Team
     template_name = f"{APP_URL}/teams/team_detail.html"
     context_object_name = "team"
@@ -574,7 +675,12 @@ class ClientsOrdersView(LoginRequiredMixin, View):
 
         formset = CallLogFormSet(queryset=CallLog.objects.none())
 
+        is_errors, count = call_errors_adviced()
         context = {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            },
             "client": client,
             "call_logs": call_logs,
             "orders": orders,
@@ -591,7 +697,12 @@ class ClientsOrdersView(LoginRequiredMixin, View):
 
         formset = CallLogFormSet(request.POST, instance=client)
 
+        is_errors, count = call_errors_adviced()
         context = {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            },
             "client": client,
             "orders": orders,
             "formset": formset,
@@ -615,7 +726,7 @@ class ClientsOrdersView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
 
-class OrderHistoryView(LoginRequiredMixin, ListView):
+class OrderHistoryView(LoginRequiredMixin, ErrorContextMixin, ListView):
     template_name = f"{APP_URL}/orders/order_detail_history.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -804,8 +915,13 @@ class ExportOrdersExcelView(LoginRequiredMixin, View):
             )
         # ---
         suffix: str = (
-            f"{filters['status']}_{filters['od']}_"
-            f"{filters['start_date']}_{filters['end_date']}"
+            f"{filters.get('status') or 'vse'}_"
+            f"{filters.get('start_date') or 'od'}_"
+            f"{filters.get('end_date') or 'do'}_"
+            f"{filters.get('hub') or 'hub'}_"
+            f"{filters.get('mandant') or 'mandant'}_"
+            f"{filters.get('od') or 'OD'}_"
+            f"{timezone.now().strftime('%Y-%m-%d_%H-%M')}"
         )
         # ---
         response = HttpResponse(
@@ -834,7 +950,7 @@ class PdfView(LoginRequiredMixin, View):
         return response
 
 
-class OrderProtocolView(LoginRequiredMixin, DetailView):
+class OrderProtocolView(LoginRequiredMixin, ErrorContextMixin, DetailView):
     model = Order
     context_object_name = "order"
     template_name = f"{APP_URL}/orders/montazni_protokol.html"
@@ -850,20 +966,23 @@ class OrderProtocolView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        order = self.object
+        order: Order = cast(Order, self.object)
         pdf_exists: bool = OrderPDFStorage.objects.filter(order=order.pk).exists()
         # ---
         back_protocol: OrderBackProtocol | None = None
         back_protocol_exist: bool = OrderBackProtocol.objects.filter(
             order=order.pk
         ).exists()
-
         if back_protocol_exist:
             back_protocol = OrderBackProtocol.objects.filter(order=order.pk).first()
+
         # ---
         context.update(
             {
                 "recieved_protokol": back_protocol,
+                "soulad": team_soulad(order),
+                "is_team_names_different": is_team_names_different(order.pk),
+                "protocol_site": True,
                 "pdf_exists": pdf_exists,
                 "team": order.team,
                 "active": "orders_all",
@@ -894,6 +1013,9 @@ class GeneratePDFView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         pk = kwargs["pk"]
         order = get_object_or_404(Order, pk=pk)
+        if not order.team.active:
+            messages.error(request, "Nelze generovat protokol, Tým je neaktivní")
+            return redirect("protocol", pk=pk)
 
         generator_class = pdf_generator_classes.get(order.mandant, DefaultPdfGenerator)
         generator_instance = generator_class()
@@ -1082,30 +1204,3 @@ class ProtocolUploadView(LoginRequiredMixin, View):
         save_message += change_status_message
         messages.success(request, save_message)
         return redirect(request.META.get("HTTP_REFERER", "/"))
-
-
-# --- API ---
-class IncompleteCustomersView(APIView):
-    permission_classes = [IsAuthenticated]  # jen pro přihlášené uživatele
-
-    def get(self, request) -> Response:
-        qs = Order.objects.filter(client__incomplete=True).exclude(status="Hidden")
-        seznam = [record.order_number.upper() for record in qs]
-        if settings.DEBUG:
-            cons.log(f"pocet nekompletnych klientu je: {len(seznam)}")
-            cons.log(f"seznam nekompletnich klientu: {seznam}")
-        return Response(seznam)
-
-
-class CustomerUpdateView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        serializer = OrderCustomerUpdateSerializer(data=request.data)
-        if serializer.is_valid():
-            updates = serializer.validated_data["updates"]  # type: ignore
-
-            update_customers(updates)
-
-            return Response({"message": "Zákazníci byli aktualizováni."})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
