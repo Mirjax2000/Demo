@@ -15,7 +15,7 @@ from django.core.files.base import ContentFile
 
 
 # --- models
-from .models import Order, Status, OrderPDFStorage
+from .models import Order, Status, OrderPDFStorage, Client
 
 
 # ---
@@ -76,30 +76,37 @@ def update_customers(customer_details: list) -> None:
     for item in customer_details:
         for order_number, data in item.items():
             try:
-                order = Order.objects.get(order_number=order_number)
-                client = order.client
+                order: Order = Order.objects.get(order_number=order_number)
+                client: Client | None = order.client
                 if client:
                     cons.log(
-                        f"zacatek {client.slug} ma incomplete: {client.incomplete}"
+                        f"zacatek {client.name}-{client.zip_code}"
+                        f"ma incomplete: {client.incomplete}"
                     )
                     try:
                         with transaction.atomic():
-                            client.name = data["name"]
-                            client.city = data.get("city", "")
-                            client.zip_code = data["zip_code"]
-                            client.street = data.get("street", "")
-                            client.phone = data.get("phone", "")
-                            client.email = data.get("email", "")
+                            client.name = data["name"].strip()
+                            client.city = data.get("city", "").strip()
+                            client.zip_code = data["zip_code"].strip()
+                            client.street = data.get("street", "").strip()
+                            client.phone = data.get("phone", "").strip()
+                            client.email = data.get("email", "").strip()
                             client.save()
                             if settings.DEBUG:
-                                cons.log(f"{client.slug}: byl aktualizovan.")
                                 cons.log(
-                                    f"konec: {client.slug} ma incomplete: {client.incomplete}"
+                                    f"{client.name}-{client.zip_code}:byl aktualizovan."
+                                )
+                                cons.log(
+                                    f"konec: {client.name}-{client.zip_code}:"
+                                    f"ma incomplete: {client.incomplete}"
                                 )
 
                     except Exception:
                         if settings.DEBUG:
-                            cons.log(f"{client.slug}: Update selhal, nic se neulozilo.")
+                            cons.log(
+                                f"{client.name}-{client.zip_code}:"
+                                f"Update selhal, nic se neulozilo."
+                            )
 
                 else:
                     if settings.DEBUG:

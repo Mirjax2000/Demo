@@ -75,7 +75,7 @@ app_sprava_montazi: list = [
     path(f"order/{PK}/delete_order/", OrderDelete.as_view(), name="delete_order"),
     path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),
     path("order/export/", ExportOrdersExcel.as_view(), name="order_export"),
-    # ---
+    # --- client
     path(f"order/{PK}/client_update/", CUV.as_view(), name="client_update"),
     path(f"order/{SLUG}/client_update_sec/", CUS.as_view(), name="client_update_sec"),
     path(f"order/{SLUG}/client_orders/", ClientsOrders.as_view(), name="client_orders"),
