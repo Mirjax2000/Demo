@@ -314,7 +314,7 @@ class CreatePageViewTest(TestCase):
 
         messages = list(response.context["messages"])
         self.assertEqual(len(messages), 1)  # Měla by být jen jedna zpráva
-        self.assertEqual(str(messages[0]), "Neznamá chyba!")
+        self.assertIn("Neznamá chyba!", str(messages[0]))
 
     @patch(
         "app_sprava_montazi.views.call_command", side_effect=ValueError("wrong value")

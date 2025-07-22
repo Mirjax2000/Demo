@@ -4,8 +4,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import TypedDict
 
+# --- django
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import transaction
+from django.db import IntegrityError
+from django.conf import settings
 from django.utils.text import slugify
 from pandas import DataFrame, read_csv
 from rich.console import Console
@@ -170,6 +173,7 @@ class DatasetTools:
         dataset["krestni-jmeno"] = dataset["krestni-jmeno"].fillna("")
         dataset["avizovany-termin"] = dataset["avizovany-termin"].fillna("").astype(str)
         dataset["erfassungstermin"] = dataset["erfassungstermin"].fillna("").astype(str)
+        dataset["psc"] = dataset["psc"].astype(str)
         dataset["misto-urceni"] = dataset["misto-urceni"].fillna(0).astype(int)
         dataset["poznamka-mandanta"] = dataset["poznamka-mandanta"].fillna("")
         dataset["cislo-zakazky"] = dataset["cislo-zakazky"].apply(slugify)
@@ -210,18 +214,25 @@ class CreateRecords:
     @staticmethod
     def create_client(prijmeni: str, krestni_jmeno: str, psc: str) -> ClientRecord:
         """Vytvoreni zaznam clienta"""
+        name = f"{prijmeni} {krestni_jmeno}".strip()
+        psc = psc.strip()
 
-        name: str = f"{prijmeni} {krestni_jmeno}"
-        client, client_created = Client.objects.get_or_create(
-            name=name.strip(), zip_code=psc
-        )
+        try:
+            client, client_created = Client.objects.get_or_create(
+                name=name, zip_code=psc
+            )
 
-        result: ClientRecord = {
+        except IntegrityError:
+            # Pokud při vytváření nastane chyba, zkus najít existujícího klienta
+            client = Client.objects.filter(name=name, zip_code=psc).first()
+            client_created = False
+            if settings.DEBUG:
+                cons.log("integrity error u vytvareni Klienta, duplikace", style="red")
+
+        return {
             "client": client,
             "client_created": client_created,
         }
-
-        return result
 
     @staticmethod
     def create_order(
