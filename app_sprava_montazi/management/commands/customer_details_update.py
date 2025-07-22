@@ -35,12 +35,12 @@ class Command(BaseCommand):
                         cons.log(f"zacatek  {client.slug} ma {client.incomplete}")
                         try:
                             with transaction.atomic():
-                                client.name = data["name"]
-                                client.city = data.get("city", "")
-                                client.zip_code = data["zip_code"]
-                                client.street = data.get("street", "")
-                                client.phone = data.get("phone", "")
-                                client.email = data.get("email", "")
+                                client.name = data["name"].strip()
+                                client.city = data.get("city", "").strip()
+                                client.zip_code = data["zip_code"].strip()
+                                client.street = data.get("street", "").strip()
+                                client.phone = data.get("phone", "").strip()
+                                client.email = data.get("email", "").strip()
                                 client.save()
                                 if settings.DEBUG:
                                     cons.log(f"{client.slug}: byl aktualizovan.")
