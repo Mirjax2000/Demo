@@ -107,6 +107,14 @@ class Command(BaseCommand):
                     )
                     raise
 
+                except IntegrityError as e:
+                    cons.log(
+                        f"Neocekavana chyba u objednavky: \n"
+                        f"{item.get('cislo-zakazky', 'N/A')} {str(e)}",
+                        style="red",
+                    )
+                    raise
+
                 except Exception as e:
                     cons.log(
                         f"Neocekavana chyba u objednavky: \n"
@@ -213,21 +221,11 @@ class CreateRecords:
 
     @staticmethod
     def create_client(prijmeni: str, krestni_jmeno: str, psc: str) -> ClientRecord:
-        """Vytvoreni zaznam clienta"""
-        name = f"{prijmeni} {krestni_jmeno}".strip()
+        """Vytvoreni zaznamu clienta"""
+        name = f"{prijmeni.strip()} {krestni_jmeno.strip()}"
         psc = psc.strip()
 
-        try:
-            client, client_created = Client.objects.get_or_create(
-                name=name, zip_code=psc
-            )
-
-        except IntegrityError:
-            # Pokud při vytváření nastane chyba, zkus najít existujícího klienta
-            client = Client.objects.filter(name=name, zip_code=psc).first()
-            client_created = False
-            if settings.DEBUG:
-                cons.log("integrity error u vytvareni Klienta, duplikace", style="red")
+        client, client_created = Client.objects.get_or_create(name=name, zip_code=psc)
 
         return {
             "client": client,

@@ -71,6 +71,33 @@ def format_date(date_obj):
     return date_obj.strftime("%Y-%m-%d") if date_obj else ""
 
 
+def client_cons_log_porovnani(client) -> None:
+    if settings.DEBUG:
+        cons.log(
+            f"zacatek {client.name}-{client.zip_code}ma incomplete: {client.incomplete}"
+        )
+
+
+def client_cons_log_aktualizovan(client) -> None:
+    if settings.DEBUG:
+        cons.log(f"{client.name}-{client.zip_code}:byl aktualizovan.")
+
+
+def client_cons_log_update_selhal(client) -> None:
+    if settings.DEBUG:
+        cons.log(f"{client.name}-{client.zip_code}:Update selhal, nic se neulozilo.")
+
+
+def client_cons_log_client_nenalezen(client) -> None:
+    if settings.DEBUG:
+        cons.log(f"Client model:{client}: nenalezen")
+
+
+def client_cons_log_zakazka_nenalezena(order_number) -> None:
+    if settings.DEBUG:
+        cons.log(f"Zakazka: {order_number} nenalezena.")
+
+
 def update_customers(customer_details: list) -> None:
     """Update modelu Client"""
     for item in customer_details:
@@ -79,10 +106,7 @@ def update_customers(customer_details: list) -> None:
                 order: Order = Order.objects.get(order_number=order_number)
                 client: Client | None = order.client
                 if client:
-                    cons.log(
-                        f"zacatek {client.name}-{client.zip_code}"
-                        f"ma incomplete: {client.incomplete}"
-                    )
+                    client_cons_log_porovnani(client)
                     try:
                         with transaction.atomic():
                             client.name = data["name"].strip()
@@ -92,29 +116,17 @@ def update_customers(customer_details: list) -> None:
                             client.phone = data.get("phone", "").strip()
                             client.email = data.get("email", "").strip()
                             client.save()
-                            if settings.DEBUG:
-                                cons.log(
-                                    f"{client.name}-{client.zip_code}:byl aktualizovan."
-                                )
-                                cons.log(
-                                    f"konec: {client.name}-{client.zip_code}:"
-                                    f"ma incomplete: {client.incomplete}"
-                                )
+                            client_cons_log_aktualizovan(client)
+                            client_cons_log_porovnani(client)
 
                     except Exception:
-                        if settings.DEBUG:
-                            cons.log(
-                                f"{client.name}-{client.zip_code}:"
-                                f"Update selhal, nic se neulozilo."
-                            )
+                        client_cons_log_update_selhal(client)
 
                 else:
-                    if settings.DEBUG:
-                        cons.log(f"{client}: nenalezen")
+                    client_cons_log_client_nenalezen(client)
 
             except Order.DoesNotExist:
-                if settings.DEBUG:
-                    cons.log(f"Order {order_number} not found")
+                client_cons_log_zakazka_nenalezena(order_number)
 
 
 def get_qrcode_value(image_path) -> None | str:

@@ -154,9 +154,6 @@ class Client(Model):
     def __str__(self) -> str:
         return str(self.name)
 
-    class Meta:
-        unique_together = ("name", "zip_code")
-
 
 class DistribHub(Model):
     code = CharField(max_length=3, unique=True)
