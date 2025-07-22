@@ -1,6 +1,7 @@
 """app_sprava_montazi_models"""
 
 from rich.console import Console
+import hashlib
 
 # --- django
 from django.db import models
@@ -146,9 +147,22 @@ class Client(Model):
             return f"{number[0:4]} {number[4:7]} {number[7:10]} {number[10:]}"
         return number
 
+    def generate_slug(self) -> str:
+        name_part = slugify(self.name)
+
+        base = f"{self.name}{self.zip_code}"
+        if self.city:
+            base += self.city
+        if self.street:
+            base += self.street
+
+        hash_part = hashlib.md5(base.encode()).hexdigest()[:10]
+
+        return f"{name_part}-{hash_part}"
+
     def save(self, *args, **kwargs):
         self.incomplete = not all([self.street, self.city, self.phone])
-        self.slug = slugify(f"{self.name}{self.city}{self.street}")
+        self.slug = self.generate_slug()
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:

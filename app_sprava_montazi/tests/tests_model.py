@@ -1,6 +1,7 @@
 """Model testy"""
 
 from datetime import date, timedelta, datetime
+import hashlib
 
 # --- django
 from django.forms import ValidationError
@@ -91,6 +92,26 @@ class DistribHubModelTest(TestCase):
 
 
 class ClientModelTests(TestCase):
+    def test_client_creation(self):
+        """
+        Testuje vytvoření nové instance modelu Client a ověřuje, že hodnoty polí jsou správně nastaveny.
+        """
+        customer = Client.objects.create(
+            name="Pavel Dvořák",
+            street="Hlavní 123",
+            city="Praha",
+            zip_code="10000",
+            phone="777123456",
+            email="pavel.dvorak@example.com",
+        )
+        self.assertTrue(isinstance(customer, Client))
+        self.assertEqual(customer.name, "Pavel Dvořák")
+        self.assertEqual(customer.city, "Praha")
+        self.assertEqual(customer.zip_code, "10000")
+        self.assertEqual(customer.phone, "777123456")
+        self.assertEqual(customer.email, "pavel.dvorak@example.com")
+        self.assertEqual(customer.first_15(), "Pavel Dvořák")
+
     def test_field_types(self):
         """Strukturalni test"""
         self.assertIsInstance(Client._meta.get_field("name"), models.CharField)
@@ -133,55 +154,35 @@ class ClientModelTests(TestCase):
             Client._meta.get_field("incomplete").verbose_name, "Neúplný záznam"
         )
 
-    def test_client_creation(self):
-        """
-        Testuje vytvoření nové instance modelu Client a ověřuje, že hodnoty polí jsou správně nastaveny.
-        """
-        customer = Client.objects.create(
-            name="Pavel Dvořák",
-            street="Hlavní 123",
-            city="Praha",
-            zip_code="10000",
-            phone="777123456",
-            email="pavel.dvorak@example.com",
-        )
-        self.assertTrue(isinstance(customer, Client))
-        self.assertEqual(customer.name, "Pavel Dvořák")
-        self.assertEqual(customer.city, "Praha")
-        self.assertEqual(customer.zip_code, "10000")
-        self.assertEqual(customer.phone, "777123456")
-        self.assertEqual(customer.email, "pavel.dvorak@example.com")
-        self.assertEqual(customer.first_15(), "Pavel Dvořák")
-
     def test_incomplete_field_true_when_data_missing(self):
         """
         Testuje, že pole 'incomplete' je True, pokud chybí některá povinná data klienta.
         """
-        customer = Client.objects.create(name="Franta Pina", zip_code="12345")
-        self.assertTrue(customer.incomplete)
+        customer1 = Client.objects.create(name="Franta Pina", zip_code="10000")
+        customer2 = Client.objects.create(name="Franta Pina", zip_code="11111")
+        self.assertTrue(customer1.incomplete)
+        self.assertTrue(customer2.incomplete)
 
     def test_incomplete_field_false_when_all_data_present(self):
         """
         Testuje, že pole 'incomplete' je False, pokud jsou u klienta vyplněna všechna potřebná data.
         """
-        customer = Client.objects.create(
+        customer1 = Client.objects.create(
             name="Franta Pina",
             street="Ulice 1",
-            city="Město",
-            zip_code="54321",
+            city="Brno",
+            zip_code="10000",
             phone="+420123456789",
         )
-        self.assertFalse(customer.incomplete)
-
-    def test_slug_is_created_correctly(self):
-        """
-        Testuje, že slug je správně vytvořen při uložení klienta.
-        """
-        customer = Client.objects.create(
-            name="Jan Novák", street="Hlavní", city="Praha", zip_code="10000"
+        customer2 = Client.objects.create(
+            name="Franta Pina",
+            street="Ulice 2",
+            city="Praha",
+            zip_code="20000",
+            phone="+420123456789",
         )
-        expected_slug = slugify("Jan NovákPrahaHlavní")
-        self.assertEqual(customer.slug, expected_slug)
+        self.assertFalse(customer1.incomplete)
+        self.assertFalse(customer2.incomplete)
 
     def test_first_15_short_name(self):
         """
@@ -205,6 +206,78 @@ class ClientModelTests(TestCase):
         """
         customer = Client.objects.create(name="Alena Testovka", zip_code="00000")
         self.assertEqual(str(customer), "Alena Testovka")
+
+    def test_slug_is_generated_correctly(self):
+        client = Client.objects.create(
+            name="Pavel Dvořák",
+            street="Hlavní 123",
+            city="Praha",
+            zip_code="10000",
+            phone="777123456",
+            email="pavel.dvorak@example.com",
+        )
+
+        # Očekávaný začátek slugu
+        expected_start = slugify(client.name) + "-"
+        slug = client.slug
+
+        # Kontrola začátku + délky hashe
+        self.assertTrue(slug.startswith(expected_start))
+        hash_part = slug[len(expected_start) :]
+        self.assertEqual(len(hash_part), 10)
+
+        self.assertTrue(isinstance(client, Client))
+        self.assertEqual(client.name, "Pavel Dvořák")
+        self.assertEqual(client.city, "Praha")
+        self.assertEqual(client.zip_code, "10000")
+        self.assertEqual(client.phone, "777123456")
+        self.assertEqual(client.email, "pavel.dvorak@example.com")
+        self.assertEqual(client.first_15(), "Pavel Dvořák")
+
+    def test_slug_changes_when_data_changes(self):
+        client = Client.objects.create(
+            name="Franta Pina",
+            zip_code="10000",
+        )
+        original_slug = client.slug
+
+        client.street = "Nová 456"
+        client.city = "Praha"
+        client.phone = "234234234"
+        client.email = "franta.pina@seznam.cz"
+        client.save()
+        # ---
+        updated_client = Client.objects.get(pk=client.pk)
+        self.assertNotEqual(client.slug, original_slug)
+        self.assertTrue(isinstance(client, Client))
+        self.assertEqual(updated_client.name, "Franta Pina")
+        self.assertEqual(updated_client.city, "Praha")
+        self.assertEqual(updated_client.zip_code, "10000")
+        self.assertEqual(updated_client.phone, "234234234")
+        self.assertEqual(updated_client.email, "franta.pina@seznam.cz")
+        self.assertEqual(updated_client.first_15(), "Franta Pina")
+
+    def test_full_slug_matches_expected(self):
+        name = "Pavel Dvořák"
+        street = "Hlavní 123"
+        city = "Praha"
+        zip_code = "10000"
+
+        client = Client.objects.create(
+            name=name,
+            street=street,
+            city=city,
+            zip_code=zip_code,
+            phone="777123456",
+            email="pavel.dvorak@example.com",
+        )
+
+        name_part = slugify(name)
+        base = f"{name}{zip_code}{city}{street}"
+        hash_part = hashlib.md5(base.encode()).hexdigest()[:10]
+        expected_slug = f"{name_part}-{hash_part}"
+
+        self.assertEqual(client.slug, expected_slug)
 
 
 class ClientMethodTests(TestCase):
