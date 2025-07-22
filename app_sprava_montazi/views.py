@@ -1,6 +1,7 @@
 """app_sprava_montazi View"""
 
 import os
+import time
 from typing import Any, cast, TypedDict, Tuple, List, Dict
 from datetime import datetime
 from django.utils import timezone
@@ -157,6 +158,7 @@ class CreatePageView(LoginRequiredMixin, ErrorContextMixin, FormView):
         try:
             db_count_old: int = Order.objects.count()
             call_command("import_data", upload.file.path)
+            time.sleep(0.25)
             db_count_new: int = Order.objects.count()
             result: int = db_count_new - db_count_old
             messages.success(
@@ -186,7 +188,7 @@ class CreatePageView(LoginRequiredMixin, ErrorContextMixin, FormView):
         except Exception as e:  # pylint: disable=broad-exception-caught
             if settings.DEBUG:
                 cons.log(f"Chyba {str(e)}", style="red")
-            messages.error(self.request, "Neznamá chyba!")
+            messages.error(self.request, f"Neznamá chyba! - {e}")
             return redirect("createpage")
 
 
