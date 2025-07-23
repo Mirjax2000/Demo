@@ -41,13 +41,8 @@ from .models import OrderPDFStorage, OrderBackProtocolToken, OrderBackProtocol
 from .models import HistoricalArticle  # type: ignore  # pylint: disable=no-name-in-module
 
 # pomocne funkce ---
-from .utils import (
-    format_date,
-    call_errors_adviced,
-    check_order_error_adviced,
-    is_team_names_different,
-    team_soulad,
-)
+from .utils import call_errors_adviced, check_order_error_adviced
+from .utils import client_created, team_soulad, is_team_names_different, format_date
 
 # 00P classes ---
 from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
@@ -282,7 +277,7 @@ class OrderHiddenView(LoginRequiredMixin, View):
         return redirect("orders")
 
 
-class OrderCreateView(LoginRequiredMixin, View):
+class OrderCreateView(LoginRequiredMixin, ErrorContextMixin, View):
     """Vytvor novou zakazku"""
 
     template = f"{APP_URL}/orders/order_form.html"
@@ -305,12 +300,8 @@ class OrderCreateView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs) -> HttpResponse:
         order_form, client_form, article_formset = self.get_forms()
 
-        is_errors, count = call_errors_adviced()
         context = {
-            "errors": {
-                "has_error": is_errors,
-                "count": count,
-            },
+            **self.get_error_context(),
             "order_form": order_form,
             "client_form": client_form,
             "article_formset": article_formset,
@@ -323,12 +314,9 @@ class OrderCreateView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         order_form, client_form, article_formset = self.get_forms(request.POST)
-        is_errors, count = call_errors_adviced()
+
         context = {
-            "errors": {
-                "has_error": is_errors,
-                "count": count,
-            },
+            **self.get_error_context(),
             "order_form": order_form,
             "client_form": client_form,
             "article_formset": article_formset,
@@ -345,18 +333,31 @@ class OrderCreateView(LoginRequiredMixin, View):
         ):
             try:
                 with transaction.atomic():
-                    client = client_form.save()
+                    name: str = client_form.cleaned_data["name"]
+                    zip_code: str = client_form.cleaned_data["zip_code"]
+                    # --- get or create
+                    client, created = client_created(
+                        name, zip_code, client_form.cleaned_data
+                    )
+
                     order = order_form.save(commit=False)
                     order.client = client
                     order.save()
+
                     article_formset.instance = order
                     article_formset.save()
-                messages.success(request, "Objednávka vytvořena.")
+
+                    msg: str = (
+                        f"Objednávka vytvořena se zákazníkem: "
+                        f"<strong>{client.name}</strong>."
+                    )
+
+                messages.success(request, msg)
                 return redirect(reverse("order_detail", kwargs={"pk": order.id}))
 
             except Exception as e:  # pylint: disable=broad-exception-caught
                 if settings.DEBUG:
-                    cons.log(f"chyba: {str(e)}")
+                    cons.log(f"Chyba při vytváření objednávky: {str(e)}", style="red")
 
         messages.error(request, "Nastala chyba při ukládání objednávky.")
         return render(request, self.template, context)

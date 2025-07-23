@@ -314,6 +314,13 @@ class ClientForm(forms.ModelForm):
             },
         }
 
+    def clean_zip_code(self) -> str:
+        zip_code: str | None = self.cleaned_data.get("zip_code")
+
+        if not zip_code or len(zip_code) != 5:
+            raise forms.ValidationError("PSČ musí mít přesně 5 číslic.")
+        return zip_code
+
 
 class DistribHubForm(forms.ModelForm):
     class Meta:

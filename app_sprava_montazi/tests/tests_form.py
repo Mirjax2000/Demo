@@ -82,6 +82,21 @@ class ClientFormTest(TestCase):
         self.assertIn("zip_code", form.errors)
         self.assertEqual(form.errors["zip_code"][0], "PSČ je povinné!")
 
+    def test_zip_code_5_chars(self):
+        form = ClientForm(
+            data={
+                "name": "Jan Novák",
+                "street": "Hlavní",
+                "city": "Praha",
+                "zip_code": "1234",  # chybí PSČ
+                "phone": "212345678",
+                "email": "jan@example.com",
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("zip_code", form.errors)
+        self.assertEqual(form.errors["zip_code"][0], "PSČ musí mít přesně 5 číslic.")
+
     def test_valid_client_form(self):
         form_data = {
             "name": "Eva Svobodová",

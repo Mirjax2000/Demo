@@ -98,6 +98,31 @@ def client_cons_log_zakazka_nenalezena(order_number) -> None:
         cons.log(f"Zakazka: {order_number} nenalezena.")
 
 
+def client_created(name: str, zip_code: str, data) -> tuple[Client, bool]:
+    client, created = Client.objects.get_or_create(
+        name=name,
+        zip_code=zip_code,
+        defaults={
+            "street": data.get("street", ""),
+            "city": data.get("city", ""),
+            "phone": data.get("phone", ""),
+            "email": data.get("email", ""),
+        },
+    )
+    # Pokud už existuje, ale má staré/neúplné údaje → aktualizuj
+    if not created:
+        updated = False
+        for field in ["street", "city", "phone", "email"]:
+            value = data.get(field, "")
+            if value and getattr(client, field) != value:
+                setattr(client, field, value)
+                updated = True
+        if updated:
+            client.save()
+
+    return client, created
+
+
 def update_customers(customer_details: list) -> None:
     """Update modelu Client"""
     for item in customer_details:

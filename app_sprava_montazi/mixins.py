@@ -14,3 +14,12 @@ class ErrorContextMixin(ContextMixin):
             "count": count,
         }
         return context
+
+    def get_error_context(self):
+        is_errors, count = call_errors_adviced()
+        return {
+            "errors": {
+                "has_error": is_errors,
+                "count": count,
+            }
+        }
