@@ -721,7 +721,8 @@ class OrderCreateViewTest(TestCase):
 
         mock_success_message.assert_called_once()
         args, kwargs = mock_success_message.call_args
-        self.assertEqual(args[1], "Objednávka vytvořena.")
+        msg: str = f"Objednávka vytvořena se zákazníkem: <strong>{created_order.client.name}</strong>."
+        self.assertEqual(args[1], msg)
 
     @patch("django.contrib.messages.error")
     def test_invalid_order_data_shows_errors(self, mock_error_message):
@@ -818,7 +819,8 @@ class OrderCreateViewTest(TestCase):
 
         mock_success_message.assert_called_once()
         args, kwargs = mock_success_message.call_args
-        self.assertEqual(args[1], "Objednávka vytvořena.")
+        msg: str = f"Objednávka vytvořena se zákazníkem: <strong>{created_order.client.name}</strong>."
+        self.assertEqual(args[1], msg)
 
     def test_active_context_variable(self):
         response = self.client.get(self.url)
