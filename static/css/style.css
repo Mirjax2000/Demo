@@ -376,6 +376,11 @@ body.home {
   user-select: none;
 }
 
+.form_cell_disable {
+  opacity: 0.6;
+  position: relative;
+}
+
 .L-sidebar {
   display: flex;
   justify-content: flex-start;

@@ -22,6 +22,34 @@ cons: Console = Console()
 
 
 class OrderForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.pk:
+            self.fields["order_number"].disabled = True
+            attrs = self.fields["order_number"].widget.attrs
+            classes = attrs.get("class", "")
+            attrs["class"] = " ".join(filter(None, [classes, "form_cell_disable"]))
+
+        self.fields["evidence_termin"].input_formats = [
+            "%Y-%m-%d",
+            "%d.%m.%Y",
+            "%d/%m/%Y",
+        ]
+
+        self.fields["delivery_termin"].input_formats = [
+            "%Y-%m-%d",
+            "%d.%m.%Y",
+            "%d/%m/%Y",
+        ]
+
+        self.fields["montage_termin"].input_formats = [
+            "%Y-%m-%dT%H:%M",
+            "%Y-%m-%d %H:%M",
+            "%d.%m.%Y %H:%M",
+            "%d/%m/%Y %H:%M",
+        ]
+
     class Meta:
         model = Order
         fields = [
@@ -117,31 +145,6 @@ class OrderForm(forms.ModelForm):
                 "required": "místo určení je povinné!",
             },
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        if self.instance.pk:
-            self.fields["order_number"].widget.attrs["readonly"] = True
-
-        self.fields["evidence_termin"].input_formats = [
-            "%Y-%m-%d",
-            "%d.%m.%Y",
-            "%d/%m/%Y",
-        ]
-
-        self.fields["delivery_termin"].input_formats = [
-            "%Y-%m-%d",
-            "%d.%m.%Y",
-            "%d/%m/%Y",
-        ]
-
-        self.fields["montage_termin"].input_formats = [
-            "%Y-%m-%dT%H:%M",
-            "%Y-%m-%d %H:%M",
-            "%d.%m.%Y %H:%M",
-            "%d/%m/%Y %H:%M",
-        ]
 
     def clean_order_number(self):
         order_number = self.cleaned_data.get("order_number", "").upper()
@@ -260,6 +263,23 @@ class ArticleForm(forms.ModelForm):
 
 
 class ClientForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["name"].disabled = True
+            attrs_name = self.fields["name"].widget.attrs
+            classes_name = attrs_name.get("class", "")
+            attrs_name["class"] = " ".join(
+                filter(None, [classes_name, "form_cell_disable"])
+            )
+
+            self.fields["zip_code"].disabled = True
+            attrs_zip = self.fields["zip_code"].widget.attrs
+            classes_zip = attrs_zip.get("class", "")
+            attrs_zip["class"] = " ".join(
+                filter(None, [classes_zip, "form_cell_disable"])
+            )
+
     class Meta:
         model = Client
         fields = [
@@ -349,6 +369,15 @@ class DistribHubForm(forms.ModelForm):
 
 
 class TeamForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.pk:
+            self.fields["name"].disabled = True
+            attrs = self.fields["name"].widget.attrs
+            classes = attrs.get("class", "")
+            attrs["class"] = " ".join(filter(None, [classes, "form_cell_disable"]))
+
     class Meta:
         model = Team
         fields = [
@@ -412,6 +441,7 @@ class TeamForm(forms.ModelForm):
                 }
             ),
         }
+
         error_messages = {
             "name": {
                 "required": "Jméno je povinné!",
@@ -427,12 +457,6 @@ class TeamForm(forms.ModelForm):
                 "invalid": "Zadej platné telefonní číslo.",
             },
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        if self.instance.pk:
-            self.fields["name"].widget.attrs["readonly"] = True
 
     def clean_name(self) -> str:
         name = str(self.cleaned_data.get("name"))

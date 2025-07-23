@@ -134,9 +134,9 @@ def update_customers(customer_details: list) -> None:
                     client_cons_log_porovnani(client)
                     try:
                         with transaction.atomic():
-                            client.name = data["name"].strip()
+                            # client.name = data["name"].strip()
                             client.city = data.get("city", "").strip()
-                            client.zip_code = data["zip_code"].strip()
+                            # client.zip_code = data["zip_code"].strip()
                             client.street = data.get("street", "").strip()
                             client.phone = data.get("phone", "").strip()
                             client.email = data.get("email", "").strip()
