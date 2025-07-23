@@ -222,7 +222,7 @@ class CreateRecords:
     @staticmethod
     def create_client(prijmeni: str, krestni_jmeno: str, psc: str) -> ClientRecord:
         """Vytvoreni zaznamu clienta"""
-        name = f"{prijmeni.strip()} {krestni_jmeno.strip()}"
+        name = f"{prijmeni.strip()} {krestni_jmeno.strip()}".strip()
         psc = psc.strip()
 
         client, client_created = Client.objects.get_or_create(name=name, zip_code=psc)

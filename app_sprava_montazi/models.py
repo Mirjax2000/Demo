@@ -124,7 +124,7 @@ class Client(Model):
     email = EmailField(blank=True, verbose_name="E-mail")
     incomplete = BooleanField(default=True, verbose_name="Neúplný záznam")
     history = HistoricalRecords()
-    slug = SlugField(blank=True)
+    slug = SlugField(blank=True, unique=True)
 
     def first_15(self):
         if len(self.name) > 15:
