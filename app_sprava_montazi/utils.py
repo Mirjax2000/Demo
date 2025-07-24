@@ -99,26 +99,30 @@ def client_cons_log_zakazka_nenalezena(order_number) -> None:
 
 
 def client_created(name: str, zip_code: str, data) -> tuple[Client, bool]:
-    client, created = Client.objects.get_or_create(
-        name=name,
-        zip_code=zip_code,
-        defaults={
-            "street": data.get("street", ""),
-            "city": data.get("city", ""),
-            "phone": data.get("phone", ""),
-            "email": data.get("email", ""),
-        },
-    )
-    # Pokud už existuje, ale má staré/neúplné údaje → aktualizuj
-    if not created:
-        updated = False
-        for field in ["street", "city", "phone", "email"]:
-            value = data.get(field, "")
-            if value and getattr(client, field) != value:
-                setattr(client, field, value)
-                updated = True
-        if updated:
+    with transaction.atomic():
+        client, created = Client.objects.get_or_create(
+            name=name,
+            zip_code=zip_code,
+            defaults={
+                "street": data.get("street", ""),
+                "city": data.get("city", ""),
+                "phone": data.get("phone", ""),
+                "email": data.get("email", ""),
+            },
+        )
+        if created:
+            client.full_clean()
             client.save()
+
+        else:
+            updated = False
+            for field in ["street", "city", "phone", "email"]:
+                value = data.get(field, "")
+                if value and getattr(client, field) != value:
+                    setattr(client, field, value)
+                    updated = True
+            if updated:
+                client.save()
 
     return client, created
 

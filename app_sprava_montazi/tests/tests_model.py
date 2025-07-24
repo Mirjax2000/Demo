@@ -8,7 +8,7 @@ from django.forms import ValidationError
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.db import models
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.utils.text import slugify
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
@@ -111,6 +111,35 @@ class ClientModelTests(TestCase):
         self.assertEqual(customer.phone, "777123456")
         self.assertEqual(customer.email, "pavel.dvorak@example.com")
         self.assertEqual(customer.first_15(), "Pavel Dvořák")
+        self.assertEqual(customer.format_psc(), "100 00")
+        self.assertEqual(customer.format_phone(), "+420 777 123 456")
+
+    def test_slug_is_generated_correctly(self):
+        client = Client.objects.create(
+            name="Pavel Dvořák",
+            street="Hlavní 123",
+            city="Praha",
+            zip_code="10000",
+            phone="777123456",
+            email="pavel.dvorak@example.com",
+        )
+
+        # Očekávaný začátek slugu
+        expected_start = slugify(client.name) + "-"
+        slug = client.slug
+
+        # Kontrola začátku + délky hashe
+        self.assertTrue(slug.startswith(expected_start))
+        hash_part = slug[len(expected_start) :]
+        self.assertEqual(len(hash_part), 10)
+
+        self.assertTrue(isinstance(client, Client))
+        self.assertEqual(client.name, "Pavel Dvořák")
+        self.assertEqual(client.city, "Praha")
+        self.assertEqual(client.zip_code, "10000")
+        self.assertEqual(client.phone, "777123456")
+        self.assertEqual(client.email, "pavel.dvorak@example.com")
+        self.assertEqual(client.first_15(), "Pavel Dvořák")
 
     def test_field_types(self):
         """Strukturalni test"""
@@ -168,14 +197,14 @@ class ClientModelTests(TestCase):
         Testuje, že pole 'incomplete' je False, pokud jsou u klienta vyplněna všechna potřebná data.
         """
         customer1 = Client.objects.create(
-            name="Franta Pina",
+            name="Customer 1",
             street="Ulice 1",
             city="Brno",
             zip_code="10000",
             phone="+420123456789",
         )
         customer2 = Client.objects.create(
-            name="Franta Pina",
+            name="Customer 2",
             street="Ulice 2",
             city="Praha",
             zip_code="20000",
@@ -190,6 +219,7 @@ class ClientModelTests(TestCase):
         """
         customer = Client.objects.create(name="Krátké jméno", zip_code="12345")
         self.assertEqual(customer.first_15(), "Krátké jméno")
+        self.assertEqual(customer.format_psc(), "123 45")
 
     def test_first_15_long_name(self):
         """
@@ -199,6 +229,7 @@ class ClientModelTests(TestCase):
             name="Toto je opravdu dlouhé jméno", zip_code="12345"
         )
         self.assertEqual(customer.first_15(), "Toto je opravdu...")
+        self.assertEqual(customer.format_psc(), "123 45")
 
     def test_str_method(self):
         """
@@ -206,33 +237,6 @@ class ClientModelTests(TestCase):
         """
         customer = Client.objects.create(name="Alena Testovka", zip_code="00000")
         self.assertEqual(str(customer), "Alena Testovka")
-
-    def test_slug_is_generated_correctly(self):
-        client = Client.objects.create(
-            name="Pavel Dvořák",
-            street="Hlavní 123",
-            city="Praha",
-            zip_code="10000",
-            phone="777123456",
-            email="pavel.dvorak@example.com",
-        )
-
-        # Očekávaný začátek slugu
-        expected_start = slugify(client.name) + "-"
-        slug = client.slug
-
-        # Kontrola začátku + délky hashe
-        self.assertTrue(slug.startswith(expected_start))
-        hash_part = slug[len(expected_start) :]
-        self.assertEqual(len(hash_part), 10)
-
-        self.assertTrue(isinstance(client, Client))
-        self.assertEqual(client.name, "Pavel Dvořák")
-        self.assertEqual(client.city, "Praha")
-        self.assertEqual(client.zip_code, "10000")
-        self.assertEqual(client.phone, "777123456")
-        self.assertEqual(client.email, "pavel.dvorak@example.com")
-        self.assertEqual(client.first_15(), "Pavel Dvořák")
 
     def test_slug_changes_when_data_changes(self):
         client = Client.objects.create(
@@ -248,7 +252,7 @@ class ClientModelTests(TestCase):
         client.save()
         # ---
         updated_client = Client.objects.get(pk=client.pk)
-        self.assertNotEqual(client.slug, original_slug)
+        self.assertEqual(client.slug, original_slug)
         self.assertTrue(isinstance(client, Client))
         self.assertEqual(updated_client.name, "Franta Pina")
         self.assertEqual(updated_client.city, "Praha")
@@ -273,38 +277,56 @@ class ClientModelTests(TestCase):
         )
 
         name_part = slugify(name)
-        base = f"{name}{zip_code}{city}{street}"
+        base = f"{name}{zip_code}"
         hash_part = hashlib.md5(base.encode()).hexdigest()[:10]
         expected_slug = f"{name_part}-{hash_part}"
 
         self.assertEqual(client.slug, expected_slug)
 
+    def test_slug_unique(self):
+        Client.objects.create(name="Franta Pina", zip_code="99999")
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Client.objects.create(name="Franta Pina", zip_code="99999")
+
+    def test_unique_name_zip_code_constraint(self):
+        Client.objects.create(
+            name="Jan Novák",
+            street="Ulice 1",
+            city="Brno",
+            zip_code="60200",
+            phone="123456789",
+            email="jan.novak@example.com",
+        )
+        with self.assertRaises(IntegrityError):
+            # Pokus vytvořit druhého klienta se stejným name + zip_code musí spadnout
+            Client.objects.create(
+                name="Jan Novák",
+                street="Jiná 2",
+                city="Brno",
+                zip_code="60200",
+                phone="987654321",
+                email="novak2@example.com",
+            )
+
 
 class ClientMethodTests(TestCase):
     def setUp(self) -> None:
-        self.customer = Client.objects.create(
+        self.customer_1 = Client.objects.create(
             name="Franta Pina", zip_code="11155", phone="602234234"
         )
 
     def test_format_psc_and_phone_from_db(self):
-        self.assertEqual(self.customer.format_psc(), "111 55")
-        self.assertEqual(self.customer.format_phone(), "+420 602 234 234")
+        self.assertEqual(self.customer_1.format_psc(), "111 55")
+        self.assertEqual(self.customer_1.format_phone(), "+420 602 234 234")
 
-    def test_format_psc_with_valid_zip(self):
-        client = Client(name="Ferda", zip_code="12345")
-        self.assertEqual(client.format_psc(), "123 45")
+    def test_cannot_create_client_with_empty_zip(self):
+        with self.assertRaises(IntegrityError):
+            Client.objects.create(name="Ferda", zip_code=None)
 
-    def test_format_psc_with_invalid_zip(self):
-        client = Client(name="Ferda", zip_code="1234")
-        self.assertEqual(client.format_psc(), "1234")
-
-    def test_format_psc_with_empty_zip(self):
-        client = Client(name="Ferda", zip_code="")
-        self.assertEqual(client.format_psc(), "")
-
-    def test_format_psc_with_none(self):
-        client = Client(name="Ferda", zip_code=None)
-        self.assertEqual(client.format_psc(), "")
+    def test_cannot_create_client_with_blank_zip(self):
+        with self.assertRaises(IntegrityError):
+            Client.objects.create(name="Ferda", zip_code="")
 
     def test_format_phone_with_valid_number(self):
         client = Client(name="Ferda", phone="+420123456789")

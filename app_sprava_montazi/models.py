@@ -1,18 +1,20 @@
 """app_sprava_montazi_models"""
 
-from rich.console import Console
 import hashlib
+
+from rich.console import Console
 
 # --- django
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import DecimalField, DateTimeField
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import PROTECT, BooleanField, CharField, DateField, EmailField
 from django.db.models import SlugField, PositiveIntegerField, ForeignKey, FileField
 from django.db.models import JSONField, OneToOneField, TextField, TextChoices, Model
-from django.core.validators import MaxValueValidator, MinValueValidator
 
 # --- pluginy
 from simple_history.models import HistoricalRecords
@@ -132,12 +134,8 @@ class Client(Model):
         return self.name
 
     def format_psc(self) -> str:
-        if not self.zip_code:
-            return ""
-        number = str(self.zip_code)
-        if len(number) == 5:
-            return f"{number[0:3]} {number[3:]}"
-        return number
+        number: str = str(self.zip_code)
+        return f"{number[0:3]} {number[3:]}"
 
     def format_phone(self) -> str:
         if not self.phone:
@@ -153,6 +151,14 @@ class Client(Model):
         hash_part = hashlib.md5(base.encode()).hexdigest()[:10]
         return f"{name_part}-{hash_part}"
 
+    def clean(self):
+        if not self.name:
+            raise ValidationError("Jméno zákazníka nesmí být prázdné.")
+        if not self.zip_code:
+            raise ValidationError("PSČ nesmí být prázdné.")
+        if len(self.zip_code) != 5:
+            raise ValidationError("PSČ musí mít přesně 5 znaků.")
+
     def save(self, *args, **kwargs):
         self.incomplete = not all([self.street, self.city, self.phone])
         if not self.slug:
@@ -161,6 +167,9 @@ class Client(Model):
 
     def __str__(self) -> str:
         return str(self.name)
+
+    class Meta:
+        unique_together = ("name", "zip_code")
 
 
 class DistribHub(Model):
