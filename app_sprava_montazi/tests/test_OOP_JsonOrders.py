@@ -212,7 +212,7 @@ class OrderDataTablesTest(TestCase):
         # 9 status Adviced no active team
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-8-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-9-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"ADVICED-NO-ACTIVE-TEAM-{i:03}-R",

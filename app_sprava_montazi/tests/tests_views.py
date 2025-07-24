@@ -966,7 +966,7 @@ class OrdersAllViewTest(TestCase):
         # status new by assembly crew
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-1-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"NEW_BY_CREW{i:05}-O",
@@ -981,7 +981,7 @@ class OrdersAllViewTest(TestCase):
         # status new by customer
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-2-{i}", zip_code=f"321{i:02}"
             )
             Order.objects.create(
                 order_number=f"NEW_BY_CUST{i:05}-O",
@@ -996,7 +996,7 @@ class OrdersAllViewTest(TestCase):
         # status adviced
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-3-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"ADVICED-{i:06}-R",
@@ -1013,7 +1013,7 @@ class OrdersAllViewTest(TestCase):
         # status Hidden by customer
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-4-{i}", zip_code=f"321{i:02}"
             )
             Order.objects.create(
                 order_number=f"HIDDEN_CUST{i:05}-R",
@@ -1028,7 +1028,7 @@ class OrdersAllViewTest(TestCase):
         # status Realized
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-5-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"REALIZED_{i:05}-R",
@@ -1045,7 +1045,7 @@ class OrdersAllViewTest(TestCase):
         # status Canceled
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-{i}", zip_code=f"321{i:02}"
             )
             Order.objects.create(
                 order_number=f"CANCELED_{i:05}-R",
@@ -1062,7 +1062,7 @@ class OrdersAllViewTest(TestCase):
         # status Billed
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-6-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"BILLED_{i:06}-R",
@@ -1079,7 +1079,7 @@ class OrdersAllViewTest(TestCase):
         # OD 701 NEW
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"321{i:02}"
+                name=f"Customer test-7-{i}", zip_code=f"321{i:02}"
             )
             Order.objects.create(
                 order_number=f"701{i:05}-R",
@@ -1524,12 +1524,11 @@ class TeamUpdateViewTest(TestCase):
         self.assertEqual(self.team.price_per_km, Decimal(12.30))
         self.assertEqual(self.team.notes, "Toto je testovací poznámka.")
 
-    def test_team_update_post(self):
+    def test_team_update_post_1(self):
         """
         Testuje, že POST požadavek aktualizuje tým a přesměruje správně.
         """
         updated_data = {
-            "name": "Updated Company",
             "city": "Brno",
             "region": "Jižní Morava",
             "phone": "234234234",
@@ -1545,7 +1544,7 @@ class TeamUpdateViewTest(TestCase):
         self.team.refresh_from_db()
 
         # Ověříme, že data byla aktualizována
-        self.assertEqual(self.team.name, "Updated Company")
+        self.assertEqual(self.team.name, "Test Company")
         self.assertEqual(self.team.city, "Brno")
         self.assertEqual(self.team.region, "Jižní Morava")
         self.assertEqual(self.team.phone, "234234234")
@@ -1562,42 +1561,30 @@ class TeamUpdateViewTest(TestCase):
         messages_list = list(response.context["messages"])
         self.assertTrue(any("byl aktualizovan" in str(msg) for msg in messages_list))
 
-    def test_team_update_duplicate_name_post(self):
-        # Vytvoříme další tým s unikátním jménem
-        Team.objects.create(
-            name="Existující Firma",
-            city="Brno",
-            region="Jižní Morava",
-            phone="233233233",
-            email="exist@firma.cz",
-            active=True,
-            price_per_hour=Decimal(100.00),
-            price_per_km=Decimal(10.00),
-            notes="Poznámka",
-        )
-
+    def test_team_update_post_2(self):
         updated_data = {
-            "name": "Existující Firma",  # pokus o duplicitní jméno
             "city": "Brno",
             "region": "Jižní Morava",
             "phone": "234234234",
             "email": "updated@company.cz",
-            "active": True,
+            "active": False,
             "price_per_hour": Decimal(200.00),
             "price_per_km": Decimal(15.00),
             "notes": "Aktualizovaná poznámka.",
         }
 
         response = self.client.post(self.url, updated_data)
-        form = response.context.get("form")
-
-        # Očekáváme chybu duplicitního jména
-        self.assertTrue(form.errors)
-        self.assertIn("name", form.errors)
 
         # Záznam v DB zůstal nezměněný
         self.team.refresh_from_db()
         self.assertEqual(self.team.name, "Test Company")
+        self.assertEqual(self.team.region, "Jižní Morava")
+        self.assertEqual(self.team.phone, "234234234")
+        self.assertEqual(self.team.email, "updated@company.cz")
+        self.assertEqual(self.team.active, False)
+        self.assertEqual(self.team.price_per_hour, Decimal(200.00))
+        self.assertEqual(self.team.price_per_km, Decimal(15.00))
+        self.assertEqual(self.team.notes, "Aktualizovaná poznámka.")
 
 
 class ClientOrdersViewTest(TestCase):
