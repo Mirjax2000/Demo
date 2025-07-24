@@ -1,3 +1,5 @@
+{% if form.non_field_errors %}<div class="L-form__error">{{ form.non_field_errors }}</div>{% endif %}
+<!---->
 {% for field in form %}
     <div class="L-form__group {% if field.field.widget.input_type == 'hidden' %}d-none{% endif %}">
         {% if field.field.widget.input_type != 'hidden' %}{{ field.label_tag }}{% endif %}

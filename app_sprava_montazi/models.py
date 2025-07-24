@@ -168,9 +168,6 @@ class Client(Model):
     def __str__(self) -> str:
         return str(self.name)
 
-    class Meta:
-        unique_together = ("name", "zip_code")
-
 
 class DistribHub(Model):
     code = CharField(max_length=3, unique=True)
@@ -255,7 +252,6 @@ class Order(Model):
 
     team_type = CharField(
         max_length=32,
-        blank=True,
         choices=TeamType.choices,
         default=TeamType.BY_ASSEMBLY_CREW,
         verbose_name="Realizace kým",

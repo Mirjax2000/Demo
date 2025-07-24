@@ -110,11 +110,8 @@ def client_created(name: str, zip_code: str, data) -> tuple[Client, bool]:
                 "email": data.get("email", ""),
             },
         )
-        if created:
-            client.full_clean()
-            client.save()
-
-        else:
+        # Pokud už existuje, ale má staré/neúplné údaje → aktualizuj
+        if not created:
             updated = False
             for field in ["street", "city", "phone", "email"]:
                 value = data.get(field, "")

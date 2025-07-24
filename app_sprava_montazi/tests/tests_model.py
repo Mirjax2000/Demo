@@ -325,16 +325,19 @@ class ClientMethodTests(TestCase):
             Client.objects.create(name="Ferda", zip_code=None)
 
     def test_cannot_create_client_with_blank_zip(self):
-        with self.assertRaises(IntegrityError):
-            Client.objects.create(name="Ferda", zip_code="")
+        client = Client(name="Ferda", zip_code="")
+        with self.assertRaises(ValidationError):
+            client.full_clean()
 
     def test_format_phone_with_valid_number(self):
         client = Client(name="Ferda", phone="+420123456789")
         self.assertEqual(client.format_phone(), "+420 123 456 789")
 
     def test_format_phone_with_invalid_number(self):
-        client = Client(name="Ferda", phone="123456789")
-        self.assertEqual(client.format_phone(), "123456789")
+        customer_4 = Client.objects.create(
+            name="Ferda", zip_code="12345", phone="123456789"
+        )
+        self.assertEqual(customer_4.format_phone(), "123456789")
 
     def test_format_phone_with_empty_number(self):
         client = Client(name="Ferda", phone="")

@@ -31,6 +31,8 @@ class OrderForm(forms.ModelForm):
             classes = attrs.get("class", "")
             attrs["class"] = " ".join(filter(None, [classes, "form_cell_disable"]))
 
+        self.fields["team"].empty_label = "Vyberte tým..."
+
         self.fields["evidence_termin"].input_formats = [
             "%Y-%m-%d",
             "%d.%m.%Y",
