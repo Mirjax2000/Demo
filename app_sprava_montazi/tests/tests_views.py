@@ -465,7 +465,7 @@ class ClientUpdateViewTest(TestCase):
         self.client.login(username="testuser", password="testpass")
         self.template = "app_sprava_montazi/orders/order_update_client-form.html"
         self.hub = DistribHub.objects.create(code="626", city="Chrastany")
-        self.customer = Client.objects.create(name="franta", zip_code="11111")
+        self.customer = Client.objects.create(name="Franta", zip_code="11111")
         self.order = Order.objects.create(
             order_number="703777143100437749-R",
             distrib_hub=self.hub,
@@ -512,39 +512,16 @@ class ClientUpdateViewTest(TestCase):
 
     def test_success_message_displayed(self):
         data = {
-            "name": "Karel",
-            "zip_code": "12345",
+            "phone": "234234234",
+            "city": "Praha",
+            "email": "ferda@seznam.cz",
         }
         response = self.client.post(self.url, data, follow=True)
         messages = [msg.message for msg in get_messages(response.wsgi_request)]
-        self.assertIn("Zákazník: <strong>Karel</strong> aktualizován.", messages)
-
-    def test_post_invalid_data_name(self):
-        data = {
-            "name": "",  # jméno je povinné
-            "zip_code": "12345",
-        }
-        response = self.client.post(self.url, data)
-
-        form = response.context["form"]
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Jméno je povinné!", str(form.errors["name"]))
-
-    def test_post_invalid_data_zip_code(self):
-        data = {
-            "name": "ferda",  # jméno je povinné
-            "zip_code": "",
-        }
-        response = self.client.post(self.url, data)
-
-        form = response.context["form"]
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("PSČ je povinné!", str(form.errors["zip_code"]))
+        self.assertIn("Zákazník: <strong>Franta</strong> aktualizován.", messages)
 
     def test_post_valid_data(self):
         data = {
-            "name": "Karel",
-            "zip_code": "12345",
             "street": "Kopretinova 15",
             "city": "Kolin",
             "phone": "234234234",
@@ -555,8 +532,8 @@ class ClientUpdateViewTest(TestCase):
             response, reverse("order_detail", kwargs={"pk": self.order.pk})
         )
         self.customer.refresh_from_db()
-        self.assertEqual(self.customer.name, "Karel")
-        self.assertEqual(self.customer.zip_code, "12345")
+        self.assertEqual(self.customer.name, "Franta")
+        self.assertEqual(self.customer.zip_code, "11111")
         self.assertEqual(self.customer.street, "Kopretinova 15")
         self.assertEqual(self.customer.city, "Kolin")
         self.assertEqual(self.customer.phone, "234234234")
