@@ -570,10 +570,8 @@ class OrderDetailView(LoginRequiredMixin, ErrorContextMixin, DetailView):
         order: Order = self.object  # správné použití v DetailView
         articles = Article.objects.filter(order=order.pk)
 
-        # --- tady už použiješ přímo order.pk
         context["order_has_error"] = check_order_error_adviced(order.pk)
         context["articles"] = articles
-
         # --- navigace
         context["active"] = "orders_all"
 

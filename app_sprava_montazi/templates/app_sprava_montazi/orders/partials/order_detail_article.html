@@ -1,6 +1,32 @@
 <section class="L-detail__fieldset {% if show %}L-detail__hidden{% endif %}">
     <div>
         <h3 class="L-detail__fieldset__header">Artikly</h3>
-        {% include "app_sprava_montazi/orders/partials/order_detail_article_table.html" %}
+        {% if articles %}
+            <ul class="L-detail__list">
+                {% for article in articles %}
+                    <li class="L-detail__item">
+                        <div class="u-flex-row-between">
+                            <strong>{{ article.name }}</strong>
+                            <span>počet: {{ article.quantity }}x</span>
+                        </div>
+                        <p class="m-0">note: {{ article.note }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            {% if order.status == "Adviced" %}
+                <div class="alert alert-danger">
+                    <p class="m-0">
+                        <strong>Chybí artikl!</strong>
+                        přidej artikl <a href="{% url 'order_update' order.pk %}"><strong>zde<i class="fa-solid fa-link ms-1"></i></strong></a>
+                    </p>
+                    <p class="text-muted u-txt-smaller m-0">info: Důležité pro montážní protokol.</p>
+                </div>
+            {% else %}
+                <div class="alert alert-primary" role="alert">
+                    <strong>Žádný artikl</strong>
+                </div>
+            {% endif %}
+        {% endif %}
     </div>
 </section>
