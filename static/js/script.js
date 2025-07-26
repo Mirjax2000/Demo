@@ -650,6 +650,7 @@
 
             const groupDiv = input.closest(".L-form__group");
             if (groupDiv) {
+                groupDiv.classList.add("vynos_naklad_input");
                 groupDiv.classList.add("inactive_input");
             }
         });

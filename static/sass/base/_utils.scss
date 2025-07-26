@@ -303,12 +303,14 @@
   }
 }
 
+.vynos_naklad_input {
+  transition: 0.2s ease-in-out all;
+}
+
 .inactive_input {
   opacity: 0.25;
   pointer-events: none;
   user-select: none;
-  border: 1px solid red;
-  border-radius: 4px;
 }
 
 .form_cell_disable {
