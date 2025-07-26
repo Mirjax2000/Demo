@@ -65,6 +65,8 @@ class OrderForm(forms.ModelForm):
             "montage_termin",
             "team_type",
             "team",
+            "vynos",
+            "naklad",
             "notes",
         ]
 
@@ -132,6 +134,20 @@ class OrderForm(forms.ModelForm):
                     "class": "L-form__input",
                     "rows": 4,
                     "placeholder": "Poznámky...",
+                }
+            ),
+            "vynos": forms.NumberInput(
+                attrs={
+                    "class": "L-form__input",
+                    "step": "0.01",  # důležité pro desetinná čísla
+                    "placeholder": "Výnos...",
+                }
+            ),
+            "naklad": forms.NumberInput(
+                attrs={
+                    "class": "L-form__input",
+                    "step": "0.01",
+                    "placeholder": "Náklad...",
                 }
             ),
         }
@@ -222,14 +238,12 @@ class ArticleForm(forms.ModelForm):
             "name": forms.TextInput(
                 attrs={"class": "L-form__input", "placeholder": "artikl..."}
             ),
-
             "quantity": forms.NumberInput(
                 attrs={
                     "class": "L-form__input",
                     "placeholder": "množství...",
                 }
             ),
-
             "note": forms.Textarea(
                 attrs={
                     "class": "L-form__input",

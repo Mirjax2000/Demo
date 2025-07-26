@@ -1,5 +1,6 @@
 """app_sprava_montazi_models"""
 
+from decimal import Decimal
 import hashlib
 
 from rich.console import Console
@@ -277,7 +278,7 @@ class Order(Model):
 
     history = HistoricalRecords()
 
-    def profit(self):
+    def profit(self) -> Decimal | None:
         if self.vynos is not None and self.naklad is not None:
             return self.vynos - self.naklad
         return None

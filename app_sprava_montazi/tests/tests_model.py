@@ -1,6 +1,7 @@
 """Model testy"""
 
 from datetime import date, timedelta, datetime
+from decimal import Decimal
 import hashlib
 
 # --- django
@@ -362,7 +363,8 @@ class OrderModelTestV1(TestCase):
             status=Status.NEW,
             client=self.customer,
             mandant="SCCZ",
-            evidence_termin=date.today(),
+            evidence_termin=timezone.now().date(),
+            delivery_termin=timezone.now().date() + timedelta(days=3),
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=None,
         )
@@ -381,7 +383,7 @@ class OrderModelTestV1(TestCase):
             mandant="SCCZ",
             client=self.customer,
             status=Status.NEW,
-            evidence_termin=date.today(),
+            evidence_termin=timezone.now().date(),
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=team,
         )
@@ -395,7 +397,7 @@ class OrderModelTestV1(TestCase):
             mandant="SCCZ",
             client=self.customer,
             status=Status.NEW,
-            evidence_termin=date.today(),
+            evidence_termin=timezone.now().date(),
             team_type=TeamType.BY_CUSTOMER,
             team=None,
         )
@@ -411,8 +413,8 @@ class OrderModelTestV1(TestCase):
             mandant="SCCZ",
             client=self.customer,
             status=Status.NEW,
-            delivery_termin=date.today(),
-            evidence_termin=date.today(),
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
             notes="Toto je opravdu dlouhá poznámka",
         )
         self.assertEqual(order.notes_first_10(), "Toto je op...")
@@ -427,8 +429,8 @@ class OrderModelTestV1(TestCase):
             mandant="SCCZ",
             status=Status.NEW,
             client=self.customer,
-            delivery_termin=date.today(),
-            evidence_termin=date.today(),
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
             notes="Krátké",
         )
         self.assertEqual(order.notes_first_10(), "Krátké")
@@ -444,8 +446,8 @@ class OrderModelTestV1(TestCase):
             mandant="SCCZ",
             status=Status.NEW,
             client=self.customer,
-            delivery_termin=date.today(),
-            evidence_termin=date.today(),
+            evidence_termin=timezone.now().date(),
+            delivery_termin=timezone.now().date(),
             notes="",
         )
         self.assertEqual(order.notes_first_10(), "-")
@@ -478,8 +480,8 @@ class OrderModelTestV1(TestCase):
             mandant="SCCZ",
             status=Status.NEW,
             client=self.customer,
-            delivery_termin=date.today(),
-            evidence_termin=date.today(),
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
             montage_termin=montage_dt,
             notes="",
         )
@@ -487,6 +489,51 @@ class OrderModelTestV1(TestCase):
             order.format_datetime(order.montage_termin), "01.01.2025 / 00:00"
         )
 
+    def test_zisk_method_from_order(self):
+        montage_dt = timezone.now()
+        order = Order.objects.create(
+            order_number="703777143100431152-R",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            status=Status.ADVICED,
+            client=self.customer,
+            evidence_termin=timezone.now().date(),
+            delivery_termin=timezone.now().date(),
+            montage_termin=montage_dt,
+            naklad=Decimal(100.00),
+            vynos=Decimal(200.00),
+            notes="",
+        )
+        self.assertEqual(order.order_number, "703777143100431152-R")
+        self.assertEqual(order.distrib_hub, self.hub)
+        self.assertEqual(order.naklad, Decimal(100.00))
+        self.assertEqual(order.vynos, Decimal(200.00))
+        self.assertEqual(order.profit(), Decimal(100.00))
+
+    def test_zisk_and_timemethods_from_order(self):
+        montage_dt = timezone.now()
+        order = Order.objects.create(
+            order_number="703777143100431153-R",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            status=Status.ADVICED,
+            client=self.customer,
+            evidence_termin=timezone.now().date(),
+            delivery_termin=timezone.now().date() + timedelta(days=3),
+            montage_termin=montage_dt,
+            naklad=Decimal(200.00),
+            vynos=Decimal(200.00),
+            notes="",
+        )
+        self.assertEqual(order.order_number, "703777143100431153-R")
+        self.assertEqual(order.distrib_hub, self.hub)
+        self.assertEqual(order.naklad, Decimal(200.00))
+        self.assertEqual(order.vynos, Decimal(200.00))
+        self.assertEqual(order.evidence_termin, timezone.now().date())
+        self.assertEqual(
+            order.delivery_termin, timezone.now().date() + timedelta(days=3)
+        )
+        self.assertEqual(order.profit(), Decimal(0.00))
 
 
 class OrderModelTestV2(TestCase):
@@ -516,8 +563,8 @@ class OrderModelTestV2(TestCase):
             "mandant": "SCCZ",
             "status": Status.NEW,
             "client": self.customer,
-            "delivery_termin": timezone.now().date() + timedelta(days=3),
             "evidence_termin": timezone.now().date(),
+            "delivery_termin": timezone.now().date() + timedelta(days=3),
             "montage_termin": timezone.now() + timedelta(days=3),
             "team_type": TeamType.BY_ASSEMBLY_CREW,
             "team": self.team,
@@ -529,20 +576,24 @@ class OrderModelTestV2(TestCase):
         """
         Testuje vytvoření nové objednávky (Order) s předdefinovanými hodnotami.
         """
-        distrib_hub = DistribHub.objects.get(code="CB")
-        customer = Client.objects.get(name="Jan Novák")
-        team = Team.objects.get(name="Alfa Team")
-        order = Order.objects.create(
+        time_now: datetime = timezone.now()
+        date_timedelta = timezone.now().date() + timedelta(days=3)
+        distrib_hub: DistribHub = DistribHub.objects.get(code="CB")
+        customer: Client = Client.objects.get(name="Jan Novák")
+        team: Team = Team.objects.get(name="Alfa Team")
+        order: Order = Order.objects.create(
             order_number="12345",
             distrib_hub=distrib_hub,
             mandant="ABC",
             status=Status.NEW,
             client=customer,
-            delivery_termin=timezone.now().date(),
             evidence_termin=timezone.now().date(),
-            montage_termin=timezone.now(),
+            delivery_termin=date_timedelta,
+            montage_termin=time_now,
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=team,
+            vynos=Decimal(100.00),
+            naklad=Decimal(100.00),
             notes="Testovací poznámka",
         )
         self.assertTrue(isinstance(order, Order))
@@ -555,6 +606,12 @@ class OrderModelTestV2(TestCase):
         self.assertIsInstance(order.client, Client)
         self.assertEqual(order.team_type, TeamType.BY_ASSEMBLY_CREW)
         self.assertEqual(order.team, team)
+        self.assertEqual(order.evidence_termin, timezone.now().date())
+        self.assertEqual(order.delivery_termin, date_timedelta)
+        self.assertEqual(order.montage_termin, time_now)
+        self.assertEqual(order.vynos, Decimal(100.00))
+        self.assertEqual(order.naklad, Decimal(100.00))
+        self.assertEqual(order.profit(), Decimal(0.00))
         self.assertIsInstance(order.team, Team)
         self.assertEqual(order.notes, "Testovací poznámka")
         if order.team is not None:
@@ -807,7 +864,6 @@ class OrderModelTestV2(TestCase):
         order.team = self.team
         order.save()
         self.assertEqual(order.status, Status.ADVICED)
-
 
 
 class ArticleModelTest(TestCase):
