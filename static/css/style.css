@@ -2,7 +2,7 @@
 /* --- root --- */
 :root {
   --accent: #fd7e14;
-  --success: #3988ff;
+  --success: #3384ff;
   --success-darker: #004ec3;
   --success-lighter: #428cfc;
   --info: #198754;
@@ -357,6 +357,7 @@ body.home {
 
 .error_mark_nav {
   border: 2px solid var(--bck-body);
+  color: white;
   top: 0.6em;
   left: 91%;
   border-radius: 10px;
@@ -374,6 +375,14 @@ body.home {
 }
 .od_inactive > select {
   user-select: none;
+}
+
+.inactive_input {
+  opacity: 0.25;
+  pointer-events: none;
+  user-select: none;
+  border: 1px solid red;
+  border-radius: 4px;
 }
 
 .form_cell_disable {

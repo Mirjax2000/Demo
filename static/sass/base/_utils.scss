@@ -282,6 +282,7 @@
 
 .error_mark_nav {
   border: 2px solid var(--bck-body);
+  color: white;
   top: 0.6em;
   left: 91%;
   border-radius: 10px;
@@ -302,9 +303,15 @@
   }
 }
 
+.inactive_input {
+  opacity: 0.25;
+  pointer-events: none;
+  user-select: none;
+  border: 1px solid red;
+  border-radius: 4px;
+}
+
 .form_cell_disable {
   opacity: 0.6;
   position: relative;
 }
-
-

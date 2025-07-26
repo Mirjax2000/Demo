@@ -14,6 +14,8 @@
     const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
     const emptyFormHtml = $('#empty-form-template');
 
+    // naklad vynos skryti
+    document.addEventListener("DOMContentLoaded", hide_input_vynos_naklad);
     // delete Order
     document.addEventListener("DOMContentLoaded", deleteOrder);
     // SCCZ filter
@@ -185,7 +187,7 @@
         });
     });
 
-    // Theme control
+    // Theme control function
     function toggleTheme() {
         const current = html.dataset.theme;
         const newTheme = current === "light" ? "dark" : "light";
@@ -520,6 +522,7 @@
             }
         }
     });
+
     //  --- protokol img
     $(document).ready(function () {
         const protocolImg = $('#protocolImg');
@@ -534,7 +537,7 @@
         });
     });
 
-    // --- autobot copy values to schranka
+    // --- autobot copy values to schranka function
     function setupAutobotCopy() {
         const btn = document.getElementById("copyBtnAutobot");
         const tokkenEl = document.getElementById("autobotTokken");
@@ -566,7 +569,7 @@
         }
     }
 
-    // delete Order
+    // delete Order function
     function deleteOrder() {
         const checkBoxDeleteOrder = document.getElementById("checkBoxDeleteOrder");
         const deleteOrderButton = document.getElementById("deleteOrderButton")
@@ -582,7 +585,7 @@
             }
         })
     }
-    // hidden Order
+    // hidden Order function
     function hiddenOrder() {
         const checkBoxHiddenOrder = document.getElementById("checkBoxHiddenOrder");
         const hiddenOrderButton = document.getElementById("hiddenOrderButton")
@@ -598,7 +601,7 @@
             }
         })
     }
-    // hidden Order
+    // delete team function
     function deleteTeam() {
         const checkBoxDeleteTeam = document.getElementById("checkBoxDeleteTeam");
         const deleteTeamButton = document.getElementById("deleteTeamButton")
@@ -614,7 +617,7 @@
             }
         })
     }
-
+    // hlavni filter zapinani OD pole function
     function scczFilter() {
         const mandantInput = document.getElementById("mandant");
         const odWrapper = document.getElementById("obchodniDumWrapper");
@@ -636,6 +639,20 @@
 
         mandantInput.addEventListener("input", toggleOD);
     }
+    // naklad vynos skryti function
+    function hide_input_vynos_naklad() {
+        const id_naklad = document.getElementById("id_naklad");
+        const id_vynos = document.getElementById("id_vynos");
+        const input_fields = [id_naklad, id_vynos];
 
+        input_fields.forEach(function (input) {
+            if (!input) return;
+
+            const groupDiv = input.closest(".L-form__group");
+            if (groupDiv) {
+                groupDiv.classList.add("inactive_input");
+            }
+        });
+    }
 
 })();

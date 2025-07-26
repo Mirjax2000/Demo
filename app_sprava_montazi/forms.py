@@ -139,14 +139,14 @@ class OrderForm(forms.ModelForm):
             "vynos": forms.NumberInput(
                 attrs={
                     "class": "L-form__input",
-                    "step": "0.01",  # důležité pro desetinná čísla
+                    "step": "1",
                     "placeholder": "Výnos...",
                 }
             ),
             "naklad": forms.NumberInput(
                 attrs={
                     "class": "L-form__input",
-                    "step": "0.01",
+                    "step": "1",
                     "placeholder": "Náklad...",
                 }
             ),
