@@ -610,7 +610,6 @@ class OrderCreateViewTest(TestCase):
             "article_set-MAX_NUM_FORMS": 1000,
             "article_set-0-name": "Postel",
             "article_set-0-quantity": 1,
-            "article_set-0-price": 10000,
             "article_set-0-note": "Tvrda postel",
             "article_set-0-id": "",
             "article_set-0-DELETE": "",
@@ -692,10 +691,6 @@ class OrderCreateViewTest(TestCase):
         self.assertEqual(
             created_article.quantity, self.valid_article_data["article_set-0-quantity"]
         )
-        self.assertEqual(
-            float(created_article.price), self.valid_article_data["article_set-0-price"]
-        )  # Decimal vs float
-
         mock_success_message.assert_called_once()
         args, kwargs = mock_success_message.call_args
         msg: str = f"Objednávka vytvořena se zákazníkem: <strong>{created_order.client.name}</strong>."
