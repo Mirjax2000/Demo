@@ -217,30 +217,19 @@ class OrderForm(forms.ModelForm):
 class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
-        fields = ["name", "price", "quantity", "is_sofa", "note"]
+        fields = ["name", "quantity", "note"]
         widgets = {
             "name": forms.TextInput(
                 attrs={"class": "L-form__input", "placeholder": "artikl..."}
             ),
-            "price": forms.NumberInput(
-                attrs={
-                    "class": "L-form__input",
-                    "placeholder": "cena...",
-                    "step": "1",  # krokování po 10
-                    "min": "0",
-                }
-            ),
+
             "quantity": forms.NumberInput(
                 attrs={
                     "class": "L-form__input",
                     "placeholder": "množství...",
                 }
             ),
-            "is_sofa": forms.CheckboxInput(
-                attrs={
-                    "class": "form-check-input C-checkbox",
-                }
-            ),
+
             "note": forms.Textarea(
                 attrs={
                     "class": "L-form__input",

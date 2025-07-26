@@ -332,26 +332,6 @@
         });
     }
 
-    // DataTable for articles
-    if (articleTable) {
-        $(articleTable).DataTable({
-            rowReorder: false,
-            fixedColumns: false,
-            searching: false,
-            paging: false,
-            columnDefs: [
-                { orderable: false, targets: [3] },
-            ],
-            language: {
-                emptyTable: "Žádné Artikly !!!",
-                decimal: ",",
-                info: "počet záznamů: _TOTAL_",
-                infoEmpty: "",
-                infoFiltered: "",
-            },
-        });
-    }
-
     // Article formset
     if (formsetContainer.length && totalFormsInput.length && emptyFormHtml.length) {
         $('#add-article-button').on('click', function () {
@@ -653,7 +633,7 @@
         }
 
         toggleOD();
-        
+
         mandantInput.addEventListener("input", toggleOD);
     }
 

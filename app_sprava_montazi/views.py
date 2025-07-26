@@ -567,7 +567,7 @@ class OrderDetailView(LoginRequiredMixin, ErrorContextMixin, DetailView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
-        order: Order = self.object  # správné použití v DetailView
+        order: Order = self.object  
         articles = Article.objects.filter(order=order.pk)
 
         context["order_has_error"] = check_order_error_adviced(order.pk)

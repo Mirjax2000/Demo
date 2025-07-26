@@ -258,7 +258,29 @@ class Order(Model):
     )
     notes = TextField(blank=True, verbose_name="Poznámky")
 
+    naklad = DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Náklad",
+        help_text="Kolik zakázka stála (výdaje)",
+    )
+    vynos = DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Výnos",
+        help_text="Kolik za zakázku dostanu zaplaceno (příjem)",
+    )
+
     history = HistoricalRecords()
+
+    def profit(self):
+        if self.vynos is not None and self.naklad is not None:
+            return self.vynos - self.naklad
+        return None
 
     def format_datetime(self, value) -> str:
         if value is None:
@@ -312,13 +334,6 @@ class Article(Model):
         Order, on_delete=PROTECT, related_name="articles", verbose_name="zakazka"
     )
     name = CharField(max_length=32, verbose_name="Název artiklu")
-    price = DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Cena",
-    )
     quantity = PositiveIntegerField(
         default=1,
         validators=[
@@ -327,7 +342,6 @@ class Article(Model):
         ],
         verbose_name="Množství",
     )
-    is_sofa = BooleanField(default=False, verbose_name="Sedačka?")
     note = TextField(blank=True, verbose_name="Popis")
     history = HistoricalRecords()
 

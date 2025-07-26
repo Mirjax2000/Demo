@@ -305,7 +305,6 @@ class ArticleFormTest(TestCase):
     def test_valid_article_form(self):
         form_data = {
             "name": "Postel",
-            "price": 1000.00,
             "quantity": 1,
             "note": "Dobra postel",
         }

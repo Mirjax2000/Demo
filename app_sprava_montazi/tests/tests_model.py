@@ -488,7 +488,7 @@ class OrderModelTestV1(TestCase):
         )
 
 
-class ArticleModelTestV1(TestCase):
+class ArticleModelTest(TestCase):
     def setUp(self):
         self.hub = DistribHub.objects.create(code="111", city="Praha")
         self.customer = Client.objects.create(name="ferda", zip_code="12345")
@@ -503,26 +503,13 @@ class ArticleModelTestV1(TestCase):
             team=None,
         )
 
-    def test_name_field(self):
+    def test_struktural_field(self):
         """Strukturlani test"""
         field = Article._meta.get_field("name")
         self.assertEqual(field.max_length, 32)
-
-    def test_quantity_field(self):
-        """Strukturalni test"""
         field = Article._meta.get_field("quantity")
         self.assertEqual(field.default, 1)
-
-    def test_note_field(self):
-        """Strukturalni test"""
         field = Article._meta.get_field("note")
-        self.assertTrue(field.blank)
-
-    def test_price_field(self):
-        field = Article._meta.get_field("price")
-        self.assertEqual(field.max_digits, 10)
-        self.assertEqual(field.decimal_places, 2)
-        self.assertTrue(field.null)
         self.assertTrue(field.blank)
 
     def test_order_field(self):
@@ -538,7 +525,6 @@ class ArticleModelTestV1(TestCase):
 
         self.assertIsInstance(model._meta.get_field("order"), models.ForeignKey)
         self.assertIsInstance(model._meta.get_field("name"), models.CharField)
-        self.assertIsInstance(model._meta.get_field("price"), models.DecimalField)
         self.assertIsInstance(
             model._meta.get_field("quantity"), models.PositiveIntegerField
         )
@@ -551,38 +537,27 @@ class ArticleModelTestV1(TestCase):
         article = Article.objects.create(
             order=self.order,
             name="Postel",
-            price=1000.00,
             quantity=1,
             note="Standardní postel",
         )
         self.assertTrue(isinstance(article, Article))
         self.assertEqual(article.name, "Postel")
-        self.assertEqual(article.price, 1000.00)
         self.assertEqual(article.quantity, 1)
         self.assertIsInstance(article.quantity, int)
-        self.assertIsInstance(article.price, float)
         self.assertEqual(article.note, "Standardní postel")
 
     def test_article_str_returns_name(self):
-        """
-        Testuje, zda metoda __str__ modelu Article vrací správně hodnotu pole name.
-        """
         article = Article.objects.create(
             order=self.order,
             name="Test Artikl",
-            price=10000,
             quantity=1,
             note="Nějaká poznámka dlouha poznamka o articlu",
         )
         self.assertEqual(str(article), "Test Artikl")
 
     def test_first_15_with_short_note(self):
-        """
-        Testuje metodu first_15 třídy Article, která by měla vrátit poznámku (note), pokud je její délka kratší nebo rovna 15 znakům.
-        """
-
         article = Article.objects.create(
-            order=self.order, name="Krátký", price=50, quantity=2, note="Krátká pozn."
+            order=self.order, name="Krátký", quantity=2, note="Krátká pozn."
         )
         self.assertEqual(article.first_15(), "Krátká pozn.")
 
@@ -593,7 +568,6 @@ class ArticleModelTestV1(TestCase):
         article = Article.objects.create(
             order=self.order,
             name="Dlouhý",
-            price=80,
             quantity=1,
             note="Tato poznámka je opravdu dlouhá",
         )
@@ -605,7 +579,7 @@ class ArticleModelTestV1(TestCase):
         Očekává se, že metoda vrátí znak "-", pokud pole poznámky neobsahuje žádný text.
         """
         article = Article.objects.create(
-            order=self.order, name="Bez poznámky", price=20, quantity=1, note=""
+            order=self.order, name="Bez poznámky", quantity=1, note=""
         )
         self.assertEqual(article.first_15(), "-")
 
