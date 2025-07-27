@@ -698,7 +698,7 @@ class Utility:
         height = bounds[3] - bounds[1]
 
         # Vytvořím kresbu a přizpůsobím velikost QR kódu
-        d = Drawing(120, 120, transform=[120.0 / width, 0, 0, 120.0 / height, 0, 0])
+        d = Drawing(110, 110, transform=[110.0 / width, 0, 0, 110.0 / height, 0, 0])
         d.add(qr_code)
 
         # Vykreslím do PDF canvasu

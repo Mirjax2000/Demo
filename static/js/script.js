@@ -14,6 +14,8 @@
     const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
     const emptyFormHtml = $('#empty-form-template');
 
+    // making_delivery_order
+    document.addEventListener("DOMContentLoaded", making_delivery_order);
     // naklad vynos skryti
     document.addEventListener("DOMContentLoaded", hide_input_vynos_naklad);
     // delete Order
@@ -655,5 +657,34 @@
             }
         });
     }
+    // making dopravni zakazku
+    function making_delivery_order() {
+        const idStatus = document.getElementById("id_status");
+        const idEvidenceTermin = document.getElementById("id_evidence_termin");
+        const idDeliveryTermin = document.getElementById("id_delivery_termin");
+        const idMontageTermin = document.getElementById("id_montage_termin");
+        const idTeamType = document.getElementById("id_team_type");
+        const idTeam = document.getElementById("id_team");
+
+        function updateTeamVisibility() {
+            const teamWrapper = idTeam.closest(".L-form__group");
+
+            if (idTeamType.value === "By_customer" || idTeamType.value === "By_delivery_crew") {
+                teamWrapper.classList.add("inactive_input");
+                idTeam.value = "";
+            } else {
+                teamWrapper.classList.remove("inactive_input");
+            }
+        }
+
+        // spustíme při změně
+        idTeamType.addEventListener("change", function () {
+            setTimeout(updateTeamVisibility, 100); // s malým delayem
+        });
+
+        // spustíme hned při načtení stránky
+        updateTeamVisibility();
+    }
+
 
 })();

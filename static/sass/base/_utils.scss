@@ -120,6 +120,13 @@
   gap: 2%;
 }
 
+.u-flex-row-end {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 2%;
+}
+
 .u-flex-row-start {
   display: flex;
   justify-content: flex-start;
@@ -308,6 +315,7 @@
 }
 
 .inactive_input {
+  transition: 0.2s ease-in-out all;
   opacity: 0.25;
   pointer-events: none;
   user-select: none;
