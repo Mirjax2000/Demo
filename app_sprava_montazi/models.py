@@ -301,11 +301,29 @@ class Order(Model):
         """
         return self.team is None and self.team_type == TeamType.BY_ASSEMBLY_CREW
 
-    def zaterminovano(self) -> None:
+    def zaterminovano_with_montage_team(self) -> None:
         ready = (
             self.team
-            and self.team_type == TeamType.BY_ASSEMBLY_CREW
             and self.status == Status.NEW
+            and self.team_type == TeamType.BY_ASSEMBLY_CREW
+            and self.client
+            and not self.client.incomplete
+            and self.montage_termin
+            and self.delivery_termin
+        )
+        if ready:
+            self.status = Status.ADVICED
+            if settings.DEBUG:
+                cons.log(
+                    f"zakazka: {self.order_number} presla do stavu: {Status.ADVICED}",
+                    style="blue",
+                )
+
+    def zaterminovano_with_delivery_team(self) -> None:
+        ready = (
+            not self.team
+            and self.status == Status.NEW
+            and self.team_type == TeamType.BY_DELIVERY_CREW
             and self.client
             and not self.client.incomplete
             and self.montage_termin
@@ -323,7 +341,8 @@ class Order(Model):
         return str(self.order_number)
 
     def save(self, *args, **kwargs):
-        self.zaterminovano()
+        self.zaterminovano_with_montage_team()
+        self.zaterminovano_with_delivery_team()
         super().save(*args, **kwargs)
 
     class Meta:
