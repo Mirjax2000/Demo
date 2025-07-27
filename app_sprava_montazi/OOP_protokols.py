@@ -147,18 +147,19 @@ class Section:
 
         def team_info(self) -> None:
             utils, cvs = self.utils, self.cvs
-            x_offset: float = 388
+            x_offset: float = 223
             utils.draw_txt(
                 "Informace o zakázce",
-                x_offset=388,
-                y_offset=147,
+                x_offset=x_offset,
+                y_offset=135,
                 font="Roboto-Semibold",
             )
-            utils.draw_txt("Číslo zakázky:", x_offset=x_offset, y_offset=162)
+            utils.draw_txt("Číslo zakázky:", x_offset=x_offset, y_offset=149)
+            utils.draw_txt("Mandant:", x_offset=x_offset, y_offset=162)
             utils.draw_txt("Datum / čas:", x_offset=x_offset, y_offset=175)
             utils.draw_txt("Montažní tým:", x_offset=x_offset, y_offset=190)
             # --- border
-            cvs.roundRect(385, 604, 173, 48, radius=4, stroke=1, fill=0)
+            cvs.roundRect(220, 604, 173, 60, radius=4, stroke=1, fill=0)
 
         def faktura_info(self) -> None:
             utils, cvs = self.utils, self.cvs
@@ -315,7 +316,7 @@ class Section:
             "MONTÁŽ NÁBYTKU", y_offset=300, font="Roboto-Semibold", font_size=bigger
         )
         # --- polozky k montazi
-        montaz_txt: str = "Položky k montáži uhrazené dle kupní smlouvy na OD Sconto:"
+        montaz_txt: str = "Položky k montáži:"
         utils.draw_txt_field(montaz_txt, 330, 37, 379, 521, 90)
         # --- polozky spotrebniho materialu
         material_text: str = "Použitý nadstandardní spotřební materiál:"
@@ -325,7 +326,7 @@ class Section:
     def sccz_data_section(self, order) -> None:
         """Sconto pdf section with Order data"""
         utils = self.utils
-        x1, x2 = 73, 442
+        x1, x2 = 73, 276
 
         # --- client info
         utils.draw_txt(
@@ -340,7 +341,18 @@ class Section:
         utils.draw_txt(order.client.format_phone(), x_offset=x1, y_offset=176)
         utils.draw_txt(order.client.email[:31], x_offset=x1, y_offset=190)
         # --- order info
-        utils.draw_txt(order.order_number.upper(), x_offset=x2, y_offset=162)
+        utils.draw_txt(
+            order.order_number.upper(),
+            x_offset=x2,
+            y_offset=149,
+            font="Roboto-Semibold",
+        )
+        utils.draw_txt(
+            order.mandant,
+            x_offset=x2,
+            y_offset=162,
+            font="Roboto-Semibold",
+        )
         # --- prevod casu
         local_dt = localtime(order.montage_termin)
         utils.draw_txt(
@@ -360,13 +372,6 @@ class Section:
         # ---
         for article in articles:
             utils.draw_txt(article.name, y_offset=offset, font="Roboto-Semibold")
-            if article.price:
-                utils.draw_txt(
-                    f"cena: {article.price} Kč", x_offset=150, y_offset=offset
-                )
-            else:
-                utils.draw_txt("cena: 0.00 Kč", x_offset=150, y_offset=offset)
-
             utils.draw_txt(f"qty: {article.quantity} ks", x_offset=240, y_offset=offset)
             utils.draw_txt(f"pzn.: {article.note[:74]}", x_offset=280, y_offset=offset)
             offset += 14
@@ -693,7 +698,7 @@ class Utility:
         height = bounds[3] - bounds[1]
 
         # Vytvořím kresbu a přizpůsobím velikost QR kódu
-        d = Drawing(110, 110, transform=[110.0 / width, 0, 0, 110.0 / height, 0, 0])
+        d = Drawing(120, 120, transform=[120.0 / width, 0, 0, 120.0 / height, 0, 0])
         d.add(qr_code)
 
         # Vykreslím do PDF canvasu
@@ -739,7 +744,7 @@ class SCCZPdfGenerator(PdfGenerator):
         # ---
         if model is not None:
             order_number = model.order_number
-            utils.generate_qrcode(order_number.upper(), 420, 660)
+            utils.generate_qrcode(order_number.upper(), 420, 640)
             section.sccz_data_section(model)  # --- data layer ---
             if settings.DEBUG:
                 cons.log(f"SCCZ pdf: {order_number} sestaven", style="blue")

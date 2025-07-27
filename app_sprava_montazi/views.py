@@ -1009,6 +1009,7 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
 
 
 class GeneratePDFView(LoginRequiredMixin, View):
+    # --- tenhle je primo z buttonu
     def get(self, request, *args, **kwargs):
         pk = kwargs["pk"]
         order = get_object_or_404(Order, pk=pk)
@@ -1040,6 +1041,7 @@ class GeneratePDFView(LoginRequiredMixin, View):
 
         return redirect("protocol", pk=pk)
 
+    # --- tenhle je z formulare pred generatorem
     def post(self, request, *args, **kwargs):
         pk = kwargs["pk"]
         order = get_object_or_404(Order, pk=pk)

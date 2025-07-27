@@ -329,6 +329,7 @@ class Order(Model):
                     f"client.incomplete: {getattr(self.client, 'incomplete', None)}"
                 )
                 cons.log(f"delivery_termin: {self.delivery_termin}")
+                cons.log(f"montage_termin: {self.montage_termin}")
                 cons.log(30 * "-")
 
     def zaterminovano_with_delivery_team(self) -> None:
@@ -358,6 +359,7 @@ class Order(Model):
                     f"client.incomplete: {getattr(self.client, 'incomplete', None)}"
                 )
                 cons.log(f"delivery_termin: {self.delivery_termin}")
+                cons.log(f"montage_termin: {self.montage_termin}")
                 cons.log(30 * "-")
 
     def __str__(self) -> str:
