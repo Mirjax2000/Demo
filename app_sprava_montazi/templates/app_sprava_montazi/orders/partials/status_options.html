@@ -25,27 +25,55 @@
 <!---->
 <!--Zaterminovano Adviced-->
 {% if order.status == "Adviced" %}
-    <a href="{% url 'protocol' order.pk %}"
-       class="btn btn-primary btn-sm u-width-180 text-nowrap me-2 position-relative">
-        {% if order_has_error %}
-            <span class="position-absolute top-0 start-100 translate-middle bg-danger error_mark">
-                <i class="fa-solid fa-exclamation fa-beat-fade fa-sm"></i>
-            </span>
-            <i class="fa-solid fa-paper-plane me-2"></i>
-        {% endif %}
-        <span>Montážní protokol</span>
-    </a>
+    {% if order.team_type == "By_assembly_crew" %}
+        <a href="{% url 'protocol' order.pk %}"
+           class="btn btn-primary btn-sm u-width-180 text-nowrap me-2 position-relative">
+            {% if order_has_error %}
+                <span class="position-absolute top-0 start-100 translate-middle bg-danger error_mark">
+                    <i class="fa-solid fa-exclamation fa-beat-fade fa-sm"></i>
+                </span>
+                <i class="fa-solid fa-paper-plane me-2"></i>
+            {% endif %}
+            <span>Montážní protokol</span>
+        </a>
+    {% else %}
+        <div>
+            <div class="alert alert-primary">
+                Pro tento stav zakázky: <strong>Zaterminovano s dopravou</strong> není žádná funkce
+            </div>
+        </div>
+    {% endif %}
 {% endif %}
 <!---->
 <!--Realized Realizováno-->
 {% if order.status == "Realized" %}
-    <a href="{% url 'protocol' order.pk %}"
-       class="btn btn-primary btn-sm u-width-180 text-nowrap me-2">
-        <i class="fa-solid fa-paper-plane me-2"></i>Montážní protokol</a>
+    <div>
+        <div class="alert alert-primary">
+            Pro tento stav zakázky: <strong>Realizováno</strong> není žádná funkce
+        </div>
+    </div>
     <!---->
 {% endif %}
+<!--"Billed", "Vyúčtovaný"-->
+{% if order.status == "Billed" %}
+    <div>
+        <div class="alert alert-primary">
+            Pro tento stav zakázky: <strong>Vyúčtovaný</strong> není žádná funkce
+        </div>
+    </div>
+    <!---->
+{% endif %}
+<!--"Canceled", "Zrušeno"-->
+{% if order.status == "Canceled" %}
+    <div>
+        <div class="alert alert-primary">
+            Pro tento stav zakázky: <strong>Zrušeno</strong> není žádná funkce
+        </div>
+    </div>
+    <!---->
+{% endif %}
+<!--Hidden Skryto-->
 {% if order.status == "Hidden" %}
-    <!--Hidden Skryto-->
     <div class="form-check form-switch mb-1">
         <input class="form-check-input"
                type="checkbox"
