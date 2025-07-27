@@ -12,16 +12,18 @@
                      class="C-img-modal__img">
             </div>
         </div>
-        <h2 class="mt-1 ">montazni protokol: {{ order.order_number|upper }}</h2>
+        <h2 class="mt-1">
+            montážní protokol:
+            <span class="u-txt-success">{{ order.order_number|upper }}</span>
+            <span>pro zákazníka:
+                <strong class="u-txt-success">{{ order.client }}</strong>
+            </span>
+        </h2>
         <hr>
         <div class="u-flex-row-start">
             {% include "app_sprava_montazi/teams/partials/team_detail_partial.html" %}
             <!---->
-            {% if order.mandant == "SCCZ" %}
-                {% include "app_sprava_montazi/orders/partials/protocol_sccz.html" %}
-            {% else %}
-                {% include "app_sprava_montazi/orders/partials/protocol_default.html" %}
-            {% endif %}
+            {% include "app_sprava_montazi/orders/partials/protocol_sccz.html" %}
             <!--recieved protocol-->
             {% include "app_sprava_montazi/orders/partials/recieved_protokol.html" %}
         </div>

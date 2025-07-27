@@ -2,6 +2,7 @@
 
 from typing import Tuple, TypedDict, TypeAlias
 from rich.console import Console
+from datetime import datetime, date as date_type
 
 # --- django
 from django.conf import settings
@@ -264,22 +265,40 @@ class JsonOrders:
 
     def montage_termin_coll(self, order: Order) -> str:
         """Vrací montage_termin jako HTML nebo varování."""
-        name: str = "montage-termin"
-        css: str = "u-s-none"
-        content: str = "–"
-        icon: str = ""
-        time = timezone.localtime(order.montage_termin)
+        name = "montage-termin"
+        css = "u-s-none"
+        icon = ""
+        content = "–"
 
-        if order.montage_termin:
-            content = f"<strong>{time.strftime('%d.%m.%Y %H:%M')}</strong>"
+        # Montážní tým
+        if (
+            order.status == Status.ADVICED
+            and order.team_type == TeamType.BY_ASSEMBLY_CREW
+        ):
+            if order.montage_termin:
+                local_time = timezone.localtime(order.montage_termin)
+                content = f"<strong>{local_time.strftime('%d.%m.%Y %H:%M')}</strong>"
 
+        # Doručovací tým
+        elif (
+            order.status == Status.ADVICED
+            and order.team_type == TeamType.BY_DELIVERY_CREW
+        ):
+            if isinstance(order.delivery_termin, datetime):
+                local_date = timezone.localdate(order.delivery_termin)
+            else:
+                local_date = order.delivery_termin
+                
+            if local_date:
+                content = f"<strong>{local_date.strftime('%d.%m.%Y')}</strong>"
+
+        # Není přiřazen tým
         elif order.team_type == "By_assembly_crew":
             icon = exclamation_icon
             css += " u-txt-warning"
             content = "Nevybráno"
 
-        result = f'<div name="{name}" class="{css}">{icon}<span>{content}</span></div>'
-        return result
+        return f'<div name="{name}">{icon}<span class="{css}">{content}</span></div>'
 
     def status_coll(self, order: Order) -> str:
         """Vrací status + případnou ikonu odkazu na protokol."""
@@ -353,7 +372,9 @@ class Utils:
     @staticmethod
     def get_invalid_orders() -> QuerySet:
         """Vrátí objednávky se statusem ADVICED, které mají chybu."""
-        filtr: QuerySet = Order.objects.filter(status=Status.ADVICED).filter(
+        filtr: QuerySet = Order.objects.filter(
+            status=Status.ADVICED, team_type=TeamType.BY_ASSEMBLY_CREW
+        ).filter(
             Q(mail_datum_sended__isnull=True)
             | (
                 Q(mail_datum_sended__isnull=False)
