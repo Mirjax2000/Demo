@@ -60,7 +60,7 @@
                 {% elif order.team_type == "By_assembly_crew" %}
                     <span class="ms-1 u-txt-success-light">{{ order.get_team_type_display }}</span>
                 {% else %}
-                    <span class="ms-1">{{ order.get_team_type_display }}</span>
+                    <span class="ms-1 u-txt-info">{{ order.get_team_type_display }}</span>
                 {% endif %}
             </li>
             <!--team-->
@@ -80,10 +80,17 @@
                     {% endif %}
                 </li>
             {% else %}
-                <li class="L-detail__item">
-                    <strong>Montážní tým:</strong>
-                    <span class="u-txt-warning ms-1">Nevybráno</span>
-                </li>
+                {% if order.team_type == "By_delivery_crew" %}
+                    <li class="L-detail__item">
+                        <strong>Montážní tým:</strong>
+                        <span class="u-txt-info ms-1">Montáž dopravcem</span>
+                    </li>
+                {% else %}
+                    <li class="L-detail__item">
+                        <strong>Montážní tým:</strong>
+                        <span class="u-txt-warning ms-1">Nevybráno</span>
+                    </li>
+                {% endif %}
             {% endif %}
             <!--notes-->
             {% if order.notes %}
