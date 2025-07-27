@@ -2,21 +2,20 @@
 
 import os
 import time
-from typing import Any, cast, TypedDict, Tuple, List, Dict
+from typing import Any, cast, Tuple, List, Dict
 from datetime import datetime
-from django.utils import timezone
 from openpyxl import Workbook
 from rich.console import Console
 
 # --- Django
 from django.db import transaction
+from django.utils import timezone
 from django.db.models.deletion import ProtectedError
 from django.conf import settings
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.forms import BaseModelForm, inlineformset_factory
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse, FileResponse, HttpResponseForbidden
@@ -33,7 +32,6 @@ from .mixins import ErrorContextMixin
 # --- formulare
 from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
 from .forms import UploadForm, TeamForm, OrderForm
-
 
 # --- modely z DB
 from .models import Article, CallLog, Client, Order, Team, TeamType, Status
@@ -567,7 +565,7 @@ class OrderDetailView(LoginRequiredMixin, ErrorContextMixin, DetailView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
-        order: Order = self.object  
+        order: Order = self.object
         articles = Article.objects.filter(order=order.pk)
 
         context["order_has_error"] = check_order_error_adviced(order.pk)

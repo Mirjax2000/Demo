@@ -12,7 +12,7 @@ from django.db.models.functions import Concat
 from django.db.models import QuerySet, Q, F, Value
 
 # --- models
-from .models import Order, Client, Status, Team
+from .models import Order, Client, Status, Team, TeamType
 
 # --- utils
 from .utils import check_order_error_adviced
@@ -213,8 +213,10 @@ class JsonOrders:
         css: str = "u-s-none"
         content: str = str(order.get_team_type_display())  # type: ignore
 
-        if order.team_type == "By_assembly_crew":
+        if order.team_type == TeamType.BY_ASSEMBLY_CREW:
             css += " u-txt-success"
+        elif order.team_type == TeamType.BY_DELIVERY_CREW:
+            css += " u-txt-info"
 
         result: str = f'<span name="{name}" class="{css}">{content}</span>'
         return result

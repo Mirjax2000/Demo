@@ -1,7 +1,7 @@
 """utilitky"""
 
-from PIL.ImageFile import ImageFile
 from io import BytesIO
+from PIL.ImageFile import ImageFile
 from PIL import Image, ImageOps
 import cv2
 from rich.console import Console
@@ -13,58 +13,57 @@ from django.db import transaction
 from django.db.models import QuerySet
 from django.core.files.base import ContentFile
 
-
 # --- models
-from .models import Order, Status, OrderPDFStorage, Client
-
+from .models import Order, Status, OrderPDFStorage, Client, TeamType
 
 # ---
 cons: Console = Console()
 
+# region: nepouzivane funkce - just in case
+# def parse_order_filters(request) -> dict:
+#     """Vrací hodnoty z GET parametrů pro filtrování objednávek."""
+#     return {
+#         "status": request.GET.get("status", "").strip(),
+#         "od": request.GET.get("od", "").strip(),
+#         "start_date": request.GET.get("start_date"),
+#         "end_date": request.GET.get("end_date"),
+#     }
 
-def parse_order_filters(request) -> dict:
-    """Vrací hodnoty z GET parametrů pro filtrování objednávek."""
-    return {
-        "status": request.GET.get("status", "").strip(),
-        "od": request.GET.get("od", "").strip(),
-        "start_date": request.GET.get("start_date"),
-        "end_date": request.GET.get("end_date"),
-    }
+#
+# def filter_orders(filters: dict) -> QuerySet:
+#     """Vrátí queryset objednávek podle GET ale pres filters"""
 
+#     status = filters.get("status", "").strip()
+#     od_value = filters.get("od", "").strip()
+#     start_date = filters.get("start_date")
+#     end_date = filters.get("end_date")
+#     # --- dotaz na vsechno a postupne se pridavaji dalsi filtry
+#     orders = Order.objects.all()
+#     # --- status filtr
+#     # --- vsechny krome hidden
+#     if status == "all":
+#         orders = orders.exclude(status="Hidden")
+#     elif status == "closed":
+#         # --- Uzavrene
+#         orders = orders.filter(status__in=["Billed", "Canceled"])
+#     elif status:
+#         # --- jednotlive
+#         orders = orders.filter(status=status)
+#     else:
+#         # --- Otevrene - default filtr
+#         orders = orders.exclude(status__in=["Hidden", "Billed", "Canceled"])
+#     # --- casovy filtr
+#     if start_date:
+#         orders = orders.filter(evidence_termin__gte=start_date)
 
-def filter_orders(filters: dict) -> QuerySet:
-    """Vrátí queryset objednávek podle GET ale pres filters"""
+#     if end_date:
+#         orders = orders.filter(evidence_termin__lte=end_date)
+#     # --- obchodni dum filtr
+#     if od_value:
+#         orders = orders.filter(order_number__startswith=od_value)
 
-    status = filters.get("status", "").strip()
-    od_value = filters.get("od", "").strip()
-    start_date = filters.get("start_date")
-    end_date = filters.get("end_date")
-    # --- dotaz na vsechno a postupne se pridavaji dalsi filtry
-    orders = Order.objects.all()
-    # --- status filtr
-    # --- vsechny krome hidden
-    if status == "all":
-        orders = orders.exclude(status="Hidden")
-    elif status == "closed":
-        # --- Uzavrene
-        orders = orders.filter(status__in=["Billed", "Canceled"])
-    elif status:
-        # --- jednotlive
-        orders = orders.filter(status=status)
-    else:
-        # --- Otevrene - default filtr
-        orders = orders.exclude(status__in=["Hidden", "Billed", "Canceled"])
-    # --- casovy filtr
-    if start_date:
-        orders = orders.filter(evidence_termin__gte=start_date)
-
-    if end_date:
-        orders = orders.filter(evidence_termin__lte=end_date)
-    # --- obchodni dum filtr
-    if od_value:
-        orders = orders.filter(order_number__startswith=od_value)
-
-    return orders
+#     return orders
+# endregion
 
 
 def format_date(date_obj):
@@ -261,7 +260,9 @@ def call_errors_adviced() -> tuple[bool, int]:
     all_count: int = 0
 
     # --- Základní queryset pro všechny ADVICED objednávky
-    base_query = Order.objects.filter(status=Status.ADVICED)
+    base_query = Order.objects.filter(
+        status=Status.ADVICED, team_type=TeamType.BY_ASSEMBLY_CREW
+    )
 
     # --- 1. Problém: E-mail nebyl odeslán
     cond_mail_not_sent = Q(mail_datum_sended__isnull=True)
@@ -291,8 +292,10 @@ def call_errors_adviced() -> tuple[bool, int]:
 
 def check_order_error_adviced(order_id: int) -> bool:
     """konkretni order kontrola stavu"""
-    # --- Vybereme pouze objednávku se statusem ADVICED a daným ID
-    base_query = Order.objects.filter(pk=order_id, status=Status.ADVICED)
+    # --- Vybereme pouze objednávku se statusem ADVICED a BY_ASSEMBLY_CREW a daným ID
+    base_query = Order.objects.filter(
+        pk=order_id, status=Status.ADVICED, team_type=TeamType.BY_ASSEMBLY_CREW
+    )
 
     # --- První problém: nebyl odeslán e-mail (mail_datum_sended je None)
     cond_mail_not_sent = Q(mail_datum_sended__isnull=True)
@@ -318,7 +321,9 @@ def check_order_error_adviced(order_id: int) -> bool:
 def check_order_adviced_email_sended_to_right_team(order_id: int) -> bool:
     """konkretni order kontrola stavu"""
     # --- Vybereme pouze objednávku se statusem ADVICED a daným ID
-    base_query = Order.objects.filter(pk=order_id, status=Status.ADVICED)
+    base_query = Order.objects.filter(
+        pk=order_id, status=Status.ADVICED, team_type=TeamType.BY_ASSEMBLY_CREW
+    )
 
     # --- prvni problém: e-mail byl odeslán, ale jméno týmu se liší
     cond_team_soulad = Q(
@@ -351,7 +356,9 @@ def is_team_names_different(order_id: int) -> bool:
     Returns:
         bool: True pokud názvy týmů nesedí, jinak False.
     """
-    base_query = Order.objects.filter(pk=order_id, status=Status.ADVICED)
+    base_query = Order.objects.filter(
+        pk=order_id, status=Status.ADVICED, team_type=TeamType.BY_ASSEMBLY_CREW
+    )
     is_different = (
         base_query.filter(
             mail_datum_sended__isnull=False,

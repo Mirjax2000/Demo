@@ -318,6 +318,18 @@ class Order(Model):
                     f"zakazka: {self.order_number} presla do stavu: {Status.ADVICED}",
                     style="blue",
                 )
+        else:
+            if settings.DEBUG:
+                cons.log("Kontrola zaterminovano s Montaznim tymem:")
+                cons.log(f"team: {self.team}")
+                cons.log(f"status: {self.status}")
+                cons.log(f"team_type: {self.team_type}")
+                cons.log(f"client: {self.client}")
+                cons.log(
+                    f"client.incomplete: {getattr(self.client, 'incomplete', None)}"
+                )
+                cons.log(f"delivery_termin: {self.delivery_termin}")
+                cons.log(30 * "-")
 
     def zaterminovano_with_delivery_team(self) -> None:
         ready = (
@@ -326,7 +338,6 @@ class Order(Model):
             and self.team_type == TeamType.BY_DELIVERY_CREW
             and self.client
             and not self.client.incomplete
-            and self.montage_termin
             and self.delivery_termin
         )
         if ready:
@@ -336,6 +347,18 @@ class Order(Model):
                     f"zakazka: {self.order_number} presla do stavu: {Status.ADVICED}",
                     style="blue",
                 )
+        else:
+            if settings.DEBUG:
+                cons.log("Kontrola zaterminovano s Dopravou:")
+                cons.log(f"team: {self.team}")
+                cons.log(f"status: {self.status}")
+                cons.log(f"team_type: {self.team_type}")
+                cons.log(f"client: {self.client}")
+                cons.log(
+                    f"client.incomplete: {getattr(self.client, 'incomplete', None)}"
+                )
+                cons.log(f"delivery_termin: {self.delivery_termin}")
+                cons.log(30 * "-")
 
     def __str__(self) -> str:
         return str(self.order_number)
