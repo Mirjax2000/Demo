@@ -278,41 +278,30 @@ class JsonOrders:
 
     def montage_termin_coll(self, order: Order) -> str:
         """Vrací montage_termin jako HTML nebo varování."""
-        name = "montage-termin"
-        css = "u-s-none"
-        icon = ""
-        content = "–"
+        name, css, icon, content = "montage-termin", "u-s-none", "", "–"
 
         # Montážní tým
-        if (
-            order.status == Status.ADVICED
-            and order.team_type == TeamType.BY_ASSEMBLY_CREW
-        ):
+        if order.team_type == TeamType.BY_ASSEMBLY_CREW:
             name += "-montaz"
             if order.montage_termin:
                 local_time = timezone.localtime(order.montage_termin)
                 content = f"<strong>{local_time.strftime('%d.%m.%Y %H:%M')}</strong>"
+            else:
+                icon, css, content = Utils.nevybrano(css)
 
         # doprava
-        elif (
-            order.status == Status.ADVICED
-            and order.team_type == TeamType.BY_DELIVERY_CREW
-        ):
+        elif order.team_type == TeamType.BY_DELIVERY_CREW:
             name += "-doprava"
-            if isinstance(order.delivery_termin, datetime):
-                local_date = timezone.localdate(order.delivery_termin)
+            if order.delivery_termin:
+                if isinstance(order.delivery_termin, datetime):
+                    local_date = timezone.localdate(order.delivery_termin)
+                else:
+                    local_date = order.delivery_termin
+
+                if local_date:
+                    content = f"<strong>{local_date.strftime('%d.%m.%Y')}</strong>"
             else:
-                local_date = order.delivery_termin
-
-            if local_date:
-                content = f"<strong>{local_date.strftime('%d.%m.%Y')}</strong>"
-
-        # Není přiřazen tým
-        elif order.team_type == TeamType.BY_ASSEMBLY_CREW:
-            icon = exclamation_icon
-            css += " u-txt-warning"
-            content = "Nevybráno"
-            name += "-no-team"
+                icon, css, content = Utils.nevybrano(css)
 
         return f'<div name="{name}">{icon}<span class="{css}">{content}</span></div>'
 
@@ -521,6 +510,14 @@ class Utils:
 
     #     orders = Order.objects.filter(query)
     #     return orders
+
+    @staticmethod
+    def nevybrano(css: str) -> tuple[str, ...]:
+        icon = exclamation_icon
+        css += " u-txt-warning"
+        content = "Nevybráno"
+
+        return icon, css, content
 
 
 if __name__ == "__main__":

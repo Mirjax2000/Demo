@@ -684,7 +684,6 @@ class OrderDataTablesTest(TestCase):
                 'name="montage-termin"' in montage_termin_html
                 or 'name="montage-termin-montaz"' in montage_termin_html
                 or 'name="montage-termin-doprava"' in montage_termin_html
-                or 'name="montage-termin-no-team"' in montage_termin_html
             )  # name
 
             # status v datech z JSONA
@@ -827,7 +826,6 @@ class OrderDataTablesTest(TestCase):
             self.assertTrue(
                 'name="montage-termin-montaz"' in montage_termin_html
                 or 'name="montage-termin-doprava"' in montage_termin_html
-                or 'name="montage-termin-no-team"' in montage_termin_html
             )  # name
 
             # status v datech z JSONA
@@ -972,7 +970,6 @@ class OrderDataTablesTest(TestCase):
             self.assertTrue(
                 'name="montage-termin-montaz"' in montage_termin_html
                 or 'name="montage-termin-doprava"' in montage_termin_html
-                or 'name="montage-termin-no-team"' in montage_termin_html
             )  # name
 
             # status v datech z JSONA
@@ -1099,17 +1096,17 @@ class OrderDataTablesTest(TestCase):
 
             # montage_termin v datech z JSONA
             montage_termin_html = data["data"][i]["montage_termin"]
-            # montage_termin_pattern = (
-            #     r"<div\b[^>]*>"
-            #     r".*?<span[^>]*>"
-            #     r"(?:<strong>)?"
-            #     r"\d{2}\.\d{2}\.\d{4}(?: \d{2}:\d{2})?"
-            #     r"(?:</strong>)?"
-            #     r"</span>"
-            #     r".*?</div>"
-            # )
-            # self.assertRegex(montage_termin_html, montage_termin_pattern)  # regex
-            # self.assertIn('name="montage-termin-doprava"', montage_termin_html)  # name
+            montage_termin_pattern = (
+                r"<div\b[^>]*>"
+                r".*?<span[^>]*>"
+                r"(?:<strong>)?"
+                r"\d{2}\.\d{2}\.\d{4}(?: \d{2}:\d{2})?"
+                r"(?:</strong>)?"
+                r"</span>"
+                r".*?</div>"
+            )
+            self.assertRegex(montage_termin_html, montage_termin_pattern)  # regex
+            self.assertIn('name="montage-termin-montaz"', montage_termin_html)  # name
 
             # status v datech z JSONA
             status_html = data["data"][i]["status"]
