@@ -937,7 +937,7 @@ class PdfView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         mandant = self.kwargs.get("mandant", "default")
         # ---
-        generator_class = pdf_generator_classes.get(mandant, DefaultPdfGenerator)
+        generator_class = SCCZPdfGenerator
         generator_instance = generator_class()
         # ---
         pdf = generator_instance.generate_pdf_protocol(model=None)
