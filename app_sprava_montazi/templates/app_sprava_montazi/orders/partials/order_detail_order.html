@@ -39,18 +39,21 @@
                     <span class="u-txt-warning ms-1">Nevybráno</span>
                 </li>
             {% endif %}
-            <!--montage_termin-->
-            {% if order.montage_termin %}
-                <li class="L-detail__item">
-                    <strong>Termín montáže:</strong>
-                    <span class="ms-1">{{ order.montage_termin|date:"d. m. Y H:i" }}</span>
-                </li>
-            {% else %}
-                <li class="L-detail__item">
-                    <strong>Termín montáže:</strong>
+            <!-- montage_termin -->
+            <li class="L-detail__item">
+                <strong>Termín montáže:</strong>
+                {% if order.montage_termin %}
+                    <span class="ms-1 {% if order.status == "Adviced" and order.team_type == "By_assembly_crew" %}u-txt-success{% endif %} ">
+                        {{ order.montage_termin|date:"d. m. Y H:i" }}
+                    </span>
+                    <!---->
+                {% elif order.status == "Adviced" and order.team_type == "By_delivery_crew" %}
+                    <span class="u-txt-info ms-1">{{ order.delivery_termin|date:"d. m. Y" }}</span>
+                    <!---->
+                {% else %}
                     <span class="u-txt-warning ms-1">Nevybráno</span>
-                </li>
-            {% endif %}
+                {% endif %}
+            </li>
             <!--team type-->
             <li class="L-detail__item">
                 <strong>Realizace kým:</strong>

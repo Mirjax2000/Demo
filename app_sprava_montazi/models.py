@@ -308,8 +308,9 @@ class Order(Model):
             and self.team_type == TeamType.BY_ASSEMBLY_CREW
             and self.client
             and not self.client.incomplete
-            and self.montage_termin
+            and self.evidence_termin
             and self.delivery_termin
+            and self.montage_termin
         )
         if ready:
             self.status = Status.ADVICED
@@ -328,6 +329,7 @@ class Order(Model):
                 cons.log(
                     f"client.incomplete: {getattr(self.client, 'incomplete', None)}"
                 )
+                cons.log(f"evidence_termin: {self.evidence_termin}")
                 cons.log(f"delivery_termin: {self.delivery_termin}")
                 cons.log(f"montage_termin: {self.montage_termin}")
                 cons.log(30 * "-")
@@ -338,8 +340,9 @@ class Order(Model):
             and self.status == Status.NEW
             and self.team_type == TeamType.BY_DELIVERY_CREW
             and self.client
-            and not self.client.incomplete
+            and self.evidence_termin
             and self.delivery_termin
+            and not self.montage_termin
         )
         if ready:
             self.status = Status.ADVICED
@@ -355,9 +358,7 @@ class Order(Model):
                 cons.log(f"status: {self.status}")
                 cons.log(f"team_type: {self.team_type}")
                 cons.log(f"client: {self.client}")
-                cons.log(
-                    f"client.incomplete: {getattr(self.client, 'incomplete', None)}"
-                )
+                cons.log(f"evidence_termin: {self.evidence_termin}")
                 cons.log(f"delivery_termin: {self.delivery_termin}")
                 cons.log(f"montage_termin: {self.montage_termin}")
                 cons.log(30 * "-")

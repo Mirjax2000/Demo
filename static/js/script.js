@@ -668,12 +668,16 @@
 
         function updateTeamVisibility() {
             const teamWrapper = idTeam.closest(".L-form__group");
+            const montageTerminWrapper = idTeam.closest(".L-form__group");
 
             if (idTeamType.value === "By_customer" || idTeamType.value === "By_delivery_crew") {
                 teamWrapper.classList.add("inactive_input");
+                montageTerminWrapper.classList.add("inactive_input");
                 idTeam.value = "";
+                idMontageTermin.value = "";
             } else {
                 teamWrapper.classList.remove("inactive_input");
+                montageTerminWrapper.classList.remove("inactive_input");
             }
         }
 
