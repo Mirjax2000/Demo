@@ -149,6 +149,7 @@ class JsonOrders:
         order_link = reverse("order_detail", args=[order.pk])
         if error:
             css += " u-txt-error"
+            name += "-error"
         result = f'<a href="{order_link}" name="{name}" class="{css}">{content}</a>'
         return result
 
@@ -205,6 +206,9 @@ class JsonOrders:
         if client.incomplete:
             css = "u-txt-warning"
             icon = exclamation_icon
+            name += "-incomplete"
+        else:
+            name += "-complete"
 
         result: str = (
             f'<div title="{title}" name="{name}">{icon}'
@@ -220,8 +224,12 @@ class JsonOrders:
 
         if order.team_type == TeamType.BY_ASSEMBLY_CREW:
             css += " u-txt-success"
+            name += "-montaz"
         elif order.team_type == TeamType.BY_DELIVERY_CREW:
             css += " u-txt-info"
+            name += "-doprava"
+        elif order.team_type == TeamType.BY_CUSTOMER:
+            name += "-zakaznik"
 
         result: str = f'<span name="{name}" class="{css}">{content}</span>'
         return result
@@ -236,6 +244,7 @@ class JsonOrders:
         # ---
         team = order.team
         if order.team_type == TeamType.BY_ASSEMBLY_CREW:
+            name += "-montaz"
             if team:
                 title = team.name
 
@@ -244,6 +253,7 @@ class JsonOrders:
                 icon = exclamation_icon
                 content = "Nevybráno"
                 title = "Montážní tým nevybrán"
+                name += "-missing"
 
             elif team:
                 css += " u-txt-success"
@@ -252,12 +262,15 @@ class JsonOrders:
                 if not team.active:
                     css = "u-s-none u-txt-error"
                     icon = ringing_bell_icon
+                    title += "-not-active"
+                    name += "-not-active"
 
         elif order.team_type == TeamType.BY_DELIVERY_CREW:
             css += " u-txt-info"
             icon = truck_icon
             content = "Doprava"
             title = "Montáž dopravcem"
+            name += "-doprava"
 
         result: str = f'<div title="{title}" name="{name}">{icon}<span class="{css}">{content}</span></div>'
 
@@ -275,20 +288,22 @@ class JsonOrders:
             order.status == Status.ADVICED
             and order.team_type == TeamType.BY_ASSEMBLY_CREW
         ):
+            name += "-montaz"
             if order.montage_termin:
                 local_time = timezone.localtime(order.montage_termin)
                 content = f"<strong>{local_time.strftime('%d.%m.%Y %H:%M')}</strong>"
 
-        # Doručovací tým
+        # doprava
         elif (
             order.status == Status.ADVICED
             and order.team_type == TeamType.BY_DELIVERY_CREW
         ):
+            name += "-doprava"
             if isinstance(order.delivery_termin, datetime):
                 local_date = timezone.localdate(order.delivery_termin)
             else:
                 local_date = order.delivery_termin
-                
+
             if local_date:
                 content = f"<strong>{local_date.strftime('%d.%m.%Y')}</strong>"
 
@@ -297,12 +312,14 @@ class JsonOrders:
             icon = exclamation_icon
             css += " u-txt-warning"
             content = "Nevybráno"
+            name += "-no-team"
 
         return f'<div name="{name}">{icon}<span class="{css}">{content}</span></div>'
 
     def status_coll(self, order: Order) -> str:
         """Vrací status + případnou ikonu odkazu na protokol."""
-        error = check_order_error_adviced(order.pk)
+        name: str = "status"
+        error: bool = check_order_error_adviced(order.pk)
         content = order.get_status_display()[:8]  # type: ignore
         icon = ""
 
@@ -310,9 +327,11 @@ class JsonOrders:
             order.status == Status.ADVICED
             and order.team_type == TeamType.BY_ASSEMBLY_CREW
         ):
+            name += "-montaz"
             icon_link = success_mail_icon
             if error:
                 icon_link = warning_mail_icon
+                name += "-error"
 
             if icon_link:
                 icon = (
@@ -323,9 +342,10 @@ class JsonOrders:
             order.status == Status.ADVICED
             and order.team_type == TeamType.BY_DELIVERY_CREW
         ):
+            name += "-doprava"
             icon = truck_icon
 
-        return f'<div name="status">{content} {icon}</div>'
+        return f'<div name="{name}">{content} {icon}</div>'
 
     def articles_coll(self, order: Order) -> str:
         name: str = "articles"

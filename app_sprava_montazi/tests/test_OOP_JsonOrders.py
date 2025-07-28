@@ -227,6 +227,22 @@ class OrderDataTablesTest(TestCase):
                 team=self.not_active_team,
                 notes="Zaterminovano",
             )
+        # 10 status Adviced delivery team
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Customer test-10-{i}", zip_code=f"123{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"ADVICED-DELIVERY-TEAM-{i:03}-R",
+                distrib_hub=self.hub,
+                mandant=self.mandant,
+                client=customer,
+                evidence_termin=self.date_evidence,
+                delivery_termin=self.date_delivery,
+                status=Status.ADVICED,
+                team_type=TeamType.BY_DELIVERY_CREW,
+                notes="Zaterminovano",
+            )
 
     def test_get_json_data_response(self):
         factory = RequestFactory()
