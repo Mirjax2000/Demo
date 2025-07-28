@@ -102,7 +102,7 @@ class OrderDataTablesTest(TestCase):
                 team_type=TeamType.BY_CUSTOMER,
                 notes="New",
             )
-        # 3 status adviced no mail sended !!!
+        # 3 status adviced no mail sended !!!  invalid
         for i in range(self.range):
             customer = Client.objects.create(
                 name=f"Customer test-3-{i}", zip_code=f"123{i:02}"
@@ -120,7 +120,7 @@ class OrderDataTablesTest(TestCase):
                 team=self.active_team,
                 notes="Zaterminovano",
             )
-        # 4 status adviced mail sended !!!
+        # 4 status adviced mail sended !!! valid
         for i in range(self.range):
             customer = Client.objects.create(
                 name=f"Customer test-4-{i}", zip_code=f"123{i:02}"
@@ -136,6 +136,7 @@ class OrderDataTablesTest(TestCase):
                 status=Status.ADVICED,
                 team_type=TeamType.BY_ASSEMBLY_CREW,
                 team=self.active_team,
+                mail_team_sended=self.active_team,
                 mail_datum_sended=timezone.make_aware(datetime(2025, 4, 11, 12, 0)),
                 notes="Zaterminovano",
             )
@@ -209,7 +210,7 @@ class OrderDataTablesTest(TestCase):
                 team=self.active_team,
                 notes="Vyuctovano",
             )
-        # 9 status Adviced no active team
+        # 9 status Adviced no active team !!! invalid
         for i in range(self.range):
             customer = Client.objects.create(
                 name=f"Customer test-9-{i}", zip_code=f"123{i:02}"
@@ -244,7 +245,11 @@ class OrderDataTablesTest(TestCase):
                 notes="Zaterminovano",
             )
 
-    def test_get_json_data_response(self):
+    def test_kontrola_stavu_db(self):
+        pocet = Order.objects.count()
+        self.assertEqual(100, pocet)
+
+    def test_get_json_data_response_default(self):
         factory = RequestFactory()
         request = factory.get(
             "/fake-url/",
@@ -275,6 +280,12 @@ class OrderDataTablesTest(TestCase):
         for i in range(0, self.pagination):
             # order number v datech z JSONA
             order_html = data["data"][i]["order_number"]
+            order_pattern = (
+                r'<a href="/order/\d+/detail/" name="order-number(?:-error)?"(?: [^>]*)?>'
+                r"\w+(?:-\w+)*-\d{5}-R"
+                r"</a>"
+            )
+            self.assertRegex(order_html, order_pattern)
             self.assertTrue(
                 'name="order-number"' in order_html
                 or 'name="order-number-error"' in order_html
@@ -367,16 +378,12 @@ class OrderDataTablesTest(TestCase):
             # status v datech z JSONA
             status_html = data["data"][i]["status"]
             status_pattern = (
-                r'<div\b[^>]*\bname="status(?:-(?:montaz|error|doprava))?"[^>]*>'
-                r".*?</div>"
+                r'name="status-'
+                r"(Nový|Zatermínováno|Realizováno|Vyúčtovaný|Zrušeno|Skryto)"  # status z choices
+                r"(?:-(montaz|doprava)(?:-error)?)?"  # pokud Adviced, může být montaz nebo doprava + error
+                r'"'
             )
             self.assertRegex(status_html, status_pattern)  # regex
-            self.assertTrue(
-                'name="status"' in status_html
-                or 'name="status-montaz' in status_html
-                or 'name="status-error' in status_html
-                or 'name="status-doprava"' in status_html
-            )  # name
 
             # articles v datech z JSONA
             articles_html = data["data"][i]["articles"]
@@ -418,10 +425,11 @@ class OrderDataTablesTest(TestCase):
             # order number v datech z JSONA
             order_html = data["data"][i]["order_number"]
             order_pattern = (
-                r'<a href="/order/\d+/detail/" name="order-number(?:-error)?" '
-                r'class="L-table__link copy_link_order_number">\w+(?:-\w+)*-\d{5}-R</a>'
+                r'<a href="/order/\d+/detail/" name="order-number(?:-error)?"(?: [^>]*)?>'
+                r"\w+(?:-\w+)*-\d{5}-R"
+                r"</a>"
             )
-            self.assertRegex(order_html, order_pattern)  # regex
+            self.assertRegex(order_html, order_pattern)
             self.assertTrue(
                 'name="order-number"' in order_html
                 or 'name="order-number-error"' in order_html
@@ -524,19 +532,8 @@ class OrderDataTablesTest(TestCase):
 
             # status v datech z JSONA
             status_html = data["data"][i]["status"]
-            status_pattern = (
-                r'<div\b[^>]*\bname="status(?:-(?:montaz|error|doprava))?"[^>]*>'
-                r"Nový\s*"
-                r"</div>"
-            )
+            status_pattern = r'name="status-Nový"'
             self.assertRegex(status_html, status_pattern)  # regex
-            self.assertTrue(
-                'name="status"' in status_html
-                or 'name="status-montaz' in status_html
-                or 'name="status-error' in status_html
-                or 'name="status-doprava"' in status_html
-            )  # name
-            self.assertIn('<div name="status">Nový </div>', status_html)
 
             # articles v datech z JSONA
             articles_html = data["data"][i]["articles"]
@@ -585,10 +582,11 @@ class OrderDataTablesTest(TestCase):
             # order number v datech z JSONA
             order_html = data["data"][i]["order_number"]
             order_pattern = (
-                r'<a href="/order/\d+/detail/" name="order-number(?:-error)?" '
-                r'class="L-table__link copy_link_order_number">\w+(?:-\w+)*-\d{5}-R</a>'
+                r'<a href="/order/\d+/detail/" name="order-number(?:-error)?"(?: [^>]*)?>'
+                r"\w+(?:-\w+)*-\d{5}-R"
+                r"</a>"
             )
-            self.assertRegex(order_html, order_pattern)  # regex
+            self.assertRegex(order_html, order_pattern)
             self.assertTrue(
                 'name="order-number"' in order_html
                 or 'name="order-number-error"' in order_html
@@ -691,19 +689,8 @@ class OrderDataTablesTest(TestCase):
 
             # status v datech z JSONA
             status_html = data["data"][i]["status"]
-            status_pattern = (
-                r'<div\b[^>]*\bname="status(?:-(?:montaz|error|doprava))?"[^>]*>'
-                r"Skryto\s*"
-                r"</div>"
-            )
+            status_pattern = r'name="status-Skryto"'
             self.assertRegex(status_html, status_pattern)  # regex
-            self.assertTrue(
-                'name="status"' in status_html
-                or 'name="status-montaz' in status_html
-                or 'name="status-error' in status_html
-                or 'name="status-doprava"' in status_html
-            )  # name
-            self.assertIn('<div name="status">Skryto </div>', status_html)  # obsah
 
             # articles v datech z JSONA
             articles_html = data["data"][i]["articles"]
@@ -752,11 +739,11 @@ class OrderDataTablesTest(TestCase):
             # order number v datech z JSONA
             order_html = data["data"][i]["order_number"]
             order_pattern = (
-                r'<a href="/order/\d+/detail/" name="order-number(?:-error)?" '
-                r'class="L-table__link copy_link_order_number(?: [^"]*)?"'
-                r">\w+(?:-\w+)*-\d{5}-R</a>"
+                r'<a href="/order/\d+/detail/" name="order-number(?:-error)?"(?: [^>]*)?>'
+                r"\w+(?:-\w+)*-\d{5}-R"
+                r"</a>"
             )
-            self.assertRegex(order_html, order_pattern)  # regex
+            self.assertRegex(order_html, order_pattern)
             self.assertTrue(
                 'name="order-number"' in order_html
                 or 'name="order-number-error"' in order_html
@@ -845,13 +832,12 @@ class OrderDataTablesTest(TestCase):
 
             # status v datech z JSONA
             status_html = data["data"][i]["status"]
-
-            self.assertTrue(
-                'name="status-montaz' in status_html
-                or 'name="status-doprava"' in status_html
-                or 'name="status-error' in status_html
-            )  # name
-            self.assertIn('Zatermín <a href="/order', status_html)  # obsah
+            status_pattern = (
+                r'name="status-Zatermínováno'
+                r"(?:-(?:doprava|montaz)(?:-error)?)?"
+                r'"'
+            )
+            self.assertRegex(status_html, status_pattern)  # regex
 
             # articles v datech z JSONA
             articles_html = data["data"][i]["articles"]
@@ -871,3 +857,281 @@ class OrderDataTablesTest(TestCase):
             self.assertIn(
                 '<span name="notes" title="Zaterminovano"', notes_html
             )  # obsah
+
+    def test_filter_status_invalid(self):
+        factory = RequestFactory()
+        request = factory.get(
+            "/fake-url/",
+            {
+                "draw": "1",
+                "start": "0",
+                "length": str(self.pagination),
+                "order[0][column]": "0",
+                "order[0][dir]": "asc",
+                "columns[0][data]": "evidence_termin",
+                "invalid": "true",
+            },
+        )
+        request.user = self.user
+        json_orders = JsonOrders(request)
+        response = json_orders.get_json_data()
+        data = json.loads(response.content.decode("utf-8"))
+        # --- kontrola že je to JsonResponse
+        self.assertEqual(response.status_code, 200)
+        # --- invalid filtr
+        self.assertEqual(data["recordsFiltered"], 20)
+        # --- mělo by se vrátit max self.pagination(15) záznamů
+        self.assertEqual(len(data["data"]), 15)
+        for i in range(0, 9):
+            # order number v datech z JSONA
+            order_html = data["data"][i]["order_number"]
+            order_pattern = (
+                r'<a href="/order/\d+/detail/" name="order-number(?:-error)?" '
+                r'class="L-table__link copy_link_order_number u-txt-error"[^>]*>'
+                r"\w+(?:-\w+)*-\d{5}-R"
+                r"</a>"
+            )
+            self.assertRegex(order_html, order_pattern)
+            self.assertIn('name="order-number-error"', order_html)  # name
+
+            # distribhub v datech z JSONA
+            distrib_hub_html = data["data"][i]["distrib_hub"]
+            distrib_hub_content = f"{self.distrib_hub_code}-{self.distrib_hub_city}"
+            distrib_hub_pattern = r'<span name="distrib-hub">.+?</span>'
+            self.assertRegex(distrib_hub_html, distrib_hub_pattern)  # regex
+            self.assertIn(distrib_hub_content, distrib_hub_html)  # obsah
+            self.assertIn('name="distrib-hub"', distrib_hub_html)  # name
+
+            # mandant v datech z JSONA
+            mandant_html = data["data"][i]["mandant"]
+            mandant_pattern = r'<span name="mandant">[A-Za-z]{1,4}</span>'
+            self.assertRegex(mandant_html, mandant_pattern)  # regex
+            self.assertIn(self.mandant, mandant_html)  # obsah
+            self.assertIn('name="mandant"', mandant_html)  # name
+
+            # evidence_termin v datech z JSONA
+            evidence_termin_html = data["data"][i]["evidence_termin"]
+            evidence_termin_pattern = (
+                r'<span\s+name="evidence-termin"(?:\s+class="[^"]*")?>'
+                r"\d{2}\.\d{2}\.\d{4}</span>"
+            )
+            self.assertIn(self.date_evidence_cz, evidence_termin_html)  # obsah
+            self.assertRegex(evidence_termin_html, evidence_termin_pattern)  # regex
+            self.assertIn('name="evidence-termin"', evidence_termin_html)  # name
+
+            # delivery_termin v datech z JSONA
+            delivery_termin_html = data["data"][i]["delivery_termin"]
+            delivery_termin_pattern = (
+                r'<span\s+name="delivery-termin"(?:\s+class="[^"]*")?>'
+                r"\d{2}\.\d{2}\.\d{4}</span>"
+            )
+            self.assertIn(self.date_delivery_cz, delivery_termin_html)  # obsah
+            self.assertRegex(delivery_termin_html, delivery_termin_pattern)  # regex
+            self.assertIn('name="delivery-termin"', delivery_termin_html)  # name
+
+            # team_type v datech z JSONA
+            team_type_html = data["data"][i]["team_type"]
+            team_type_pattern = (
+                r'<span\b[^>]*\bname="team-type-(?:montaz|doprava|zakaznik)"[^>]*class="u-s-none(?: u-txt-success)?"[^>]*>'
+                r"(?:Montážníky|Zákazníkem|Dopravcem)</span>"
+            )
+            self.assertRegex(team_type_html, team_type_pattern)  # regex
+            self.assertTrue(
+                'name="team-type-montaz"' in team_type_html
+                or 'name="team-type-doprava"' in team_type_html
+                or 'name="team-type-zakaznik"' in team_type_html
+            )  # name
+
+            # team v datech z JSONA
+            team_html = data["data"][i]["team"]
+            team_pattern = (
+                r'<div[^>]*\btitle="[^"]*"\s+name="team(?:-[a-z]+(?:-[a-z]+)?)?"[^>]*>'
+                r".*?<span[^>]*>.*?</span>.*?</div>"
+            )
+            self.assertRegex(team_html, team_pattern)  # regex
+            self.assertTrue(
+                'name="team"' in team_html
+                or 'name="team-montaz"' in team_html
+                or 'name="team-montaz-missing"' in team_html
+                or "name=team-montaz-not-active" in team_html
+                or "name=team-doprava" in team_html
+            )  # name
+
+            # montage_termin v datech z JSONA
+            montage_termin_html = data["data"][i]["montage_termin"]
+            montage_termin_pattern = (
+                r"<div\b[^>]*>"
+                r".*?<span[^>]*>"
+                r"(?:<strong>)?"
+                r"\d{2}\.\d{2}\.\d{4}(?: \d{2}:\d{2})?"
+                r"(?:</strong>)?"
+                r"</span>"
+                r".*?</div>"
+            )
+            self.assertRegex(montage_termin_html, montage_termin_pattern)  # regex
+            self.assertTrue(
+                'name="montage-termin-montaz"' in montage_termin_html
+                or 'name="montage-termin-doprava"' in montage_termin_html
+                or 'name="montage-termin-no-team"' in montage_termin_html
+            )  # name
+
+            # status v datech z JSONA
+            status_html = data["data"][i]["status"]
+            status_pattern = (
+                r'name="status-Zatermínováno'
+                r"(?:-(?:doprava|montaz)(?:-error)?)?"
+                r'"'
+            )
+            self.assertRegex(status_html, status_pattern)  # regex
+
+            # articles v datech z JSONA
+            articles_html = data["data"][i]["articles"]
+            articles_pattern = r'<div\b[^>]*\bname="articles"[^>]*>.*?</div>'
+            self.assertRegex(articles_html, articles_pattern)  # regex
+            self.assertIn('name="articles"', articles_html)  # name
+            self.assertIn(
+                '<div name="articles" "class="u-s-none u-txt-center u-txt-error">0</div>',
+                articles_html,
+            )  # obsah
+
+            # notes v datech z JSONA
+            notes_html = data["data"][i]["notes"]
+            notes_pattern = r'<span\b[^>]*\bname="notes"[^>]*>.*?</span>'
+            self.assertRegex(notes_html, notes_pattern)  # regex
+            self.assertIn('name="notes"', notes_html)  # name
+            self.assertIn(
+                '<span name="notes" title="Zaterminovano"', notes_html
+            )  # obsah
+
+    def test_filter_status_billed(self):
+        factory = RequestFactory()
+        request = factory.get(
+            "/fake-url/",
+            {
+                "draw": "1",
+                "start": "0",
+                "length": str(self.pagination),
+                "order[0][column]": "0",
+                "order[0][dir]": "asc",
+                "columns[0][data]": "evidence_termin",
+                "status": "Billed",
+            },
+        )
+        request.user = self.user
+        json_orders = JsonOrders(request)
+        response = json_orders.get_json_data()
+        data = json.loads(response.content.decode("utf-8"))
+        # --- kontrola že je to JsonResponse
+        self.assertEqual(response.status_code, 200)
+        # --- billed filtr
+        self.assertEqual(data["recordsFiltered"], 10)
+        # --- mělo by se vrátit max self.pagination(10) záznamů
+        self.assertEqual(len(data["data"]), 10)
+        for i in range(0, 9):
+            # order number v datech z JSONA
+            order_html = data["data"][i]["order_number"]
+            order_pattern = (
+                r'<a href="/order/\d+/detail/" name="order-number"(?: [^>]*)?>'
+                r"\w+(?:-\w+)*-\d{5}-R"
+                r"</a>"
+            )
+            self.assertRegex(order_html, order_pattern)
+            self.assertIn('name="order-number"', order_html)  # name
+
+            # distribhub v datech z JSONA
+            distrib_hub_html = data["data"][i]["distrib_hub"]
+            distrib_hub_content = f"{self.distrib_hub_code}-{self.distrib_hub_city}"
+            distrib_hub_pattern = r'<span name="distrib-hub">.+?</span>'
+            self.assertRegex(distrib_hub_html, distrib_hub_pattern)  # regex
+            self.assertIn(distrib_hub_content, distrib_hub_html)  # obsah
+            self.assertIn('name="distrib-hub"', distrib_hub_html)  # name
+
+            # mandant v datech z JSONA
+            mandant_html = data["data"][i]["mandant"]
+            mandant_pattern = r'<span name="mandant">[A-Za-z]{1,4}</span>'
+            self.assertRegex(mandant_html, mandant_pattern)  # regex
+            self.assertIn(self.mandant, mandant_html)  # obsah
+            self.assertIn('name="mandant"', mandant_html)  # name
+
+            # evidence_termin v datech z JSONA
+            evidence_termin_html = data["data"][i]["evidence_termin"]
+            evidence_termin_pattern = (
+                r'<span\s+name="evidence-termin"(?:\s+class="[^"]*")?>'
+                r"\d{2}\.\d{2}\.\d{4}</span>"
+            )
+            self.assertIn(self.date_evidence_cz, evidence_termin_html)  # obsah
+            self.assertRegex(evidence_termin_html, evidence_termin_pattern)  # regex
+            self.assertIn('name="evidence-termin"', evidence_termin_html)  # name
+
+            # delivery_termin v datech z JSONA
+            delivery_termin_html = data["data"][i]["delivery_termin"]
+            delivery_termin_pattern = (
+                r'<span\s+name="delivery-termin"(?:\s+class="[^"]*")?>'
+                r"\d{2}\.\d{2}\.\d{4}</span>"
+            )
+            self.assertIn(self.date_delivery_cz, delivery_termin_html)  # obsah
+            self.assertRegex(delivery_termin_html, delivery_termin_pattern)  # regex
+            self.assertIn('name="delivery-termin"', delivery_termin_html)  # name
+
+            # team_type v datech z JSONA
+            team_type_html = data["data"][i]["team_type"]
+            team_type_pattern = (
+                r'<span\b[^>]*\bname="team-type-(?:montaz|doprava|zakaznik)"[^>]*class="u-s-none(?: u-txt-success)?"[^>]*>'
+                r"(?:Montážníky|Zákazníkem|Dopravcem)</span>"
+            )
+            self.assertRegex(team_type_html, team_type_pattern)  # regex
+            self.assertTrue(
+                'name="team-type-montaz"' in team_type_html
+                or 'name="team-type-doprava"' in team_type_html
+                or 'name="team-type-zakaznik"' in team_type_html
+            )  # name
+
+            # team v datech z JSONA
+            team_html = data["data"][i]["team"]
+            team_pattern = (
+                r'<div[^>]*\btitle="[^"]*"\s+name="team(?:-[a-z]+(?:-[a-z]+)?)?"[^>]*>'
+                r".*?<span[^>]*>.*?</span>.*?</div>"
+            )
+            self.assertRegex(team_html, team_pattern)  # regex
+            self.assertTrue(
+                'name="team-montaz"' in team_html or "name=team-doprava" in team_html
+            )  # name
+
+            # montage_termin v datech z JSONA
+            montage_termin_html = data["data"][i]["montage_termin"]
+            # montage_termin_pattern = (
+            #     r"<div\b[^>]*>"
+            #     r".*?<span[^>]*>"
+            #     r"(?:<strong>)?"
+            #     r"\d{2}\.\d{2}\.\d{4}(?: \d{2}:\d{2})?"
+            #     r"(?:</strong>)?"
+            #     r"</span>"
+            #     r".*?</div>"
+            # )
+            # self.assertRegex(montage_termin_html, montage_termin_pattern)  # regex
+            # self.assertIn('name="montage-termin-doprava"', montage_termin_html)  # name
+
+            # status v datech z JSONA
+            status_html = data["data"][i]["status"]
+            status_pattern = (
+                r'name="status-Vyúčtovaný'
+                r'"'
+            )
+            self.assertRegex(status_html, status_pattern)  # regex
+
+            # articles v datech z JSONA
+            articles_html = data["data"][i]["articles"]
+            articles_pattern = r'<div\b[^>]*\bname="articles"[^>]*>.*?</div>'
+            self.assertRegex(articles_html, articles_pattern)  # regex
+            self.assertIn('name="articles"', articles_html)  # name
+            self.assertIn(
+                '<div name="articles" "class="u-s-none u-txt-center u-txt-error">0</div>',
+                articles_html,
+            )  # obsah
+
+            # notes v datech z JSONA
+            notes_html = data["data"][i]["notes"]
+            notes_pattern = r'<span\b[^>]*\bname="notes"[^>]*>.*?</span>'
+            self.assertRegex(notes_html, notes_pattern)  # regex
+            self.assertIn('name="notes"', notes_html)  # name
+            self.assertIn('<span name="notes" title="Vyuctovano"', notes_html)  # obsah

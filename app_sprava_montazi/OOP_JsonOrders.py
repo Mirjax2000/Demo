@@ -282,43 +282,59 @@ class JsonOrders:
         css = "u-s-none"
         icon = ""
         content = "–"
+        # ---
+        is_new = order.status == Status.NEW
+        is_adviced = order.status == Status.ADVICED
+        is_realized = order.status == Status.REALIZED
+        is_billed = order.status == Status.BILLED
+        is_canceled = order.status == Status.CANCELED
+        is_hidden = order.status == Status.HIDDEN
+        # ---
+        is_montaz = order.team_type == TeamType.BY_ASSEMBLY_CREW
+        is_doprava = order.team_type == TeamType.BY_DELIVERY_CREW
+        # ---
 
-        # Montážní tým
-        if (
-            order.status == Status.ADVICED
-            and order.team_type == TeamType.BY_ASSEMBLY_CREW
-        ):
-            name += "-montaz"
-            if order.montage_termin:
-                local_time = timezone.localtime(order.montage_termin)
-                content = f"<strong>{local_time.strftime('%d.%m.%Y %H:%M')}</strong>"
+        if is_adviced:
+            if is_montaz:
+                name += "-montaz"
+                if order.montage_termin:
+                    local_time = timezone.localtime(order.montage_termin)
+                    content = (
+                        f"<strong>{local_time.strftime('%d.%m.%Y %H:%M')}</strong>"
+                    )
+            elif is_doprava:
+                name += "-doprava"
+                local_date = (
+                    timezone.localdate(order.delivery_termin)
+                    if isinstance(order.delivery_termin, datetime)
+                    else order.delivery_termin
+                )
+                if local_date:
+                    content = f"<strong>{local_date.strftime('%d.%m.%Y')}</strong>"
 
-        # doprava
-        elif (
-            order.status == Status.ADVICED
-            and order.team_type == TeamType.BY_DELIVERY_CREW
-        ):
-            name += "-doprava"
-            if isinstance(order.delivery_termin, datetime):
-                local_date = timezone.localdate(order.delivery_termin)
-            else:
-                local_date = order.delivery_termin
-
-            if local_date:
-                content = f"<strong>{local_date.strftime('%d.%m.%Y')}</strong>"
-
-        # Není přiřazen tým
-        elif order.team_type == "By_assembly_crew":
-            icon = exclamation_icon
-            css += " u-txt-warning"
-            content = "Nevybráno"
-            name += "-no-team"
+        elif order.status == Status.BILLED:
+            if is_montaz:
+                css += " u-txt-success"
+                if order.montage_termin:
+                    local_time = timezone.localtime(order.montage_termin)
+                    content = (
+                        f"<strong>{local_time.strftime('%d.%m.%Y %H:%M')}</strong>"
+                    )
+            elif is_doprava:
+                css += " u-txt-info"
+                local_date = (
+                    timezone.localdate(order.delivery_termin)
+                    if isinstance(order.delivery_termin, datetime)
+                    else order.delivery_termin
+                )
+                if local_date:
+                    content = f"<strong>{local_date.strftime('%d.%m.%Y')}</strong>"
 
         return f'<div name="{name}">{icon}<span class="{css}">{content}</span></div>'
 
     def status_coll(self, order: Order) -> str:
         """Vrací status + případnou ikonu odkazu na protokol."""
-        name: str = "status"
+        name: str = f"status-{order.get_status_display()}"  # type: ignore
         error: bool = check_order_error_adviced(order.pk)
         content = order.get_status_display()[:8]  # type: ignore
         icon = ""
