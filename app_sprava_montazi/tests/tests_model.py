@@ -579,7 +579,7 @@ class OrderModelTestV2(TestCase):
         time_now: datetime = timezone.now()
         date_timedelta = timezone.now().date() + timedelta(days=3)
         distrib_hub: DistribHub = DistribHub.objects.get(code="CB")
-        customer: Client = Client.objects.get(name="Jan Novák")
+        customer: Client = Client.objects.get(name="Jan Novák", zip_code="11150")
         team: Team = Team.objects.get(name="Alfa Team")
         order: Order = Order.objects.create(
             order_number="12345",
@@ -603,6 +603,8 @@ class OrderModelTestV2(TestCase):
         self.assertEqual(order.mandant, "ABC")
         self.assertEqual(order.status, Status.ADVICED)
         self.assertEqual(order.client, customer)
+        self.assertEqual(order.client.zip_code, "11150")
+        self.assertEqual(order.client.name, "Jan Novák")
         self.assertIsInstance(order.client, Client)
         self.assertEqual(order.team_type, TeamType.BY_ASSEMBLY_CREW)
         self.assertEqual(order.team, team)
@@ -864,6 +866,67 @@ class OrderModelTestV2(TestCase):
         order.team = self.team
         order.save()
         self.assertEqual(order.status, Status.ADVICED)
+
+    def test_order_creation_with_delivery_default(self):
+        """
+        Testuje vytvoření nové objednávky (Order) s předdefinovanými hodnotami.
+        """
+        date_timedelta = timezone.now().date() + timedelta(days=3)
+        distrib_hub: DistribHub = DistribHub.objects.get(code="CB")
+        customer: Client = Client.objects.get(name="Jan Novák", zip_code="11150")
+        order: Order = Order.objects.create(
+            order_number="54321",
+            distrib_hub=distrib_hub,
+            mandant="ABC",
+            status=Status.NEW,
+            client=customer,
+            evidence_termin=timezone.now().date(),
+            delivery_termin=date_timedelta,
+            team_type=TeamType.BY_CUSTOMER,
+            vynos=Decimal(100.00),
+            naklad=Decimal(100.00),
+            notes="Testovací poznámka",
+        )
+        # Změna team_type
+        order.team_type = TeamType.BY_DELIVERY_CREW
+        # Ručně uložíme po změně (jako by to dělal formulář)
+        order.save()
+        # Zkontrolujeme v DB
+        order.refresh_from_db()
+        self.assertEqual(order.order_number, "54321")
+        self.assertEqual(order.status, Status.ADVICED)
+        self.assertEqual(order.team_type, TeamType.BY_DELIVERY_CREW)
+        self.assertEqual(order.delivery_termin, date_timedelta)
+
+    def test_order_creation_with_delivery_not_delivery_termin(self):
+        """
+        Testuje vytvoření nové objednávky (Order) s předdefinovanými hodnotami.
+        """
+        distrib_hub: DistribHub = DistribHub.objects.get(code="CB")
+        customer: Client = Client.objects.get(name="Jan Novák", zip_code="11150")
+        order: Order = Order.objects.create(
+            order_number="54322",
+            distrib_hub=distrib_hub,
+            mandant="ABC",
+            status=Status.NEW,
+            client=customer,
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_CUSTOMER,
+            vynos=Decimal(100.00),
+            naklad=Decimal(100.00),
+            notes="Testovací poznámka",
+        )
+        # Změna team_type
+        order.team_type = TeamType.BY_DELIVERY_CREW
+        # Ručně uložíme po změně (jako by to dělal formulář)
+        order.save()
+        # Zkontrolujeme v DB
+        order.refresh_from_db()
+        self.assertEqual(order.order_number, "54322")
+        self.assertEqual(order.status, Status.NEW)
+        self.assertEqual(order.team_type, TeamType.BY_DELIVERY_CREW)
+        self.assertEqual(order.delivery_termin, None)
+        self.assertEqual(order.montage_termin, None)
 
 
 class ArticleModelTest(TestCase):

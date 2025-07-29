@@ -996,7 +996,7 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
     def render_to_response(self, context, **response_kwargs):
         order = context["object"]
         # ---
-        generator_class = pdf_generator_classes.get(order.mandant, DefaultPdfGenerator)
+        generator_class = SCCZPdfGenerator
         generator_instance = generator_class()
         # ---
         pdf = generator_instance.generate_pdf_protocol(model=order)

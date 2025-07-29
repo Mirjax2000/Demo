@@ -2029,19 +2029,20 @@ class ExportOrdersExcelViewTest(TestCase):
         self.assertIn(".xlsx", disposition)
 
 
-class PdfViewTestV1(TestCase):
+class PdfViewTest(TestCase):
     def setUp(self):
         # Vytvoříme testovacího uživatele
         self.user = User.objects.create_user(username="testuser", password="testpass")
         self.client.login(username="testuser", password="testpass")
-        self.url = reverse("mandant_pdf", kwargs={"mandant": "SCCZ"})
+        self.url_sccz = reverse("mandant_pdf", kwargs={"mandant": "SCCZ"})
+        self.url_default = reverse("mandant_pdf", kwargs={"mandant": "default"})
 
-    def test_logged_in(self):
+    def test_logged_in_sccz(self):
         """
         Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
         a je použita správná šablona.
         """
-        response = self.client.get(self.url)
+        response = self.client.get(self.url_sccz)
         self.assertEqual(response.status_code, 200)
 
     def test_redirect_if_not_logged_in(self):
@@ -2050,12 +2051,11 @@ class PdfViewTestV1(TestCase):
         pokud není přihlášen a pokusí se zobrazit indexovou stránku.
         """
         self.client.logout()
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
+        response = self.client.get(self.url_sccz)
+        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url_sccz}")
 
-    def test_pdf_view_returns_pdf(self):
-        url = reverse("mandant_pdf", kwargs={"mandant": "SCCZ"})
-        response = self.client.get(url)
+    def test_pdf_view_returns_pdf_sccz(self):
+        response = self.client.get(self.url_sccz)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/pdf")
@@ -2064,34 +2064,8 @@ class PdfViewTestV1(TestCase):
         self.assertTrue(response.content.startswith(b"%PDF"))
         self.assertIn("Protokol_SCCZ.pdf", response["Content-Disposition"])
 
-
-class PdfViewTestV2(TestCase):
-    def setUp(self):
-        # Vytvoříme testovacího uživatele
-        self.user = User.objects.create_user(username="testuser", password="testpass")
-        self.client.login(username="testuser", password="testpass")
-        self.url = reverse("mandant_pdf", kwargs={"mandant": "default"})
-
-    def test_logged_in(self):
-        """
-        Testuje, zda přihlášený uživatel úspěšně získá indexovou stránku
-        a je použita správná šablona.
-        """
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_redirect_if_not_logged_in(self):
-        """
-        Testuje, zda je uživatel přesměrován na přihlašovací stránku,
-        pokud není přihlášen a pokusí se zobrazit indexovou stránku.
-        """
-        self.client.logout()
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{settings.LOGIN_URL}?next={self.url}")
-
-    def test_pdf_view_returns_pdf(self):
-        url = reverse("mandant_pdf", kwargs={"mandant": "default"})
-        response = self.client.get(url)
+    def test_pdf_view_returns_pdf_default(self):
+        response = self.client.get(self.url_default)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/pdf")
@@ -2101,7 +2075,7 @@ class PdfViewTestV2(TestCase):
         self.assertIn("Protokol_default.pdf", response["Content-Disposition"])
 
 
-class OrderPdfViewTestV1(TestCase):
+class OrderPdfViewTest(TestCase):
     def setUp(self):
         # Vytvoříme testovacího uživatele
         self.user = User.objects.create_user(username="testuser", password="testpass")

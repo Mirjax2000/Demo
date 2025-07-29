@@ -698,7 +698,8 @@ class Utility:
         height = bounds[3] - bounds[1]
 
         # Vytvořím kresbu a přizpůsobím velikost QR kódu
-        d = Drawing(110, 110, transform=[110.0 / width, 0, 0, 110.0 / height, 0, 0])
+        xy = 120
+        d = Drawing(xy, xy, transform=[xy / width, 0, 0, xy / height, 0, 0])
         d.add(qr_code)
 
         # Vykreslím do PDF canvasu
@@ -744,7 +745,7 @@ class SCCZPdfGenerator(PdfGenerator):
         # ---
         if model is not None:
             order_number = model.order_number
-            utils.generate_qrcode(order_number.upper(), 420, 640)
+            utils.generate_qrcode(order_number.upper(), 420, 630)
             section.sccz_data_section(model)  # --- data layer ---
             if settings.DEBUG:
                 cons.log(f"SCCZ pdf: {order_number} sestaven", style="blue")
