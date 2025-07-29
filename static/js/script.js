@@ -668,7 +668,7 @@
 
         function updateTeamVisibility() {
             const teamWrapper = idTeam.closest(".L-form__group");
-            const montageTerminWrapper = idTeam.closest(".L-form__group");
+            const montageTerminWrapper = idMontageTermin.closest(".L-form__group");
 
             if (idTeamType.value === "By_customer" || idTeamType.value === "By_delivery_crew") {
                 teamWrapper.classList.add("inactive_input");
