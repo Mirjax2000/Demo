@@ -178,18 +178,6 @@ class OrderForm(forms.ModelForm):
 
         return order_number
 
-    def clean_team_type(self):
-        team_type = self.cleaned_data.get("team_type")
-        if not team_type:
-            return TeamType.BY_ASSEMBLY_CREW
-        return team_type
-
-    def clean_status(self):
-        status = self.cleaned_data.get("status")
-        if not status:
-            return Status.NEW
-        return status
-
     def clean(self) -> dict[str, Any]:
         cleaned_data: dict[str, Any] = super().clean()
         # kontrola stavu - zaterminovano
@@ -202,25 +190,41 @@ class OrderForm(forms.ModelForm):
 
     def validate_adviced(self, data) -> None:
         """Validace při stavu 'Zatermínováno'"""
-        team_type = data.get("team_type")
-        team = data.get("team")
-        client = data.get("client")
+        team_type: TeamType = data.get("team_type")
+        team: Team = data.get("team")
+        client: Client = data.get("client")
         montage_termin = data.get("montage_termin")
         delivery_termin = data.get("delivery_termin")
 
-        if team_type == TeamType.BY_ASSEMBLY_CREW and not team:
+        is_montage: bool = team_type == TeamType.BY_ASSEMBLY_CREW
+        is_delivery: bool = team_type == TeamType.BY_DELIVERY_CREW
+        is_customer: bool = team_type == TeamType.BY_CUSTOMER
+
+        if is_montage:
+            self.if_is_montage(client, team, montage_termin, delivery_termin)
+        elif is_delivery:
+            self.if_is_delivery(client, team, montage_termin, delivery_termin)
+        elif is_customer:
             self.add_error(
-                "team", "Pro stav 'Zatermínováno' musí být vybrán montážní tým."
+                "team_type",
+                "Pro stav 'Zatermínováno' nesmí být Zákazníkem. Přepni pole podle typu.",
             )
 
+    def if_is_montage(
+        self, client: Client, team: Team, montage_termin, delivery_termin
+    ) -> None:
         if not client:
             self.add_error(
                 "client", "Pro stav 'Zatermínováno' je třeba vyplnit zákazníka."
             )
-        elif client.incomplete:
+        if client.incomplete:
             self.add_error(
                 "client",
                 "Zákazník má neúplné údaje, nelze uložit jako 'Zatermínováno'.",
+            )
+        if not team:
+            self.add_error(
+                "team", "Pro stav 'Zatermínováno' musí být vybrán montážní tým."
             )
 
         if not montage_termin:
@@ -228,6 +232,28 @@ class OrderForm(forms.ModelForm):
 
         if not delivery_termin:
             self.add_error("delivery_termin", "Zadej termín doručení.")
+
+    def if_is_delivery(
+        self, client: Client, team: Team, montage_termin, delivery_termin
+    ) -> None:
+        if not client:
+            self.add_error(
+                "client", "Pro stav 'Zatermínováno' je třeba vyplnit zákazníka."
+            )
+        if team:
+            self.add_error(
+                "team", "Pro stav 'Zatermínováno' nemá být vybrán montážní tým."
+            )
+        if montage_termin:
+            self.add_error(
+                "montage_termin",
+                "Pro stav 'Zatermínováno' nemá být vybrán termín montáže.",
+            )
+        if not delivery_termin:
+            self.add_error(
+                "delivery_termin",
+                "Pro stav 'Zatermínováno' musí být vybrán termín doručení.",
+            )
 
 
 class ArticleForm(forms.ModelForm):
