@@ -109,12 +109,20 @@
                 <div class="u-flex-row">
                     <div class="detail__vynos">
                         <p class="detail__header">Výnos</p>
-                        <p class="detail__content">{{ order.vynos }}</p>
+                        {% if order.vynos %}
+                            <p class="detail__content">{{ order.vynos }}</p>
+                        {% else %}
+                            <p class="detail__content u-txt-warning">Nezadáno</p>
+                        {% endif %}
                     </div>
                     <!---->
                     <div class="detail__naklad">
                         <p class="detail__header">Náklad</p>
-                        <p class="detail__content">{{ order.naklad }}</p>
+                        {% if order.naklad %}
+                            <p class="detail__content">{{ order.naklad }}</p>
+                        {% else %}
+                            <p class="detail__content u-txt-warning">Nezadáno</p>
+                        {% endif %}
                     </div>
                     <!---->
                     <div class="detail__profit">

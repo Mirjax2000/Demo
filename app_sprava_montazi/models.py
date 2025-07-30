@@ -278,10 +278,10 @@ class Order(Model):
 
     history = HistoricalRecords()
 
-    def profit(self) -> Decimal | None:
+    def profit(self) -> Decimal:
         if self.vynos is not None and self.naklad is not None:
             return self.vynos - self.naklad
-        return None
+        return Decimal(0)
 
     def format_datetime(self, value) -> str:
         if value is None:
