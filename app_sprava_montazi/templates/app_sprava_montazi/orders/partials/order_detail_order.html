@@ -1,46 +1,46 @@
 <section class="L-detail__fieldset {% if show %}L-detail__hidden{% endif %}">
     <div>
         <h3 class="L-detail__fieldset__header">Objednávka</h3>
-        <ul class="L-detail__list">
+        <ul class="L-detail__list" name="detailOrder">
             <!--order-->
-            <li class="L-detail__item">
+            <li class="L-detail__item" name="detailOrderNumber">
                 <strong>Číslo zakázky:</strong>
                 <span>{{ order.order_number }}</span>
             </li>
             <!--distrib_hub-->
-            <li class="L-detail__item">
+            <li class="L-detail__item" name="detailDistribHub">
                 <strong>Místo určení:</strong>
                 <span class="u-txt-success-light ms-1">{{ order.distrib_hub }}</span>
             </li>
             <!--mandant-->
-            <li class="L-detail__item">
+            <li class="L-detail__item" name="detailMandant">
                 <strong>Mandant:</strong>
                 <span class="ms-1">{{ order.mandant }}</span>
             </li>
             <!--status-->
-            <li class="L-detail__item">
+            <li class="L-detail__item" name="detailStatus">
                 <strong>Stav:</strong>
                 <span class="u-txt-success-light ms-1">{{ order.get_status_display }}</span>
             </li>
             <!--evidence_termin-->
-            <li class="L-detail__item">
+            <li class="L-detail__item" name="detailEvidenceTermin">
                 <strong>Termín evidence:</strong>
                 <span class="ms-1">{{ order.evidence_termin|date:"d. m. Y" }}</span>
             </li>
             <!--delivery termin-->
             {% if order.delivery_termin %}
-                <li class="L-detail__item">
+                <li class="L-detail__item" name="detailDeliveryTerminDate">
                     <strong>Termín doručení:</strong>
                     <span class="ms-1">{{ order.delivery_termin|date:"d. m. Y" }}</span>
                 </li>
             {% else %}
-                <li class="L-detail__item">
+                <li class="L-detail__item" name="detailDeliveryTerminNone">
                     <strong>Termín doručení:</strong>
                     <span class="u-txt-warning ms-1">Nevybráno</span>
                 </li>
             {% endif %}
             <!-- montage_termin -->
-            <li class="L-detail__item">
+            <li class="L-detail__item" name="detailMontageTermin">
                 <strong>Termín montáže:</strong>
                 {% if order.montage_termin %}
                     <span class="ms-1 {% if order.status == "Adviced" and order.team_type == "By_assembly_crew" %}u-txt-success{% endif %} ">
@@ -55,7 +55,7 @@
                 {% endif %}
             </li>
             <!--team type-->
-            <li class="L-detail__item">
+            <li class="L-detail__item" name="detailTeamType">
                 <strong>Realizace kým:</strong>
                 <!---->
                 {% if order.team_type == "By_customer" %}
@@ -68,7 +68,7 @@
             </li>
             <!--team-->
             {% if order.team %}
-                <li class="L-detail__item">
+                <li class="L-detail__item" name="detailTeamMontage">
                     <strong>Montážní tým:</strong>
                     {% if order.team.active %}
                         <span class="ms-1">
@@ -84,12 +84,12 @@
                 </li>
             {% else %}
                 {% if order.team_type == "By_delivery_crew" %}
-                    <li class="L-detail__item">
+                    <li class="L-detail__item" name="detailTeamDelivery">
                         <strong>Montážní tým:</strong>
                         <span class="u-txt-info ms-1">Montáž dopravcem</span>
                     </li>
                 {% else %}
-                    <li class="L-detail__item">
+                    <li class="L-detail__item" name="detailTeamNone">
                         <strong>Montážní tým:</strong>
                         <span class="u-txt-warning ms-1">Nevybráno</span>
                     </li>
@@ -97,18 +97,32 @@
             {% endif %}
             <!--notes-->
             {% if order.notes %}
-                <li class="L-detail__item">
+                <li class="L-detail__item" name="detailNotes">
                     <strong>Poznámky:</strong>
                     <span class="ms-1">{{ order.notes }}</span>
                 </li>
             {% endif %}
             <!--vynos/naklad/profit-->
-            {% if order.notes %}
-                <li class="L-detail__item">
-                    <strong>Poznámky:</strong>
-                    <span class="ms-1">{{ order.notes }}</span>
-                </li>
-            {% endif %}
+            <li class="L-detail__item L-detail__vynos_naklad_profit"
+                id="vynosNakladProfitListItem"
+                name="detailVynosNakladProfitListItem">
+                <div class="u-flex-row">
+                    <div class="detail__vynos">
+                        <p class="detail__header">Výnos</p>
+                        <p class="detail__content">{{ order.vynos }}</p>
+                    </div>
+                    <!---->
+                    <div class="detail__naklad">
+                        <p class="detail__header">Náklad</p>
+                        <p class="detail__content">{{ order.naklad }}</p>
+                    </div>
+                    <!---->
+                    <div class="detail__profit">
+                        <p class="detail__header">Profit</p>
+                        <p class="detail__content" id="detailProfit">{{ order.profit }}</p>
+                    </div>
+                </div>
+            </li>
         </ul>
     </div>
     <!---->

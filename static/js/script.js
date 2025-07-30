@@ -14,6 +14,8 @@
     const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
     const emptyFormHtml = $('#empty-form-template');
 
+    // detail profit
+    document.addEventListener("DOMContentLoaded", detailProfit);
     // making_delivery_order
     document.addEventListener("DOMContentLoaded", making_delivery_order);
     // naklad vynos skryti
@@ -643,7 +645,7 @@
 
         mandantInput.addEventListener("input", toggleOD);
     }
-    
+
     //  input vynos naklad
     function input_vynos_naklad() {
         const idStatus = document.getElementById("id_status");
@@ -699,16 +701,13 @@
         }
     }
 
-
-
     // making dopravni zakazku
     function making_delivery_order() {
-        const idStatus = document.getElementById("id_status");
-        const idEvidenceTermin = document.getElementById("id_evidence_termin");
-        const idDeliveryTermin = document.getElementById("id_delivery_termin");
         const idMontageTermin = document.getElementById("id_montage_termin");
         const idTeamType = document.getElementById("id_team_type");
         const idTeam = document.getElementById("id_team");
+
+        if (!idMontageTermin || !idTeamType || !idTeam) return
 
         function updateTeamVisibility() {
             const teamWrapper = idTeam.closest(".L-form__group");
@@ -734,5 +733,23 @@
         updateTeamVisibility();
     }
 
+    // detail profit
+    function detailProfit() {
+        const vynosNakladProfitListItem = document.getElementById("vynosNakladProfitListItem")
+        const detailProfit = document.getElementById("detailProfit")
+
+        if (!vynosNakladProfitListItem) return
+
+        let detailProfitValue = parseFloat(detailProfit.textContent.trim())
+        detailProfit.classList.remove("profit", "ztrata", "zero");
+
+        if (detailProfitValue > 0) {
+            detailProfit.classList.add("profit");
+        } else if (detailProfitValue < 0) {
+            detailProfit.classList.add("ztrata");
+        } else {
+            detailProfit.classList.add("zero");
+        }
+    }
 
 })();

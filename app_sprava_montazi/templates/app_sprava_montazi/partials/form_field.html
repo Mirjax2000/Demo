@@ -11,7 +11,7 @@
 {% endfor %}
 {# pokud obsahuje vynos i naklad, includuj partial #}
 {% if "vynos" in form.fields and "naklad" in form.fields %}
-    <hr>
+    <hr class="mb-2">
     {% include "app_sprava_montazi/orders/partials/naklad_vynos_input.html" %}
     <hr>
 {% endif %}

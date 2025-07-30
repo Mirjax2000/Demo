@@ -766,7 +766,35 @@ body.home {
   padding: 0.3em;
   background-color: var(--bck-list-item);
   border: 1px solid var(--border);
-  box-shadow: 0 0 5px --shadow;
+  box-shadow: 0 0 5px var(--shadow);
+}
+.L-detail__vynos_naklad_profit {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.L-detail__vynos_naklad_profit .detail__header,
+.L-detail__vynos_naklad_profit .detail__content {
+  margin: 0;
+  padding: 0;
+}
+.L-detail__vynos_naklad_profit .detail__vynos,
+.L-detail__vynos_naklad_profit .detail__naklad,
+.L-detail__vynos_naklad_profit .detail__profit {
+  flex-basis: 100%;
+  border: 1px solid var(--border);
+  text-align: center;
+  padding-top: 0.2em;
+  font-weight: 600;
+}
+.L-detail__vynos_naklad_profit .detail__profit .detail__content.profit {
+  background-color: var(--bck-profit);
+}
+.L-detail__vynos_naklad_profit .detail__profit .detail__content.ztrata {
+  background-color: var(--bck-ztrata);
+}
+.L-detail__vynos_naklad_profit .detail__profit .detail__content.zero {
+  background-color: var(--bck-zero);
 }
 
 .C-spinner {
