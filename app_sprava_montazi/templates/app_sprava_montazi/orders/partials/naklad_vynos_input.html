@@ -1,16 +1,20 @@
-<div class="L-form__group d-flex gap-3">
-    <div class="flex-item">
+<div class="L-form__group u-flex-row">
+    <div class="flex_item_100 transition vynos_naklad_input inactive_input">
         {{ form.vynos.label_tag }}
         {{ form.vynos }}
-        {% if form.vynos.errors %}
-            <div class="L-form__error">{{ form.vynos.errors }}</div>
-        {% endif %}
+        {% if form.vynos.errors %}<div class="L-form__error">{{ form.vynos.errors }}</div>{% endif %}
     </div>
-    <div class="flex-item">
+    <!---->
+    <div class="flex_item_100 transition vynos_naklad_input inactive_input">
         {{ form.naklad.label_tag }}
         {{ form.naklad }}
-        {% if form.naklad.errors %}
-            <div class="L-form__error">{{ form.naklad.errors }}</div>
-        {% endif %}
+        {% if form.naklad.errors %}<div class="L-form__error">{{ form.naklad.errors }}</div>{% endif %}
+    </div>
+    <!--profit/loss-->
+    <div class="flex_item_100">
+        <p class="m-0 p-0">Profit</p>
+        <div>
+            <p id="vynosNakladProfitLoss"></p>
+        </div>
     </div>
 </div>

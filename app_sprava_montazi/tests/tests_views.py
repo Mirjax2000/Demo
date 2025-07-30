@@ -6,8 +6,8 @@ import logging
 import tempfile
 from decimal import Decimal
 from unittest.mock import patch
-from openpyxl import load_workbook
 from datetime import date, datetime
+from openpyxl import load_workbook
 
 # --- django
 from django.http import HttpRequest
@@ -34,8 +34,10 @@ from app_sprava_montazi.models import (
     TeamType,
     Upload,
 )
-from accounts.views import CustomLoginView
+
+# ---
 from app_sprava_montazi.views import OD_CHOICES, HUB_CHOICES
+from accounts.views import CustomLoginView
 
 
 # --- utils
@@ -476,7 +478,7 @@ class ClientUpdateViewTest(TestCase):
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=None,
         )
-        base_url = reverse("client_update", kwargs={"pk": self.order.client.pk})
+        base_url = reverse("client_update", kwargs={"pk": self.order.client.pk})  # type:ignore
         self.url = f"{base_url}?order_pk={self.order.pk}"
 
     def test_logged_in(self):
@@ -585,14 +587,14 @@ class OrderCreateViewTest(TestCase):
 
         self.valid_order_data = {
             "order_number": "703777143100437749-O",
-            "distrib_hub": self.hub.id,
+            "distrib_hub": self.hub.id,  # type:ignore
             "mandant": "CCCC",
             "status": self.valid_status_key,
             "delivery_termin": "2024-05-15",
             "evidence_termin": "2024-05-20",
             "montage_termin": "2024-05-25T10:30",
             "team_type": self.valid_team_type_key,
-            "team": self.team.id,
+            "team": self.team.id,  # type:ignore
             "notes": "This is a test order note.",
         }
 
@@ -680,11 +682,11 @@ class OrderCreateViewTest(TestCase):
 
         self.assertEqual(created_order.client, created_client)
         self.assertEqual(
-            created_order.articles.count(),
+            created_order.articles.count(),  # type:ignore
             self.valid_article_data["article_set-TOTAL_FORMS"],
         )
 
-        created_article = created_order.articles.first()
+        created_article = created_order.articles.first()  # type:ignore
         self.assertEqual(
             created_article.name, self.valid_article_data["article_set-0-name"]
         )
@@ -692,8 +694,11 @@ class OrderCreateViewTest(TestCase):
             created_article.quantity, self.valid_article_data["article_set-0-quantity"]
         )
         mock_success_message.assert_called_once()
-        args, kwargs = mock_success_message.call_args
-        msg: str = f"Objednávka vytvořena se zákazníkem: <strong>{created_order.client.name}</strong>."
+        args, _ = mock_success_message.call_args
+        msg: str = (
+            f"Objednávka vytvořena se zákazníkem: "
+            f"<strong>{created_order.client.name}</strong>."  # type:ignore
+        )
         self.assertEqual(args[1], msg)
 
     @patch("django.contrib.messages.error")
@@ -713,16 +718,21 @@ class OrderCreateViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            "číslo objednávky je povinné!", str(order_form.errors["order_number"])
+            "číslo objednávky je povinné!",
+            str(order_form.errors["order_number"]),  # type:ignore
         )
-        self.assertIn("Mandant je povinný!", str(order_form.errors["mandant"]))
+        self.assertIn("Mandant je povinný!", str(order_form.errors["mandant"]))  # type:ignore
         self.assertIn(
-            "Toto pole je vyžadováno", str(order_form.errors["evidence_termin"])
+            "Toto pole je vyžadováno",
+            str(order_form.errors["evidence_termin"]),  # type:ignore
         )
-        self.assertIn("místo určení je povinné!", str(order_form.errors["distrib_hub"]))
+        self.assertIn(
+            "místo určení je povinné!",
+            str(order_form.errors["distrib_hub"]),  # type:ignore
+        )
 
         mock_error_message.assert_called_once()
-        args, kwargs = mock_error_message.call_args
+        args, _ = mock_error_message.call_args
         self.assertEqual(args[1], "Nastala chyba při ukládání objednávky.")
 
     @patch("django.contrib.messages.error")
@@ -738,10 +748,13 @@ class OrderCreateViewTest(TestCase):
         order_form = response.context.get("order_form")
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Objednávka už existuje!", str(order_form.errors["order_number"]))
+        self.assertIn(
+            "Objednávka už existuje!",
+            str(order_form.errors["order_number"]),  # type:ignore
+        )
 
         mock_error_message.assert_called_once()
-        args, kwargs = mock_error_message.call_args
+        args, _ = mock_error_message.call_args
         self.assertEqual(args[1], "Nastala chyba při ukládání objednávky.")
 
     @patch("django.contrib.messages.success")
@@ -783,15 +796,18 @@ class OrderCreateViewTest(TestCase):
         self.assertEqual(Article.objects.count(), initial_article_count)
 
         self.assertEqual(created_order.client, created_client)
-        self.assertEqual(created_order.articles.count(), 0)
+        self.assertEqual(created_order.articles.count(), 0)  # type:ignore
         self.assertEqual(created_order.distrib_hub, self.hub)
         self.assertEqual(created_order.team, self.team)
         self.assertEqual(created_order.status, Status.ADVICED)
         self.assertEqual(created_order.team_type, self.valid_team_type_key)
 
         mock_success_message.assert_called_once()
-        args, kwargs = mock_success_message.call_args
-        msg: str = f"Objednávka vytvořena se zákazníkem: <strong>{created_order.client.name}</strong>."
+        args, _ = mock_success_message.call_args
+        msg: str = (
+            "Objednávka vytvořena se zákazníkem: "
+            f"<strong>{created_order.client.name}</strong>."  # type:ignore
+        )
         self.assertEqual(args[1], msg)
 
     def test_active_context_variable(self):
@@ -882,7 +898,8 @@ class OrderDeleteViewTest(TestCase):
         # Ověřím, že se zobrazila chybová hláška
         messages = [msg.message for msg in get_messages(response.wsgi_request)]
         self.assertIn(
-            f"Zakázku: {self.order_hidden.order_number} nelze smazat, protože má vazby na jiné záznamy.",
+            f"Zakázku: {self.order_hidden.order_number} nelze smazat, "
+            "protože má vazby na jiné záznamy.",
             messages,
         )
         # Cílová stránka po redirectu
@@ -1487,6 +1504,8 @@ class TeamUpdateViewTest(TestCase):
 
     def test_before_update(self):
         response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.template)
         self.assertEqual(self.team.name, "Test Company")
         self.assertEqual(self.team.city, "Praha")
         self.assertEqual(self.team.region, "Střední Čechy")
@@ -1870,7 +1889,7 @@ class ExportOrdersExcelViewTest(TestCase):
             "Montážní tým",
             "Poznámky",
         ]
-        actual_headers = [cell.value for cell in ws[1]]
+        actual_headers = [cell.value for cell in ws[1]]  # type:ignore
         self.assertEqual(actual_headers, expected_headers)
 
         # Získání viditelných objednávek z DB a jejich seřazení pro ověření
@@ -1881,13 +1900,13 @@ class ExportOrdersExcelViewTest(TestCase):
         # Test datových řádků
 
         current_order = visible_orders[0]
-        row_values = [cell.value for cell in ws[2]]
+        row_values = [cell.value for cell in ws[2]]  # type:ignore
         self.assertEqual(row_values[0], current_order.order_number)
         self.assertEqual(row_values[1], str(current_order.distrib_hub))
         self.assertEqual(row_values[2], current_order.mandant)
-        self.assertEqual(row_values[3], current_order.get_status_display())
+        self.assertEqual(row_values[3], current_order.get_status_display())  # type:ignore
         self.assertEqual(row_values[4], str(current_order.client))
-        self.assertEqual(row_values[5], current_order.client.zip_code)
+        self.assertEqual(row_values[5], current_order.client.zip_code)  # type:ignore
         self.assertEqual(row_values[6], format_date(current_order.evidence_termin))
         # ZMĚNA: Pokud je delivery_termin None, očekáváme None z Excelu
         self.assertEqual(
@@ -1903,7 +1922,7 @@ class ExportOrdersExcelViewTest(TestCase):
             if current_order.montage_termin is None
             else format_date(current_order.montage_termin),
         )
-        self.assertEqual(row_values[9], current_order.get_team_type_display())
+        self.assertEqual(row_values[9], current_order.get_team_type_display())  # type:ignore
         self.assertEqual(
             row_values[10], str(current_order.team) if current_order.team else None
         )  # Může být None
@@ -1914,13 +1933,13 @@ class ExportOrdersExcelViewTest(TestCase):
         # Řádek 2 (prvni viditelná objednávka: self.order1)
         current_order = visible_orders[1]
 
-        row_values = [cell.value for cell in ws[3]]
+        row_values = [cell.value for cell in ws[3]]  # type:ignore
         self.assertEqual(row_values[0], current_order.order_number)
         self.assertEqual(row_values[1], str(current_order.distrib_hub))
         self.assertEqual(row_values[2], current_order.mandant)
-        self.assertEqual(row_values[3], current_order.get_status_display())
+        self.assertEqual(row_values[3], current_order.get_status_display())  # type:ignore
         self.assertEqual(row_values[4], str(current_order.client))
-        self.assertEqual(row_values[5], current_order.client.zip_code)
+        self.assertEqual(row_values[5], current_order.client.zip_code)  # type:ignore
         self.assertEqual(row_values[6], format_date(current_order.evidence_termin))
         # ZMĚNA
         self.assertEqual(
@@ -1936,7 +1955,7 @@ class ExportOrdersExcelViewTest(TestCase):
             if current_order.montage_termin is None
             else format_date(current_order.montage_termin),
         )
-        self.assertEqual(row_values[9], current_order.get_team_type_display())
+        self.assertEqual(row_values[9], current_order.get_team_type_display())  # type:ignore
         self.assertEqual(
             row_values[10], str(current_order.team) if current_order.team else None
         )  # Může být None
@@ -1945,17 +1964,17 @@ class ExportOrdersExcelViewTest(TestCase):
         )  # "" read as None
 
         current_order = visible_orders[2]
-        row_values = [cell.value for cell in ws[4]]
+        row_values = [cell.value for cell in ws[4]]  # type:ignore
         self.assertEqual(row_values[0], current_order.order_number)
         self.assertEqual(row_values[1], str(current_order.distrib_hub))
         self.assertEqual(row_values[2], current_order.mandant)
-        self.assertEqual(row_values[3], current_order.get_status_display())
+        self.assertEqual(row_values[3], current_order.get_status_display())  # type:ignore
         self.assertEqual(row_values[4], str(current_order.client))
-        self.assertEqual(row_values[5], current_order.client.zip_code)
+        self.assertEqual(row_values[5], current_order.client.zip_code)  # type:ignore
         self.assertEqual(row_values[6], format_date(current_order.evidence_termin))
         self.assertEqual(row_values[7], format_date(current_order.delivery_termin))
         self.assertEqual(row_values[8], format_date(current_order.montage_termin))
-        self.assertEqual(row_values[9], current_order.get_team_type_display())
+        self.assertEqual(row_values[9], current_order.get_team_type_display())  # type:ignore
         self.assertEqual(
             row_values[10], str(current_order.team) if current_order.team else None
         )
@@ -1964,7 +1983,7 @@ class ExportOrdersExcelViewTest(TestCase):
         )
 
         # Zajistíme správný počet řádků (1 hlavička + 4 datové řádky)
-        self.assertEqual(ws.max_row, 5)
+        self.assertEqual(ws.max_row, 5)  # type:ignore
 
     def test_excel_file_no_matching_orders(self):
         """
@@ -1978,7 +1997,7 @@ class ExportOrdersExcelViewTest(TestCase):
         wb = load_workbook(excel_file)
         ws = wb.active
 
-        self.assertEqual(ws.max_row, 1)  # Only headers
+        self.assertEqual(ws.max_row, 1)  # type:ignore
         expected_headers = [
             "Číslo zakázky",
             "Místo určení",
@@ -1993,11 +2012,11 @@ class ExportOrdersExcelViewTest(TestCase):
             "Montážní tým",
             "Poznámky",
         ]
-        actual_headers = [cell.value for cell in ws[1]]
+        actual_headers = [cell.value for cell in ws[1]]  # type:ignore
         self.assertEqual(actual_headers, expected_headers)
         # ZDE JE ZMĚNA: Očekávaný suffix je nyní "New_NO-MATCH_None_None"
         disposition = response["Content-Disposition"]
-        self.assertIn(f"filename=objednavky-{Status.NEW.value}_", disposition)
+        self.assertIn(f"filename=objednavky-{Status.NEW.value}_", disposition)  # type:ignore
         self.assertIn("NO-MATCH", disposition)
         self.assertIn(".xlsx", disposition)
 
@@ -2013,19 +2032,23 @@ class ExportOrdersExcelViewTest(TestCase):
         wb = load_workbook(excel_file)
         ws = wb.active
 
-        self.assertEqual(ws.max_row, 3)
+        self.assertEqual(ws.max_row, 3)  # type:ignore
 
         # Zkontrolujeme, zda se jedná o správnou objednávku
-        order_row_values = [cell.value for cell in ws[2]]
+        order_row_values = [cell.value for cell in ws[2]]  # type:ignore
         self.assertEqual(order_row_values[0], self.order_adviced.order_number)
         self.assertEqual(
-            order_row_values[3], self.order_adviced.get_status_display()
+            order_row_values[3],
+            self.order_adviced.get_status_display(),  # type:ignore
         )  # ADVICED
         self.assertEqual(
             order_row_values[6], format_date(self.order_adviced.evidence_termin)
         )
         disposition = response["Content-Disposition"]
-        self.assertIn(f"filename=objednavky-{Status.ADVICED.value}_", disposition)
+        self.assertIn(
+            f"filename=objednavky-{Status.ADVICED.value}_",  # type:ignore
+            disposition,
+        )
         self.assertIn(".xlsx", disposition)
 
 
@@ -2299,5 +2322,5 @@ class CheckPDFProtocolViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/pdf")
-        content = b"".join(response.streaming_content)
+        content = b"".join(response.streaming_content)  # type:ignore
         self.assertIn(b"%PDF-1.4", content)

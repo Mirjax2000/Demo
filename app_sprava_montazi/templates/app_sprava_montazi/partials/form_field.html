@@ -11,7 +11,9 @@
 {% endfor %}
 {# pokud obsahuje vynos i naklad, includuj partial #}
 {% if "vynos" in form.fields and "naklad" in form.fields %}
+    <hr>
     {% include "app_sprava_montazi/orders/partials/naklad_vynos_input.html" %}
+    <hr>
 {% endif %}
 {% if form_type == "create" %}
     <div class="u-txt-right">

@@ -8,14 +8,13 @@ from rich.console import Console
 # --- django
 from django.test import TestCase, RequestFactory
 from django.utils import timezone
-from django.db.models import QuerySet
 from django.contrib.auth.models import User
 
 # --- models
 from ..models import Order, Client, DistribHub, Team, Status, TeamType
 
 # --- OOP
-from ..OOP_JsonOrders import JsonOrders, Utils, FilterDict, JsonHeader
+from ..OOP_JsonOrders import JsonOrders
 
 # ---
 cons: Console = Console()
@@ -334,7 +333,8 @@ class OrderDataTablesTest(TestCase):
             # team_type v datech z JSONA
             team_type_html = data["data"][i]["team_type"]
             team_type_pattern = (
-                r'<span\b[^>]*\bname="team-type-(?:montaz|doprava|zakaznik)"[^>]*class="u-s-none(?: u-txt-success)?"[^>]*>'
+                r'<span\b[^>]*\bname="team-type-(?:montaz|doprava|zakaznik)"'
+                r'[^>]*class="u-s-none(?: u-txt-success)?"[^>]*>'
                 r"(?:Montážníky|Zákazníkem|Dopravcem)</span>"
             )
             self.assertRegex(team_type_html, team_type_pattern)  # regex
@@ -362,9 +362,10 @@ class OrderDataTablesTest(TestCase):
             # montage_termin v datech z JSONA
             montage_termin_html = data["data"][i]["montage_termin"]
             montage_termin_pattern = (
-                r'<div\b[^>]*\bname="[^"]+"[^>]*>'  # div s name, bez title
-                r".*?<span[^>]*>"  # začátek span (non-greedy)
-                r"(?:\d{2}\.\d{2}\.\d{4}(?: \d{2}:\d{2})?|–|Nevybráno)"  # datum, pomlčka nebo Nevybráno
+                r'<div\b[^>]*\bname="[^"]+"[^>]*>'
+                r".*?<span[^>]*>"
+                r"(?:\d{2}\.\d{2}\.\d{4}(?: \d{2}:\d{2})?"
+                r"|–|Nevybráno)"
                 r"</span>"
             )
             self.assertRegex(montage_termin_html, montage_termin_pattern)  # regex
@@ -1073,7 +1074,8 @@ class OrderDataTablesTest(TestCase):
             # team_type v datech z JSONA
             team_type_html = data["data"][i]["team_type"]
             team_type_pattern = (
-                r'<span\b[^>]*\bname="team-type-(?:montaz|doprava|zakaznik)"[^>]*class="u-s-none(?: u-txt-success)?"[^>]*>'
+                r'<span\b[^>]*\bname="team-type-(?:montaz|doprava|zakaznik)"'
+                r'[^>]*class="u-s-none(?: u-txt-success)?"[^>]*>'
                 r"(?:Montážníky|Zákazníkem|Dopravcem)</span>"
             )
             self.assertRegex(team_type_html, team_type_pattern)  # regex

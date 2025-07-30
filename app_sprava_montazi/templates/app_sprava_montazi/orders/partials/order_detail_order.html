@@ -102,6 +102,13 @@
                     <span class="ms-1">{{ order.notes }}</span>
                 </li>
             {% endif %}
+            <!--vynos/naklad/profit-->
+            {% if order.notes %}
+                <li class="L-detail__item">
+                    <strong>Poznámky:</strong>
+                    <span class="ms-1">{{ order.notes }}</span>
+                </li>
+            {% endif %}
         </ul>
     </div>
     <!---->

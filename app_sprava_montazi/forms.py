@@ -31,21 +31,21 @@ class OrderForm(forms.ModelForm):
             classes = attrs.get("class", "")
             attrs["class"] = " ".join(filter(None, [classes, "form_cell_disable"]))
 
-        self.fields["team"].empty_label = "Vyberte tým..."
+        self.fields["team"].empty_label = "Vyberte tým..."  # type: ignore
 
-        self.fields["evidence_termin"].input_formats = [
+        self.fields["evidence_termin"].input_formats = [  # type: ignore
             "%Y-%m-%d",
             "%d.%m.%Y",
             "%d/%m/%Y",
         ]
 
-        self.fields["delivery_termin"].input_formats = [
+        self.fields["delivery_termin"].input_formats = [  # type: ignore
             "%Y-%m-%d",
             "%d.%m.%Y",
             "%d/%m/%Y",
         ]
 
-        self.fields["montage_termin"].input_formats = [
+        self.fields["montage_termin"].input_formats = [  # type: ignore
             "%Y-%m-%dT%H:%M",
             "%Y-%m-%d %H:%M",
             "%d.%m.%Y %H:%M",
@@ -322,28 +322,29 @@ class ClientForm(forms.ModelForm):
             "email",
         ]
 
+        l_form_input: str = "L-form__input"
         widgets = {
             "name": forms.TextInput(
-                attrs={"class": "L-form__input", "placeholder": "celé jméno..."}
+                attrs={"class": l_form_input, "placeholder": "celé jméno..."}
             ),
             "street": forms.TextInput(
-                attrs={"class": "L-form__input", "placeholder": "ulice..."}
+                attrs={"class": l_form_input, "placeholder": "ulice..."}
             ),
             "city": forms.TextInput(
-                attrs={"class": "L-form__input", "placeholder": "město..."}
+                attrs={"class": l_form_input, "placeholder": "město..."}
             ),
             "zip_code": forms.TextInput(
-                attrs={"class": "L-form__input number", "placeholder": "PSC..."}
+                attrs={"class": f"{l_form_input} number", "placeholder": "PSC..."}
             ),
             "phone": forms.TextInput(
                 attrs={
-                    "class": "L-form__input number",
+                    "class": f"{l_form_input} number",
                     "placeholder": "Telefon...",
                     "type": "tel",
                 }
             ),
             "email": forms.EmailInput(
-                attrs={"class": "L-form__input", "placeholder": "E-mail..."}
+                attrs={"class": l_form_input, "placeholder": "E-mail..."}
             ),
         }
         error_messages = {

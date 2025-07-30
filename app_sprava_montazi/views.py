@@ -43,7 +43,7 @@ from .utils import call_errors_adviced, check_order_error_adviced
 from .utils import client_created, team_soulad, is_team_names_different, format_date
 
 # 00P classes ---
-from .OOP_protokols import DefaultPdfGenerator, SCCZPdfGenerator
+from .OOP_protokols import SCCZPdfGenerator
 from .OOP_back_protocol import ProtocolUploader
 from .OOP_JsonOrders import JsonOrders
 
@@ -334,9 +334,7 @@ class OrderCreateView(LoginRequiredMixin, ErrorContextMixin, View):
                     name: str = client_form.cleaned_data["name"]
                     zip_code: str = client_form.cleaned_data["zip_code"]
                     # --- get or create
-                    client, created = client_created(
-                        name, zip_code, client_form.cleaned_data
-                    )
+                    client, _ = client_created(name, zip_code, client_form.cleaned_data)
 
                     order = order_form.save(commit=False)
                     order.client = client
@@ -565,7 +563,7 @@ class OrderDetailView(LoginRequiredMixin, ErrorContextMixin, DetailView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
-        order: Order = self.object
+        order: Order = self.object  # type:ignore
         articles = Article.objects.filter(order=order.pk)
 
         context["order_has_error"] = check_order_error_adviced(order.pk)
@@ -747,7 +745,8 @@ class OrderHistoryView(LoginRequiredMixin, ErrorContextMixin, ListView):
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
             cons.log(
-                f"Chyba při načítání historie HistoricalArticle pro zakázku {self.order_instance.pk}: {e}"
+                f"Chyba při načítání historie HistoricalArticle "
+                f"pro zakázku {self.order_instance.pk}: {e}"
             )
             article_history = []
 
@@ -957,7 +956,7 @@ class OrderProtocolView(LoginRequiredMixin, ErrorContextMixin, DetailView):
     def get(self, request, *args, **kwargs) -> HttpResponse:
         self.object = self.get_object()
 
-        if not self.object.team:
+        if not self.object.team:  # type: ignore
             messages.error(request, "Není vybraný žádný montážní tým!")
             return redirect(request.META.get("HTTP_REFERER", "/"))
 
@@ -1013,7 +1012,7 @@ class GeneratePDFView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         pk = kwargs["pk"]
         order = get_object_or_404(Order, pk=pk)
-        if not order.team.active:
+        if not order.team.active:  # type: ignore
             messages.error(request, "Nelze generovat protokol, Tým je neaktivní")
             return redirect("protocol", pk=pk)
 
@@ -1197,7 +1196,11 @@ class ProtocolUploadView(LoginRequiredMixin, View):
         # ---
         change_status_message: str = ""
         if realizovano:
-            change_status_message = "<p style='text-indent:4.7em;'>a status přepnut na <strong>Realizováno</strong></p>"
+            change_status_message = (
+                "<p style='text-indent:4.7em;'>"
+                "a status přepnut na <strong>Realizováno</strong>"
+                "</p>"
+            )
             uploader.update_order_status()
 
         uploader.delete_token()

@@ -17,7 +17,7 @@
     // making_delivery_order
     document.addEventListener("DOMContentLoaded", making_delivery_order);
     // naklad vynos skryti
-    document.addEventListener("DOMContentLoaded", hide_input_vynos_naklad);
+    document.addEventListener("DOMContentLoaded", input_vynos_naklad);
     // delete Order
     document.addEventListener("DOMContentLoaded", deleteOrder);
     // SCCZ filter
@@ -587,6 +587,7 @@
             }
         })
     }
+
     // hidden Order function
     function hiddenOrder() {
         const checkBoxHiddenOrder = document.getElementById("checkBoxHiddenOrder");
@@ -603,6 +604,7 @@
             }
         })
     }
+
     // delete team function
     function deleteTeam() {
         const checkBoxDeleteTeam = document.getElementById("checkBoxDeleteTeam");
@@ -641,22 +643,64 @@
 
         mandantInput.addEventListener("input", toggleOD);
     }
-    // naklad vynos skryti function
-    function hide_input_vynos_naklad() {
+    
+    //  input vynos naklad
+    function input_vynos_naklad() {
+        const idStatus = document.getElementById("id_status");
         const id_naklad = document.getElementById("id_naklad");
         const id_vynos = document.getElementById("id_vynos");
-        const input_fields = [id_naklad, id_vynos];
+        const vynosNakladProfitLoss = document.getElementById("vynosNakladProfitLoss");
 
-        input_fields.forEach(function (input) {
-            if (!input) return;
+        if (!idStatus || !id_naklad || !id_vynos || !vynosNakladProfitLoss) return;
 
-            const groupDiv = input.closest(".L-form__group");
-            if (groupDiv) {
-                groupDiv.classList.add("vynos_naklad_input");
-                groupDiv.classList.add("inactive_input");
+        function toggleInputFields() {
+            if (idStatus.value !== "New" && idStatus.value !== "Adviced") {
+                id_naklad.parentElement.classList.add("vynos_naklad_input", "inactive_input");
+                id_vynos.parentElement.classList.add("vynos_naklad_input", "inactive_input");
+            } else {
+                id_naklad.parentElement.classList.remove("vynos_naklad_input", "inactive_input");
+                id_vynos.parentElement.classList.remove("vynos_naklad_input", "inactive_input");
             }
-        });
+        }
+
+        function handleInputChange() {
+            updateProfitLoss(id_naklad, id_vynos, vynosNakladProfitLoss);
+        }
+
+        function handleStatusChange() {
+            toggleInputFields();
+        }
+
+        // počáteční nastavení
+        toggleInputFields();
+        updateProfitLoss(id_naklad, id_vynos, vynosNakladProfitLoss);
+
+        // posluchače
+        id_naklad.addEventListener("input", handleInputChange);
+        id_vynos.addEventListener("input", handleInputChange);
+        idStatus.addEventListener("change", handleStatusChange);
     }
+
+    function updateProfitLoss(id_naklad, id_vynos, vynosNakladProfitLoss) {
+        const vynos = parseFloat(id_vynos.value) || 0;
+        const naklad = parseFloat(id_naklad.value) || 0;
+        const profitLoss = vynos - naklad;
+
+        vynosNakladProfitLoss.innerHTML = profitLoss;
+
+        vynosNakladProfitLoss.classList.remove("profit", "ztrata", "zero");
+
+        if (profitLoss > 0) {
+            vynosNakladProfitLoss.classList.add("profit");
+        } else if (profitLoss < 0) {
+            vynosNakladProfitLoss.classList.add("ztrata");
+        } else {
+            vynosNakladProfitLoss.classList.add("zero");
+        }
+    }
+
+
+
     // making dopravni zakazku
     function making_delivery_order() {
         const idStatus = document.getElementById("id_status");
