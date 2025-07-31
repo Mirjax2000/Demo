@@ -238,16 +238,10 @@ class OrderForm(forms.ModelForm):
 
         if not delivery_termin:
             self.add_error("delivery_termin", "Zadej termín doručení.")
-        if not naklad:
-            self.add_error(
-                "naklad",
-                "Chybí náklad",
-            )
-        if not vynos:
-            self.add_error(
-                "vynos",
-                "Chybí výnos",
-            )
+        if naklad is None:
+            self.add_error("naklad", "Chybí náklad")
+        if vynos is None:
+            self.add_error("vynos", "Chybí výnos")
 
     def if_is_delivery(
         self, client: Client, team: Team, montage_termin, delivery_termin, naklad, vynos
@@ -270,16 +264,10 @@ class OrderForm(forms.ModelForm):
                 "delivery_termin",
                 "Pro stav 'Zatermínováno' musí být vybrán termín doručení.",
             )
-        if not naklad:
-            self.add_error(
-                "naklad",
-                "Chybí náklad",
-            )
-        if not vynos:
-            self.add_error(
-                "vynos",
-                "Chybí výnos",
-            )
+        if naklad is None:
+            self.add_error("naklad", "Chybí náklad")
+        if vynos is None:
+            self.add_error("vynos", "Chybí výnos")
 
 
 class ArticleForm(forms.ModelForm):
