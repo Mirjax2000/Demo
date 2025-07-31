@@ -2028,7 +2028,12 @@ class ExportOrdersExcelViewTest(TestCase):
         self.assertEqual(row_values[5], current_order.client.zip_code)  # type:ignore
         self.assertEqual(row_values[6], format_date(current_order.evidence_termin))
         self.assertEqual(row_values[7], format_date(current_order.delivery_termin))
-        self.assertEqual(row_values[8], format_date(current_order.montage_termin))
+        self.assertEqual(
+            row_values[8],
+            None
+            if current_order.montage_termin is None
+            else format_date(current_order.montage_termin),
+        )
         self.assertEqual(row_values[9], current_order.get_team_type_display())  # type:ignore
         self.assertEqual(
             row_values[10], str(current_order.team) if current_order.team else None
@@ -2038,7 +2043,7 @@ class ExportOrdersExcelViewTest(TestCase):
         )
 
         # Zajistíme správný počet řádků (1 hlavička + 4 datové řádky)
-        self.assertEqual(ws.max_row, 5)  # type:ignore
+        self.assertEqual(ws.max_row, 6)  # type:ignore
 
     def test_excel_file_no_matching_orders(self):
         """
