@@ -1,5 +1,8 @@
 """app_sprava_montazi_models"""
 
+from decimal import Decimal
+import hashlib
+
 from rich.console import Console
 
 # --- django
@@ -7,11 +10,12 @@ from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import DecimalField, DateTimeField
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import PROTECT, BooleanField, CharField, DateField, EmailField
 from django.db.models import SlugField, PositiveIntegerField, ForeignKey, FileField
 from django.db.models import JSONField, OneToOneField, TextField, TextChoices, Model
-from django.core.validators import MaxValueValidator, MinValueValidator
 
 # --- pluginy
 from simple_history.models import HistoricalRecords
@@ -123,7 +127,7 @@ class Client(Model):
     email = EmailField(blank=True, verbose_name="E-mail")
     incomplete = BooleanField(default=True, verbose_name="Neúplný záznam")
     history = HistoricalRecords()
-    slug = SlugField(blank=True)
+    slug = SlugField(blank=True, unique=True)
 
     def first_15(self):
         if len(self.name) > 15:
@@ -131,12 +135,8 @@ class Client(Model):
         return self.name
 
     def format_psc(self) -> str:
-        if not self.zip_code:
-            return ""
-        number = str(self.zip_code)
-        if len(number) == 5:
-            return f"{number[0:3]} {number[3:]}"
-        return number
+        number: str = str(self.zip_code)
+        return f"{number[0:3]} {number[3:]}"
 
     def format_phone(self) -> str:
         if not self.phone:
@@ -146,9 +146,24 @@ class Client(Model):
             return f"{number[0:4]} {number[4:7]} {number[7:10]} {number[10:]}"
         return number
 
+    def generate_slug(self) -> str:
+        name_part = slugify(self.name)
+        base = f"{self.name}{self.zip_code}"
+        hash_part = hashlib.md5(base.encode()).hexdigest()[:10]
+        return f"{name_part}-{hash_part}"
+
+    def clean(self):
+        if not self.name:
+            raise ValidationError("Jméno zákazníka nesmí být prázdné.")
+        if not self.zip_code:
+            raise ValidationError("PSČ nesmí být prázdné.")
+        if len(self.zip_code) != 5:
+            raise ValidationError("PSČ musí mít přesně 5 znaků.")
+
     def save(self, *args, **kwargs):
         self.incomplete = not all([self.street, self.city, self.phone])
-        self.slug = slugify(f"{self.name}{self.city}{self.street}")
+        if not self.slug:
+            self.slug = self.generate_slug()
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
@@ -238,14 +253,35 @@ class Order(Model):
 
     team_type = CharField(
         max_length=32,
-        blank=True,
         choices=TeamType.choices,
         default=TeamType.BY_ASSEMBLY_CREW,
         verbose_name="Realizace kým",
     )
     notes = TextField(blank=True, verbose_name="Poznámky")
 
+    naklad = DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Náklad",
+        help_text="Kolik zakázka stála (výdaje)",
+    )
+    vynos = DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Výnos",
+        help_text="Kolik za zakázku dostanu zaplaceno (příjem)",
+    )
+
     history = HistoricalRecords()
+
+    def profit(self) -> Decimal:
+        if self.vynos is not None and self.naklad is not None:
+            return self.vynos - self.naklad
+        return Decimal(0)
 
     def format_datetime(self, value) -> str:
         if value is None:
@@ -265,15 +301,38 @@ class Order(Model):
         """
         return self.team is None and self.team_type == TeamType.BY_ASSEMBLY_CREW
 
-    def zaterminovano(self) -> None:
+    def zaterminovano_with_montage_team(self) -> None:
         ready = (
             self.team
-            and self.team_type == TeamType.BY_ASSEMBLY_CREW
             and self.status == Status.NEW
+            and self.team_type == TeamType.BY_ASSEMBLY_CREW
             and self.client
             and not self.client.incomplete
-            and self.montage_termin
+            and self.evidence_termin
             and self.delivery_termin
+            and self.montage_termin
+            and self.vynos
+            and self.naklad
+        )
+        if ready:
+            self.status = Status.ADVICED
+            if settings.DEBUG:
+                cons.log(
+                    f"zakazka: {self.order_number} presla do stavu: {Status.ADVICED}",
+                    style="blue",
+                )
+
+    def zaterminovano_with_delivery_team(self) -> None:
+        ready = (
+            not self.team
+            and self.status == Status.NEW
+            and self.team_type == TeamType.BY_DELIVERY_CREW
+            and self.client
+            and self.evidence_termin
+            and self.delivery_termin
+            and not self.montage_termin
+            and self.vynos
+            and self.naklad
         )
         if ready:
             self.status = Status.ADVICED
@@ -287,7 +346,8 @@ class Order(Model):
         return str(self.order_number)
 
     def save(self, *args, **kwargs):
-        self.zaterminovano()
+        self.zaterminovano_with_montage_team()
+        self.zaterminovano_with_delivery_team()
         super().save(*args, **kwargs)
 
     class Meta:
@@ -299,13 +359,6 @@ class Article(Model):
         Order, on_delete=PROTECT, related_name="articles", verbose_name="zakazka"
     )
     name = CharField(max_length=32, verbose_name="Název artiklu")
-    price = DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Cena",
-    )
     quantity = PositiveIntegerField(
         default=1,
         validators=[
@@ -314,7 +367,6 @@ class Article(Model):
         ],
         verbose_name="Množství",
     )
-    is_sofa = BooleanField(default=False, verbose_name="Sedačka?")
     note = TextField(blank=True, verbose_name="Popis")
     history = HistoricalRecords()
 

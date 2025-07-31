@@ -74,7 +74,7 @@ class IncompleteCustomersViewTest(TestCase):
         # status new by assembly crew
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-1-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"NEW_BY_CREW{i:05}-O",
@@ -89,7 +89,7 @@ class IncompleteCustomersViewTest(TestCase):
         # status new by customer
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-2-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"NEW_BY_CUST{i:05}-O",
@@ -104,7 +104,7 @@ class IncompleteCustomersViewTest(TestCase):
         # status adviced
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-3-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"ADVICED-{i:06}-R",
@@ -121,7 +121,7 @@ class IncompleteCustomersViewTest(TestCase):
         # status Hidden by customer
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-4-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"HIDDEN_CUST{i:05}-R",
@@ -136,7 +136,7 @@ class IncompleteCustomersViewTest(TestCase):
         # status Realized
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-5-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"REALIZED_{i:05}-R",
@@ -153,7 +153,7 @@ class IncompleteCustomersViewTest(TestCase):
         # status Canceled
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-6-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"CANCELED_{i:05}-R",
@@ -170,7 +170,7 @@ class IncompleteCustomersViewTest(TestCase):
         # status Billed
         for i in range(self.range):
             customer = Client.objects.create(
-                name=f"Customer test-{i}", zip_code=f"123{i:02}"
+                name=f"Customer test-7-{i}", zip_code=f"123{i:02}"
             )
             Order.objects.create(
                 order_number=f"BILLED_{i:06}-R",

@@ -22,6 +22,36 @@ cons: Console = Console()
 
 
 class OrderForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.pk:
+            self.fields["order_number"].disabled = True
+            attrs = self.fields["order_number"].widget.attrs
+            classes = attrs.get("class", "")
+            attrs["class"] = " ".join(filter(None, [classes, "form_cell_disable"]))
+
+        self.fields["team"].empty_label = "Vyberte tým..."  # type: ignore
+
+        self.fields["evidence_termin"].input_formats = [  # type: ignore
+            "%Y-%m-%d",
+            "%d.%m.%Y",
+            "%d/%m/%Y",
+        ]
+
+        self.fields["delivery_termin"].input_formats = [  # type: ignore
+            "%Y-%m-%d",
+            "%d.%m.%Y",
+            "%d/%m/%Y",
+        ]
+
+        self.fields["montage_termin"].input_formats = [  # type: ignore
+            "%Y-%m-%dT%H:%M",
+            "%Y-%m-%d %H:%M",
+            "%d.%m.%Y %H:%M",
+            "%d/%m/%Y %H:%M",
+        ]
+
     class Meta:
         model = Order
         fields = [
@@ -35,6 +65,8 @@ class OrderForm(forms.ModelForm):
             "montage_termin",
             "team_type",
             "team",
+            "vynos",
+            "naklad",
             "notes",
         ]
 
@@ -104,6 +136,20 @@ class OrderForm(forms.ModelForm):
                     "placeholder": "Poznámky...",
                 }
             ),
+            "vynos": forms.NumberInput(
+                attrs={
+                    "class": "L-form__input",
+                    "step": "1",
+                    "placeholder": "Výnos...",
+                }
+            ),
+            "naklad": forms.NumberInput(
+                attrs={
+                    "class": "L-form__input",
+                    "step": "1",
+                    "placeholder": "Náklad...",
+                }
+            ),
         }
         error_messages = {
             "order_number": {
@@ -117,31 +163,6 @@ class OrderForm(forms.ModelForm):
                 "required": "místo určení je povinné!",
             },
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        if self.instance.pk:
-            self.fields["order_number"].widget.attrs["readonly"] = True
-
-        self.fields["evidence_termin"].input_formats = [
-            "%Y-%m-%d",
-            "%d.%m.%Y",
-            "%d/%m/%Y",
-        ]
-
-        self.fields["delivery_termin"].input_formats = [
-            "%Y-%m-%d",
-            "%d.%m.%Y",
-            "%d/%m/%Y",
-        ]
-
-        self.fields["montage_termin"].input_formats = [
-            "%Y-%m-%dT%H:%M",
-            "%Y-%m-%d %H:%M",
-            "%d.%m.%Y %H:%M",
-            "%d/%m/%Y %H:%M",
-        ]
 
     def clean_order_number(self):
         order_number = self.cleaned_data.get("order_number", "").upper()
@@ -157,18 +178,6 @@ class OrderForm(forms.ModelForm):
 
         return order_number
 
-    def clean_team_type(self):
-        team_type = self.cleaned_data.get("team_type")
-        if not team_type:
-            return TeamType.BY_ASSEMBLY_CREW
-        return team_type
-
-    def clean_status(self):
-        status = self.cleaned_data.get("status")
-        if not status:
-            return Status.NEW
-        return status
-
     def clean(self) -> dict[str, Any]:
         cleaned_data: dict[str, Any] = super().clean()
         # kontrola stavu - zaterminovano
@@ -181,25 +190,47 @@ class OrderForm(forms.ModelForm):
 
     def validate_adviced(self, data) -> None:
         """Validace při stavu 'Zatermínováno'"""
-        team_type = data.get("team_type")
-        team = data.get("team")
-        client = data.get("client")
+        team_type: TeamType = data.get("team_type")
+        team: Team = data.get("team")
+        client: Client = data.get("client")
         montage_termin = data.get("montage_termin")
         delivery_termin = data.get("delivery_termin")
+        naklad = data.get("naklad")
+        vynos = data.get("vynos")
 
-        if team_type == TeamType.BY_ASSEMBLY_CREW and not team:
+        is_montage: bool = team_type == TeamType.BY_ASSEMBLY_CREW
+        is_delivery: bool = team_type == TeamType.BY_DELIVERY_CREW
+        is_customer: bool = team_type == TeamType.BY_CUSTOMER
+
+        if is_montage:
+            self.if_is_montage(
+                client, team, montage_termin, delivery_termin, naklad, vynos
+            )
+        elif is_delivery:
+            self.if_is_delivery(
+                client, team, montage_termin, delivery_termin, naklad, vynos
+            )
+        elif is_customer:
             self.add_error(
-                "team", "Pro stav 'Zatermínováno' musí být vybrán montážní tým."
+                "team_type",
+                "Pro stav 'Zatermínováno' nesmí být Zákazníkem. Přepni pole podle typu.",
             )
 
+    def if_is_montage(
+        self, client: Client, team: Team, montage_termin, delivery_termin, naklad, vynos
+    ) -> None:
         if not client:
             self.add_error(
                 "client", "Pro stav 'Zatermínováno' je třeba vyplnit zákazníka."
             )
-        elif client.incomplete:
+        if client.incomplete:
             self.add_error(
                 "client",
                 "Zákazník má neúplné údaje, nelze uložit jako 'Zatermínováno'.",
+            )
+        if not team:
+            self.add_error(
+                "team", "Pro stav 'Zatermínováno' musí být vybrán montážní tým."
             )
 
         if not montage_termin:
@@ -207,33 +238,62 @@ class OrderForm(forms.ModelForm):
 
         if not delivery_termin:
             self.add_error("delivery_termin", "Zadej termín doručení.")
+        if not naklad:
+            self.add_error(
+                "naklad",
+                "Chybí náklad",
+            )
+        if not vynos:
+            self.add_error(
+                "vynos",
+                "Chybí výnos",
+            )
+
+    def if_is_delivery(
+        self, client: Client, team: Team, montage_termin, delivery_termin, naklad, vynos
+    ) -> None:
+        if not client:
+            self.add_error(
+                "client", "Pro stav 'Zatermínováno' je třeba vyplnit zákazníka."
+            )
+        if team:
+            self.add_error(
+                "team", "Pro stav 'Zatermínováno' nemá být vybrán montážní tým."
+            )
+        if montage_termin:
+            self.add_error(
+                "montage_termin",
+                "Pro stav 'Zatermínováno' nemá být vybrán termín montáže.",
+            )
+        if not delivery_termin:
+            self.add_error(
+                "delivery_termin",
+                "Pro stav 'Zatermínováno' musí být vybrán termín doručení.",
+            )
+        if not naklad:
+            self.add_error(
+                "naklad",
+                "Chybí náklad",
+            )
+        if not vynos:
+            self.add_error(
+                "vynos",
+                "Chybí výnos",
+            )
 
 
 class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
-        fields = ["name", "price", "quantity", "is_sofa", "note"]
+        fields = ["name", "quantity", "note"]
         widgets = {
             "name": forms.TextInput(
                 attrs={"class": "L-form__input", "placeholder": "artikl..."}
-            ),
-            "price": forms.NumberInput(
-                attrs={
-                    "class": "L-form__input",
-                    "placeholder": "cena...",
-                    "step": "1",  # krokování po 10
-                    "min": "0",
-                }
             ),
             "quantity": forms.NumberInput(
                 attrs={
                     "class": "L-form__input",
                     "placeholder": "množství...",
-                }
-            ),
-            "is_sofa": forms.CheckboxInput(
-                attrs={
-                    "class": "form-check-input C-checkbox",
                 }
             ),
             "note": forms.Textarea(
@@ -260,6 +320,23 @@ class ArticleForm(forms.ModelForm):
 
 
 class ClientForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["name"].disabled = True
+            attrs_name = self.fields["name"].widget.attrs
+            classes_name = attrs_name.get("class", "")
+            attrs_name["class"] = " ".join(
+                filter(None, [classes_name, "form_cell_disable"])
+            )
+
+            self.fields["zip_code"].disabled = True
+            attrs_zip = self.fields["zip_code"].widget.attrs
+            classes_zip = attrs_zip.get("class", "")
+            attrs_zip["class"] = " ".join(
+                filter(None, [classes_zip, "form_cell_disable"])
+            )
+
     class Meta:
         model = Client
         fields = [
@@ -271,28 +348,29 @@ class ClientForm(forms.ModelForm):
             "email",
         ]
 
+        l_form_input: str = "L-form__input"
         widgets = {
             "name": forms.TextInput(
-                attrs={"class": "L-form__input", "placeholder": "celé jméno..."}
+                attrs={"class": l_form_input, "placeholder": "celé jméno..."}
             ),
             "street": forms.TextInput(
-                attrs={"class": "L-form__input", "placeholder": "ulice..."}
+                attrs={"class": l_form_input, "placeholder": "ulice..."}
             ),
             "city": forms.TextInput(
-                attrs={"class": "L-form__input", "placeholder": "město..."}
+                attrs={"class": l_form_input, "placeholder": "město..."}
             ),
             "zip_code": forms.TextInput(
-                attrs={"class": "L-form__input number", "placeholder": "PSC..."}
+                attrs={"class": f"{l_form_input} number", "placeholder": "PSC..."}
             ),
             "phone": forms.TextInput(
                 attrs={
-                    "class": "L-form__input number",
+                    "class": f"{l_form_input} number",
                     "placeholder": "Telefon...",
                     "type": "tel",
                 }
             ),
             "email": forms.EmailInput(
-                attrs={"class": "L-form__input", "placeholder": "E-mail..."}
+                attrs={"class": l_form_input, "placeholder": "E-mail..."}
             ),
         }
         error_messages = {
@@ -313,6 +391,13 @@ class ClientForm(forms.ModelForm):
                 "required": "PSČ je povinné!",
             },
         }
+
+    def clean_zip_code(self) -> str:
+        zip_code: str | None = self.cleaned_data.get("zip_code")
+
+        if not zip_code or len(zip_code) != 5:
+            raise forms.ValidationError("PSČ musí mít přesně 5 číslic.")
+        return zip_code
 
 
 class DistribHubForm(forms.ModelForm):
@@ -342,6 +427,15 @@ class DistribHubForm(forms.ModelForm):
 
 
 class TeamForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.pk:
+            self.fields["name"].disabled = True
+            attrs = self.fields["name"].widget.attrs
+            classes = attrs.get("class", "")
+            attrs["class"] = " ".join(filter(None, [classes, "form_cell_disable"]))
+
     class Meta:
         model = Team
         fields = [
@@ -405,6 +499,7 @@ class TeamForm(forms.ModelForm):
                 }
             ),
         }
+
         error_messages = {
             "name": {
                 "required": "Jméno je povinné!",
@@ -420,12 +515,6 @@ class TeamForm(forms.ModelForm):
                 "invalid": "Zadej platné telefonní číslo.",
             },
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        if self.instance.pk:
-            self.fields["name"].widget.attrs["readonly"] = True
 
     def clean_name(self) -> str:
         name = str(self.cleaned_data.get("name"))

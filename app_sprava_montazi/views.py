@@ -2,21 +2,20 @@
 
 import os
 import time
-from typing import Any, cast, TypedDict, Tuple, List, Dict
+from typing import Any, cast, Tuple, List, Dict
 from datetime import datetime
-from django.utils import timezone
 from openpyxl import Workbook
 from rich.console import Console
 
 # --- Django
 from django.db import transaction
+from django.utils import timezone
 from django.db.models.deletion import ProtectedError
 from django.conf import settings
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.forms import BaseModelForm, inlineformset_factory
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse, FileResponse, HttpResponseForbidden
@@ -34,23 +33,17 @@ from .mixins import ErrorContextMixin
 from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
 from .forms import UploadForm, TeamForm, OrderForm
 
-
 # --- modely z DB
 from .models import Article, CallLog, Client, Order, Team, TeamType, Status
 from .models import OrderPDFStorage, OrderBackProtocolToken, OrderBackProtocol
 from .models import HistoricalArticle  # type: ignore  # pylint: disable=no-name-in-module
 
 # pomocne funkce ---
-from .utils import (
-    format_date,
-    call_errors_adviced,
-    check_order_error_adviced,
-    is_team_names_different,
-    team_soulad,
-)
+from .utils import call_errors_adviced, check_order_error_adviced
+from .utils import client_created, team_soulad, is_team_names_different, format_date
 
 # 00P classes ---
-from .OOP_protokols import DefaultPdfGenerator, pdf_generator_classes
+from .OOP_protokols import SCCZPdfGenerator
 from .OOP_back_protocol import ProtocolUploader
 from .OOP_JsonOrders import JsonOrders
 
@@ -282,7 +275,7 @@ class OrderHiddenView(LoginRequiredMixin, View):
         return redirect("orders")
 
 
-class OrderCreateView(LoginRequiredMixin, View):
+class OrderCreateView(LoginRequiredMixin, ErrorContextMixin, View):
     """Vytvor novou zakazku"""
 
     template = f"{APP_URL}/orders/order_form.html"
@@ -305,12 +298,8 @@ class OrderCreateView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs) -> HttpResponse:
         order_form, client_form, article_formset = self.get_forms()
 
-        is_errors, count = call_errors_adviced()
         context = {
-            "errors": {
-                "has_error": is_errors,
-                "count": count,
-            },
+            **self.get_error_context(),
             "order_form": order_form,
             "client_form": client_form,
             "article_formset": article_formset,
@@ -323,12 +312,9 @@ class OrderCreateView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         order_form, client_form, article_formset = self.get_forms(request.POST)
-        is_errors, count = call_errors_adviced()
+
         context = {
-            "errors": {
-                "has_error": is_errors,
-                "count": count,
-            },
+            **self.get_error_context(),
             "order_form": order_form,
             "client_form": client_form,
             "article_formset": article_formset,
@@ -345,18 +331,29 @@ class OrderCreateView(LoginRequiredMixin, View):
         ):
             try:
                 with transaction.atomic():
-                    client = client_form.save()
+                    name: str = client_form.cleaned_data["name"]
+                    zip_code: str = client_form.cleaned_data["zip_code"]
+                    # --- get or create
+                    client, _ = client_created(name, zip_code, client_form.cleaned_data)
+
                     order = order_form.save(commit=False)
                     order.client = client
                     order.save()
+
                     article_formset.instance = order
                     article_formset.save()
-                messages.success(request, "Objednávka vytvořena.")
+
+                    msg: str = (
+                        f"Objednávka vytvořena se zákazníkem: "
+                        f"<strong>{client.name}</strong>."
+                    )
+
+                messages.success(request, msg)
                 return redirect(reverse("order_detail", kwargs={"pk": order.id}))
 
             except Exception as e:  # pylint: disable=broad-exception-caught
                 if settings.DEBUG:
-                    cons.log(f"chyba: {str(e)}")
+                    cons.log(f"Chyba při vytváření objednávky: {str(e)}", style="red")
 
         messages.error(request, "Nastala chyba při ukládání objednávky.")
         return render(request, self.template, context)
@@ -566,13 +563,11 @@ class OrderDetailView(LoginRequiredMixin, ErrorContextMixin, DetailView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
-        order: Order = self.object  # správné použití v DetailView
+        order: Order = self.object  # type:ignore
         articles = Article.objects.filter(order=order.pk)
 
-        # --- tady už použiješ přímo order.pk
         context["order_has_error"] = check_order_error_adviced(order.pk)
         context["articles"] = articles
-
         # --- navigace
         context["active"] = "orders_all"
 
@@ -750,7 +745,8 @@ class OrderHistoryView(LoginRequiredMixin, ErrorContextMixin, ListView):
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
             cons.log(
-                f"Chyba při načítání historie HistoricalArticle pro zakázku {self.order_instance.pk}: {e}"
+                f"Chyba při načítání historie HistoricalArticle "
+                f"pro zakázku {self.order_instance.pk}: {e}"
             )
             article_history = []
 
@@ -940,7 +936,7 @@ class PdfView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         mandant = self.kwargs.get("mandant", "default")
         # ---
-        generator_class = pdf_generator_classes.get(mandant, DefaultPdfGenerator)
+        generator_class = SCCZPdfGenerator
         generator_instance = generator_class()
         # ---
         pdf = generator_instance.generate_pdf_protocol(model=None)
@@ -960,7 +956,7 @@ class OrderProtocolView(LoginRequiredMixin, ErrorContextMixin, DetailView):
     def get(self, request, *args, **kwargs) -> HttpResponse:
         self.object = self.get_object()
 
-        if not self.object.team:
+        if not self.object.team:  # type: ignore
             messages.error(request, "Není vybraný žádný montážní tým!")
             return redirect(request.META.get("HTTP_REFERER", "/"))
 
@@ -999,7 +995,7 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
     def render_to_response(self, context, **response_kwargs):
         order = context["object"]
         # ---
-        generator_class = pdf_generator_classes.get(order.mandant, DefaultPdfGenerator)
+        generator_class = SCCZPdfGenerator
         generator_instance = generator_class()
         # ---
         pdf = generator_instance.generate_pdf_protocol(model=order)
@@ -1012,14 +1008,16 @@ class OrderPdfView(LoginRequiredMixin, DetailView):
 
 
 class GeneratePDFView(LoginRequiredMixin, View):
+    # --- tenhle je primo z buttonu
     def get(self, request, *args, **kwargs):
         pk = kwargs["pk"]
         order = get_object_or_404(Order, pk=pk)
-        if not order.team.active:
+        if not order.team.active:  # type: ignore
             messages.error(request, "Nelze generovat protokol, Tým je neaktivní")
             return redirect("protocol", pk=pk)
 
-        generator_class = pdf_generator_classes.get(order.mandant, DefaultPdfGenerator)
+        # jestli bude vic protokolu tak to ber slovnik v pdf_generator_classes
+        generator_class = SCCZPdfGenerator
         generator_instance = generator_class()
         pdf_io = generator_instance.generate_pdf_protocol(model=order)
         created = generator_instance.save_pdf_protocol_to_db(model=order, pdf=pdf_io)
@@ -1043,36 +1041,40 @@ class GeneratePDFView(LoginRequiredMixin, View):
 
         return redirect("protocol", pk=pk)
 
-    def post(self, request, *args, **kwargs):
-        pk = kwargs["pk"]
-        order = get_object_or_404(Order, pk=pk)
-        zona: int = int(request.POST.get("zona") or 0)
-        km: int = int(request.POST.get("zona_km") or 0)
-        data: dict[str, int] = {"zona": zona, "km": km}
+        # region: post defualt protokol
+        # --- tenhle je z formulare pred generatorem
+        # def post(self, request, *args, **kwargs):
+        # pk = kwargs["pk"]
+        # order = get_object_or_404(Order, pk=pk)
+        # zona: int = int(request.POST.get("zona") or 0)
+        # km: int = int(request.POST.get("zona_km") or 0)
+        # data: dict[str, int] = {"zona": zona, "km": km}
 
-        default_pdf_protocol = DefaultPdfGenerator()
-        default_pdf_protocol.data = data  # type: ignore
-        pdf_io = default_pdf_protocol.generate_pdf_protocol(model=order)
-        created = default_pdf_protocol.save_pdf_protocol_to_db(model=order, pdf=pdf_io)
-        # ---
-        if created:
-            messages.success(
-                request,
-                (
-                    f"PDF: <strong>{str(order).upper()}</strong> "
-                    f"byl úspěšně vygenerován a uložen."
-                ),
-            )
-        else:
-            messages.success(
-                request,
-                (
-                    f"PDF: <strong>{str(order).upper()}</strong> "
-                    f"byl úspěšně vygenerováno,uložen a nahrazen."
-                ),
-            )
+        # default_pdf_protocol = DefaultPdfGenerator()
+        # default_pdf_protocol.data = data  # type: ignore
+        # pdf_io = default_pdf_protocol.generate_pdf_protocol(model=order)
+        # created = default_pdf_protocol.save_pdf_protocol_to_db(model=order, pdf=pdf_io)
+        # # ---
+        # if created:
+        #     messages.success(
+        #         request,
+        #         (
+        #             f"PDF: <strong>{str(order).upper()}</strong> "
+        #             f"byl úspěšně vygenerován a uložen."
+        #         ),
+        #     )
+        # else:
+        #     messages.success(
+        #         request,
+        #         (
+        #             f"PDF: <strong>{str(order).upper()}</strong> "
+        #             f"byl úspěšně vygenerováno,uložen a nahrazen."
+        #         ),
+        #     )
 
-        return redirect("protocol", pk=pk)
+        # return redirect("protocol", pk=pk)
+
+    # endregion
 
 
 class CheckPDFProtocolView(LoginRequiredMixin, View):
@@ -1194,7 +1196,11 @@ class ProtocolUploadView(LoginRequiredMixin, View):
         # ---
         change_status_message: str = ""
         if realizovano:
-            change_status_message = "<p style='text-indent:4.7em;'>a status přepnut na <strong>Realizováno</strong></p>"
+            change_status_message = (
+                "<p style='text-indent:4.7em;'>"
+                "a status přepnut na <strong>Realizováno</strong>"
+                "</p>"
+            )
             uploader.update_order_status()
 
         uploader.delete_token()

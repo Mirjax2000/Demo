@@ -5,6 +5,7 @@
   ],
   "rules": {
     "selector-class-pattern": null,
+    "selector-id-pattern": null,
     "scss/no-global-function-names": null,
     "declaration-property-value-no-unknown": null,
     "property-no-vendor-prefix": null

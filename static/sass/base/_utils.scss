@@ -120,6 +120,17 @@
   gap: 2%;
 }
 
+.flex_item_100 {
+  flex-basis: 100%;
+}
+
+.u-flex-row-end {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 2%;
+}
+
 .u-flex-row-start {
   display: flex;
   justify-content: flex-start;
@@ -226,7 +237,7 @@
 .L-table__select option[value="New"],
 .L-table__select option[value="Adviced"],
 .L-table__select option[value="Realized"] {
-  background-color: rgb(255, 254, 204);
+  background-color: #fffecc;
 }
 
 .L-table__select option[value="Billed"],
@@ -240,7 +251,7 @@
 }
 
 .L-table__select option[value="all"] {
-  background-color: rgba(204, 249, 145, 0.571);
+  background-color: #ccf99192;
   font-weight: 600;
 }
 
@@ -254,7 +265,9 @@
   font-weight: 600;
 }
 
-#id_montage_termin {
+#id_montage_termin,
+#id_naklad,
+#id_vynos {
   font-weight: 600;
   background-color: var(--bck-form-date);
 }
@@ -282,6 +295,7 @@
 
 .error_mark_nav {
   border: 2px solid var(--bck-body);
+  color: white;
   top: 0.6em;
   left: 91%;
   border-radius: 10px;
@@ -300,4 +314,47 @@
   & > select {
     user-select: none;
   }
+}
+
+.vynos_naklad_input {
+  transition: 0.2s ease-in-out all;
+}
+
+.inactive_input {
+  transition: 0.2s ease-in-out all;
+  opacity: 0.3;
+  pointer-events: none;
+  user-select: none;
+}
+
+.form_cell_disable {
+  opacity: 0.6;
+  position: relative;
+}
+
+#vynosNakladProfitLoss {
+  margin: 0;
+  padding: 0;
+  padding-block: 0.3em;
+  text-align: center;
+  font-weight: 600;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  box-shadow: 1px 1px 5px var(--shadow);
+}
+
+.profit {
+  background-color: var(--bck-profit);
+}
+
+.ztrata {
+  background-color: var(--bck-ztrata);
+}
+
+.zero {
+  background-color: var(--bck-zero);
+}
+
+.transition {
+  transition: 0.2s ease-in-out all;
 }

@@ -2,7 +2,7 @@
 /* --- root --- */
 :root {
   --accent: #fd7e14;
-  --success: #0d6efd;
+  --success: #3384ff;
   --success-darker: #004ec3;
   --success-lighter: #428cfc;
   --info: #198754;
@@ -20,6 +20,9 @@
   --bck-table-row-even: #f3f3f3;
   --bck-table-row-odd: #fff;
   --bck-table-row-hover: #e5e5e5;
+  --bck-profit: #c8ff9c;
+  --bck-ztrata: #ffaf99;
+  --bck-zero: #cfcfcf;
   --txt-default: #212529;
   --txt-default-calm: #386187;
   --txt-muted: #c2c2c2;
@@ -37,6 +40,9 @@
   --bck-table-row-odd: #2c2c2c;
   --bck-table-row-even: #212529;
   --bck-table-row-hover: #4f4f4f;
+  --bck-profit: #005100;
+  --bck-ztrata: #512700;
+  --bck-zero: #2c3239;
   --txt-default: #f8f9fa;
   --txt-default-calm: rgba(138, 179, 255, 0.3490196078);
   --txt-muted: #8b8b8b;
@@ -200,6 +206,17 @@ body.home {
   gap: 2%;
 }
 
+.flex_item_100 {
+  flex-basis: 100%;
+}
+
+.u-flex-row-end {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 2%;
+}
+
 .u-flex-row-start {
   display: flex;
   justify-content: flex-start;
@@ -301,7 +318,7 @@ body.home {
 .L-table__select option[value=New],
 .L-table__select option[value=Adviced],
 .L-table__select option[value=Realized] {
-  background-color: rgb(255, 254, 204);
+  background-color: #fffecc;
 }
 
 .L-table__select option[value=Billed],
@@ -315,7 +332,7 @@ body.home {
 }
 
 .L-table__select option[value=all] {
-  background-color: rgba(204, 249, 145, 0.571);
+  background-color: rgba(204, 249, 145, 0.5725490196);
   font-weight: 600;
 }
 
@@ -329,7 +346,9 @@ body.home {
   font-weight: 600;
 }
 
-#id_montage_termin {
+#id_montage_termin,
+#id_naklad,
+#id_vynos {
   font-weight: 600;
   background-color: var(--bck-form-date);
 }
@@ -357,6 +376,7 @@ body.home {
 
 .error_mark_nav {
   border: 2px solid var(--bck-body);
+  color: white;
   top: 0.6em;
   left: 91%;
   border-radius: 10px;
@@ -374,6 +394,49 @@ body.home {
 }
 .od_inactive > select {
   user-select: none;
+}
+
+.vynos_naklad_input {
+  transition: 0.2s ease-in-out all;
+}
+
+.inactive_input {
+  transition: 0.2s ease-in-out all;
+  opacity: 0.3;
+  pointer-events: none;
+  user-select: none;
+}
+
+.form_cell_disable {
+  opacity: 0.6;
+  position: relative;
+}
+
+#vynosNakladProfitLoss {
+  margin: 0;
+  padding: 0;
+  padding-block: 0.3em;
+  text-align: center;
+  font-weight: 600;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  box-shadow: 1px 1px 5px var(--shadow);
+}
+
+.profit {
+  background-color: var(--bck-profit);
+}
+
+.ztrata {
+  background-color: var(--bck-ztrata);
+}
+
+.zero {
+  background-color: var(--bck-zero);
+}
+
+.transition {
+  transition: 0.2s ease-in-out all;
 }
 
 .L-sidebar {
@@ -498,6 +561,7 @@ body.home {
 }
 .L-form__group {
   margin-bottom: 0.3em;
+  transition: 0.2s ease-in-out all;
 }
 .L-form__group label {
   user-select: none;
@@ -702,7 +766,35 @@ body.home {
   padding: 0.3em;
   background-color: var(--bck-list-item);
   border: 1px solid var(--border);
-  box-shadow: 0 0 5px --shadow;
+  box-shadow: 0 0 5px var(--shadow);
+}
+.L-detail__vynos_naklad_profit {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.L-detail__vynos_naklad_profit .detail__header,
+.L-detail__vynos_naklad_profit .detail__content {
+  margin: 0;
+  padding: 0;
+}
+.L-detail__vynos_naklad_profit .detail__vynos,
+.L-detail__vynos_naklad_profit .detail__naklad,
+.L-detail__vynos_naklad_profit .detail__profit {
+  flex-basis: 100%;
+  border: 1px solid var(--border);
+  text-align: center;
+  padding-top: 0.2em;
+  font-weight: 600;
+}
+.L-detail__vynos_naklad_profit .detail__profit .detail__content.profit {
+  background-color: var(--bck-profit);
+}
+.L-detail__vynos_naklad_profit .detail__profit .detail__content.ztrata {
+  background-color: var(--bck-ztrata);
+}
+.L-detail__vynos_naklad_profit .detail__profit .detail__content.zero {
+  background-color: var(--bck-zero);
 }
 
 .C-spinner {

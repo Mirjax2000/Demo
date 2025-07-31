@@ -1,5 +1,6 @@
 """Form testy"""
 
+from decimal import Decimal
 from django.test import TestCase
 from ..forms import (
     ClientForm,
@@ -81,6 +82,21 @@ class ClientFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("zip_code", form.errors)
         self.assertEqual(form.errors["zip_code"][0], "PSČ je povinné!")
+
+    def test_zip_code_5_chars(self):
+        form = ClientForm(
+            data={
+                "name": "Jan Novák",
+                "street": "Hlavní",
+                "city": "Praha",
+                "zip_code": "1234",  # chybí PSČ
+                "phone": "212345678",
+                "email": "jan@example.com",
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("zip_code", form.errors)
+        self.assertEqual(form.errors["zip_code"][0], "PSČ musí mít přesně 5 číslic.")
 
     def test_valid_client_form(self):
         form_data = {
@@ -246,6 +262,8 @@ class OrderFormTest(TestCase):
             "montage_termin": "2025-05-11 10:00",
             "team_type": TeamType.BY_ASSEMBLY_CREW,
             "team": Team.objects.get(name="Omega Team").id,
+            "naklad": Decimal(100.00),
+            "vynos": Decimal(100.00),
             "notes": "Další testovací poznámka",
         }
         form = OrderForm(data=form_data)
@@ -284,13 +302,14 @@ class OrderFormTest(TestCase):
         form = OrderForm()
         self.assertEqual(form.fields["team_type"].initial, TeamType.BY_ASSEMBLY_CREW)
         self.assertEqual(form.fields["status"].initial, Status.NEW)
+        self.assertEqual(form.fields["naklad"].initial, None)
+        self.assertEqual(form.fields["vynos"].initial, None)
 
 
 class ArticleFormTest(TestCase):
     def test_valid_article_form(self):
         form_data = {
             "name": "Postel",
-            "price": 1000.00,
             "quantity": 1,
             "note": "Dobra postel",
         }

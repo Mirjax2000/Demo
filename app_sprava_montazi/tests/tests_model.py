@@ -1,13 +1,15 @@
 """Model testy"""
 
 from datetime import date, timedelta, datetime
+from decimal import Decimal
+import hashlib
 
 # --- django
 from django.forms import ValidationError
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.db import models
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.utils.text import slugify
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
@@ -91,6 +93,55 @@ class DistribHubModelTest(TestCase):
 
 
 class ClientModelTests(TestCase):
+    def test_client_creation(self):
+        """
+        Testuje vytvoření nové instance modelu Client a ověřuje, že hodnoty polí jsou správně nastaveny.
+        """
+        customer = Client.objects.create(
+            name="Pavel Dvořák",
+            street="Hlavní 123",
+            city="Praha",
+            zip_code="10000",
+            phone="777123456",
+            email="pavel.dvorak@example.com",
+        )
+        self.assertTrue(isinstance(customer, Client))
+        self.assertEqual(customer.name, "Pavel Dvořák")
+        self.assertEqual(customer.city, "Praha")
+        self.assertEqual(customer.zip_code, "10000")
+        self.assertEqual(customer.phone, "777123456")
+        self.assertEqual(customer.email, "pavel.dvorak@example.com")
+        self.assertEqual(customer.first_15(), "Pavel Dvořák")
+        self.assertEqual(customer.format_psc(), "100 00")
+        self.assertEqual(customer.format_phone(), "+420 777 123 456")
+
+    def test_slug_is_generated_correctly(self):
+        client = Client.objects.create(
+            name="Pavel Dvořák",
+            street="Hlavní 123",
+            city="Praha",
+            zip_code="10000",
+            phone="777123456",
+            email="pavel.dvorak@example.com",
+        )
+
+        # Očekávaný začátek slugu
+        expected_start = slugify(client.name) + "-"
+        slug = client.slug
+
+        # Kontrola začátku + délky hashe
+        self.assertTrue(slug.startswith(expected_start))
+        hash_part = slug[len(expected_start) :]
+        self.assertEqual(len(hash_part), 10)
+
+        self.assertTrue(isinstance(client, Client))
+        self.assertEqual(client.name, "Pavel Dvořák")
+        self.assertEqual(client.city, "Praha")
+        self.assertEqual(client.zip_code, "10000")
+        self.assertEqual(client.phone, "777123456")
+        self.assertEqual(client.email, "pavel.dvorak@example.com")
+        self.assertEqual(client.first_15(), "Pavel Dvořák")
+
     def test_field_types(self):
         """Strukturalni test"""
         self.assertIsInstance(Client._meta.get_field("name"), models.CharField)
@@ -133,55 +184,35 @@ class ClientModelTests(TestCase):
             Client._meta.get_field("incomplete").verbose_name, "Neúplný záznam"
         )
 
-    def test_client_creation(self):
-        """
-        Testuje vytvoření nové instance modelu Client a ověřuje, že hodnoty polí jsou správně nastaveny.
-        """
-        customer = Client.objects.create(
-            name="Pavel Dvořák",
-            street="Hlavní 123",
-            city="Praha",
-            zip_code="10000",
-            phone="777123456",
-            email="pavel.dvorak@example.com",
-        )
-        self.assertTrue(isinstance(customer, Client))
-        self.assertEqual(customer.name, "Pavel Dvořák")
-        self.assertEqual(customer.city, "Praha")
-        self.assertEqual(customer.zip_code, "10000")
-        self.assertEqual(customer.phone, "777123456")
-        self.assertEqual(customer.email, "pavel.dvorak@example.com")
-        self.assertEqual(customer.first_15(), "Pavel Dvořák")
-
     def test_incomplete_field_true_when_data_missing(self):
         """
         Testuje, že pole 'incomplete' je True, pokud chybí některá povinná data klienta.
         """
-        customer = Client.objects.create(name="Franta Pina", zip_code="12345")
-        self.assertTrue(customer.incomplete)
+        customer1 = Client.objects.create(name="Franta Pina", zip_code="10000")
+        customer2 = Client.objects.create(name="Franta Pina", zip_code="11111")
+        self.assertTrue(customer1.incomplete)
+        self.assertTrue(customer2.incomplete)
 
     def test_incomplete_field_false_when_all_data_present(self):
         """
         Testuje, že pole 'incomplete' je False, pokud jsou u klienta vyplněna všechna potřebná data.
         """
-        customer = Client.objects.create(
-            name="Franta Pina",
+        customer1 = Client.objects.create(
+            name="Customer 1",
             street="Ulice 1",
-            city="Město",
-            zip_code="54321",
+            city="Brno",
+            zip_code="10000",
             phone="+420123456789",
         )
-        self.assertFalse(customer.incomplete)
-
-    def test_slug_is_created_correctly(self):
-        """
-        Testuje, že slug je správně vytvořen při uložení klienta.
-        """
-        customer = Client.objects.create(
-            name="Jan Novák", street="Hlavní", city="Praha", zip_code="10000"
+        customer2 = Client.objects.create(
+            name="Customer 2",
+            street="Ulice 2",
+            city="Praha",
+            zip_code="20000",
+            phone="+420123456789",
         )
-        expected_slug = slugify("Jan NovákPrahaHlavní")
-        self.assertEqual(customer.slug, expected_slug)
+        self.assertFalse(customer1.incomplete)
+        self.assertFalse(customer2.incomplete)
 
     def test_first_15_short_name(self):
         """
@@ -189,6 +220,7 @@ class ClientModelTests(TestCase):
         """
         customer = Client.objects.create(name="Krátké jméno", zip_code="12345")
         self.assertEqual(customer.first_15(), "Krátké jméno")
+        self.assertEqual(customer.format_psc(), "123 45")
 
     def test_first_15_long_name(self):
         """
@@ -198,6 +230,7 @@ class ClientModelTests(TestCase):
             name="Toto je opravdu dlouhé jméno", zip_code="12345"
         )
         self.assertEqual(customer.first_15(), "Toto je opravdu...")
+        self.assertEqual(customer.format_psc(), "123 45")
 
     def test_str_method(self):
         """
@@ -206,40 +239,106 @@ class ClientModelTests(TestCase):
         customer = Client.objects.create(name="Alena Testovka", zip_code="00000")
         self.assertEqual(str(customer), "Alena Testovka")
 
+    def test_slug_changes_when_data_changes(self):
+        client = Client.objects.create(
+            name="Franta Pina",
+            zip_code="10000",
+        )
+        original_slug = client.slug
+
+        client.street = "Nová 456"
+        client.city = "Praha"
+        client.phone = "234234234"
+        client.email = "franta.pina@seznam.cz"
+        client.save()
+        # ---
+        updated_client = Client.objects.get(pk=client.pk)
+        self.assertEqual(client.slug, original_slug)
+        self.assertTrue(isinstance(client, Client))
+        self.assertEqual(updated_client.name, "Franta Pina")
+        self.assertEqual(updated_client.city, "Praha")
+        self.assertEqual(updated_client.zip_code, "10000")
+        self.assertEqual(updated_client.phone, "234234234")
+        self.assertEqual(updated_client.email, "franta.pina@seznam.cz")
+        self.assertEqual(updated_client.first_15(), "Franta Pina")
+
+    def test_full_slug_matches_expected(self):
+        name = "Pavel Dvořák"
+        street = "Hlavní 123"
+        city = "Praha"
+        zip_code = "10000"
+
+        client = Client.objects.create(
+            name=name,
+            street=street,
+            city=city,
+            zip_code=zip_code,
+            phone="777123456",
+            email="pavel.dvorak@example.com",
+        )
+
+        name_part = slugify(name)
+        base = f"{name}{zip_code}"
+        hash_part = hashlib.md5(base.encode()).hexdigest()[:10]
+        expected_slug = f"{name_part}-{hash_part}"
+
+        self.assertEqual(client.slug, expected_slug)
+
+    def test_slug_unique(self):
+        Client.objects.create(name="Franta Pina", zip_code="99999")
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Client.objects.create(name="Franta Pina", zip_code="99999")
+
+    def test_unique_name_zip_code_constraint(self):
+        Client.objects.create(
+            name="Jan Novák",
+            street="Ulice 1",
+            city="Brno",
+            zip_code="60200",
+            phone="123456789",
+            email="jan.novak@example.com",
+        )
+        with self.assertRaises(IntegrityError):
+            # Pokus vytvořit druhého klienta se stejným name + zip_code musí spadnout
+            Client.objects.create(
+                name="Jan Novák",
+                street="Jiná 2",
+                city="Brno",
+                zip_code="60200",
+                phone="987654321",
+                email="novak2@example.com",
+            )
+
 
 class ClientMethodTests(TestCase):
     def setUp(self) -> None:
-        self.customer = Client.objects.create(
+        self.customer_1 = Client.objects.create(
             name="Franta Pina", zip_code="11155", phone="602234234"
         )
 
     def test_format_psc_and_phone_from_db(self):
-        self.assertEqual(self.customer.format_psc(), "111 55")
-        self.assertEqual(self.customer.format_phone(), "+420 602 234 234")
+        self.assertEqual(self.customer_1.format_psc(), "111 55")
+        self.assertEqual(self.customer_1.format_phone(), "+420 602 234 234")
 
-    def test_format_psc_with_valid_zip(self):
-        client = Client(name="Ferda", zip_code="12345")
-        self.assertEqual(client.format_psc(), "123 45")
+    def test_cannot_create_client_with_empty_zip(self):
+        with self.assertRaises(IntegrityError):
+            Client.objects.create(name="Ferda", zip_code=None)
 
-    def test_format_psc_with_invalid_zip(self):
-        client = Client(name="Ferda", zip_code="1234")
-        self.assertEqual(client.format_psc(), "1234")
-
-    def test_format_psc_with_empty_zip(self):
+    def test_cannot_create_client_with_blank_zip(self):
         client = Client(name="Ferda", zip_code="")
-        self.assertEqual(client.format_psc(), "")
-
-    def test_format_psc_with_none(self):
-        client = Client(name="Ferda", zip_code=None)
-        self.assertEqual(client.format_psc(), "")
+        with self.assertRaises(ValidationError):
+            client.full_clean()
 
     def test_format_phone_with_valid_number(self):
         client = Client(name="Ferda", phone="+420123456789")
         self.assertEqual(client.format_phone(), "+420 123 456 789")
 
     def test_format_phone_with_invalid_number(self):
-        client = Client(name="Ferda", phone="123456789")
-        self.assertEqual(client.format_phone(), "123456789")
+        customer_4 = Client.objects.create(
+            name="Ferda", zip_code="12345", phone="123456789"
+        )
+        self.assertEqual(customer_4.format_phone(), "123456789")
 
     def test_format_phone_with_empty_number(self):
         client = Client(name="Ferda", phone="")
@@ -264,7 +363,8 @@ class OrderModelTestV1(TestCase):
             status=Status.NEW,
             client=self.customer,
             mandant="SCCZ",
-            evidence_termin=date.today(),
+            evidence_termin=timezone.now().date(),
+            delivery_termin=timezone.now().date() + timedelta(days=3),
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=None,
         )
@@ -283,7 +383,7 @@ class OrderModelTestV1(TestCase):
             mandant="SCCZ",
             client=self.customer,
             status=Status.NEW,
-            evidence_termin=date.today(),
+            evidence_termin=timezone.now().date(),
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=team,
         )
@@ -297,7 +397,7 @@ class OrderModelTestV1(TestCase):
             mandant="SCCZ",
             client=self.customer,
             status=Status.NEW,
-            evidence_termin=date.today(),
+            evidence_termin=timezone.now().date(),
             team_type=TeamType.BY_CUSTOMER,
             team=None,
         )
@@ -313,8 +413,8 @@ class OrderModelTestV1(TestCase):
             mandant="SCCZ",
             client=self.customer,
             status=Status.NEW,
-            delivery_termin=date.today(),
-            evidence_termin=date.today(),
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
             notes="Toto je opravdu dlouhá poznámka",
         )
         self.assertEqual(order.notes_first_10(), "Toto je op...")
@@ -329,8 +429,8 @@ class OrderModelTestV1(TestCase):
             mandant="SCCZ",
             status=Status.NEW,
             client=self.customer,
-            delivery_termin=date.today(),
-            evidence_termin=date.today(),
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
             notes="Krátké",
         )
         self.assertEqual(order.notes_first_10(), "Krátké")
@@ -346,8 +446,8 @@ class OrderModelTestV1(TestCase):
             mandant="SCCZ",
             status=Status.NEW,
             client=self.customer,
-            delivery_termin=date.today(),
-            evidence_termin=date.today(),
+            evidence_termin=timezone.now().date(),
+            delivery_termin=timezone.now().date(),
             notes="",
         )
         self.assertEqual(order.notes_first_10(), "-")
@@ -380,8 +480,8 @@ class OrderModelTestV1(TestCase):
             mandant="SCCZ",
             status=Status.NEW,
             client=self.customer,
-            delivery_termin=date.today(),
-            evidence_termin=date.today(),
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
             montage_termin=montage_dt,
             notes="",
         )
@@ -389,286 +489,51 @@ class OrderModelTestV1(TestCase):
             order.format_datetime(order.montage_termin), "01.01.2025 / 00:00"
         )
 
-
-class ArticleModelTestV1(TestCase):
-    def setUp(self):
-        self.hub = DistribHub.objects.create(code="111", city="Praha")
-        self.customer = Client.objects.create(name="ferda", zip_code="12345")
-        self.order = Order.objects.create(
-            order_number="703777143100437751-R",
+    def test_zisk_method_from_order(self):
+        montage_dt = timezone.now()
+        order = Order.objects.create(
+            order_number="703777143100431152-R",
             distrib_hub=self.hub,
             mandant="SCCZ",
+            status=Status.ADVICED,
             client=self.customer,
-            status=Status.NEW,
-            evidence_termin=date.today(),
-            team_type=TeamType.BY_CUSTOMER,
-            team=None,
+            evidence_termin=timezone.now().date(),
+            delivery_termin=timezone.now().date(),
+            montage_termin=montage_dt,
+            naklad=Decimal(100.00),
+            vynos=Decimal(200.00),
+            notes="",
         )
+        self.assertEqual(order.order_number, "703777143100431152-R")
+        self.assertEqual(order.distrib_hub, self.hub)
+        self.assertEqual(order.naklad, Decimal(100.00))
+        self.assertEqual(order.vynos, Decimal(200.00))
+        self.assertEqual(order.profit(), Decimal(100.00))
 
-    def test_name_field(self):
-        """Strukturlani test"""
-        field = Article._meta.get_field("name")
-        self.assertEqual(field.max_length, 32)
-
-    def test_quantity_field(self):
-        """Strukturalni test"""
-        field = Article._meta.get_field("quantity")
-        self.assertEqual(field.default, 1)
-
-    def test_note_field(self):
-        """Strukturalni test"""
-        field = Article._meta.get_field("note")
-        self.assertTrue(field.blank)
-
-    def test_price_field(self):
-        field = Article._meta.get_field("price")
-        self.assertEqual(field.max_digits, 10)
-        self.assertEqual(field.decimal_places, 2)
-        self.assertTrue(field.null)
-        self.assertTrue(field.blank)
-
-    def test_order_field(self):
-        """Strukturalni test"""
-        field = Article._meta.get_field("order")
-        self.assertEqual(field.related_model, Order)
-        self.assertEqual(field.remote_field.on_delete, models.PROTECT)
-        self.assertEqual(field.related_query_name(), "articles")
-
-    def test_field_types(self):
-        """Strukturalni test"""
-        model = Article()
-
-        self.assertIsInstance(model._meta.get_field("order"), models.ForeignKey)
-        self.assertIsInstance(model._meta.get_field("name"), models.CharField)
-        self.assertIsInstance(model._meta.get_field("price"), models.DecimalField)
-        self.assertIsInstance(
-            model._meta.get_field("quantity"), models.PositiveIntegerField
+    def test_zisk_and_timemethods_from_order(self):
+        montage_dt = timezone.now()
+        order = Order.objects.create(
+            order_number="703777143100431153-R",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            status=Status.ADVICED,
+            client=self.customer,
+            evidence_termin=timezone.now().date(),
+            delivery_termin=timezone.now().date() + timedelta(days=3),
+            montage_termin=montage_dt,
+            naklad=Decimal(200.00),
+            vynos=Decimal(200.00),
+            notes="",
         )
-        self.assertIsInstance(model._meta.get_field("note"), models.TextField)
-
-    def test_article_creation(self):
-        """
-        Testuje vytvoření instance modelu Article.
-        """
-        article = Article.objects.create(
-            order=self.order,
-            name="Postel",
-            price=1000.00,
-            quantity=1,
-            note="Standardní postel",
+        self.assertEqual(order.order_number, "703777143100431153-R")
+        self.assertEqual(order.distrib_hub, self.hub)
+        self.assertEqual(order.naklad, Decimal(200.00))
+        self.assertEqual(order.vynos, Decimal(200.00))
+        self.assertEqual(order.evidence_termin, timezone.now().date())
+        self.assertEqual(
+            order.delivery_termin, timezone.now().date() + timedelta(days=3)
         )
-        self.assertTrue(isinstance(article, Article))
-        self.assertEqual(article.name, "Postel")
-        self.assertEqual(article.price, 1000.00)
-        self.assertEqual(article.quantity, 1)
-        self.assertIsInstance(article.quantity, int)
-        self.assertIsInstance(article.price, float)
-        self.assertEqual(article.note, "Standardní postel")
-
-    def test_article_str_returns_name(self):
-        """
-        Testuje, zda metoda __str__ modelu Article vrací správně hodnotu pole name.
-        """
-        article = Article.objects.create(
-            order=self.order,
-            name="Test Artikl",
-            price=10000,
-            quantity=1,
-            note="Nějaká poznámka dlouha poznamka o articlu",
-        )
-        self.assertEqual(str(article), "Test Artikl")
-
-    def test_first_15_with_short_note(self):
-        """
-        Testuje metodu first_15 třídy Article, která by měla vrátit poznámku (note), pokud je její délka kratší nebo rovna 15 znakům.
-        """
-
-        article = Article.objects.create(
-            order=self.order, name="Krátký", price=50, quantity=2, note="Krátká pozn."
-        )
-        self.assertEqual(article.first_15(), "Krátká pozn.")
-
-    def test_first_15_with_long_note(self):
-        """
-        Testuje metodu `first_15` modelu Article, která by měla vracet prvních 15 znaků z poznámky
-        """
-        article = Article.objects.create(
-            order=self.order,
-            name="Dlouhý",
-            price=80,
-            quantity=1,
-            note="Tato poznámka je opravdu dlouhá",
-        )
-        self.assertEqual(article.first_15(), "Tato poznámka j...")
-
-    def test_first_15_with_empty_note(self):
-        """
-        Testuje metodu `first_15` modelu Article, když je poznámka (`note`) prázdná.
-        Očekává se, že metoda vrátí znak "-", pokud pole poznámky neobsahuje žádný text.
-        """
-        article = Article.objects.create(
-            order=self.order, name="Bez poznámky", price=20, quantity=1, note=""
-        )
-        self.assertEqual(article.first_15(), "-")
-
-
-class TeamModelTest(TestCase):
-    def setUp(self):
-        self.team = Team.objects.create(
-            name="Test Company",
-            city="Praha",
-            region="Střední Čechy",
-            phone="123456789",
-            email="test@company.cz",
-            active=True,
-            price_per_hour=150.50,
-            price_per_km=12.30,
-            notes="Toto je testovací poznámka.",
-        )
-        self.team_2 = Team.objects.create(
-            name="Test Company 2",
-            city="Praha",
-            region="Střední Čechy",
-            phone="123456789",
-            active=True,
-            price_per_hour=150.50,
-            price_per_km=12.30,
-            notes="Toto je testovací poznámka.",
-        )
-
-    def test_missing_email_raises_validation_error(self):
-        team = Team(
-            name="No Email Team",
-            city="Praha",
-            region="Střední Čechy",
-            phone="123456789",
-            active=True,
-            price_per_hour=150.50,
-            price_per_km=12.30,
-            notes="Bez e-mailu",
-        )
-        with self.assertRaises(ValidationError) as context:
-            team.full_clean()
-        self.assertIn("email", context.exception.message_dict)
-
-    def test_field_attributes(self):
-        """Strukturalni test"""
-        field = Team._meta.get_field("name")
-        self.assertTrue(field.unique)
-        self.assertEqual(field.max_length, 32)
-
-        self.assertEqual(Team._meta.get_field("city").max_length, 32)
-        self.assertEqual(Team._meta.get_field("region").max_length, 32)
-
-        self.assertEqual(Team._meta.get_field("phone").max_length, 17)
-        self.assertEqual(Team._meta.get_field("email").max_length, 64)
-
-        self.assertEqual(Team._meta.get_field("price_per_hour").max_digits, 6)
-        self.assertEqual(Team._meta.get_field("price_per_hour").decimal_places, 2)
-
-        self.assertEqual(Team._meta.get_field("price_per_km").max_digits, 6)
-        self.assertEqual(Team._meta.get_field("price_per_km").decimal_places, 2)
-
-        self.assertTrue(Team._meta.get_field("slug").unique)
-
-    def test_field_types(self):
-        """Strukturalni test"""
-        model = Team()
-
-        self.assertIsInstance(model._meta.get_field("name"), models.CharField)
-        self.assertIsInstance(model._meta.get_field("city"), models.CharField)
-        self.assertIsInstance(model._meta.get_field("region"), models.CharField)
-        self.assertIsInstance(model._meta.get_field("phone"), PhoneNumberField)
-        self.assertIsInstance(model._meta.get_field("email"), models.EmailField)
-        self.assertIsInstance(model._meta.get_field("active"), models.BooleanField)
-        self.assertIsInstance(
-            model._meta.get_field("price_per_hour"), models.DecimalField
-        )
-        self.assertIsInstance(
-            model._meta.get_field("price_per_km"), models.DecimalField
-        )
-        self.assertIsInstance(model._meta.get_field("notes"), models.TextField)
-        self.assertIsInstance(model._meta.get_field("slug"), models.SlugField)
-
-    def test_team_creation(self):
-        """Team creation"""
-        team = self.team
-        self.assertTrue(isinstance(team, Team))
-        self.assertEqual(team.name, "Test Company")
-        self.assertEqual(team.city, "Praha")
-        self.assertEqual(team.region, "Střední Čechy")
-        self.assertEqual(team.email, "test@company.cz")
-        self.assertEqual(team.phone, "123456789")
-        self.assertEqual(team.price_per_hour, 150.50)
-        self.assertEqual(team.price_per_km, 12.30)
-        self.assertEqual(team.notes, "Toto je testovací poznámka.")
-        self.assertEqual(team.first_15(), "Toto je testova...")
-        self.assertEqual(team.price_per_hour_float(), 150.50)
-        self.assertEqual(team.price_per_km_float(), 12.30)
-        self.assertIsInstance(team.price_per_hour_float(), float)
-        self.assertIsInstance(team.price_per_km_float(), float)
-        self.assertTrue(team.active)
-        self.assertIsInstance(team.active, bool)
-
-    def test_team_unique_name(self):
-        """
-        Testuje, že nelze vytvořit dva týmy se stejným názvem (name).
-        """
-        Team.objects.create(name="Gamma Team", city="Plzeň")
-        with self.assertRaises(Exception):
-            Team.objects.create(name="Gamma Team", city="Karlovy Vary")
-
-    def test_str_representation(self):
-        """✅ Testuje, že metoda __str__ vrací název společnosti."""
-        self.assertEqual(str(self.team), "Test Company")
-
-    def test_slug_is_generated_on_save(self):
-        """✅ Testuje, že slug se automaticky vygeneruje ze jména při uložení."""
-        self.assertEqual(self.team.slug, slugify(self.team.name))
-
-    def test_price_per_km_float_conversion(self):
-        """✅ Testuje, že metoda price_per_km_float vrací správně převedenou hodnotu z
-        Decimal na float."""
-        self.assertEqual(self.team.price_per_km_float(), 12.30)
-
-    def test_price_per_km_float_default(self):
-        """✅ Testuje, že metoda price_per_km_float
-        vrátí 0.0 pokud není cena za km nastavena."""
-        self.team.price_per_km = None
-        self.assertEqual(self.team.price_per_km_float(), 0.0)
-
-    def test_price_per_hour_float_conversion(self):
-        """✅ Testuje, že metoda price_per_hour_float vrací
-        správně převedenou hodnotu z Decimal na float."""
-        self.assertEqual(self.team.price_per_hour_float(), 150.50)
-
-    def test_price_per_hour_float_default(self):
-        """✅ Testuje, že metoda price_per_hour_float vrátí 0.0 pokud
-        není cena za hodinu nastavena."""
-        self.team.price_per_hour = None
-        self.assertEqual(self.team.price_per_hour_float(), 0.0)
-
-    def test_first_15_with_long_note(self):
-        """✅ Testuje, že metoda first_15 vrátí prvních 15 znaků poznámky
-        s tečkami, pokud je delší než 15 znaků."""
-        self.assertEqual(self.team.first_15(), "Toto je testova...")
-
-    def test_first_15_with_short_note(self):
-        """✅ Testuje, že metoda first_15 vrátí celou poznámku,
-        pokud má 15 znaků nebo méně."""
-        self.team.notes = "Krátká poznámka"
-        self.assertEqual(self.team.first_15(), "Krátká poznámka")
-
-    def test_first_15_with_empty_note(self):
-        """✅ Testuje, že metoda first_15 vrátí '-'
-        pokud poznámka není nastavena."""
-        self.team.notes = ""
-        self.assertEqual(self.team.first_15(), "-")
-
-    def test_unique_name_constraint(self):
-        """✅ Testuje, že nelze vytvořit dvě společnosti se stejným názvem."""
-        with self.assertRaises(Exception):
-            Team.objects.create(name="Test Company", city="Brno", phone="987654321")
+        self.assertEqual(order.profit(), Decimal(0.00))
 
 
 class OrderModelTestV2(TestCase):
@@ -698,11 +563,13 @@ class OrderModelTestV2(TestCase):
             "mandant": "SCCZ",
             "status": Status.NEW,
             "client": self.customer,
-            "delivery_termin": timezone.now().date() + timedelta(days=3),
             "evidence_termin": timezone.now().date(),
+            "delivery_termin": timezone.now().date() + timedelta(days=3),
             "montage_termin": timezone.now() + timedelta(days=3),
             "team_type": TeamType.BY_ASSEMBLY_CREW,
             "team": self.team,
+            "naklad": Decimal(100),
+            "vynos": Decimal(100),
         }
         data.update(kwargs)
         return data
@@ -711,20 +578,24 @@ class OrderModelTestV2(TestCase):
         """
         Testuje vytvoření nové objednávky (Order) s předdefinovanými hodnotami.
         """
-        distrib_hub = DistribHub.objects.get(code="CB")
-        customer = Client.objects.get(name="Jan Novák")
-        team = Team.objects.get(name="Alfa Team")
-        order = Order.objects.create(
+        time_now: datetime = timezone.now()
+        date_timedelta = timezone.now().date() + timedelta(days=3)
+        distrib_hub: DistribHub = DistribHub.objects.get(code="CB")
+        customer: Client = Client.objects.get(name="Jan Novák", zip_code="11150")
+        team: Team = Team.objects.get(name="Alfa Team")
+        order: Order = Order.objects.create(
             order_number="12345",
             distrib_hub=distrib_hub,
             mandant="ABC",
             status=Status.NEW,
             client=customer,
-            delivery_termin=timezone.now().date(),
             evidence_termin=timezone.now().date(),
-            montage_termin=timezone.now(),
+            delivery_termin=date_timedelta,
+            montage_termin=time_now,
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=team,
+            vynos=Decimal(100.00),
+            naklad=Decimal(100.00),
             notes="Testovací poznámka",
         )
         self.assertTrue(isinstance(order, Order))
@@ -734,9 +605,17 @@ class OrderModelTestV2(TestCase):
         self.assertEqual(order.mandant, "ABC")
         self.assertEqual(order.status, Status.ADVICED)
         self.assertEqual(order.client, customer)
+        self.assertEqual(order.client.zip_code, "11150")  # type:ignore
+        self.assertEqual(order.client.name, "Jan Novák")  # type:ignore
         self.assertIsInstance(order.client, Client)
         self.assertEqual(order.team_type, TeamType.BY_ASSEMBLY_CREW)
         self.assertEqual(order.team, team)
+        self.assertEqual(order.evidence_termin, timezone.now().date())
+        self.assertEqual(order.delivery_termin, date_timedelta)
+        self.assertEqual(order.montage_termin, time_now)
+        self.assertEqual(order.vynos, Decimal(100.00))
+        self.assertEqual(order.naklad, Decimal(100.00))
+        self.assertEqual(order.profit(), Decimal(0.00))
         self.assertIsInstance(order.team, Team)
         self.assertEqual(order.notes, "Testovací poznámka")
         if order.team is not None:
@@ -989,6 +868,326 @@ class OrderModelTestV2(TestCase):
         order.team = self.team
         order.save()
         self.assertEqual(order.status, Status.ADVICED)
+
+    def test_order_creation_with_delivery_default(self):
+        """
+        Testuje vytvoření nové objednávky (Order) s předdefinovanými hodnotami.
+        """
+        date_timedelta = timezone.now().date() + timedelta(days=3)
+        distrib_hub: DistribHub = DistribHub.objects.get(code="CB")
+        customer: Client = Client.objects.get(name="Jan Novák", zip_code="11150")
+        order: Order = Order.objects.create(
+            order_number="54321",
+            distrib_hub=distrib_hub,
+            mandant="ABC",
+            status=Status.NEW,
+            client=customer,
+            evidence_termin=timezone.now().date(),
+            delivery_termin=date_timedelta,
+            team_type=TeamType.BY_CUSTOMER,
+            vynos=Decimal(100.00),
+            naklad=Decimal(100.00),
+            notes="Testovací poznámka",
+        )
+        # Změna team_type
+        order.team_type = TeamType.BY_DELIVERY_CREW
+        # Ručně uložíme po změně (jako by to dělal formulář)
+        order.save()
+        # Zkontrolujeme v DB
+        order.refresh_from_db()
+        self.assertEqual(order.order_number, "54321")
+        self.assertEqual(order.status, Status.ADVICED)
+        self.assertEqual(order.team_type, TeamType.BY_DELIVERY_CREW)
+        self.assertEqual(order.delivery_termin, date_timedelta)
+        self.assertEqual(order.profit(), Decimal(0))
+
+    def test_order_creation_with_delivery_not_delivery_termin(self):
+        """
+        Testuje vytvoření nové objednávky (Order) s předdefinovanými hodnotami.
+        """
+        distrib_hub: DistribHub = DistribHub.objects.get(code="CB")
+        customer: Client = Client.objects.get(name="Jan Novák", zip_code="11150")
+        order: Order = Order.objects.create(
+            order_number="54322",
+            distrib_hub=distrib_hub,
+            mandant="ABC",
+            status=Status.NEW,
+            client=customer,
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_CUSTOMER,
+            vynos=Decimal(100.00),
+            naklad=Decimal(100.00),
+            notes="Testovací poznámka",
+        )
+        # Změna team_type
+        order.team_type = TeamType.BY_DELIVERY_CREW
+        # Ručně uložíme po změně (jako by to dělal formulář)
+        order.save()
+        # Zkontrolujeme v DB
+        order.refresh_from_db()
+        self.assertEqual(order.order_number, "54322")
+        self.assertEqual(order.status, Status.NEW)
+        self.assertEqual(order.team_type, TeamType.BY_DELIVERY_CREW)
+        self.assertEqual(order.delivery_termin, None)
+        self.assertEqual(order.montage_termin, None)
+        self.assertEqual(order.naklad, Decimal(100))
+        self.assertEqual(order.vynos, Decimal(100))
+        self.assertEqual(order.profit(), Decimal(0))
+
+
+class ArticleModelTest(TestCase):
+    def setUp(self):
+        self.hub = DistribHub.objects.create(code="111", city="Praha")
+        self.customer = Client.objects.create(name="ferda", zip_code="12345")
+        self.order = Order.objects.create(
+            order_number="703777143100437751-R",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            status=Status.NEW,
+            evidence_termin=date.today(),
+            team_type=TeamType.BY_CUSTOMER,
+            team=None,
+        )
+
+    def test_struktural_field(self):
+        """Strukturlani test"""
+        field = Article._meta.get_field("name")
+        self.assertEqual(field.max_length, 32)
+        field = Article._meta.get_field("quantity")
+        self.assertEqual(field.default, 1)
+        field = Article._meta.get_field("note")
+        self.assertTrue(field.blank)
+
+    def test_order_field(self):
+        """Strukturalni test"""
+        field = Article._meta.get_field("order")
+        self.assertEqual(field.related_model, Order)
+        self.assertEqual(field.remote_field.on_delete, models.PROTECT)
+        self.assertEqual(field.related_query_name(), "articles")
+
+    def test_field_types(self):
+        """Strukturalni test"""
+        model = Article()
+
+        self.assertIsInstance(model._meta.get_field("order"), models.ForeignKey)
+        self.assertIsInstance(model._meta.get_field("name"), models.CharField)
+        self.assertIsInstance(
+            model._meta.get_field("quantity"), models.PositiveIntegerField
+        )
+        self.assertIsInstance(model._meta.get_field("note"), models.TextField)
+
+    def test_article_creation(self):
+        """
+        Testuje vytvoření instance modelu Article.
+        """
+        article = Article.objects.create(
+            order=self.order,
+            name="Postel",
+            quantity=1,
+            note="Standardní postel",
+        )
+        self.assertTrue(isinstance(article, Article))
+        self.assertEqual(article.name, "Postel")
+        self.assertEqual(article.quantity, 1)
+        self.assertIsInstance(article.quantity, int)
+        self.assertEqual(article.note, "Standardní postel")
+
+    def test_article_str_returns_name(self):
+        article = Article.objects.create(
+            order=self.order,
+            name="Test Artikl",
+            quantity=1,
+            note="Nějaká poznámka dlouha poznamka o articlu",
+        )
+        self.assertEqual(str(article), "Test Artikl")
+
+    def test_first_15_with_short_note(self):
+        article = Article.objects.create(
+            order=self.order, name="Krátký", quantity=2, note="Krátká pozn."
+        )
+        self.assertEqual(article.first_15(), "Krátká pozn.")
+
+    def test_first_15_with_long_note(self):
+        """
+        Testuje metodu `first_15` modelu Article, která by měla vracet prvních 15 znaků z poznámky
+        """
+        article = Article.objects.create(
+            order=self.order,
+            name="Dlouhý",
+            quantity=1,
+            note="Tato poznámka je opravdu dlouhá",
+        )
+        self.assertEqual(article.first_15(), "Tato poznámka j...")
+
+    def test_first_15_with_empty_note(self):
+        """
+        Testuje metodu `first_15` modelu Article, když je poznámka (`note`) prázdná.
+        Očekává se, že metoda vrátí znak "-", pokud pole poznámky neobsahuje žádný text.
+        """
+        article = Article.objects.create(
+            order=self.order, name="Bez poznámky", quantity=1, note=""
+        )
+        self.assertEqual(article.first_15(), "-")
+
+
+class TeamModelTest(TestCase):
+    def setUp(self):
+        self.team = Team.objects.create(
+            name="Test Company",
+            city="Praha",
+            region="Střední Čechy",
+            phone="123456789",
+            email="test@company.cz",
+            active=True,
+            price_per_hour=150.50,
+            price_per_km=12.30,
+            notes="Toto je testovací poznámka.",
+        )
+        self.team_2 = Team.objects.create(
+            name="Test Company 2",
+            city="Praha",
+            region="Střední Čechy",
+            phone="123456789",
+            active=True,
+            price_per_hour=150.50,
+            price_per_km=12.30,
+            notes="Toto je testovací poznámka.",
+        )
+
+    def test_missing_email_raises_validation_error(self):
+        team = Team(
+            name="No Email Team",
+            city="Praha",
+            region="Střední Čechy",
+            phone="123456789",
+            active=True,
+            price_per_hour=150.50,
+            price_per_km=12.30,
+            notes="Bez e-mailu",
+        )
+        with self.assertRaises(ValidationError) as context:
+            team.full_clean()
+        self.assertIn("email", context.exception.message_dict)
+
+    def test_field_attributes(self):
+        """Strukturalni test"""
+        field = Team._meta.get_field("name")
+        self.assertTrue(field.unique)
+        self.assertEqual(field.max_length, 32)
+
+        self.assertEqual(Team._meta.get_field("city").max_length, 32)
+        self.assertEqual(Team._meta.get_field("region").max_length, 32)
+
+        self.assertEqual(Team._meta.get_field("phone").max_length, 17)
+        self.assertEqual(Team._meta.get_field("email").max_length, 64)
+
+        self.assertEqual(Team._meta.get_field("price_per_hour").max_digits, 6)
+        self.assertEqual(Team._meta.get_field("price_per_hour").decimal_places, 2)
+
+        self.assertEqual(Team._meta.get_field("price_per_km").max_digits, 6)
+        self.assertEqual(Team._meta.get_field("price_per_km").decimal_places, 2)
+
+        self.assertTrue(Team._meta.get_field("slug").unique)
+
+    def test_field_types(self):
+        """Strukturalni test"""
+        model = Team()
+
+        self.assertIsInstance(model._meta.get_field("name"), models.CharField)
+        self.assertIsInstance(model._meta.get_field("city"), models.CharField)
+        self.assertIsInstance(model._meta.get_field("region"), models.CharField)
+        self.assertIsInstance(model._meta.get_field("phone"), PhoneNumberField)
+        self.assertIsInstance(model._meta.get_field("email"), models.EmailField)
+        self.assertIsInstance(model._meta.get_field("active"), models.BooleanField)
+        self.assertIsInstance(
+            model._meta.get_field("price_per_hour"), models.DecimalField
+        )
+        self.assertIsInstance(
+            model._meta.get_field("price_per_km"), models.DecimalField
+        )
+        self.assertIsInstance(model._meta.get_field("notes"), models.TextField)
+        self.assertIsInstance(model._meta.get_field("slug"), models.SlugField)
+
+    def test_team_creation(self):
+        """Team creation"""
+        team = self.team
+        self.assertTrue(isinstance(team, Team))
+        self.assertEqual(team.name, "Test Company")
+        self.assertEqual(team.city, "Praha")
+        self.assertEqual(team.region, "Střední Čechy")
+        self.assertEqual(team.email, "test@company.cz")
+        self.assertEqual(team.phone, "123456789")
+        self.assertEqual(team.price_per_hour, 150.50)
+        self.assertEqual(team.price_per_km, 12.30)
+        self.assertEqual(team.notes, "Toto je testovací poznámka.")
+        self.assertEqual(team.first_15(), "Toto je testova...")
+        self.assertEqual(team.price_per_hour_float(), 150.50)
+        self.assertEqual(team.price_per_km_float(), 12.30)
+        self.assertIsInstance(team.price_per_hour_float(), float)
+        self.assertIsInstance(team.price_per_km_float(), float)
+        self.assertTrue(team.active)
+        self.assertIsInstance(team.active, bool)
+
+    def test_team_unique_name(self):
+        """
+        Testuje, že nelze vytvořit dva týmy se stejným názvem (name).
+        """
+        Team.objects.create(name="Gamma Team", city="Plzeň")
+        with self.assertRaises(Exception):
+            Team.objects.create(name="Gamma Team", city="Karlovy Vary")
+
+    def test_str_representation(self):
+        """✅ Testuje, že metoda __str__ vrací název společnosti."""
+        self.assertEqual(str(self.team), "Test Company")
+
+    def test_slug_is_generated_on_save(self):
+        """✅ Testuje, že slug se automaticky vygeneruje ze jména při uložení."""
+        self.assertEqual(self.team.slug, slugify(self.team.name))
+
+    def test_price_per_km_float_conversion(self):
+        """✅ Testuje, že metoda price_per_km_float vrací správně převedenou hodnotu z
+        Decimal na float."""
+        self.assertEqual(self.team.price_per_km_float(), 12.30)
+
+    def test_price_per_km_float_default(self):
+        """✅ Testuje, že metoda price_per_km_float
+        vrátí 0.0 pokud není cena za km nastavena."""
+        self.team.price_per_km = None
+        self.assertEqual(self.team.price_per_km_float(), 0.0)
+
+    def test_price_per_hour_float_conversion(self):
+        """✅ Testuje, že metoda price_per_hour_float vrací
+        správně převedenou hodnotu z Decimal na float."""
+        self.assertEqual(self.team.price_per_hour_float(), 150.50)
+
+    def test_price_per_hour_float_default(self):
+        """✅ Testuje, že metoda price_per_hour_float vrátí 0.0 pokud
+        není cena za hodinu nastavena."""
+        self.team.price_per_hour = None
+        self.assertEqual(self.team.price_per_hour_float(), 0.0)
+
+    def test_first_15_with_long_note(self):
+        """✅ Testuje, že metoda first_15 vrátí prvních 15 znaků poznámky
+        s tečkami, pokud je delší než 15 znaků."""
+        self.assertEqual(self.team.first_15(), "Toto je testova...")
+
+    def test_first_15_with_short_note(self):
+        """✅ Testuje, že metoda first_15 vrátí celou poznámku,
+        pokud má 15 znaků nebo méně."""
+        self.team.notes = "Krátká poznámka"
+        self.assertEqual(self.team.first_15(), "Krátká poznámka")
+
+    def test_first_15_with_empty_note(self):
+        """✅ Testuje, že metoda first_15 vrátí '-'
+        pokud poznámka není nastavena."""
+        self.team.notes = ""
+        self.assertEqual(self.team.first_15(), "-")
+
+    def test_unique_name_constraint(self):
+        """✅ Testuje, že nelze vytvořit dvě společnosti se stejným názvem."""
+        with self.assertRaises(Exception):
+            Team.objects.create(name="Test Company", city="Brno", phone="987654321")
 
 
 class CallLogModelTest(TestCase):

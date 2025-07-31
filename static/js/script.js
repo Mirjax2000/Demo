@@ -14,6 +14,12 @@
     const totalFormsInput = $('#id_article_set-TOTAL_FORMS');
     const emptyFormHtml = $('#empty-form-template');
 
+    // detail profit
+    document.addEventListener("DOMContentLoaded", detailProfit);
+    // making_delivery_order
+    document.addEventListener("DOMContentLoaded", making_delivery_order);
+    // naklad vynos skryti
+    document.addEventListener("DOMContentLoaded", input_vynos_naklad);
     // delete Order
     document.addEventListener("DOMContentLoaded", deleteOrder);
     // SCCZ filter
@@ -185,7 +191,7 @@
         });
     });
 
-    // Theme control
+    // Theme control function
     function toggleTheme() {
         const current = html.dataset.theme;
         const newTheme = current === "light" ? "dark" : "light";
@@ -328,26 +334,6 @@
                 infoEmpty: "",
                 lengthMenu: "_MENU_ zakázek na stránku",
                 search: "Vyhledávání: "
-            },
-        });
-    }
-
-    // DataTable for articles
-    if (articleTable) {
-        $(articleTable).DataTable({
-            rowReorder: false,
-            fixedColumns: false,
-            searching: false,
-            paging: false,
-            columnDefs: [
-                { orderable: false, targets: [3] },
-            ],
-            language: {
-                emptyTable: "Žádné Artikly !!!",
-                decimal: ",",
-                info: "počet záznamů: _TOTAL_",
-                infoEmpty: "",
-                infoFiltered: "",
             },
         });
     }
@@ -540,6 +526,7 @@
             }
         }
     });
+
     //  --- protokol img
     $(document).ready(function () {
         const protocolImg = $('#protocolImg');
@@ -554,7 +541,7 @@
         });
     });
 
-    // --- autobot copy values to schranka
+    // --- autobot copy values to schranka function
     function setupAutobotCopy() {
         const btn = document.getElementById("copyBtnAutobot");
         const tokkenEl = document.getElementById("autobotTokken");
@@ -586,7 +573,7 @@
         }
     }
 
-    // delete Order
+    // delete Order function
     function deleteOrder() {
         const checkBoxDeleteOrder = document.getElementById("checkBoxDeleteOrder");
         const deleteOrderButton = document.getElementById("deleteOrderButton")
@@ -602,7 +589,8 @@
             }
         })
     }
-    // hidden Order
+
+    // hidden Order function
     function hiddenOrder() {
         const checkBoxHiddenOrder = document.getElementById("checkBoxHiddenOrder");
         const hiddenOrderButton = document.getElementById("hiddenOrderButton")
@@ -618,7 +606,8 @@
             }
         })
     }
-    // hidden Order
+
+    // delete team function
     function deleteTeam() {
         const checkBoxDeleteTeam = document.getElementById("checkBoxDeleteTeam");
         const deleteTeamButton = document.getElementById("deleteTeamButton")
@@ -634,7 +623,7 @@
             }
         })
     }
-
+    // hlavni filter zapinani OD pole function
     function scczFilter() {
         const mandantInput = document.getElementById("mandant");
         const odWrapper = document.getElementById("obchodniDumWrapper");
@@ -653,9 +642,114 @@
         }
 
         toggleOD();
-        
+
         mandantInput.addEventListener("input", toggleOD);
     }
 
+    //  input vynos naklad
+    function input_vynos_naklad() {
+        const idStatus = document.getElementById("id_status");
+        const id_naklad = document.getElementById("id_naklad");
+        const id_vynos = document.getElementById("id_vynos");
+        const vynosNakladProfitLoss = document.getElementById("vynosNakladProfitLoss");
+
+        if (!idStatus || !id_naklad || !id_vynos || !vynosNakladProfitLoss) return;
+
+        function toggleInputFields() {
+            if (idStatus.value !== "New" && idStatus.value !== "Adviced") {
+                id_naklad.parentElement.classList.add("vynos_naklad_input", "inactive_input");
+                id_vynos.parentElement.classList.add("vynos_naklad_input", "inactive_input");
+            } else {
+                id_naklad.parentElement.classList.remove("vynos_naklad_input", "inactive_input");
+                id_vynos.parentElement.classList.remove("vynos_naklad_input", "inactive_input");
+            }
+        }
+
+        function handleInputChange() {
+            updateProfitLoss(id_naklad, id_vynos, vynosNakladProfitLoss);
+        }
+
+        function handleStatusChange() {
+            toggleInputFields();
+        }
+
+        // počáteční nastavení
+        toggleInputFields();
+        updateProfitLoss(id_naklad, id_vynos, vynosNakladProfitLoss);
+
+        // posluchače
+        id_naklad.addEventListener("input", handleInputChange);
+        id_vynos.addEventListener("input", handleInputChange);
+        idStatus.addEventListener("change", handleStatusChange);
+    }
+
+    function updateProfitLoss(id_naklad, id_vynos, vynosNakladProfitLoss) {
+        const vynos = parseFloat(id_vynos.value) || 0;
+        const naklad = parseFloat(id_naklad.value) || 0;
+        const profitLoss = vynos - naklad;
+
+        vynosNakladProfitLoss.innerHTML = profitLoss;
+
+        vynosNakladProfitLoss.classList.remove("profit", "ztrata", "zero");
+
+        if (profitLoss > 0) {
+            vynosNakladProfitLoss.classList.add("profit");
+        } else if (profitLoss < 0) {
+            vynosNakladProfitLoss.classList.add("ztrata");
+        } else {
+            vynosNakladProfitLoss.classList.add("zero");
+        }
+    }
+
+    // making dopravni zakazku
+    function making_delivery_order() {
+        const idMontageTermin = document.getElementById("id_montage_termin");
+        const idTeamType = document.getElementById("id_team_type");
+        const idTeam = document.getElementById("id_team");
+
+        if (!idMontageTermin || !idTeamType || !idTeam) return
+
+        function updateTeamVisibility() {
+            const teamWrapper = idTeam.closest(".L-form__group");
+            const montageTerminWrapper = idMontageTermin.closest(".L-form__group");
+
+            if (idTeamType.value === "By_customer" || idTeamType.value === "By_delivery_crew") {
+                teamWrapper.classList.add("inactive_input");
+                montageTerminWrapper.classList.add("inactive_input");
+                idTeam.value = "";
+                idMontageTermin.value = "";
+            } else {
+                teamWrapper.classList.remove("inactive_input");
+                montageTerminWrapper.classList.remove("inactive_input");
+            }
+        }
+
+        // spustíme při změně
+        idTeamType.addEventListener("change", function () {
+            setTimeout(updateTeamVisibility, 100); // s malým delayem
+        });
+
+        // spustíme hned při načtení stránky
+        updateTeamVisibility();
+    }
+
+    // detail profit
+    function detailProfit() {
+        const vynosNakladProfitListItem = document.getElementById("vynosNakladProfitListItem")
+        const detailProfit = document.getElementById("detailProfit")
+
+        if (!vynosNakladProfitListItem) return
+
+        let detailProfitValue = parseFloat(detailProfit.textContent.trim())
+        detailProfit.classList.remove("profit", "ztrata", "zero");
+
+        if (detailProfitValue > 0) {
+            detailProfit.classList.add("profit");
+        } else if (detailProfitValue < 0) {
+            detailProfit.classList.add("ztrata");
+        } else {
+            detailProfit.classList.add("zero");
+        }
+    }
 
 })();

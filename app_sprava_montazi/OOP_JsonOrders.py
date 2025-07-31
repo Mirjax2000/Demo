@@ -2,6 +2,7 @@
 
 from typing import Tuple, TypedDict, TypeAlias
 from rich.console import Console
+from datetime import datetime, date as date_type
 
 # --- django
 from django.conf import settings
@@ -12,7 +13,7 @@ from django.db.models.functions import Concat
 from django.db.models import QuerySet, Q, F, Value
 
 # --- models
-from .models import Order, Client, Status, Team
+from .models import Order, Client, Status, Team, TeamType
 
 # --- utils
 from .utils import check_order_error_adviced
@@ -47,6 +48,10 @@ success_mail_icon: str = (
 )
 ringing_bell_icon: str = (
     '<i class="fa-solid fa-bell fa-shake fa-sm u-txt-error-color me-1"></i>'
+)
+truck_icon: str = '<i class="fa-solid fa-truck me-1 u-txt-info-color"></i>'
+montage_icon: str = (
+    '<i class="fa-solid fa-screwdriver-wrench me-1 u-txt-success-color"></i>'
 )
 
 
@@ -144,6 +149,7 @@ class JsonOrders:
         order_link = reverse("order_detail", args=[order.pk])
         if error:
             css += " u-txt-error"
+            name += "-error"
         result = f'<a href="{order_link}" name="{name}" class="{css}">{content}</a>'
         return result
 
@@ -200,6 +206,9 @@ class JsonOrders:
         if client.incomplete:
             css = "u-txt-warning"
             icon = exclamation_icon
+            name += "-incomplete"
+        else:
+            name += "-complete"
 
         result: str = (
             f'<div title="{title}" name="{name}">{icon}'
@@ -213,8 +222,14 @@ class JsonOrders:
         css: str = "u-s-none"
         content: str = str(order.get_team_type_display())  # type: ignore
 
-        if order.team_type == "By_assembly_crew":
+        if order.team_type == TeamType.BY_ASSEMBLY_CREW:
             css += " u-txt-success"
+            name += "-montaz"
+        elif order.team_type == TeamType.BY_DELIVERY_CREW:
+            css += " u-txt-info"
+            name += "-doprava"
+        elif order.team_type == TeamType.BY_CUSTOMER:
+            name += "-zakaznik"
 
         result: str = f'<span name="{name}" class="{css}">{content}</span>'
         return result
@@ -226,23 +241,36 @@ class JsonOrders:
         content = "-"
         icon = ""
         title = ""
-
+        # ---
         team = order.team
-        if team:
-            title = team.name
+        if order.team_type == TeamType.BY_ASSEMBLY_CREW:
+            name += "-montaz"
+            if team:
+                title = team.name
 
-        if order.is_missing_team():
-            css += " u-txt-warning"
-            icon = exclamation_icon
-            content = "Nevybráno"
+            if order.is_missing_team():
+                css += " u-txt-warning"
+                icon = exclamation_icon
+                content = "Nevybráno"
+                title = "Montážní tým nevybrán"
+                name += "-missing"
 
-        elif team:
-            css += " u-txt-success"
-            icon = success_icon
-            content = team.name_first_15()
-            if not team.active:
-                css = "u-s-none u-txt-error"
-                icon = ringing_bell_icon
+            elif team:
+                css += " u-txt-success"
+                icon = montage_icon
+                content = team.name_first_15()
+                if not team.active:
+                    css = "u-s-none u-txt-error"
+                    icon = ringing_bell_icon
+                    title += "-not-active"
+                    name += "-not-active"
+
+        elif order.team_type == TeamType.BY_DELIVERY_CREW:
+            css += " u-txt-info"
+            icon = truck_icon
+            content = "Doprava"
+            title = "Montáž dopravcem"
+            name += "-doprava"
 
         result: str = f'<div title="{title}" name="{name}">{icon}<span class="{css}">{content}</span></div>'
 
@@ -250,41 +278,63 @@ class JsonOrders:
 
     def montage_termin_coll(self, order: Order) -> str:
         """Vrací montage_termin jako HTML nebo varování."""
-        name: str = "montage-termin"
-        css: str = "u-s-none"
-        content: str = "–"
-        icon: str = ""
-        time = timezone.localtime(order.montage_termin)
+        name, css, icon, content = "montage-termin", "u-s-none", "", "–"
 
-        if order.montage_termin:
-            content = f"<strong>{time.strftime('%d.%m.%Y %H:%M')}</strong>"
+        # Montážní tým
+        if order.team_type == TeamType.BY_ASSEMBLY_CREW:
+            name += "-montaz"
+            if order.montage_termin:
+                local_time = timezone.localtime(order.montage_termin)
+                content = f"<strong>{local_time.strftime('%d.%m.%Y %H:%M')}</strong>"
+            else:
+                icon, css, content = Utils.nevybrano(css)
 
-        elif order.team_type == "By_assembly_crew":
-            icon = exclamation_icon
-            css += " u-txt-warning"
-            content = "Nevybráno"
+        # doprava
+        elif order.team_type == TeamType.BY_DELIVERY_CREW:
+            name += "-doprava"
+            if order.delivery_termin:
+                if isinstance(order.delivery_termin, datetime):
+                    local_date = timezone.localdate(order.delivery_termin)
+                else:
+                    local_date = order.delivery_termin
 
-        result = f'<div name="{name}" class="{css}">{icon}<span>{content}</span></div>'
-        return result
+                if local_date:
+                    content = f"<strong>{local_date.strftime('%d.%m.%Y')}</strong>"
+            else:
+                icon, css, content = Utils.nevybrano(css)
+
+        return f'<div name="{name}">{icon}<span class="{css}">{content}</span></div>'
 
     def status_coll(self, order: Order) -> str:
         """Vrací status + případnou ikonu odkazu na protokol."""
-        error = check_order_error_adviced(order.pk)
+        name: str = f"status-{order.get_status_display()}"  # type: ignore
+        error: bool = check_order_error_adviced(order.pk)
         content = order.get_status_display()[:8]  # type: ignore
         icon = ""
 
-        if order.status == Status.ADVICED:
+        if (
+            order.status == Status.ADVICED
+            and order.team_type == TeamType.BY_ASSEMBLY_CREW
+        ):
+            name += "-montaz"
             icon_link = success_mail_icon
             if error:
                 icon_link = warning_mail_icon
+                name += "-error"
 
             if icon_link:
                 icon = (
                     f'<a href="{reverse("protocol", kwargs={"pk": order.pk})}" '
                     f'title="Zobrazit protokol">{icon_link}</a>'
                 )
+        elif (
+            order.status == Status.ADVICED
+            and order.team_type == TeamType.BY_DELIVERY_CREW
+        ):
+            name += "-doprava"
+            icon = truck_icon
 
-        return f'<div name="status">{content} {icon}</div>'
+        return f'<div name="{name}">{content} {icon}</div>'
 
     def articles_coll(self, order: Order) -> str:
         name: str = "articles"
@@ -331,7 +381,9 @@ class Utils:
     @staticmethod
     def get_invalid_orders() -> QuerySet:
         """Vrátí objednávky se statusem ADVICED, které mají chybu."""
-        filtr: QuerySet = Order.objects.filter(status=Status.ADVICED).filter(
+        filtr: QuerySet = Order.objects.filter(
+            status=Status.ADVICED, team_type=TeamType.BY_ASSEMBLY_CREW
+        ).filter(
             Q(mail_datum_sended__isnull=True)
             | (
                 Q(mail_datum_sended__isnull=False)
@@ -458,6 +510,14 @@ class Utils:
 
     #     orders = Order.objects.filter(query)
     #     return orders
+
+    @staticmethod
+    def nevybrano(css: str) -> tuple[str, ...]:
+        icon = exclamation_icon
+        css += " u-txt-warning"
+        content = "Nevybráno"
+
+        return icon, css, content
 
 
 if __name__ == "__main__":

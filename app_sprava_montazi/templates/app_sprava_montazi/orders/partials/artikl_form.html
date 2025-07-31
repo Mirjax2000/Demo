@@ -6,36 +6,19 @@
 <div class="row mb-3"
      data-form-index="{{ form.prefix|default:'__prefix__' }}">
     {{ form.id }}
-    <div class="L-form__group">
-        {{ form.name.label_tag }}
-        {{ form.name }}
-        {% for error in form.name.errors %}<span class="text-danger">{{ error }}</span>{% endfor %}
-    </div>
     <div class="u-flex-row">
-        <div>
-            <!-- Price -->
-            <div class="L-form__group">
-                {{ form.price.label_tag }}
-                {{ form.price }}
-            </div>
-            <div class="L-form__error">
-                {% if form.price.errors %}{{ form.price.errors }}{% endif %}
-            </div>
+        <div class="L-form__group flex-grow-1">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            {% for error in form.name.errors %}<span class="text-danger">{{ error }}</span>{% endfor %}
         </div>
-        <div>
-            <!-- Quantity -->
-            <div class="L-form__group">
-                {{ form.quantity.label_tag }}
-                {{ form.quantity }}
-            </div>
-            <div class="L-form__error">
-                {% if form.quantity.errors %}{{ form.quantity.errors }}{% endif %}
-            </div>
+        <!-- Quantity -->
+        <div class="L-form__group flex-shrink-0 w-25">
+            {{ form.quantity.label_tag }}
+            {{ form.quantity }}
         </div>
-        <div>
-            <label class="form-check-label" for="{{ form.is_sofa.id_for_label }}">{{ form.is_sofa.label }}</label>
-            {{ form.is_sofa }}
-            {% for error in form.is_sofa.errors %}<span class="text-danger">{{ error }}</span>{% endfor %}
+        <div class="L-form__error">
+            {% if form.quantity.errors %}{{ form.quantity.errors }}{% endif %}
         </div>
     </div>
     <div class="L-form__group">
@@ -66,3 +49,4 @@
         </div>
     {% endif %}
 </div>
+<hr>

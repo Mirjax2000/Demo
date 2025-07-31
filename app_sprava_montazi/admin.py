@@ -50,7 +50,6 @@ class ArticleAdmin(admin.ModelAdmin):
     list_display = (
         "order",
         "name",
-        "price",
         "quantity",
     )
     list_per_page = 15

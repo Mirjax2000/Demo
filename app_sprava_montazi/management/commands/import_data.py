@@ -4,8 +4,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import TypedDict
 
+# --- django
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import transaction
+from django.db import IntegrityError
+from django.conf import settings
 from django.utils.text import slugify
 from pandas import DataFrame, read_csv
 from rich.console import Console
@@ -104,6 +107,14 @@ class Command(BaseCommand):
                     )
                     raise
 
+                except IntegrityError as e:
+                    cons.log(
+                        f"Neocekavana chyba u objednavky: \n"
+                        f"{item.get('cislo-zakazky', 'N/A')} {str(e)}",
+                        style="red",
+                    )
+                    raise
+
                 except Exception as e:
                     cons.log(
                         f"Neocekavana chyba u objednavky: \n"
@@ -170,6 +181,7 @@ class DatasetTools:
         dataset["krestni-jmeno"] = dataset["krestni-jmeno"].fillna("")
         dataset["avizovany-termin"] = dataset["avizovany-termin"].fillna("").astype(str)
         dataset["erfassungstermin"] = dataset["erfassungstermin"].fillna("").astype(str)
+        dataset["psc"] = dataset["psc"].astype(str)
         dataset["misto-urceni"] = dataset["misto-urceni"].fillna(0).astype(int)
         dataset["poznamka-mandanta"] = dataset["poznamka-mandanta"].fillna("")
         dataset["cislo-zakazky"] = dataset["cislo-zakazky"].apply(slugify)
@@ -209,19 +221,16 @@ class CreateRecords:
 
     @staticmethod
     def create_client(prijmeni: str, krestni_jmeno: str, psc: str) -> ClientRecord:
-        """Vytvoreni zaznam clienta"""
+        """Vytvoreni zaznamu clienta"""
+        name = f"{prijmeni.strip()} {krestni_jmeno.strip()}".strip()
+        psc = psc.strip()
 
-        name: str = f"{prijmeni} {krestni_jmeno}"
-        client, client_created = Client.objects.get_or_create(
-            name=name.strip(), zip_code=psc
-        )
+        client, client_created = Client.objects.get_or_create(name=name, zip_code=psc)
 
-        result: ClientRecord = {
+        return {
             "client": client,
             "client_created": client_created,
         }
-
-        return result
 
     @staticmethod
     def create_order(

@@ -29,29 +29,31 @@ class Command(BaseCommand):
         for item in customer_details:
             for order_number, data in item.items():
                 try:
-                    order = Order.objects.get(order_number=order_number.lower())
+                    order = Order.objects.get(order_number=order_number)
                     client = order.client
                     if client:
-                        cons.log(f"zacatek  {client.slug} ma {client.incomplete}")
+                        cons.log(f"zacatek {client.name} ma {client.incomplete}")
                         try:
                             with transaction.atomic():
-                                client.name = data["name"]
-                                client.city = data.get("city", "")
-                                client.zip_code = data["zip_code"]
-                                client.street = data.get("street", "")
-                                client.phone = data.get("phone", "")
-                                client.email = data.get("email", "")
+                                # client.name = data["name"].strip()
+                                client.city = data.get("city", "").strip()
+                                # client.zip_code = data["zip_code"].strip()
+                                client.street = data.get("street", "").strip()
+                                client.phone = data.get("phone", "").strip()
+                                client.email = data.get("email", "").strip()
                                 client.save()
                                 if settings.DEBUG:
-                                    cons.log(f"{client.slug}: byl aktualizovan.")
                                     cons.log(
-                                        f"konec: {client.slug} ma {client.incomplete}"
+                                        f"{client.name} {client.zip_code}: byl aktualizovan."
+                                    )
+                                    cons.log(
+                                        f"konec: {client.name} {client.zip_code} ma {client.incomplete}"
                                     )
 
                         except Exception:
                             if settings.DEBUG:
                                 cons.log(
-                                    f"{client.slug}: Update selhal, nic se neulozilo."
+                                    f"{client.name} {client.zip_code}: Update selhal, nic se neulozilo."
                                 )
 
                     else:
@@ -126,38 +128,3 @@ class SeleniumFunction:
         ]
 
         return recieved_with_order_number
-
-        # recieved_columns: list = [
-        #     {
-        #         "name": "Franta",
-        #         "zip_code": "12345",
-        #         "city": "Praha",
-        #         "street": "Konvalinkova 15",
-        #         "phone": "234234234",
-        #         "email": "franta@seznam.cz",
-        #     },
-        #     {
-        #         "name": "Pepa",
-        #         "zip_code": "54321",
-        #         "city": "Brno",
-        #         "street": "Jabloňová 3",
-        #         "phone": "777888999",
-        #         "email": "pepa@centrum.cz",
-        #     },
-        #     {
-        #         "name": "Lucie",
-        #         "zip_code": "10000",
-        #         "city": "Ostrava",
-        #         "street": "Školní 22",
-        #         "phone": "602123456",
-        #         "email": "lucie@volny.cz",
-        #     },
-        #     {
-        #         "name": "Karel",
-        #         "zip_code": "11000",
-        #         "city": "Plzeň",
-        #         "street": "Hlavní 5",
-        #         "phone": "601987654",
-        #         "email": "karel@email.cz",
-        #     },
-        # ]

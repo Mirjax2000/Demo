@@ -40,7 +40,7 @@
             {% if order.client.phone %}
                 <li class="L-detail__item">
                     <strong>Telefon:</strong>
-                    <span class="ms-1">{{ order.client.phone }}</span>
+                    <span class="ms-1">{{ order.client.format_phone }}</span>
                 </li>
             {% else %}
                 <li class="L-detail__item">

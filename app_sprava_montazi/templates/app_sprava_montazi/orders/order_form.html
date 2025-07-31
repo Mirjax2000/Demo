@@ -11,12 +11,10 @@
                 <fieldset class="L-form__fieldset">
                     <legend>Objednávka</legend>
                     {% include "app_sprava_montazi/partials/form_field.html" with form=order_form %}
-                    <div>
-                        <div class="u-txt-right mt-3">
-                            <button type="submit" class="btn btn-primary mt-3">
-                                <i class="fa-solid fa-plus me-2"></i>Uložit objednávku
-                            </button>
-                        </div>
+                    <div class="u-txt-right mt-3">
+                        <button type="submit" class="btn btn-primary mt-3">
+                            <i class="fa-solid fa-plus me-2"></i>Uložit objednávku
+                        </button>
                     </div>
                 </fieldset>
                 <!---->
@@ -63,6 +61,7 @@
                 {% endif %}
             </div>
         </form>
+        <!---->
         <hr>
         <div class="mt-3">
             <a href="{% url 'orders' %}"
