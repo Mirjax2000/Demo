@@ -477,6 +477,8 @@ class ClientUpdateViewTest(TestCase):
             evidence_termin=date.today(),
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=None,
+            naklad=Decimal(100),
+            vynos=Decimal(100),
         )
         base_url = reverse("client_update", kwargs={"pk": self.order.client.pk})  # type:ignore
         self.url = f"{base_url}?order_pk={self.order.pk}"
@@ -573,6 +575,8 @@ class OrderCreateViewTest(TestCase):
             evidence_termin=date.today(),
             team_type=TeamType.BY_ASSEMBLY_CREW,
             team=None,
+            naklad=Decimal(100),
+            vynos=Decimal(100),
         )
 
         # Základní validní data pro formuláře
@@ -595,6 +599,8 @@ class OrderCreateViewTest(TestCase):
             "montage_termin": "2024-05-25T10:30",
             "team_type": self.valid_team_type_key,
             "team": self.team.id,  # type:ignore
+            "vynos": Decimal(100),
+            "naklad": Decimal(100),
             "notes": "This is a test order note.",
         }
 
@@ -1771,6 +1777,7 @@ class ExportOrdersExcelViewTest(TestCase):
             city="Praha",
             phone="+420987654321",
             price_per_hour=350.00,
+            price_per_km=350.00,
             active=True,
         )
 
@@ -1856,11 +1863,59 @@ class ExportOrdersExcelViewTest(TestCase):
             mandant="SCCZ",
             client=self.customer,
             evidence_termin=date(2024, 3, 1),
+            delivery_termin=date(2024, 3, 1),
+            montage_termin=timezone.now(),
             status=Status.ADVICED,
             team_type=TeamType.BY_ASSEMBLY_CREW,
+            team=self.team,
+            naklad=Decimal(100),
+            vynos=Decimal(100),
+        )
+        self.order_adviced_2 = Order.objects.create(
+            order_number="ADVICED-X-2",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            evidence_termin=date(2024, 3, 1),
+            delivery_termin=date(2024, 3, 1),
+            status=Status.ADVICED,
+            team_type=TeamType.BY_DELIVERY_CREW,
+            naklad=Decimal(200),
+            vynos=Decimal(100),
         )
 
         self.url = reverse("order_export")
+
+    def test_excel_file_with_status_filter(self):
+        """
+        Testuje generování Excelu s použitím filtru 'status'.
+        Měl by obsahovat pouze objednávky s daným statusem (zde ADVICED).
+        """
+        response = self.client.get(self.url, {"status": Status.ADVICED})
+        self.assertEqual(response.status_code, 200)
+
+        excel_file = io.BytesIO(response.content)
+        wb = load_workbook(excel_file)
+        ws = wb.active
+
+        self.assertEqual(ws.max_row, 3)  # type:ignore
+
+        # Zkontrolujeme, zda se jedná o správnou objednávku
+        order_row_values = [cell.value for cell in ws[2]]  # type:ignore
+        self.assertEqual(order_row_values[0], self.order_adviced.order_number)
+        self.assertEqual(
+            order_row_values[3],
+            self.order_adviced.get_status_display(),  # type:ignore
+        )  # ADVICED
+        self.assertEqual(
+            order_row_values[6], format_date(self.order_adviced.evidence_termin)
+        )
+        disposition = response["Content-Disposition"]
+        self.assertIn(
+            f"filename=objednavky-{Status.ADVICED.value}_",  # type:ignore
+            disposition,
+        )
+        self.assertIn(".xlsx", disposition)
 
     def test_excel_file_content_all_visible_orders(self):
         """
@@ -2018,37 +2073,6 @@ class ExportOrdersExcelViewTest(TestCase):
         disposition = response["Content-Disposition"]
         self.assertIn(f"filename=objednavky-{Status.NEW.value}_", disposition)  # type:ignore
         self.assertIn("NO-MATCH", disposition)
-        self.assertIn(".xlsx", disposition)
-
-    def test_excel_file_with_status_filter(self):
-        """
-        Testuje generování Excelu s použitím filtru 'status'.
-        Měl by obsahovat pouze objednávky s daným statusem (zde ADVICED).
-        """
-        response = self.client.get(self.url, {"status": Status.ADVICED})
-        self.assertEqual(response.status_code, 200)
-
-        excel_file = io.BytesIO(response.content)
-        wb = load_workbook(excel_file)
-        ws = wb.active
-
-        self.assertEqual(ws.max_row, 3)  # type:ignore
-
-        # Zkontrolujeme, zda se jedná o správnou objednávku
-        order_row_values = [cell.value for cell in ws[2]]  # type:ignore
-        self.assertEqual(order_row_values[0], self.order_adviced.order_number)
-        self.assertEqual(
-            order_row_values[3],
-            self.order_adviced.get_status_display(),  # type:ignore
-        )  # ADVICED
-        self.assertEqual(
-            order_row_values[6], format_date(self.order_adviced.evidence_termin)
-        )
-        disposition = response["Content-Disposition"]
-        self.assertIn(
-            f"filename=objednavky-{Status.ADVICED.value}_",  # type:ignore
-            disposition,
-        )
         self.assertIn(".xlsx", disposition)
 
 

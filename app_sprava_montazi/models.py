@@ -311,6 +311,8 @@ class Order(Model):
             and self.evidence_termin
             and self.delivery_termin
             and self.montage_termin
+            and self.vynos
+            and self.naklad
         )
         if ready:
             self.status = Status.ADVICED
@@ -329,6 +331,8 @@ class Order(Model):
             and self.evidence_termin
             and self.delivery_termin
             and not self.montage_termin
+            and self.vynos
+            and self.naklad
         )
         if ready:
             self.status = Status.ADVICED

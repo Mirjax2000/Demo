@@ -568,6 +568,8 @@ class OrderModelTestV2(TestCase):
             "montage_termin": timezone.now() + timedelta(days=3),
             "team_type": TeamType.BY_ASSEMBLY_CREW,
             "team": self.team,
+            "naklad": Decimal(100),
+            "vynos": Decimal(100),
         }
         data.update(kwargs)
         return data
@@ -603,8 +605,8 @@ class OrderModelTestV2(TestCase):
         self.assertEqual(order.mandant, "ABC")
         self.assertEqual(order.status, Status.ADVICED)
         self.assertEqual(order.client, customer)
-        self.assertEqual(order.client.zip_code, "11150")
-        self.assertEqual(order.client.name, "Jan Novák")
+        self.assertEqual(order.client.zip_code, "11150")  # type:ignore
+        self.assertEqual(order.client.name, "Jan Novák")  # type:ignore
         self.assertIsInstance(order.client, Client)
         self.assertEqual(order.team_type, TeamType.BY_ASSEMBLY_CREW)
         self.assertEqual(order.team, team)
@@ -897,6 +899,7 @@ class OrderModelTestV2(TestCase):
         self.assertEqual(order.status, Status.ADVICED)
         self.assertEqual(order.team_type, TeamType.BY_DELIVERY_CREW)
         self.assertEqual(order.delivery_termin, date_timedelta)
+        self.assertEqual(order.profit(), Decimal(0))
 
     def test_order_creation_with_delivery_not_delivery_termin(self):
         """
@@ -927,6 +930,9 @@ class OrderModelTestV2(TestCase):
         self.assertEqual(order.team_type, TeamType.BY_DELIVERY_CREW)
         self.assertEqual(order.delivery_termin, None)
         self.assertEqual(order.montage_termin, None)
+        self.assertEqual(order.naklad, Decimal(100))
+        self.assertEqual(order.vynos, Decimal(100))
+        self.assertEqual(order.profit(), Decimal(0))
 
 
 class ArticleModelTest(TestCase):
