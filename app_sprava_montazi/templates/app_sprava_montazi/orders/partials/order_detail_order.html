@@ -109,7 +109,7 @@
                 <div class="u-flex-row">
                     <div class="detail__vynos">
                         <p class="detail__header">Výnos</p>
-                        {% if order.vynos %}
+                        {% if order.vynos is not None %}
                             <p class="detail__content">{{ order.vynos }}</p>
                         {% else %}
                             <p class="detail__content u-txt-warning">Nezadáno</p>
@@ -118,7 +118,7 @@
                     <!---->
                     <div class="detail__naklad">
                         <p class="detail__header">Náklad</p>
-                        {% if order.naklad %}
+                        {% if order.naklad is not None %}
                             <p class="detail__content">{{ order.naklad }}</p>
                         {% else %}
                             <p class="detail__content u-txt-warning">Nezadáno</p>
