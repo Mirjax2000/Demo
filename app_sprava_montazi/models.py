@@ -412,6 +412,20 @@ class OrderPDFStorage(Model):
         ordering = ["-created"]
 
 
+class OrderMontazImage(Model):
+    order = ForeignKey(
+        Order,
+        on_delete=PROTECT,
+        related_name="montage_images",
+        verbose_name="Fotky z montaze",
+    )
+    image = FileField(upload_to="montage_images/")
+    created = DateTimeField(auto_now_add=True, verbose_name="Cas ulozeni")
+
+    def __str__(self):
+        return f"Fotka k zakázce {self.order.pk} z {self.created}"
+
+
 class OrderBackProtocol(Model):
     order = OneToOneField(
         Order,

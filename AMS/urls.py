@@ -37,6 +37,7 @@ from app_sprava_montazi.views import (
     ExportOrdersExcelView as ExportOrdersExcel,
     OrderHiddenView as OrderHidden,
     TeamDeleteView as TeamDelete,
+    UploadOneImageView as UploadOneImg,
 )
 
 from app_sprava_montazi.views_services import (
@@ -86,10 +87,11 @@ app_sprava_montazi: list = [
     path(f"order/{PK}/generate-pdf/", GeneratePDF.as_view(), name="generate_pdf"),
     path(f"order/{PK}/back_protocol/", BackProtocol.as_view(), name="back_protocol"),
     path(f"order/{PK}/upload_protocol/", UplBckPrtcl.as_view(), name="upload_protocol"),
+    path(f"order/{PK}/upload_one_img/", UploadOneImg.as_view(), name="upload_one_img"),
     # ---
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),
-    path("createpage/upload/", ProtocolUpload.as_view(), name="upload_protocol"),
+    path("createpage/upload/", ProtocolUpload.as_view(), name="create_upload_protocol"),
     #
     # --- teams ---
     path("teams/", Teams.as_view(), name="teams"),

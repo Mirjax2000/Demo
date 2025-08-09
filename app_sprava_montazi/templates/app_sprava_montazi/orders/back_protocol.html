@@ -27,32 +27,66 @@
                 {% endfor %}
                 <h1 class="mb-4 pt-2">Zakázka: {{ order|upper }}</h1>
                 <hr>
-                <div class="row justify-content-center mt-4 mb-5">
-                    <div class="col-12 col-md-6">
-                        <h3 class="text-start">Montážní tým: {{ order.team }}</h3>
-                        <h3 class="text-start">Zákazník: {{ order.client }}</h3>
-                    </div>
+                <div class="alert alert-primary">
+                    <h3 class="text-start">
+                        Montážní tým: <span class="badge text-bg-info">{{ order.team }}</span>
+                    </h3>
+                    <h3 class="text-start">
+                        Zákazník: <span class="badge text-bg-info">{{ order.client }}</span>
+                    </h3>
                 </div>
                 <!---->
-                <form action="{% url 'upload_protocol' order.pk %}"
-                      method="post"
-                      enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <p>
-                        max. velikost souboru je <strong>10MB</strong>!
-                    </p>
-                    <input class="d-none"
-                           type="file"
-                           id="fileInput"
-                           name="image"
-                           accept="image/*"
-                           capture="environment" />
-                    <label for="fileInput"
-                           class="btn btn-primary ps-5 pe-5 pt-2 pb-2 u-txt-bigger">
-                        <i class="fa-solid fa-camera me-2"></i> Nahrát fotografii
-                    </label>
-                    <p id="fileError" class="mt-5 u-txt-bigger"></p>
-                </form>
+                <hr>
+                <div class="u-bck-form-back-protocol">
+                    <h2>Nahrát fotografii z montáže.</h2>
+                    <form action="{% url 'upload_one_img' order.pk %}"
+                          method="post"
+                          enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <p>
+                            max. velikost souboru je <strong>10MB</strong>!
+                        </p>
+                        <input class="d-none"
+                               type="file"
+                               id="fileInputImg"
+                               name="image"
+                               accept="image/*"
+                               capture="environment" />
+                        <label for="fileInputImg"
+                               class="btn btn-primary ps-5 pe-5 pt-2 pb-2 u-txt-bigger mb-3">
+                            <i class="fa-solid fa-camera me-2"></i>Nahrát fotografii
+                        </label>
+                        <p id="fileErrorImg" class="mt-5 u-txt-bigger"></p>
+                    </form>
+                </div>
+                <!---->
+                <p class="alert alert-info u-txt-left">
+                    Jakmile se úspěšně nahraje obrázek montážního protokolu dojde k uzavření zakázky.
+                </p>
+                <!---->
+                <div class="u-bck-form-back-protocol">
+                    <h2>Nahrát fotografii montážního protokolu</h2>
+                    <form action="{% url 'upload_protocol' order.pk %}"
+                          method="post"
+                          enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <p>
+                            max. velikost souboru je <strong>10MB</strong>!
+                        </p>
+                        <input class="d-none"
+                               type="file"
+                               id="fileInput"
+                               name="image"
+                               accept="image/*"
+                               capture="environment" />
+                        <label for="fileInput"
+                               class="btn btn-primary ps-5 pe-5 pt-2 pb-2 u-txt-bigger mb-3">
+                            <i class="fa-solid fa-camera me-2"></i>Nahrát fotografii
+                        </label>
+                        <p id="fileError" class="mt-5 u-txt-bigger"></p>
+                    </form>
+                </div>
+                <hr>
             </div>
         </section>
         {% include "includes/scripts.html" %}

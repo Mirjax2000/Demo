@@ -22,15 +22,16 @@ cons: Console = Console()
 @dataclass(frozen=True)
 class Config:
     img_formats: tuple[str, ...] = (".jpg", ".jpeg", ".png", ".webp", ".bmp")
+    max_size_mb: int = 10
 
 
 class ProtocolUploader:
     """OOP pro vsechno z navratu protokolu od montazniho tymu"""
 
-    def __init__(self, order: Order, image, request: HttpRequest):
-        self.order = order
+    def __init__(self, order: Order, image, request: HttpRequest) -> None:
+        self.order: Order = order
         self.image = image
-        self.request = request
+        self.request: HttpRequest = request
         self.conf: Config = Config()
         self.protocol_obj: OrderBackProtocol | None = None
         self.error_message: str | None = None
@@ -50,7 +51,7 @@ class ProtocolUploader:
 
     def validate_image(self) -> bool:
         """Validace obrazku"""
-        max_size_mb: int = 10
+        max_size_mb: int = Config.max_size_mb
         if not self.image:
             self.set_error("Soubor nevybrán")
             return False
