@@ -412,6 +412,11 @@ class OrderPDFStorage(Model):
         ordering = ["-created"]
 
 
+def upload_to_order_folder(instance, filename):
+    order_number = instance.order.order_number.upper()
+    return f"montage_images/{order_number}/{filename}"
+
+
 class OrderMontazImage(Model):
     order = ForeignKey(
         Order,
@@ -420,8 +425,9 @@ class OrderMontazImage(Model):
         verbose_name="Fotky z montaze",
     )
     position = PositiveIntegerField(default=0)
-    image = FileField(upload_to="montage_images/")
     created = DateTimeField(auto_now_add=True, verbose_name="Cas ulozeni")
+
+    image = FileField(upload_to=upload_to_order_folder)
 
     def __str__(self):
         return f"Fotka k zakázce {self.order.pk} z {self.created}"
