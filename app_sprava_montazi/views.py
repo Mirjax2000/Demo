@@ -1248,6 +1248,4 @@ class UploadOneImageView(View):
         if not img_uploader.save_images():
             return img_uploader.redirect_with_error()
 
-        img_uploader.convert_and_save_webp()
-
         return HttpResponse(img_uploader.html_success())

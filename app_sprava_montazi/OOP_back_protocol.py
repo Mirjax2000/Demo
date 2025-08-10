@@ -137,29 +137,32 @@ class ProtocolUploader:
 
     def save_images(self) -> bool:
         error: str = "Interní chyba: Soubor nebyl připraven k uložení."
+        error_img: str = "Chyba při ukládání obrázku"
         if not self.renamed_file:
             cons.log(error, style="red")
             self.set_error(error)
             return False
 
-        # vytvoříme nový záznam vždy (protože máme víc obrázků)
         try:
             position = self.get_next_image_number()
-            obj = OrderBackProtocol(
+            obj = OrderMontazImage(
                 order=self.order,
                 position=position,
             )
-            obj.file.save(self.renamed_file.name, self.renamed_file, save=True)
+            obj.image.save(self.renamed_file.name, self.renamed_file, save=True)
             obj.save()
+            # ---
+            self.montage_images_obj = obj
+            # ---
             if settings.DEBUG:
                 cons.log(
-                    f"Soubor {obj.file.name} uložen s pozicí {position}", style="blue"
+                    f"Soubor {obj.image.name} uložen s pozicí {position}", style="blue"
                 )
             return True
 
         except Exception as e:
-            cons.log(f"Chyba při ukládání protokolu: {e}", style="red")
-            self.set_error("Chyba při ukládání protokolu.")
+            cons.log(f"{error_img}: {e}", style="red")
+            self.set_error(error_img)
             return False
 
     def validate_barcode(self) -> bool:
