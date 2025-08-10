@@ -419,6 +419,7 @@ class OrderMontazImage(Model):
         related_name="montage_images",
         verbose_name="Fotky z montaze",
     )
+    position = PositiveIntegerField(default=0)
     image = FileField(upload_to="montage_images/")
     created = DateTimeField(auto_now_add=True, verbose_name="Cas ulozeni")
 

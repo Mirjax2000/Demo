@@ -14,6 +14,7 @@ from django.shortcuts import redirect
 
 # --- models
 from .models import Order, OrderBackProtocol, OrderBackProtocolToken, Status
+from .models import OrderMontazImage
 from .utils import get_qrcode_value, convert_image_to_webp
 
 cons: Console = Console()
@@ -34,6 +35,7 @@ class ProtocolUploader:
         self.request: HttpRequest = request
         self.conf: Config = Config()
         self.protocol_obj: OrderBackProtocol | None = None
+        self.montage_images_obj: OrderMontazImage | None = None
         self.error_message: str | None = None
         self.renamed_file: ContentFile | None = None
 
@@ -85,11 +87,29 @@ class ProtocolUploader:
             self.set_error("Chyba při přípravě souboru k uložení.")
             return False
 
+    def prepare_file_for_saving_images(self) -> bool:
+        """priprava pred ulozenim images souboru"""
+        try:
+            ext = os.path.splitext(self.image.name)[1]
+            next_number = self.get_next_image_number()
+            new_filename = f"{self.order.order_number.upper()}_{next_number}{ext}"
+
+            renamed_file = ContentFile(self.image.read())
+            renamed_file.name = new_filename
+            self.renamed_file = renamed_file
+            return True
+
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            cons.log(f"Chyba při přípravě souboru k uložení: {e}", style="red")
+            self.set_error("Chyba při přípravě souboru k uložení.")
+            return False
+
     def save_protocol_object(self) -> bool:
         """ukladame soubor"""
+        error: str = "Interní chyba: Soubor nebyl připraven k uložení."
         if not self.renamed_file:
-            cons.log("Interní chyba: Soubor nebyl připraven k uložení.", style="red")
-            self.set_error("Interní chyba: Soubor nebyl připraven k uložení.")
+            cons.log(error, style="red")
+            self.set_error(error)
             return False
 
         obj, created = OrderBackProtocol.objects.get_or_create(order=self.order)
@@ -111,6 +131,33 @@ class ProtocolUploader:
             return True
 
         except Exception as e:  # pylint: disable=broad-exception-caught
+            cons.log(f"Chyba při ukládání protokolu: {e}", style="red")
+            self.set_error("Chyba při ukládání protokolu.")
+            return False
+
+    def save_images(self) -> bool:
+        error: str = "Interní chyba: Soubor nebyl připraven k uložení."
+        if not self.renamed_file:
+            cons.log(error, style="red")
+            self.set_error(error)
+            return False
+
+        # vytvoříme nový záznam vždy (protože máme víc obrázků)
+        try:
+            position = self.get_next_image_number()
+            obj = OrderBackProtocol(
+                order=self.order,
+                position=position,
+            )
+            obj.file.save(self.renamed_file.name, self.renamed_file, save=True)
+            obj.save()
+            if settings.DEBUG:
+                cons.log(
+                    f"Soubor {obj.file.name} uložen s pozicí {position}", style="blue"
+                )
+            return True
+
+        except Exception as e:
             cons.log(f"Chyba při ukládání protokolu: {e}", style="red")
             self.set_error("Chyba při ukládání protokolu.")
             return False
@@ -194,6 +241,18 @@ class ProtocolUploader:
         else:
             if settings.DEBUG:
                 cons.log("WEBP konverze selhala", style="red")
+
+    def get_next_image_number(self) -> int:
+        """toto je zjisteni kolik uz mame obrazku z montaze
+        a pridavame ke jmenu pocet + 1"""
+        last_obj = (
+            OrderMontazImage.objects.filter(order=self.order)
+            .order_by("-position")
+            .first()
+        )
+        if last_obj:
+            return last_obj.position + 1
+        return 1
 
     @staticmethod
     def html_success() -> str:

@@ -1235,19 +1235,19 @@ class UploadOneImageView(View):
             return redirect(request.META.get("HTTP_REFERER", "/"))
         #
         # --- instance
-        uploader: ProtocolUploader = ProtocolUploader(
+        img_uploader: ProtocolUploader = ProtocolUploader(
             order=order, image=image, request=request
         )
 
-        if not uploader.validate_image():
-            return uploader.redirect_with_error()
+        if not img_uploader.validate_image():
+            return img_uploader.redirect_with_error()
 
-        if not uploader.prepare_file_for_saving():
-            return uploader.redirect_with_error()
+        if not img_uploader.prepare_file_for_saving_images():
+            return img_uploader.redirect_with_error()
 
-        if not uploader.save_protocol_object():
-            return uploader.redirect_with_error()
+        if not img_uploader.save_images():
+            return img_uploader.redirect_with_error()
 
-        uploader.convert_and_save_webp()
+        img_uploader.convert_and_save_webp()
 
-        return HttpResponse(uploader.html_success())
+        return HttpResponse(img_uploader.html_success())
