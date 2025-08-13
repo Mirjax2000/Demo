@@ -51,6 +51,11 @@ class ProtocolUploader:
             messages.error(self.request, "Nastala neočekávaná chyba.")
         return redirect(self.request.META.get("HTTP_REFERER", "/"))
 
+    def redirect_with_success(self) -> HttpResponse:
+        """redirect se success message"""
+        messages.success(self.request, "Obrázek přijat.")
+        return redirect(self.request.META.get("HTTP_REFERER", "/"))
+
     def validate_image(self) -> bool:
         """Validace obrazku"""
         max_size_mb: int = Config.max_size_mb
@@ -154,6 +159,7 @@ class ProtocolUploader:
             # ---
             self.montage_images_obj = obj
             # ---
+
             if settings.DEBUG:
                 cons.log(
                     f"Soubor {obj.image.name} uložen s pozicí {position}", style="blue"
@@ -240,6 +246,34 @@ class ProtocolUploader:
             if settings.DEBUG:
                 cons.log(
                     f"Original image nahrazen WEBP: {webp_file.name}", style="green"
+                )
+        else:
+            if settings.DEBUG:
+                cons.log("WEBP konverze selhala", style="red")
+
+    def convert_and_save_webp_images(self) -> None:
+        """Convertuje poslední obrázek z montáže na webp"""
+        last_image = (
+            OrderMontazImage.objects.filter(order=self.order)
+            .order_by("-position")
+            .first()
+        )
+        cons.log(f"last image: {last_image} jmeno souboru:{last_image.image}")
+
+        if not last_image or not last_image.image:
+            cons.log("Chybí soubor ke konverzi na WEBP.", style="red bold")
+            return
+
+        webp_file = convert_image_to_webp(
+            last_image.image, f"{self.order.order_number.upper()}_{last_image.position}"
+        )
+
+        if webp_file:
+            last_image.image.delete(save=False)
+            last_image.image.save(webp_file.name, webp_file, save=True)
+            if settings.DEBUG:
+                cons.log(
+                    f"Originál obrázek nahrazen WEBP: {webp_file.name}", style="green"
                 )
         else:
             if settings.DEBUG:
