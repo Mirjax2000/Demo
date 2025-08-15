@@ -17,7 +17,7 @@ from rest_framework.authtoken.models import Token
 from app_sprava_montazi.utils import update_customers
 
 # --- modely z DB
-from app_sprava_montazi.models import Order
+from app_sprava_montazi.models import Order, Status, TeamType
 
 # --- serializer
 from .serializer import OrderCustomerUpdateSerializer
@@ -48,6 +48,20 @@ class IncompleteCustomersView(APIView):
         if settings.DEBUG:
             cons.log(f"pocet nekompletnych klientu je: {len(seznam)}")
             cons.log(f"seznam nekompletnich klientu: {seznam}")
+        return Response(seznam)
+
+
+class IncompleteDopravniZakazkaView(APIView):
+    permission_classes = [IsAuthenticated]  # jen pro přihlášené uživatele
+
+    def get(self, request) -> Response:
+        qs = Order.objects.filter(
+            status=Status.ADVICED, team_type=TeamType.BY_DELIVERY_CREW
+        )
+        seznam = [record.order_number.upper() for record in qs]
+        if settings.DEBUG:
+            cons.log(f"pocet zaterminovanych zakazek je: {len(seznam)}")
+            cons.log(f"seznam zaterminovanyhch zakazek: {seznam}")
         return Response(seznam)
 
 

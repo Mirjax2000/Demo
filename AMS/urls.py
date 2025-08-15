@@ -49,7 +49,10 @@ from app_sprava_montazi.views_services import (
 from API.views import (
     CustomerUpdateView as CustomerUpdate,
     IncompleteCustomersView as IncmpCstmrs,
+)
+from API.views import (
     ApiStatusView as ApiStatus,
+    IncompleteDopravniZakazkaView as IncmpDopZak,
 )
 
 
@@ -124,7 +127,9 @@ api_urls: list = [
     path(
         "api/incomplete-customers/", IncmpCstmrs.as_view(), name="incomplete-customers"
     ),
-    path("api/update-customers/", CustomerUpdate.as_view(), name="update-customers"),
+    path("api/dopravni-zakazka/", IncmpDopZak.as_view(), name="dopravni-zakazka"),
+    # path("api/update-customers/", CustomerUpdate.as_view(), name="update-customers"),
+    path("api/update-dopzak/", CustomerUpdate.as_view(), name="update-dopzak"),
     path("api/status/", ApiStatus.as_view(), name="api-status"),
     path("api-token-auth/", obtain_auth_token),
     # --- swagger
