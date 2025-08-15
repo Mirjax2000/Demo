@@ -52,7 +52,7 @@ from API.views import (
 )
 from API.views import (
     ApiStatusView as ApiStatus,
-    IncompleteDopravniZakazkaView as IncmpDopZak,
+    ZaterminovanoDopravouView as ZatermDoprav,
 )
 
 
@@ -127,9 +127,11 @@ api_urls: list = [
     path(
         "api/incomplete-customers/", IncmpCstmrs.as_view(), name="incomplete-customers"
     ),
-    path("api/dopravni-zakazka/", IncmpDopZak.as_view(), name="dopravni-zakazka"),
-    # path("api/update-customers/", CustomerUpdate.as_view(), name="update-customers"),
-    path("api/update-dopzak/", CustomerUpdate.as_view(), name="update-dopzak"),
+    path(
+        "api/inc-dopravni-zakazka/", ZatermDoprav.as_view(), name="inc-dopravni-zakazka"
+    ),
+    path("api/update-customers/", CustomerUpdate.as_view(), name="update-customers"),
+    # path("api/update-dopzak/", CustomerUpdate.as_view(), name="update-dopzak"),
     path("api/status/", ApiStatus.as_view(), name="api-status"),
     path("api-token-auth/", obtain_auth_token),
     # --- swagger

@@ -51,7 +51,7 @@ class IncompleteCustomersView(APIView):
         return Response(seznam)
 
 
-class IncompleteDopravniZakazkaView(APIView):
+class ZaterminovanoDopravouView(APIView):
     permission_classes = [IsAuthenticated]  # jen pro přihlášené uživatele
 
     def get(self, request) -> Response:
