@@ -311,8 +311,8 @@ class Order(Model):
             and self.evidence_termin
             and self.delivery_termin
             and self.montage_termin
-            and self.vynos
-            and self.naklad
+            and self.vynos is not None
+            and self.naklad is not None
         )
         if ready:
             self.status = Status.ADVICED
@@ -331,8 +331,8 @@ class Order(Model):
             and self.evidence_termin
             and self.delivery_termin
             and not self.montage_termin
-            and self.vynos
-            and self.naklad
+            and self.vynos is not None
+            and self.naklad is not None
         )
         if ready:
             self.status = Status.ADVICED
@@ -410,6 +410,27 @@ class OrderPDFStorage(Model):
 
     class Meta:
         ordering = ["-created"]
+
+
+def upload_to_order_folder(instance, filename):
+    order_number = instance.order.order_number.upper()
+    return f"montage_images/{order_number}/{filename}"
+
+
+class OrderMontazImage(Model):
+    order = ForeignKey(
+        Order,
+        on_delete=PROTECT,
+        related_name="montage_images",
+        verbose_name="Fotky z montaze",
+    )
+    position = PositiveIntegerField(default=0)
+    created = DateTimeField(auto_now_add=True, verbose_name="Cas ulozeni")
+
+    image = FileField(upload_to=upload_to_order_folder)
+
+    def __str__(self):
+        return f"Fotka k zakázce {self.order.pk} z {self.created}"
 
 
 class OrderBackProtocol(Model):

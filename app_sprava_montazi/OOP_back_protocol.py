@@ -14,6 +14,7 @@ from django.shortcuts import redirect
 
 # --- models
 from .models import Order, OrderBackProtocol, OrderBackProtocolToken, Status
+from .models import OrderMontazImage
 from .utils import get_qrcode_value, convert_image_to_webp
 
 cons: Console = Console()
@@ -22,17 +23,19 @@ cons: Console = Console()
 @dataclass(frozen=True)
 class Config:
     img_formats: tuple[str, ...] = (".jpg", ".jpeg", ".png", ".webp", ".bmp")
+    max_size_mb: int = 10
 
 
 class ProtocolUploader:
     """OOP pro vsechno z navratu protokolu od montazniho tymu"""
 
-    def __init__(self, order: Order, image, request: HttpRequest):
-        self.order = order
+    def __init__(self, order: Order, image, request: HttpRequest) -> None:
+        self.order: Order = order
         self.image = image
-        self.request = request
+        self.request: HttpRequest = request
         self.conf: Config = Config()
         self.protocol_obj: OrderBackProtocol | None = None
+        self.montage_images_obj: OrderMontazImage | None = None
         self.error_message: str | None = None
         self.renamed_file: ContentFile | None = None
 
@@ -48,9 +51,14 @@ class ProtocolUploader:
             messages.error(self.request, "Nastala neočekávaná chyba.")
         return redirect(self.request.META.get("HTTP_REFERER", "/"))
 
+    def redirect_with_success(self) -> HttpResponse:
+        """redirect se success message"""
+        messages.success(self.request, "Obrázek přijat.")
+        return redirect(self.request.META.get("HTTP_REFERER", "/"))
+
     def validate_image(self) -> bool:
         """Validace obrazku"""
-        max_size_mb: int = 10
+        max_size_mb: int = Config.max_size_mb
         if not self.image:
             self.set_error("Soubor nevybrán")
             return False
@@ -84,11 +92,29 @@ class ProtocolUploader:
             self.set_error("Chyba při přípravě souboru k uložení.")
             return False
 
+    def prepare_file_for_saving_images(self) -> bool:
+        """priprava pred ulozenim images souboru"""
+        try:
+            ext = os.path.splitext(self.image.name)[1]
+            next_number = self.get_next_image_number()
+            new_filename = f"{self.order.order_number.upper()}_{next_number}{ext}"
+
+            renamed_file = ContentFile(self.image.read())
+            renamed_file.name = new_filename
+            self.renamed_file = renamed_file
+            return True
+
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            cons.log(f"Chyba při přípravě souboru k uložení: {e}", style="red")
+            self.set_error("Chyba při přípravě souboru k uložení.")
+            return False
+
     def save_protocol_object(self) -> bool:
         """ukladame soubor"""
+        error: str = "Interní chyba: Soubor nebyl připraven k uložení."
         if not self.renamed_file:
-            cons.log("Interní chyba: Soubor nebyl připraven k uložení.", style="red")
-            self.set_error("Interní chyba: Soubor nebyl připraven k uložení.")
+            cons.log(error, style="red")
+            self.set_error(error)
             return False
 
         obj, created = OrderBackProtocol.objects.get_or_create(order=self.order)
@@ -112,6 +138,37 @@ class ProtocolUploader:
         except Exception as e:  # pylint: disable=broad-exception-caught
             cons.log(f"Chyba při ukládání protokolu: {e}", style="red")
             self.set_error("Chyba při ukládání protokolu.")
+            return False
+
+    def save_images(self) -> bool:
+        error: str = "Interní chyba: Soubor nebyl připraven k uložení."
+        error_img: str = "Chyba při ukládání obrázku"
+        if not self.renamed_file:
+            cons.log(error, style="red")
+            self.set_error(error)
+            return False
+
+        try:
+            position = self.get_next_image_number()
+            obj = OrderMontazImage(
+                order=self.order,
+                position=position,
+            )
+            obj.image.save(self.renamed_file.name, self.renamed_file, save=True)
+            obj.save()
+            # ---
+            self.montage_images_obj = obj
+            # ---
+
+            if settings.DEBUG:
+                cons.log(
+                    f"Soubor {obj.image.name} uložen s pozicí {position}", style="blue"
+                )
+            return True
+
+        except Exception as e:
+            cons.log(f"{error_img}: {e}", style="red")
+            self.set_error(error_img)
             return False
 
     def validate_barcode(self) -> bool:
@@ -193,6 +250,47 @@ class ProtocolUploader:
         else:
             if settings.DEBUG:
                 cons.log("WEBP konverze selhala", style="red")
+
+    def convert_and_save_webp_images(self) -> None:
+        """Convertuje poslední obrázek z montáže na webp"""
+        last_image = (
+            OrderMontazImage.objects.filter(order=self.order)
+            .order_by("-position")
+            .first()
+        )
+        if settings.DEBUG:
+            cons.log(f"last image: {last_image} jmeno souboru:{last_image.image}")
+
+        if not last_image or not last_image.image:
+            cons.log("Chybí soubor ke konverzi na WEBP.", style="red bold")
+            return
+
+        webp_file = convert_image_to_webp(
+            last_image.image, f"{self.order.order_number.upper()}_{last_image.position}"
+        )
+
+        if webp_file:
+            last_image.image.delete(save=False)
+            last_image.image.save(webp_file.name, webp_file, save=True)
+            if settings.DEBUG:
+                cons.log(
+                    f"Originál obrázek nahrazen WEBP: {webp_file.name}", style="green"
+                )
+        else:
+            if settings.DEBUG:
+                cons.log("WEBP konverze selhala", style="red")
+
+    def get_next_image_number(self) -> int:
+        """toto je zjisteni kolik uz mame obrazku z montaze
+        a pridavame ke jmenu pocet + 1"""
+        last_obj = (
+            OrderMontazImage.objects.filter(order=self.order)
+            .order_by("-position")
+            .first()
+        )
+        if last_obj:
+            return last_obj.position + 1
+        return 1
 
     @staticmethod
     def html_success() -> str:

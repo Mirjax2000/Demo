@@ -34,8 +34,8 @@ from .forms import ArticleForm, CallLogFormSet, ClientForm, DistribHub
 from .forms import UploadForm, TeamForm, OrderForm
 
 # --- modely z DB
-from .models import Article, CallLog, Client, Order, Team, TeamType, Status
-from .models import OrderPDFStorage, OrderBackProtocolToken, OrderBackProtocol
+from .models import Article, CallLog, Client, Order, Team, TeamType, OrderMontazImage
+from .models import OrderPDFStorage, OrderBackProtocolToken, OrderBackProtocol, Status
 from .models import HistoricalArticle  # type: ignore  # pylint: disable=no-name-in-module
 
 # pomocne funkce ---
@@ -1092,6 +1092,7 @@ class CheckPDFProtocolView(LoginRequiredMixin, View):
         )
 
 
+# --- back protocols
 class BackProtocolView(TemplateView):
     template_name = f"{APP_URL}/orders/back_protocol.html"
 
@@ -1146,7 +1147,9 @@ class UploadBackProtocolView(View):
             return redirect(request.META.get("HTTP_REFERER", "/"))
         #
         # --- instance
-        uploader = ProtocolUploader(order, image, request)
+        uploader: ProtocolUploader = ProtocolUploader(
+            order=order, image=image, request=request
+        )
 
         if not uploader.validate_image():
             return uploader.redirect_with_error()
@@ -1168,6 +1171,8 @@ class UploadBackProtocolView(View):
 
 
 class ProtocolUploadView(LoginRequiredMixin, View):
+    """tohle je fallback z create view"""
+
     def get(self, request, *args, **kwargs):
         messages.error(request, "Formulář nebyl odeslán.")
         return redirect(request.META.get("HTTP_REFERER", "/"))
@@ -1183,7 +1188,9 @@ class ProtocolUploadView(LoginRequiredMixin, View):
             messages.error(request, f"Zakázka s číslem '{order_number}' neexistuje.")
             return redirect(request.META.get("HTTP_REFERER", "/"))
 
-        uploader: ProtocolUploader = ProtocolUploader(order, image, request)
+        uploader: ProtocolUploader = ProtocolUploader(
+            order=order, image=image, request=request
+        )
 
         if not uploader.validate_image():
             return uploader.redirect_with_error()
@@ -1212,3 +1219,35 @@ class ProtocolUploadView(LoginRequiredMixin, View):
         save_message += change_status_message
         messages.success(request, save_message)
         return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+class UploadOneImageView(View):
+    """Upload img co se vrati zpet z montazniho tymu"""
+
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get("pk")
+        image = request.FILES.get("image")
+        # ---
+        try:
+            order = Order.objects.get(pk=pk)
+        except Order.DoesNotExist:
+            messages.error(request, "Zakázka neexistuje.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+        #
+        # --- instance
+        img_uploader: ProtocolUploader = ProtocolUploader(
+            order=order, image=image, request=request
+        )
+
+        if not img_uploader.validate_image():
+            return img_uploader.redirect_with_error()
+
+        if not img_uploader.prepare_file_for_saving_images():
+            return img_uploader.redirect_with_error()
+
+        if not img_uploader.save_images():
+            return img_uploader.redirect_with_error()
+
+        img_uploader.convert_and_save_webp_images()
+
+        return img_uploader.redirect_with_success()

@@ -209,7 +209,8 @@ def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | Content
 
     try:
         input_size = img_file.size
-        cons.log(f"Input image size: {input_size / 1024:.2f} KB")
+        if settings.DEBUG:
+            cons.log(f"Input image size: {input_size / 1024:.2f} KB")
         img: Image.Image = Image.open(img_file)
 
         # Oprava rotace podle EXIF dat (mobilní fotky apod.)

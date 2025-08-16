@@ -1,35 +1,31 @@
+"""test views 2"""
+
 import logging
+import tempfile
+import shutil
+from pathlib import Path
 from datetime import date, datetime
+from unittest.mock import patch, MagicMock
 
 # --- django
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.http import HttpRequest
 from django.conf import settings
+from django.shortcuts import redirect
 from django.contrib.messages import get_messages
-from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client as CL
-from django.test import TestCase
-from unittest.mock import patch
+from django.core.files.base import ContentFile
+from django.test import TestCase, override_settings
 from django.utils import timezone
-from django.test import override_settings
 
 # --- modely
-from app_sprava_montazi.models import (
-    Article,
-    Client,
-    DistribHub,
-    Order,
-    OrderPDFStorage,
-    Status,
-    Team,
-    TeamType,
-    Upload,
-    OrderBackProtocolToken,
-)
+from app_sprava_montazi.models import Client, DistribHub, Status, TeamType, Order
+from app_sprava_montazi.models import OrderMontazImage, OrderBackProtocolToken, Team
 
 # --- oop
 from app_sprava_montazi.OOP_emails import CustomEmail
+from app_sprava_montazi.OOP_back_protocol import ProtocolUploader, Config
 
 # --- utils
 from ..utils import format_date
@@ -202,7 +198,6 @@ class OrderProtocolView(TestCase):
         self.assertContains(response, "234234234", html=False)
         self.assertContains(response, "ferda.company@gmail.cz", html=False)
         self.assertContains(response, "Neaktivní", html=False)
-    
 
 
 class OrderHiddenView(TestCase):
@@ -367,3 +362,133 @@ class SendMailViewTests(TestCase):
 
         # 5️⃣ zkontrolujeme redirect (pro jistotu)
         self.assertEqual(response.status_code, 302)
+
+
+class ImageUploaderTestCase(TestCase):
+    _media_root_manager = None
+    _temp_media_dir = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # Vytvoření dočasného adresáře
+        cls._temp_media_dir = tempfile.mkdtemp()
+        # Nastavení MEDIA_ROOT na dočasný adresář
+        cls._media_root_manager = override_settings(MEDIA_ROOT=cls._temp_media_dir)
+        cls._media_root_manager.enable()
+
+    @classmethod
+    def tearDownClass(cls):
+        # Vrácení původního nastavení
+        cls._media_root_manager.disable()
+        # Odstranění dočasného adresáře
+        shutil.rmtree(cls._temp_media_dir, ignore_errors=True)
+        super().tearDownClass()
+
+    def setUp(self):
+        self.hub = DistribHub.objects.create(code="111", city="Praha")
+        self.customer = Client.objects.create(name="Pedro Pascal", zip_code="12345")
+        self.order = Order.objects.create(
+            order_number="ORDER-TEST-ADVICED-1",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            status=Status.ADVICED,
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_DELIVERY_CREW,
+            notes="zaterminovano s dopravou",
+        )
+        self.url = reverse("upload_one_img", kwargs={"pk": self.order.pk})
+
+        # Vytvoření instance ProtocolUploader pro unit testy
+        self.request = HttpRequest()
+        self.request.META["HTTP_REFERER"] = "/test-referer/"
+        self.uploader = ProtocolUploader(
+            order=self.order,
+            image=SimpleUploadedFile(
+                "test.jpg", b"fake_content", content_type="image/jpeg"
+            ),
+            request=self.request,
+        )
+
+    @patch("app_sprava_montazi.OOP_back_protocol.convert_image_to_webp")
+    def test_upload_image_flow_end_to_end(self, mock_webp_converter):
+        """Testuje celý proces nahrání a konverze obrázku do .webp, včetně DB a souborů."""
+
+        def mock_conversion(image_file, filename):
+            return ContentFile(b"fake_webp_content", name=f"{filename}.webp")
+
+        mock_webp_converter.side_effect = mock_conversion
+
+        with tempfile.NamedTemporaryFile(suffix=".jpg") as tmp:
+            tmp.write(b"fake_image_content")
+            tmp.seek(0)
+            test_image = SimpleUploadedFile(
+                "test_image.jpg", tmp.read(), content_type="image/jpeg"
+            )
+
+            response = self.client.post(self.url, {"image": test_image})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(OrderMontazImage.objects.count(), 1)
+
+        img_obj = OrderMontazImage.objects.first()
+        self.assertIsNotNone(img_obj)
+
+        expected_filename = f"{self.order.order_number.upper()}_{img_obj.position}.webp"
+        self.assertTrue(img_obj.image.name.endswith(".webp"))
+        self.assertEqual(Path(img_obj.image.name).name, expected_filename)
+
+        full_path = Path(img_obj.image.path)
+        self.assertTrue(full_path.exists())
+        self.assertTrue(full_path.name.endswith(".webp"))
+
+    def test_validate_image_size_too_large(self):
+        """Testuje validaci velkého souboru."""
+        # Mockování statické proměnné
+        with patch.object(Config, "max_size_mb", 1):
+            max_size_in_bytes = 1 * 1024 * 1024
+            self.uploader.image = SimpleUploadedFile(
+                "large_file.jpg",
+                b"x" * (max_size_in_bytes + 1),
+                content_type="image/jpeg",
+            )
+            self.assertFalse(self.uploader.validate_image())
+            self.assertIn("větší než", self.uploader.error_message)
+
+    def test_validate_image_invalid_extension(self):
+        """Testuje validaci neplatné koncovky."""
+        self.uploader.image = SimpleUploadedFile(
+            "document.pdf", b"fake_content", content_type="application/pdf"
+        )
+        self.assertFalse(self.uploader.validate_image())
+        self.assertIn("Špatná koncovka", self.uploader.error_message)
+
+    def test_get_next_image_number_starts_at_one(self):
+        """Ověří, že první obrázek dostane pozici 1."""
+        self.assertEqual(self.uploader.get_next_image_number(), 1)
+
+    def test_get_next_image_number_increments(self):
+        """Ověří, že pozice se správně inkrementuje."""
+        OrderMontazImage.objects.create(order=self.order, position=1)
+        OrderMontazImage.objects.create(order=self.order, position=2)
+        self.assertEqual(self.uploader.get_next_image_number(), 3)
+
+    def test_prepare_file_for_saving_images_renames_file(self):
+        """Ověří správné přejmenování souboru."""
+        self.uploader.image = SimpleUploadedFile("original_name.jpg", b"fake_content")
+        self.assertTrue(self.uploader.prepare_file_for_saving_images())
+        expected_filename = f"{self.order.order_number.upper()}_1.jpg"
+        self.assertEqual(self.uploader.renamed_file.name, expected_filename)
+
+    def test_save_images_creates_db_object(self):
+        """Ověří, že metoda save_images vytvoří objekt v databázi."""
+        self.uploader.renamed_file = ContentFile(b"fake_content", name="test.jpg")
+
+        self.assertTrue(self.uploader.save_images())
+        self.assertEqual(OrderMontazImage.objects.count(), 1)
+
+        img_obj = OrderMontazImage.objects.first()
+        self.assertEqual(img_obj.order, self.order)
+        self.assertEqual(img_obj.position, 1)

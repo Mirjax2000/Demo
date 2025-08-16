@@ -1,6 +1,10 @@
 <p class="mb-3">
     Další možnosti podle statusu objednávky:
-    <span class="u-txt-success">{{ order.get_status_display }}</span>
+    {% if order.team_type == "By_assembly_crew" %}
+        <span class="u-txt-success">{{ order.get_status_display }} - s montáží</span>
+    {% elif order.team_type == "By_delivery_crew" %}
+        <span class="u-txt-success">{{ order.get_status_display }} - s dopravou</span>
+    {% endif %}
 </p>
 <!--new novy-->
 {% if order.status == "New" %}
@@ -41,11 +45,14 @@
             <span>Montážní protokol</span>
         </a>
     {% else %}
-        <div>
-            <div class="alert alert-primary">
-                Pro tento stav zakázky: <strong>Zatermínováno s dopravou</strong> není žádná funkce
-            </div>
-        </div>
+        <form method="post" action="#">
+            {% csrf_token %}
+            <button type="submit"
+                    id="switchRealizedBtn"
+                    class="btn btn-primary btn-sm u-width-180 text-nowrap me-2 disabled">
+                <i class="fa-solid fa-clipboard-check me-2"></i>Na Realizováno
+            </button>
+        </form>
     {% endif %}
 {% endif %}
 <!---->

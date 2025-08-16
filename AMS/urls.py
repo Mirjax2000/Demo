@@ -37,6 +37,7 @@ from app_sprava_montazi.views import (
     ExportOrdersExcelView as ExportOrdersExcel,
     OrderHiddenView as OrderHidden,
     TeamDeleteView as TeamDelete,
+    UploadOneImageView as UploadOneImg,
 )
 
 from app_sprava_montazi.views_services import (
@@ -48,7 +49,10 @@ from app_sprava_montazi.views_services import (
 from API.views import (
     CustomerUpdateView as CustomerUpdate,
     IncompleteCustomersView as IncmpCstmrs,
+)
+from API.views import (
     ApiStatusView as ApiStatus,
+    ZaterminovanoDopravouView as ZatermDoprav,
 )
 
 
@@ -86,10 +90,11 @@ app_sprava_montazi: list = [
     path(f"order/{PK}/generate-pdf/", GeneratePDF.as_view(), name="generate_pdf"),
     path(f"order/{PK}/back_protocol/", BackProtocol.as_view(), name="back_protocol"),
     path(f"order/{PK}/upload_protocol/", UplBckPrtcl.as_view(), name="upload_protocol"),
+    path(f"order/{PK}/upload_one_img/", UploadOneImg.as_view(), name="upload_one_img"),
     # ---
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),
-    path("createpage/upload/", ProtocolUpload.as_view(), name="upload_protocol"),
+    path("createpage/upload/", ProtocolUpload.as_view(), name="create_upload_protocol"),
     #
     # --- teams ---
     path("teams/", Teams.as_view(), name="teams"),
@@ -122,7 +127,11 @@ api_urls: list = [
     path(
         "api/incomplete-customers/", IncmpCstmrs.as_view(), name="incomplete-customers"
     ),
+    path(
+        "api/inc-dopravni-zakazka/", ZatermDoprav.as_view(), name="inc-dopravni-zakazka"
+    ),
     path("api/update-customers/", CustomerUpdate.as_view(), name="update-customers"),
+    # path("api/update-dopzak/", CustomerUpdate.as_view(), name="update-dopzak"),
     path("api/status/", ApiStatus.as_view(), name="api-status"),
     path("api-token-auth/", obtain_auth_token),
     # --- swagger

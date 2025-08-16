@@ -1,12 +1,14 @@
 """Model testy"""
 
 from datetime import date, timedelta, datetime
+import tempfile
 
 # --- django
 from django.forms import ValidationError
 from django.contrib.auth import get_user_model
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import models
 from django.db import IntegrityError
 from django.utils.text import slugify
@@ -14,7 +16,8 @@ from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 
 # --- modely
-from ..models import AppSetting
+from ..models import AppSetting, Order, OrderMontazImage, Status, DistribHub, Client
+from ..models import TeamType
 
 User = get_user_model()
 
@@ -73,3 +76,73 @@ class SettingsModelTest(TestCase):
         # Otestujeme, že už neexistuje v DB
         exists = AppSetting.objects.filter(pk=self.app_settings.pk).exists()
         self.assertFalse(exists)
+
+
+@override_settings(MEDIA_ROOT=tempfile.gettempdir())  # testovací složka
+class OrderMontazImageTest(TestCase):
+    def setUp(self):
+        self.hub = DistribHub.objects.create(code="111", city="Praha")
+        self.customer = Client.objects.create(name="Pedro Pascal", zip_code="12345")
+        self.order_1 = Order.objects.create(
+            order_number="ORDER-TEST-ADVICED-1",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            status=Status.ADVICED,
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_DELIVERY_CREW,
+            notes="zaterminovano s dopravou",
+        )
+        self.order_2 = Order.objects.create(
+            order_number="ORDER-TEST-ADVICE-2",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            status=Status.ADVICED,
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_DELIVERY_CREW,
+            notes="zaterminovano s dopravou",
+        )
+
+    def test_image_upload_path(self):
+        # připravíme testovací soubor
+        test_image_1 = SimpleUploadedFile(
+            "test_1.jpg", b"file_content", content_type="image/jpeg"
+        )
+        test_image_2 = SimpleUploadedFile(
+            "test_2.jpg", b"file_content", content_type="image/jpeg"
+        )
+
+        # vytvoříme instanci modelu
+        image_instance_1 = OrderMontazImage.objects.create(
+            order=self.order_1,
+            image=test_image_1,
+            position=1,
+        )
+        image_instance_2 = OrderMontazImage.objects.create(
+            order=self.order_2,
+            image=test_image_2,
+            position=1,
+        )
+
+        # kontrola, že se soubor ukládá do správné složky
+        expected_prefix_1 = f"montage_images/{self.order_1.order_number.upper()}/test"
+        expected_prefix_2 = f"montage_images/{self.order_2.order_number.upper()}/test"
+        self.assertTrue(
+            image_instance_1.image.name.startswith(expected_prefix_1),
+            f"Soubor by měl začínat '{expected_prefix_1}', ale je '{image_instance_1.image.name}'",
+        )
+        self.assertTrue(
+            image_instance_2.image.name.startswith(expected_prefix_2),
+            f"Soubor by měl začínat '{expected_prefix_2}', ale je '{image_instance_2.image.name}'",
+        )
+
+        # volitelně: kontrola, že soubor existuje fyzicky (v testovací temp složce)
+        self.assertTrue(
+            image_instance_1.image.storage.exists(image_instance_1.image.name)
+        )
+        self.assertTrue(
+            image_instance_2.image.storage.exists(image_instance_2.image.name)
+        )

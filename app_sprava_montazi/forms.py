@@ -16,6 +16,7 @@ from .models import (
     Status,
     Upload,
     CallLog,
+    OrderMontazImage,
 )
 
 cons: Console = Console()

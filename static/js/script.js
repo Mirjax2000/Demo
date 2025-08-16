@@ -30,11 +30,19 @@
     document.addEventListener("DOMContentLoaded", deleteTeam);
     // copy to schranka
     document.addEventListener("DOMContentLoaded", setupAutobotCopy);
-    // File input validation
+
+
+
+    // File input validation v creation page
     document.addEventListener("DOMContentLoaded", function () {
         // --- montazni protokol form
         const fileInput = document.getElementById("fileInput");
         const fileError = document.getElementById("fileError");
+
+        // --- montazni img form
+        const fileInputImg = document.getElementById("fileInputImg");
+        const fileErrorImg = document.getElementById("fileErrorImg");
+
         // --- fallback protocol form
         const fileInputProtocol = document.getElementById("fileInputProtocol");
         const errorMessageProtocolfile = document.getElementById("errorMessageProtocolfile");
@@ -68,7 +76,7 @@
 
 
                     if (!allowedImageTypes.includes(file.type)) {
-                        fileError.innerHTML = `Soubor musí být ve formátu obrázku (např. JPG, PNG, WebP).<br> Nepovolený typ souboru: <strong class="u-txt-error">${file.type}</strong>.`;
+                        fileError.innerHTML = `Soubor nemá správný formát: např. JPG, PNG, WebP.<br> Nepovolený typ souboru: <strong class="u-txt-error">${file.type}</strong>.`;
                         fileInput.value = "";
                         return;
                     }
@@ -79,6 +87,34 @@
                 }
             });
         }
+        // --- montazni images form
+        if (fileInputImg && fileErrorImg) {
+            fileInputImg.addEventListener("change", function () {
+                const file = fileInputImg.files[0];
+                fileErrorImg.textContent = "";
+
+                if (file) {
+
+                    if (file.size > 10 * 1024 * 1024) { // 10 MB
+                        const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                        fileErrorImg.innerHTML = `Soubor je příliš velký <strong class="u-txt-error">${sizeMB} MB</strong>.<br> Max. velikost je 10 MB.`;
+                        fileInputImg.value = "";
+                        return;
+                    }
+
+                    if (!allowedImageTypes.includes(file.type)) {
+                        fileErrorImg.innerHTML = `Soubor nemá spravný formát: např. JPG, PNG, WebP.<br> Nepovolený typ souboru: <strong class="u-txt-error">${file.type}</strong>.`;
+                        fileInputImg.value = "";
+                        return;
+                    }
+
+                    if (fileInputImg.form) {
+                        fileInputImg.form.submit();
+                    }
+                }
+            });
+        }
+
         //  --- protokol fallback form
         if (fileInputProtocol && errorMessageProtocolfile) {
             fileInputProtocol.addEventListener("change", function () {

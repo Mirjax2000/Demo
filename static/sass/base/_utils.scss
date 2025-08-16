@@ -2,6 +2,12 @@
 @use "../utils/" as *;
 @use "../base/placeholders" as *;
 
+.u-bck-form-back-protocol {
+  background-color: #e3e3e3;
+  border-radius: 4px;
+  box-shadow: 1px 1px 5px #0000006f;
+}
+
 .u-txt-center {
   text-align: center !important;
 }
