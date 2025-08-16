@@ -258,7 +258,8 @@ class ProtocolUploader:
             .order_by("-position")
             .first()
         )
-        cons.log(f"last image: {last_image} jmeno souboru:{last_image.image}")
+        if settings.DEBUG:
+            cons.log(f"last image: {last_image} jmeno souboru:{last_image.image}")
 
         if not last_image or not last_image.image:
             cons.log("Chybí soubor ke konverzi na WEBP.", style="red bold")

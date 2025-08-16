@@ -83,8 +83,19 @@ class OrderMontazImageTest(TestCase):
     def setUp(self):
         self.hub = DistribHub.objects.create(code="111", city="Praha")
         self.customer = Client.objects.create(name="Pedro Pascal", zip_code="12345")
-        self.order = Order.objects.create(
-            order_number="ORDER-TEST-ADVICED",
+        self.order_1 = Order.objects.create(
+            order_number="ORDER-TEST-ADVICED-1",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            status=Status.ADVICED,
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_DELIVERY_CREW,
+            notes="zaterminovano s dopravou",
+        )
+        self.order_2 = Order.objects.create(
+            order_number="ORDER-TEST-ADVICE-2",
             distrib_hub=self.hub,
             mandant="SCCZ",
             client=self.customer,
@@ -97,23 +108,41 @@ class OrderMontazImageTest(TestCase):
 
     def test_image_upload_path(self):
         # připravíme testovací soubor
-        test_image = SimpleUploadedFile(
-            "test.jpg", b"file_content", content_type="image/jpeg"
+        test_image_1 = SimpleUploadedFile(
+            "test_1.jpg", b"file_content", content_type="image/jpeg"
+        )
+        test_image_2 = SimpleUploadedFile(
+            "test_2.jpg", b"file_content", content_type="image/jpeg"
         )
 
         # vytvoříme instanci modelu
-        image_instance = OrderMontazImage.objects.create(
-            order=self.order,
-            image=test_image,
+        image_instance_1 = OrderMontazImage.objects.create(
+            order=self.order_1,
+            image=test_image_1,
+            position=1,
+        )
+        image_instance_2 = OrderMontazImage.objects.create(
+            order=self.order_2,
+            image=test_image_2,
             position=1,
         )
 
         # kontrola, že se soubor ukládá do správné složky
-        expected_prefix = f"montage_images/{self.order.order_number.upper()}/test"
+        expected_prefix_1 = f"montage_images/{self.order_1.order_number.upper()}/test"
+        expected_prefix_2 = f"montage_images/{self.order_2.order_number.upper()}/test"
         self.assertTrue(
-            image_instance.image.name.startswith(expected_prefix),
-            f"Soubor by měl začínat '{expected_prefix}', ale je '{image_instance.image.name}'",
+            image_instance_1.image.name.startswith(expected_prefix_1),
+            f"Soubor by měl začínat '{expected_prefix_1}', ale je '{image_instance_1.image.name}'",
+        )
+        self.assertTrue(
+            image_instance_2.image.name.startswith(expected_prefix_2),
+            f"Soubor by měl začínat '{expected_prefix_2}', ale je '{image_instance_2.image.name}'",
         )
 
         # volitelně: kontrola, že soubor existuje fyzicky (v testovací temp složce)
-        self.assertTrue(image_instance.image.storage.exists(image_instance.image.name))
+        self.assertTrue(
+            image_instance_1.image.storage.exists(image_instance_1.image.name)
+        )
+        self.assertTrue(
+            image_instance_2.image.storage.exists(image_instance_2.image.name)
+        )
