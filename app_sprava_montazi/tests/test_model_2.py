@@ -1,12 +1,14 @@
 """Model testy"""
 
 from datetime import date, timedelta, datetime
+import tempfile
 
 # --- django
 from django.forms import ValidationError
 from django.contrib.auth import get_user_model
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import models
 from django.db import IntegrityError
 from django.utils.text import slugify
@@ -14,7 +16,8 @@ from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 
 # --- modely
-from ..models import AppSetting
+from ..models import AppSetting, Order, OrderMontazImage, Status, DistribHub, Client
+from ..models import TeamType
 
 User = get_user_model()
 
@@ -73,3 +76,44 @@ class SettingsModelTest(TestCase):
         # Otestujeme, že už neexistuje v DB
         exists = AppSetting.objects.filter(pk=self.app_settings.pk).exists()
         self.assertFalse(exists)
+
+
+@override_settings(MEDIA_ROOT=tempfile.gettempdir())  # testovací složka
+class OrderMontazImageTest(TestCase):
+    def setUp(self):
+        self.hub = DistribHub.objects.create(code="111", city="Praha")
+        self.customer = Client.objects.create(name="Pedro Pascal", zip_code="12345")
+        self.order = Order.objects.create(
+            order_number="ORDER-TEST-ADVICED",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            status=Status.ADVICED,
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_DELIVERY_CREW,
+            notes="zaterminovano s dopravou",
+        )
+
+    def test_image_upload_path(self):
+        # připravíme testovací soubor
+        test_image = SimpleUploadedFile(
+            "test.jpg", b"file_content", content_type="image/jpeg"
+        )
+
+        # vytvoříme instanci modelu
+        image_instance = OrderMontazImage.objects.create(
+            order=self.order,
+            image=test_image,
+            position=1,
+        )
+
+        # kontrola, že se soubor ukládá do správné složky
+        expected_prefix = f"montage_images/{self.order.order_number.upper()}/test"
+        self.assertTrue(
+            image_instance.image.name.startswith(expected_prefix),
+            f"Soubor by měl začínat '{expected_prefix}', ale je '{image_instance.image.name}'",
+        )
+
+        # volitelně: kontrola, že soubor existuje fyzicky (v testovací temp složce)
+        self.assertTrue(image_instance.image.storage.exists(image_instance.image.name))
