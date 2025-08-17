@@ -42,7 +42,7 @@ from app_sprava_montazi.views import (
 )
 
 from app_sprava_montazi.views_services import (
-    AutocompleteOrdersView as AutocompleteOrders,
+    AutocompleteOrdersByDeliveryGroupView as AtcompByDlivryOrders,
     OrderStatusView as OrderStatus,
     SendMailView as SendMail,
 )
@@ -114,7 +114,9 @@ app_sprava_montazi: list = [
     path(f"send/{PK}/order/", SendMail.as_view(), name="send_mail"),
     #
     # --- autocomplete ---
-    path("autocomp-orders/", AutocompleteOrders.as_view(), name="autocomplete_orders"),
+    path(
+        "autocomp-orders/", AtcompByDlivryOrders.as_view(), name="autocomplete_orders"
+    ),
     path("order-status/", OrderStatus.as_view(), name="order_status"),
 ]
 

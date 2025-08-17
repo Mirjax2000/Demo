@@ -15,7 +15,7 @@ from django.urls import reverse
 
 
 # --- modely z DB
-from .models import Order, OrderBackProtocolToken
+from .models import Order, OrderBackProtocolToken, TeamType
 
 # --- OOP classes
 from .OOP_emails import CustomEmail
@@ -71,12 +71,12 @@ class SendMailView(LoginRequiredMixin, View):
 # --- Autocomplete ---
 
 
-class AutocompleteOrdersView(LoginRequiredMixin, View):
+class AutocompleteOrdersByDeliveryGroupView(LoginRequiredMixin, View):
     def get(self, request):
         term = request.GET.get("term", "")
-        zakazky = Order.objects.filter(order_number__icontains=term).values_list(
-            "order_number", flat=True
-        )[:10]
+        zakazky = Order.objects.filter(
+            order_number__icontains=term, team_type=TeamType.BY_ASSEMBLY_CREW
+        ).values_list("order_number", flat=True)[:10]
 
         send_to_autocomplete: list[str] = []
         for zakazka in zakazky:
@@ -90,6 +90,10 @@ class OrderStatusView(LoginRequiredMixin, View):
         try:
             order = Order.objects.get(order_number=number)
             status = order.get_status_display()  # type:ignore
+            if order.team_type != TeamType.BY_ASSEMBLY_CREW:
+                return JsonResponse(
+                    {"status": "Toto není montážní zakázka"}, status=409
+                )
             return JsonResponse({"status": status}, status=200)
 
         except Order.DoesNotExist:

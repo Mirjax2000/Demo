@@ -487,7 +487,7 @@
             switchWarningId: "statusSwitchWarning",
             autocompleteUrl: "/autocomp-orders/",
             statusUrl: "/order-status/",
-            debounceTime: 250
+            debounceTime: 250,
         };
 
         // ---------- ELEMENTY ----------
@@ -497,7 +497,7 @@
             status: document.getElementById(config.statusId),
             switchWrapper: document.getElementById(config.switchWrapperId),
             switch: document.getElementById(config.switchId),
-            switchWarning: document.getElementById(config.switchWarningId)
+            switchWarning: document.getElementById(config.switchWarningId),
         };
 
         if (!el.input || !el.suggestions || !el.status) return;
@@ -521,6 +521,14 @@
 
             const lower = status.toLowerCase().trim();
 
+            // --- speciální případ pro ne-montážní zakázku ---
+            if (status === "Toto není montážní zakázka") {
+                let saveProtocolBtn = document.getElementById("saveProtocolBtn")
+                saveProtocolBtn.classList.add("disabled");
+                el.status.classList.add("u-txt-warning");
+                el.switchWrapper.style.display = "none"; // přepínač vůbec nezobrazit
+                return;
+            }
             switch (lower) {
                 case "nezjištěno":
                     el.status.classList.add("u-txt-muted");
@@ -551,7 +559,15 @@
                 url: config.statusUrl,
                 data: { order_number: orderNumber },
                 success: (data) => setStatus(data.status),
-                error: () => setStatus("Neznámé číslo zakázky")
+                error: (jqXHR) => {
+                    if (jqXHR.status === 404) {
+                        setStatus("Neznámé číslo zakázky");
+                    } else if (jqXHR.status === 409) {
+                        setStatus("Toto není montážní zakázka");
+                    } else {
+                        setStatus("Chyba při získávání statusu");
+                    }
+                }
             });
         };
 

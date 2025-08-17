@@ -1188,6 +1188,12 @@ class ProtocolUploadView(LoginRequiredMixin, View):
             messages.error(request, f"Zakázka s číslem '{order_number}' neexistuje.")
             return redirect(request.META.get("HTTP_REFERER", "/"))
 
+        if order.team_type != TeamType.BY_ASSEMBLY_CREW:
+            messages.error(
+                request, f"Zakázka s číslem '{order_number}' není montážní zakázka."
+            )
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
         uploader: ProtocolUploader = ProtocolUploader(
             order=order, image=image, request=request
         )
@@ -1236,6 +1242,12 @@ class MontageImgUploadView(LoginRequiredMixin, View):
             order = Order.objects.get(order_number=order_number)
         except Order.DoesNotExist:
             messages.error(request, f"Zakázka s číslem '{order_number}' neexistuje.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        if order.team_type != TeamType.BY_ASSEMBLY_CREW:
+            messages.error(
+                request, f"Zakázka s číslem '{order_number}' není montážní zakázka."
+            )
             return redirect(request.META.get("HTTP_REFERER", "/"))
 
         img_uploader: ProtocolUploader = ProtocolUploader(
