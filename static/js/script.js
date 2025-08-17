@@ -477,124 +477,148 @@
 
     // Autocomplete order number pro back protokol fallback form
     document.addEventListener("DOMContentLoaded", function () {
-        const orderNumberInput = document.getElementById("orderNumber");
-        const orderSuggestions = document.getElementById("orderSuggestions");
-        const statusZakazky = document.getElementById("StatusZakazky");
-        const switchWrapper = document.getElementById("realizovanoSwitch");
-        const flexSwitch = document.getElementById("flexSwitchCheckChecked");
-        const statusWarning = document.getElementById("statusSwitchWarning");
+        // ---------- KONFIGURACE ----------
+        const config = {
+            inputId: "orderNumber",
+            suggestionsId: "orderSuggestions",
+            statusId: "StatusZakazky",
+            switchWrapperId: "realizovanoSwitch",
+            switchId: "flexSwitchCheckChecked",
+            switchWarningId: "statusSwitchWarning",
+            autocompleteUrl: "/autocomp-orders/",
+            statusUrl: "/order-status/",
+            debounceTime: 250
+        };
 
-        // Hide switch and reset checkbox on initial load
-        if (switchWrapper && flexSwitch) {
-            switchWrapper.style.display = "none";
-            flexSwitch.checked = false;
-        }
+        // ---------- ELEMENTY ----------
+        const el = {
+            input: document.getElementById(config.inputId),
+            suggestions: document.getElementById(config.suggestionsId),
+            status: document.getElementById(config.statusId),
+            switchWrapper: document.getElementById(config.switchWrapperId),
+            switch: document.getElementById(config.switchId),
+            switchWarning: document.getElementById(config.switchWarningId)
+        };
 
-        // Event listener for order number input (autocomplete)
-        if (orderNumberInput && orderSuggestions && statusZakazky) {
-            orderNumberInput.addEventListener("input", function () {
-                const query = this.value.trim();
+        if (!el.input || !el.suggestions || !el.status) return;
 
-                if (query.length < 2) {
-                    orderSuggestions.innerHTML = "";
-                    setStatus("nezjištěno");
-                    return;
-                }
+        // ---------- DEBOUNCE ----------
+        const debounce = (fn, delay) => {
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn(...args), delay);
+            };
+        };
 
-                $.ajax({
-                    url: "/autocomp-orders/",
-                    data: { term: query },
-                    success: function (data) {
-                        orderSuggestions.innerHTML = data.orders.map(order =>
-                            `<div class="suggestion-item">${order}</div>`
-                        ).join('');
-                    },
-                    error: function (jqXHR, textStatus, errorThrown) {
-                        console.error("Autocomplete AJAX error:", textStatus, errorThrown);
-                        orderSuggestions.innerHTML = "";
-                    }
-                });
-            });
+        // ---------- STATUS ----------
+        const setStatus = (status) => {
+            if (!el.status || !el.switchWrapper || !el.switch || !el.switchWarning) return;
 
-            orderNumberInput.addEventListener("blur", function () {
-                const enteredOrderNumber = this.value.trim();
-                if (enteredOrderNumber.length > 0 && orderSuggestions.innerHTML === "") {
-                    fetchStatus(enteredOrderNumber);
-                }
-            });
-
-            document.addEventListener("click", function (e) {
-                if (!e.target.closest("#orderNumber") && !e.target.closest("#orderSuggestions")) {
-                    orderSuggestions.innerHTML = "";
-                }
-            });
-
-            orderSuggestions.addEventListener("click", function (e) {
-                if (e.target.classList.contains("suggestion-item")) {
-                    const selected = e.target.textContent.trim();
-                    orderNumberInput.value = selected;
-                    orderSuggestions.innerHTML = "";
-                    fetchStatus(selected);
-                }
-            });
-        }
-
-        // Event listener for switch change
-        if (flexSwitch && statusWarning) {
-            flexSwitch.addEventListener("change", function () {
-                statusWarning.style.visibility = this.checked ? "visible" : "hidden";
-            });
-        }
-
-        // Fetch status from backend
-        function fetchStatus(orderNumber) {
-            $.ajax({
-                url: "/order-status/",
-                data: { order_number: orderNumber },
-                success: function (data) {
-                    setStatus(data.status);
-                },
-                error: function () {
-                    setStatus("Neznámé číslo zakázky");
-                }
-            });
-        }
-
-        // Set status and display switch/warning
-        function setStatus(status) {
-            if (!statusZakazky || !switchWrapper || !flexSwitch || !statusWarning) return;
-
-            statusZakazky.textContent = status;
-            statusZakazky.classList.remove("u-txt-muted", "u-txt-success", "u-txt-warning");
-            statusWarning.style.visibility = "hidden";
+            el.status.textContent = status;
+            el.status.classList.remove("u-txt-muted", "u-txt-success", "u-txt-warning");
+            el.switchWarning.style.visibility = "hidden";
 
             const lower = status.toLowerCase().trim();
 
             switch (lower) {
                 case "nezjištěno":
-                    statusZakazky.classList.add("u-txt-muted");
-                    switchWrapper.style.display = "none";
-                    flexSwitch.checked = false;
+                    el.status.classList.add("u-txt-muted");
+                    el.switchWrapper.style.display = "none";
+                    el.switch.checked = false;
                     break;
                 case "realizováno":
-                    statusZakazky.classList.add("u-txt-success");
-                    switchWrapper.style.display = "none";
-                    flexSwitch.checked = false;
+                    el.status.classList.add("u-txt-success");
+                    el.switchWrapper.style.display = "none";
+                    el.switch.checked = false;
                     break;
                 case "vyúčtovaný":
-                    statusZakazky.classList.add("u-txt-warning");
-                    switchWrapper.style.display = "block";
-                    flexSwitch.checked = false;
+                    el.status.classList.add("u-txt-warning");
+                    el.switchWrapper.style.display = "block";
+                    el.switch.checked = false;
                     break;
                 default:
-                    statusZakazky.classList.add("u-txt-warning");
-                    switchWrapper.style.display = "block";
-                    flexSwitch.checked = true;
-                    statusWarning.style.visibility = "visible";
+                    el.status.classList.add("u-txt-warning");
+                    el.switchWrapper.style.display = "block";
+                    el.switch.checked = true;
+                    el.switchWarning.style.visibility = "visible";
                     break;
             }
+        };
+
+        const fetchStatus = (orderNumber) => {
+            $.ajax({
+                url: config.statusUrl,
+                data: { order_number: orderNumber },
+                success: (data) => setStatus(data.status),
+                error: () => setStatus("Neznámé číslo zakázky")
+            });
+        };
+
+        // ---------- AUTOCOMPLETE ----------
+        const fetchSuggestions = debounce((query) => {
+            if (query.length < 2) {
+                el.suggestions.innerHTML = "";
+                setStatus("nezjištěno");
+                return;
+            }
+            $.ajax({
+                url: config.autocompleteUrl,
+                data: { term: query },
+                success: (data) => {
+                    el.suggestions.innerHTML = data.orders.map(order =>
+                        `<div class="suggestion-item">${order}</div>`
+                    ).join('');
+                },
+                error: () => { el.suggestions.innerHTML = ""; }
+            });
+        }, config.debounceTime);
+
+        el.input.addEventListener("input", function () {
+            fetchSuggestions(this.value.trim());
+        });
+
+        // ---------- CLICK OUTSIDE ----------
+        document.addEventListener("click", function (e) {
+            if (!e.target.closest(`#${config.inputId}`) &&
+                !e.target.closest(`#${config.suggestionsId}`)) {
+                el.suggestions.innerHTML = "";
+            }
+        });
+
+        // ---------- SELECT SUGGESTION ----------
+        el.suggestions.addEventListener("mousedown", function (e) {
+            if (e.target.classList.contains("suggestion-item")) {
+                const selected = e.target.textContent.trim();
+                el.input.value = selected;
+                el.suggestions.innerHTML = "";
+                fetchStatus(selected);
+            }
+        });
+
+        // ---------- BLUR ----------
+        el.input.addEventListener("blur", function () {
+            // Timeout aby click na suggestion stihl proběhnout
+            setTimeout(() => {
+                if (el.suggestions.innerHTML === "") {
+                    const val = el.input.value.trim();
+                    if (val) fetchStatus(val);
+                }
+            }, 150);
+        });
+
+        // ---------- SWITCH ----------
+        if (el.switch && el.switchWarning) {
+            // initial reset
+            el.switchWrapper.style.display = "none";
+            el.switch.checked = false;
+
+            el.switch.addEventListener("change", function () {
+                el.switchWarning.style.visibility = this.checked ? "visible" : "hidden";
+            });
         }
     });
+
     // Autocomplete order number pro image fallback form
     document.addEventListener("DOMContentLoaded", function () {
         const orderNumberInput = document.getElementById("orderNumberForImgFallback");
