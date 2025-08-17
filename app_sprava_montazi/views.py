@@ -1146,6 +1146,12 @@ class UploadBackProtocolView(View):
             messages.error(request, "Zakázka neexistuje.")
             return redirect(request.META.get("HTTP_REFERER", "/"))
         #
+        if order.team_type != TeamType.BY_ASSEMBLY_CREW:
+            messages.error(
+                request,
+                f"Zakázka s číslem '{order.order_number}' není montážní zakázka.",
+            )
+            return redirect(request.META.get("HTTP_REFERER", "/"))
         # --- instance
         uploader: ProtocolUploader = ProtocolUploader(
             order=order, image=image, request=request
@@ -1281,11 +1287,16 @@ class UploadOneImageView(View):
         # ---
         try:
             order = Order.objects.get(pk=pk)
-
         except Order.DoesNotExist:
             messages.error(request, "Zakázka neexistuje.")
             return redirect(request.META.get("HTTP_REFERER", "/"))
         #
+        if order.team_type != TeamType.BY_ASSEMBLY_CREW:
+            messages.error(
+                request,
+                f"Zakázka s číslem '{order.order_number}' není montážní zakázka.",
+            )
+            return redirect(request.META.get("HTTP_REFERER", "/"))
         # --- instance
         img_uploader: ProtocolUploader = ProtocolUploader(
             order=order, image=image, request=request
