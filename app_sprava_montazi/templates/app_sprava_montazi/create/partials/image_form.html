@@ -1,6 +1,6 @@
-<fieldset class="L-form__fieldset fieldset-border-middle">
+<fieldset class="L-form__fieldset fieldset-border">
     <legend>
-        <i class="fa-solid fa-qrcode me-2"></i>Uložení protokolu <span class="u-txt-smaller">(fallback)</span>
+        <i class="fa-solid fa-qrcode me-2"></i>Uložení img protokolu <span class="u-txt-smaller">(fallback)</span>
     </legend>
     <form action="{% url "create_upload_protocol" %}"
           method="post"
@@ -8,7 +8,7 @@
         {% csrf_token %}
         <!-- Obrázek -->
         <div class="L-form__group m-0">
-            <label for="fileInputProtocol">Vyberte soubor s obrázkem protokolu</label>
+            <label for="fileInputProtocol">Vyberte soubor s obrázkem</label>
             <input class="form-control"
                    type="file"
                    id="fileInputProtocol"

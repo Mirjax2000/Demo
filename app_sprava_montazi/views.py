@@ -1171,7 +1171,7 @@ class UploadBackProtocolView(View):
 
 
 class ProtocolUploadView(LoginRequiredMixin, View):
-    """tohle je fallback z create view"""
+    """tohle je fallback z create view pro nahravani doslych montaznich protokolu"""
 
     def get(self, request, *args, **kwargs):
         messages.error(request, "Formulář nebyl odeslán.")
@@ -1221,6 +1221,45 @@ class ProtocolUploadView(LoginRequiredMixin, View):
         return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
+class MontageImgUploadView(LoginRequiredMixin, View):
+    """tohle je fallback z create view pro nahravani obrazku"""
+
+    def get(self, request, *args, **kwargs):
+        messages.error(request, "Formulář nebyl odeslán.")
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+
+    def post(self, request):
+        image = request.FILES.get("image")
+        order_number = str(request.POST.get("order_number", ""))
+
+        try:
+            order = Order.objects.get(order_number=order_number)
+        except Order.DoesNotExist:
+            messages.error(request, f"Zakázka s číslem '{order_number}' neexistuje.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        img_uploader: ProtocolUploader = ProtocolUploader(
+            order=order, image=image, request=request
+        )
+
+        if not img_uploader.validate_image():
+            return img_uploader.redirect_with_error()
+
+        if not img_uploader.prepare_file_for_saving_images():
+            return img_uploader.redirect_with_error()
+
+        if not img_uploader.save_protocol_object():
+            return img_uploader.redirect_with_error()
+        # ---
+        img_uploader.convert_and_save_webp_images()
+
+        save_message: str = (
+            f"Obrázek protokolu pro zakázku: {order_number} byl úspěšně uložen."
+        )
+        messages.success(request, save_message)
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
 class UploadOneImageView(View):
     """Upload img co se vrati zpet z montazniho tymu"""
 
@@ -1230,6 +1269,7 @@ class UploadOneImageView(View):
         # ---
         try:
             order = Order.objects.get(pk=pk)
+
         except Order.DoesNotExist:
             messages.error(request, "Zakázka neexistuje.")
             return redirect(request.META.get("HTTP_REFERER", "/"))

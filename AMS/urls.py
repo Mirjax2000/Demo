@@ -38,6 +38,7 @@ from app_sprava_montazi.views import (
     OrderHiddenView as OrderHidden,
     TeamDeleteView as TeamDelete,
     UploadOneImageView as UploadOneImg,
+    MontageImgUploadView as MontageImgUpload,
 )
 
 from app_sprava_montazi.views_services import (
@@ -95,6 +96,7 @@ app_sprava_montazi: list = [
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),
     path("createpage/upload/", ProtocolUpload.as_view(), name="create_upload_protocol"),
+    path("createpage/imgupload/", MontageImgUpload.as_view(), name="create_upload_img"),
     #
     # --- teams ---
     path("teams/", Teams.as_view(), name="teams"),

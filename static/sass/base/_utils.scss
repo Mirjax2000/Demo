@@ -148,7 +148,12 @@
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
-  gap: 0.3em;
+}
+
+.u-flex-row-start-nogap-stretch {
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
 }
 
 .u-flex-column {
@@ -363,4 +368,14 @@
 
 .transition {
   transition: 0.2s ease-in-out all;
+}
+
+.fieldset-border {
+  padding-inline: 1%;
+}
+
+.fieldset-border-middle {
+  padding-inline: 1%;
+  background-color: var(--bck-fieldset-middle);
+  border-radius: 4px;
 }
