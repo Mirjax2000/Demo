@@ -1,89 +1,55 @@
-<section id="superuserOnly">
-    <!-- Accordion: Nastavení Autobota -->
-    <div class="accordion accordion-flush" id="accordionAutobot">
-        <div class="accordion-item theme">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed theme-lighter border border-secondary rounded"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseAutobot"
-                        aria-expanded="false"
-                        aria-controls="collapseAutobot">Nastavení Autobota</button>
-            </h2>
-            <div id="collapseAutobot"
-                 class="accordion-collapse collapse"
-                 data-bs-parent="#accordionAutobot">
-                <!-- incomplete/update customers -->
-                <div class="accordion-body pb-1">
-                    <hr>
-                    <p>nastavení pro incomplete/update zákazníků</p>
-                    <p class="mb-1" id="autobotTokken">
-                        <strong>TOKEN</strong> = "{{ tokken }}"
-                    </p>
-                    <p class="mb-1" id="autobotUrlGet">
-                        <strong>API_URL_GET</strong> = "https://{{ url }}/api/incomplete-customers/"
-                    </p>
-                    <p class="mb-1" id="autobotUrlUpdate">
-                        <strong>API_URL_UPDATE</strong> = "https://{{ url }}/api/update-customers/"
-                    </p>
-                    <p class="btn btn-sm btn-primary m-0" id="copyBtnAutobot">
-                        <i class="fa-solid fa-copy me-2"></i>copy
-                    </p>
-                    <strong class="alert alert-success u-txt-smaller d-none m-0 p-1"
-                            id="copySuccessAutobot">zkopírováno</strong>
-                </div>
+<div class="accordion accordion-flush" id="accordionAutobot">
+    <div class="accordion-item theme">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed theme-lighter border border-secondary rounded"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseAutobot"
+                    aria-expanded="false"
+                    aria-controls="collapseAutobot">Nastavení Autobota</button>
+        </h2>
+        <div id="collapseAutobot"
+             class="accordion-collapse collapse"
+             data-bs-parent="#accordionAutobot">
+            <!-- incomplete/update customers -->
+            <div class="accordion-body pb-1">
                 <hr>
-                <!-- dopravní zakázka -->
-                <div class="accordion-body pb-1 pt-1">
-                    <p>nastavení pro dopravní zakázky</p>
-                    <p class="mb-1" id="autobotTokkenDopravniZakazka">
-                        <strong>TOKEN</strong> = "{{ tokken }}"
-                    </p>
-                    <p class="mb-1" id="autobotUrlGetDopravniZakazka">
-                        <strong>API_URL_GET</strong> = "https://{{ url }}/api/inc-dopravni-zakazka/"
-                    </p>
-                    <p class="mb-1" id="autobotUrlUpdateDopravniZakazka">
-                        <strong>API_URL_UPDATE</strong> = "https://{{ url }}/api/update-dopzak/"
-                    </p>
-                    <p class="btn btn-sm btn-primary m-0" id="copyBtnAutobotDopravniZakazka">
-                        <i class="fa-solid fa-copy me-2"></i>copy
-                    </p>
-                    <strong class="alert alert-success u-txt-smaller d-none m-0 p-1"
-                            id="copySuccessAutobotDopravniZakazka">zkopírováno</strong>
-                    <hr>
-                </div>
+                <p>nastavení pro incomplete/update zákazníků</p>
+                <p class="mb-1" id="autobotTokken">
+                    <strong>TOKEN</strong> = "{{ tokken }}"
+                </p>
+                <p class="mb-1" id="autobotUrlGet">
+                    <strong>API_URL_GET</strong> = "https://{{ url }}/api/incomplete-customers/"
+                </p>
+                <p class="mb-1" id="autobotUrlUpdate">
+                    <strong>API_URL_UPDATE</strong> = "https://{{ url }}/api/update-customers/"
+                </p>
+                <p class="btn btn-sm btn-primary m-0" id="copyBtnAutobot">
+                    <i class="fa-solid fa-copy me-2"></i>copy
+                </p>
+                <strong class="alert alert-success u-txt-smaller d-none m-0 p-1"
+                        id="copySuccessAutobot">zkopírováno</strong>
+            </div>
+            <hr>
+            <!-- dopravní zakázka -->
+            <div class="accordion-body pb-1 pt-1">
+                <p>nastavení pro dopravní zakázky</p>
+                <p class="mb-1" id="autobotTokkenDopravniZakazka">
+                    <strong>TOKEN</strong> = "{{ tokken }}"
+                </p>
+                <p class="mb-1" id="autobotUrlGetDopravniZakazka">
+                    <strong>API_URL_GET</strong> = "https://{{ url }}/api/inc-dopravni-zakazka/"
+                </p>
+                <p class="mb-1" id="autobotUrlUpdateDopravniZakazka">
+                    <strong>API_URL_UPDATE</strong> = "https://{{ url }}/api/update-dopzak/"
+                </p>
+                <p class="btn btn-sm btn-primary m-0" id="copyBtnAutobotDopravniZakazka">
+                    <i class="fa-solid fa-copy me-2"></i>copy
+                </p>
+                <strong class="alert alert-success u-txt-smaller d-none m-0 p-1"
+                        id="copySuccessAutobotDopravniZakazka">zkopírováno</strong>
+                <hr>
             </div>
         </div>
     </div>
-    <!-- Accordion: Seznam API -->
-    <div class="accordion accordion-flush mt-3" id="accordionApiList">
-        <div class="accordion-item theme">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed theme-lighter border border-secondary rounded"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseApiList"
-                        aria-expanded="false"
-                        aria-controls="collapseApiList">Seznam API</button>
-            </h2>
-            <div id="collapseApiList"
-                 class="accordion-collapse collapse"
-                 data-bs-parent="#accordionApiList">
-                <div class="accordion-body pb-1">
-                    <a href="{% url 'api-docs' %}" target="_blank">Swagger docs</a>
-                    <p>baseUrl:https//{{ url }}</p>
-                    <ul class="list-unstyled">
-                        <li>api/status/</li>
-                        <li>api/docs/</li>
-                        <li>api-token-auth/</li>
-                        <li class="mb-3">api/schema/</li>
-                        <li>api/incomplete-customers/</li>
-                        <li class="mb-3">api/update-customers/</li>
-                        <li>api/inc-dopravni-zakazka/</li>
-                        <li class="mb-3">api/update-dopzak/</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+</div>

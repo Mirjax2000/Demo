@@ -1,0 +1,45 @@
+<!-- Accordion: Seznam API -->
+<div class="accordion accordion-flush mt-3" id="accordionApiList">
+    <div class="accordion-item theme">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed theme-lighter border border-secondary rounded"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseApiList"
+                    aria-expanded="false"
+                    aria-controls="collapseApiList">Seznam API</button>
+        </h2>
+        <div id="collapseApiList"
+             class="accordion-collapse collapse"
+             data-bs-parent="#accordionApiList">
+            <div class="accordion-body pb-1">
+                <div>
+                    <a href="{% url 'api-docs' %}" target="_blank">Swagger docs</a>
+                </div>
+                <div>
+                    <a href="{% url 'schema' %}">Swagger scheme</a>
+                </div>
+                <div class="mt-2 mb-2 u-flex-row-start-nogap">
+                    <p>
+                        baseUrl: <span id="baseUrl">https://{{ url }}/</span>
+                    </p>
+                    <p class="btn btn-sm btn-primary m-0 ms-2" id="copyBaseUrl">
+                        <i class="fa-solid fa-copy me-2"></i>copy
+                    </p>
+                    <strong class="alert alert-success u-txt-smaller d-none m-0 p-1 ms-2"
+                            id="copySuccessBaseUrl">zkopírováno</strong>
+                </div>
+                <ul class="list-unstyled">
+                    <li>api/status/</li>
+                    <li>api/docs/</li>
+                    <li>api-token-auth/</li>
+                    <li class="mb-3">api/schema/</li>
+                    <li>api/incomplete-customers/</li>
+                    <li class="mb-3">api/update-customers/</li>
+                    <li>api/inc-dopravni-zakazka/</li>
+                    <li class="mb-3">api/update-dopzak/</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

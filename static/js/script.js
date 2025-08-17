@@ -30,7 +30,8 @@
     // copy to schranka
     document.addEventListener("DOMContentLoaded", function () {
         setupAutobotCopy();
-        setupAutobotCopyDopravniZakazka();
+        setupDopravniZakazka();
+        setupApiBaseUrl();
     });
 
 
@@ -474,7 +475,7 @@
     }
 
 
-    // Autocomplete order number
+    // Autocomplete order number pro back protokol fallback form
     document.addEventListener("DOMContentLoaded", function () {
         const orderNumberInput = document.getElementById("orderNumber");
         const orderSuggestions = document.getElementById("orderSuggestions");
@@ -594,6 +595,67 @@
             }
         }
     });
+    // Autocomplete order number pro image fallback form
+    document.addEventListener("DOMContentLoaded", function () {
+        const orderNumberInput = document.getElementById("orderNumberForImgFallback");
+        const orderSuggestions = document.getElementById("orderSuggestionsForImgFallback");
+
+        if (!orderNumberInput || !orderSuggestions) return;
+
+        // Pomocná funkce pro získání statusu (pokud máš fetchStatus definované)
+        const fetchStatusSafe = (orderNumber) => {
+            if (typeof fetchStatus === "function") fetchStatus(orderNumber);
+        };
+
+        orderNumberInput.addEventListener("input", function () {
+            const query = this.value.trim();
+
+            if (query.length < 2) {
+                orderSuggestions.innerHTML = "";
+                if (typeof setStatus === "function") setStatus("nezjištěno");
+                return;
+            }
+
+            $.ajax({
+                url: "/autocomp-orders/",
+                data: { term: query },
+                success: function (data) {
+                    orderSuggestions.innerHTML = data.orders.map(order =>
+                        `<div class="suggestion-item">${order}</div>`
+                    ).join('');
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error("Autocomplete AJAX error:", textStatus, errorThrown);
+                    orderSuggestions.innerHTML = "";
+                }
+            });
+        });
+
+        orderNumberInput.addEventListener("blur", function () {
+            const enteredOrderNumber = this.value.trim();
+            if (enteredOrderNumber && orderSuggestions.innerHTML === "") {
+                fetchStatusSafe(enteredOrderNumber);
+            }
+        });
+
+        // Zavření dropdownu kliknutím mimo input
+        document.addEventListener("click", function (e) {
+            if (!e.target.closest("#orderNumberForImgFallback") && !e.target.closest("#orderSuggestionsForImgFallback")) {
+                orderSuggestions.innerHTML = "";
+            }
+        });
+
+        // Výběr položky z autocomplete
+        orderSuggestions.addEventListener("click", function (e) {
+            if (e.target.classList.contains("suggestion-item")) {
+                const selected = e.target.textContent.trim();
+                orderNumberInput.value = selected;
+                orderSuggestions.innerHTML = "";
+                fetchStatusSafe(selected);
+            }
+        });
+    });
+
 
     //  --- protokol img
     $(document).ready(function () {
@@ -644,8 +706,8 @@
             });
         }
     }
-    // --- autobot copy values to schranka function pro dopravni zakazka
-    function setupAutobotCopyDopravniZakazka() {
+    // --- copy values to schranka function pro dopravni zakazka
+    function setupDopravniZakazka() {
         const btn = document.getElementById("copyBtnAutobotDopravniZakazka");
         const tokkenEl = document.getElementById("autobotTokkenDopravniZakazka");
         const urlGetEl = document.getElementById("autobotUrlGetDopravniZakazka");
@@ -662,6 +724,36 @@
                     cleanLine(tokkenEl),
                     cleanLine(urlGetEl),
                     cleanLine(urlUpdateEl)
+                ].join("\n");
+
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    successMsg.classList.remove("d-none");
+                    successMsg.classList.add("d-inline-block");
+
+                    setTimeout(() => {
+                        successMsg.classList.remove("d-inline-block");
+                        successMsg.classList.add("d-none");
+                    }, 2000);
+                }).catch((err) => {
+                    console.error("Chyba kopírování:", err);
+                });
+            });
+        }
+    }
+    // --- copy values to schranka function pro baseUrl
+    function setupApiBaseUrl() {
+        const btn = document.getElementById("copyBaseUrl");
+        const baseUrl = document.getElementById("baseUrl");
+        const successMsg = document.getElementById("copySuccessBaseUrl");
+
+        if (btn && baseUrl && successMsg) {
+            btn.addEventListener("click", function () {
+                const cleanLine = (el) => {
+                    return el.textContent.trim().replace(/\s+=\s+/, " = ");
+                };
+
+                const textToCopy = [
+                    cleanLine(baseUrl),
                 ].join("\n");
 
                 navigator.clipboard.writeText(textToCopy).then(() => {

@@ -24,8 +24,12 @@
         <hr>
         <!-- pouze superUser -->
         {% if request.user.is_superuser %}
-            <!-- autobot info -->
-            {% include "app_sprava_montazi/create/partials/autobot_info.html" %}
+            <section id="superuserOnly">
+                <!-- autobot info -->
+                {% include "app_sprava_montazi/create/partials/autobot_info.html" %}
+                <!-- autobot info -->
+                {% include "app_sprava_montazi/create/partials/api_info.html" %}
+            </section>
         {% endif %}
     </section>
 {% endblock content %}
