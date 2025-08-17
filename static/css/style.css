@@ -13,7 +13,6 @@
   --border: rgba(33, 37, 41, 0.2901960784);
   --shadow: rgba(33, 37, 41, 0.1843137255);
   --bck-form-date: #9bc8ff;
-  --bck-fieldset-middle: #ececec;
   --bck-list-item: white;
   --bck-sidebar: #f8f9fa;
   --bck-body: #f8f9fa;
@@ -34,7 +33,6 @@
   --border: #424242;
   --shadow: rgba(248, 249, 250, 0.0705882353);
   --bck-form-date: #264460;
-  --bck-fieldset-middle: #30353e;
   --bck-list-item: #232323;
   --bck-sidebar: #212529;
   --bck-body: #212529;
@@ -110,6 +108,10 @@ body.home {
 
 .u-txt-smaller {
   font-size: 80%;
+}
+
+.u-txt-smallest {
+  font-size: 60%;
 }
 
 .u-txt-bigger {
@@ -453,13 +455,14 @@ body.home {
 }
 
 .fieldset-border {
-  padding-inline: 1%;
+  padding-inline: 1em;
 }
 
 .fieldset-border-middle {
-  padding-inline: 1%;
-  background-color: var(--bck-fieldset-middle);
-  border-radius: 4px;
+  padding-inline: 1em;
+  padding-bottom: 1em;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
 }
 
 .L-sidebar {

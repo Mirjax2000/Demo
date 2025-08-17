@@ -1,54 +1,38 @@
 <fieldset class="L-form__fieldset fieldset-border">
     <legend>
-        <i class="fa-solid fa-qrcode me-2"></i>Uložení img protokolu <span class="u-txt-smaller">(fallback)</span>
+        <i class="fa-solid fa-image me-2"></i>Uložení obrázku <span class="u-txt-smallest">(fallback)</span>
     </legend>
-    <form action="{% url "create_upload_protocol" %}"
+    <form action="{% url "create_upload_img" %}"
           method="post"
           enctype="multipart/form-data">
         {% csrf_token %}
         <!-- Obrázek -->
         <div class="L-form__group m-0">
-            <label for="fileInputProtocol">Vyberte soubor s obrázkem</label>
+            <label for="fileInputImgFallback">Vyberte soubor s obrázkem</label>
             <input class="form-control"
                    type="file"
-                   id="fileInputProtocol"
+                   id="fileInputImgFallback"
                    name="image"
                    required
                    accept="image/*" />
-            <p class="u-txt-error u-error-special1" id="errorMessageProtocolfile"></p>
+            <p class="u-txt-error u-error-special1" id="errorMessageImgfile"></p>
         </div>
         <!-- Číslo zakázky + autocomplete -->
         <div class="L-form__group position-relative ">
-            <label for="orderNumber">Zadej číslo zakázky</label>
+            <label for="orderNumberForImgFallback">Zadej číslo zakázky</label>
             <input class="L-form__input"
                    type="text"
-                   id="orderNumber"
+                   id="orderNumberForImgFallback"
                    name="order_number"
                    autocomplete="off"
                    required
                    placeholder="Číslo zakázky ..." />
-            <div id="orderSuggestions" class="autocomplete-suggestions"></div>
-        </div>
-        <div>
-            <p class="m-0">
-                zakázka je ve stavu: <span id="StatusZakazky" class="u-txt-muted">nezjištěno</span>
-            </p>
-        </div>
-        <!-- Přepínač statusu -->
-        <div class="form-check form-switch" id="realizovanoSwitch">
-            <p class="u-txt-error u-txt-smaller p-0 u-negative-margin-5"
-               id="statusSwitchWarning">přepnutí stavu přepíše současný stav !!!</p>
-            <input class="form-check-input"
-                   type="checkbox"
-                   id="flexSwitchCheckChecked"
-                   name="realizovano"
-                   checked>
-            <label class="form-check-label" for="flexSwitchCheckChecked">Přepnout status na Realizováno ?</label>
+            <div id="orderSuggestionsForImgFallback" class="autocomplete-suggestions"></div>
         </div>
         <!-- Tlačítko -->
         <div class="u-txt-right mt-3">
             <button type="submit" class="btn btn-primary">
-                <i class="fa-solid fa-plus me-2"></i>Ulož protokol
+                <i class="fa-solid fa-plus me-2"></i>Ulož obrázek
             </button>
         </div>
     </form>

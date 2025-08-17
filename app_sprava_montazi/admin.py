@@ -6,7 +6,7 @@ from simple_history.admin import SimpleHistoryAdmin
 # --- models
 from .models import Order, Team, DistribHub, Upload, Client, Article, CallLog
 from .models import OrderPDFStorage, OrderBackProtocol, OrderBackProtocolToken
-from .models import AppSetting
+from .models import AppSetting, OrderMontazImage
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -70,7 +70,17 @@ class OrderBackProtocolTokenAdmin(admin.ModelAdmin):
     ordering = ("-created",)
 
 
+class OrderMontazImageAdmin(admin.ModelAdmin):
+    list_display = ("order", "position", "created", "image")
+    readonly_fields = ("created",)
+    ordering = ("-created",)
+
+
 class OrderHistoryAdmin(SimpleHistoryAdmin, OrderAdmin):
+    pass
+
+
+class OrderMontazImageHistoryAdmin(SimpleHistoryAdmin, OrderMontazImageAdmin):
     pass
 
 
@@ -99,8 +109,8 @@ class AppSettingHistoryAdmin(SimpleHistoryAdmin):
 
 
 admin.site.register(AppSetting, AppSettingHistoryAdmin)
-
 admin.site.register(DistribHub, DistribHubHistoryAdmin)
+admin.site.register(OrderMontazImage, OrderMontazImageHistoryAdmin)
 admin.site.register(Client, ClientHistoryAdmin)
 admin.site.register(Order, OrderHistoryAdmin)
 admin.site.register(Team, TeamHistoryAdmin)

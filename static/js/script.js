@@ -5,7 +5,6 @@
     const orderTable = document.getElementById("orderTable");
     const clientOrderTable = document.getElementById("clientOrderTable");
     const teamTable = document.getElementById("teamTable");
-    const articleTable = document.getElementById("articleTable");
     const numberInputs = document.querySelectorAll(".number");
     const deleteBtns = document.querySelectorAll(".form__delete");
     const P_main = document.querySelector(".P-main");
@@ -29,23 +28,30 @@
     // delete team
     document.addEventListener("DOMContentLoaded", deleteTeam);
     // copy to schranka
-    document.addEventListener("DOMContentLoaded", setupAutobotCopy);
+    document.addEventListener("DOMContentLoaded", function () {
+        setupAutobotCopy();
+        setupAutobotCopyDopravniZakazka();
+    });
 
 
 
     // File input validation v creation page
     document.addEventListener("DOMContentLoaded", function () {
-        // --- montazni protokol form
+        // --- montazni protokol form na back protokolu
         const fileInput = document.getElementById("fileInput");
         const fileError = document.getElementById("fileError");
 
-        // --- montazni img form
+        // --- montazni img form na back protokolu
         const fileInputImg = document.getElementById("fileInputImg");
         const fileErrorImg = document.getElementById("fileErrorImg");
 
         // --- fallback protocol form
         const fileInputProtocol = document.getElementById("fileInputProtocol");
         const errorMessageProtocolfile = document.getElementById("errorMessageProtocolfile");
+
+        // --- fallback image form
+        const fileInputImgFallback = document.getElementById("fileInputImgFallback");
+        const errorMessageImgfile = document.getElementById("errorMessageImgfile");
 
         // --- CSV form
         const CsvFormFile = document.getElementById("CsvFormFile");
@@ -136,6 +142,32 @@
                     if (!allowedImageTypes.includes(file_from_fallback.type)) {
                         errorMessageProtocolfile.innerHTML = "Povolené formáty (např. JPG, PNG, WebP).";
                         fileInputProtocol.value = "";
+                        return;
+                    }
+                }
+            });
+        }
+
+        //  --- protokol image fallback form
+        if (fileInputImgFallback && errorMessageImgfile) {
+            fileInputImgFallback.addEventListener("change", function () {
+                const file_from_fallback = fileInputImgFallback.files[0];
+                errorMessageImgfile.textContent = "";
+
+                if (file_from_fallback) {
+                    const maxSize = 10
+                    let countSize = maxSize * 1024 * 1024
+
+                    if (file_from_fallback.size > countSize) {
+                        const sizeMB = (file_from_fallback.size / 1024 / 1024).toFixed(2);
+                        errorMessageImgfile.innerHTML = `File too big <strong>${sizeMB} </strong>MB. Max. size is <strong>${maxSize}</strong> MB.`;
+                        fileInputImgFallback.value = "";
+                        return;
+                    }
+
+                    if (!allowedImageTypes.includes(file_from_fallback.type)) {
+                        errorMessageImgfile.innerHTML = "Povolené formáty (např. JPG, PNG, WebP).";
+                        fileInputImgFallback.value = "";
                         return;
                     }
                 }
@@ -577,7 +609,7 @@
         });
     });
 
-    // --- autobot copy values to schranka function
+    // --- autobot copy values to schranka function pro incomplete customers
     function setupAutobotCopy() {
         const btn = document.getElementById("copyBtnAutobot");
         const tokkenEl = document.getElementById("autobotTokken");
@@ -585,7 +617,7 @@
         const urlUpdateEl = document.getElementById("autobotUrlUpdate");
         const successMsg = document.getElementById("copySuccessAutobot");
 
-        if (btn && tokkenEl && urlGetEl && urlUpdateEl) {
+        if (btn && tokkenEl && urlGetEl && urlUpdateEl && successMsg) {
             btn.addEventListener("click", function () {
                 const cleanLine = (el) => {
                     return el.textContent.trim().replace(/\s+=\s+/, " = ");
@@ -598,10 +630,48 @@
                 ].join("\n");
 
                 navigator.clipboard.writeText(textToCopy).then(() => {
-                    if (successMsg) {
-                        successMsg.classList.remove("d-none");
-                        successMsg.classList.add("d-inline-block");
-                    }
+                    successMsg.classList.remove("d-none");
+                    successMsg.classList.add("d-inline-block");
+
+                    // Zpráva se automaticky skryje po 2 sekundách
+                    setTimeout(() => {
+                        successMsg.classList.remove("d-inline-block");
+                        successMsg.classList.add("d-none");
+                    }, 2000);
+                }).catch((err) => {
+                    console.error("Chyba kopírování:", err);
+                });
+            });
+        }
+    }
+    // --- autobot copy values to schranka function pro dopravni zakazka
+    function setupAutobotCopyDopravniZakazka() {
+        const btn = document.getElementById("copyBtnAutobotDopravniZakazka");
+        const tokkenEl = document.getElementById("autobotTokkenDopravniZakazka");
+        const urlGetEl = document.getElementById("autobotUrlGetDopravniZakazka");
+        const urlUpdateEl = document.getElementById("autobotUrlUpdateDopravniZakazka");
+        const successMsg = document.getElementById("copySuccessAutobotDopravniZakazka");
+
+        if (btn && tokkenEl && urlGetEl && urlUpdateEl && successMsg) {
+            btn.addEventListener("click", function () {
+                const cleanLine = (el) => {
+                    return el.textContent.trim().replace(/\s+=\s+/, " = ");
+                };
+
+                const textToCopy = [
+                    cleanLine(tokkenEl),
+                    cleanLine(urlGetEl),
+                    cleanLine(urlUpdateEl)
+                ].join("\n");
+
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    successMsg.classList.remove("d-none");
+                    successMsg.classList.add("d-inline-block");
+
+                    setTimeout(() => {
+                        successMsg.classList.remove("d-inline-block");
+                        successMsg.classList.add("d-none");
+                    }, 2000);
                 }).catch((err) => {
                     console.error("Chyba kopírování:", err);
                 });

@@ -1248,13 +1248,13 @@ class MontageImgUploadView(LoginRequiredMixin, View):
         if not img_uploader.prepare_file_for_saving_images():
             return img_uploader.redirect_with_error()
 
-        if not img_uploader.save_protocol_object():
+        if not img_uploader.save_images():
             return img_uploader.redirect_with_error()
         # ---
         img_uploader.convert_and_save_webp_images()
 
         save_message: str = (
-            f"Obrázek protokolu pro zakázku: {order_number} byl úspěšně uložen."
+            f"Obrázek montáže pro zakázku: {order_number} byl úspěšně uložen."
         )
         messages.success(request, save_message)
         return redirect(request.META.get("HTTP_REFERER", "/"))

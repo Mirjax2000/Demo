@@ -24,6 +24,10 @@
   font-size: 80%;
 }
 
+.u-txt-smallest {
+  font-size: 60%;
+}
+
 .u-txt-bigger {
   font-size: 120% !important;
 }
@@ -371,11 +375,12 @@
 }
 
 .fieldset-border {
-  padding-inline: 1%;
+  padding-inline: 1em;
 }
 
 .fieldset-border-middle {
-  padding-inline: 1%;
-  background-color: var(--bck-fieldset-middle);
-  border-radius: 4px;
+  padding-inline: 1em;
+  padding-bottom: 1em;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
 }

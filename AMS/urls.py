@@ -138,7 +138,9 @@ api_urls: list = [
     path("api-token-auth/", obtain_auth_token),
     # --- swagger
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
+    path(
+        "api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="api-docs"
+    ),
 ]
 
 #
