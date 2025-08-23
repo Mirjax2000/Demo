@@ -71,7 +71,7 @@ class OrderBackProtocolTokenAdmin(admin.ModelAdmin):
 
 
 class OrderMontazImageAdmin(admin.ModelAdmin):
-    list_display = ("order", "position", "created", "image")
+    list_display = ("order", "position", "created", "alt_text", "image")
     search_fields = ("order__order_number",)
     readonly_fields = ("created",)
     ordering = ("-created",)

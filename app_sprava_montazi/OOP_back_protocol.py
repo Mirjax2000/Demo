@@ -29,7 +29,7 @@ class Config:
 class ProtocolUploader:
     """OOP pro vsechno z navratu protokolu od montazniho tymu"""
 
-    def __init__(self, order: Order, image, request: HttpRequest) -> None:
+    def __init__(self, order: Order, image, alt_text, request: HttpRequest) -> None:
         self.order: Order = order
         self.image = image
         self.request: HttpRequest = request
@@ -38,6 +38,7 @@ class ProtocolUploader:
         self.montage_images_obj: OrderMontazImage | None = None
         self.error_message: str | None = None
         self.renamed_file: ContentFile | None = None
+        self.alt_text = alt_text
 
     def set_error(self, message: str) -> None:
         """Hlavni message predavana ven"""
@@ -124,7 +125,9 @@ class ProtocolUploader:
             obj.file.delete(save=False)
 
         try:
-            obj.file.save(self.renamed_file.name, self.renamed_file, save=True)
+            obj.file.save(self.renamed_file.name, self.renamed_file, save=False)
+            obj.alt_text = getattr(self, "alt_text", "")
+            obj.save()
             name: str = str(obj.order).upper()
             ext: str = os.path.splitext(self.renamed_file.name)[1]
 
@@ -153,6 +156,7 @@ class ProtocolUploader:
             obj = OrderMontazImage(
                 order=self.order,
                 position=position,
+                alt_text=getattr(self, "alt_text", ""),
             )
             obj.image.save(self.renamed_file.name, self.renamed_file, save=True)
             obj.save()
