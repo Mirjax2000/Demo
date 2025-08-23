@@ -72,6 +72,14 @@ class OrderBackProtocolTokenAdmin(admin.ModelAdmin):
 
 class OrderMontazImageAdmin(admin.ModelAdmin):
     list_display = ("order", "position", "created", "image")
+    search_fields = ("order__order_number",)
+    readonly_fields = ("created",)
+    ordering = ("-created",)
+
+
+class OrderBackProtocolAdmin(admin.ModelAdmin):
+    list_display = ("order", "alt_text")
+    search_fields = ("order__order_number",)
     readonly_fields = ("created",)
     ordering = ("-created",)
 
@@ -118,5 +126,5 @@ admin.site.register(Article, ArticleHistoryAdmin)
 admin.site.register(Upload, SimpleHistoryAdmin)
 admin.site.register(CallLog, CallLogHistoryAdmin)
 admin.site.register(OrderPDFStorage)
-admin.site.register(OrderBackProtocol)
+admin.site.register(OrderBackProtocol, OrderBackProtocolAdmin)
 admin.site.register(OrderBackProtocolToken, OrderBackProtocolTokenAdmin)

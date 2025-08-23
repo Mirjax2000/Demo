@@ -1152,6 +1152,7 @@ class UploadBackProtocolView(View):
                 f"Zakázka s číslem '{order.order_number}' není montážní zakázka.",
             )
             return redirect(request.META.get("HTTP_REFERER", "/"))
+        
         # --- instance
         uploader: ProtocolUploader = ProtocolUploader(
             order=order, image=image, request=request
