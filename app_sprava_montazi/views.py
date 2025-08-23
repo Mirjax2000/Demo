@@ -1139,6 +1139,7 @@ class UploadBackProtocolView(View):
     def post(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
         image = request.FILES.get("image")
+        alt_text = request.POST.get("alt_text", "")
         # ---
         try:
             order = Order.objects.get(pk=pk)
@@ -1152,7 +1153,7 @@ class UploadBackProtocolView(View):
                 f"Zakázka s číslem '{order.order_number}' není montážní zakázka.",
             )
             return redirect(request.META.get("HTTP_REFERER", "/"))
-        
+
         # --- instance
         uploader: ProtocolUploader = ProtocolUploader(
             order=order, image=image, request=request
@@ -1173,6 +1174,13 @@ class UploadBackProtocolView(View):
         uploader.update_order_status()
         uploader.delete_token()
         uploader.convert_and_save_webp()
+        # --- ukladam alt_message
+        protocol = order.back_protocol
+        protocol.alt_text = alt_text
+        protocol.save()
+        if settings.DEBUG:
+            cons.log(f"zaznam alt_textu: {protocol.alt_text}")
+        # ---
 
         return HttpResponse(uploader.html_success())
 
@@ -1188,6 +1196,7 @@ class ProtocolUploadView(LoginRequiredMixin, View):
         image = request.FILES.get("image")
         order_number = str(request.POST.get("order_number", ""))
         realizovano = request.POST.get("realizovano") == "on"
+        alt_text: str = str(request.POST.get("alt_text", ""))
 
         try:
             order = Order.objects.get(order_number=order_number)
@@ -1226,6 +1235,13 @@ class ProtocolUploadView(LoginRequiredMixin, View):
         uploader.delete_token()
         uploader.convert_and_save_webp()
 
+        # --- ukladam alt_message
+        protocol = order.back_protocol
+        protocol.alt_text = alt_text
+        protocol.save()
+        if settings.DEBUG:
+            cons.log(f"zaznam alt_textu: {protocol.alt_text}")
+        # ---
         save_message: str = (
             f"Obrázek protokolu pro zakázku: {order_number} byl úspěšně uložen."
         )

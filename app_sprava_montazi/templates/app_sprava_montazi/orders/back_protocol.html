@@ -73,17 +73,29 @@
                         <p>
                             max. velikost souboru je <strong>10MB</strong>!
                         </p>
-                        <input class="d-none"
-                               type="file"
-                               id="fileInput"
-                               name="image"
-                               accept="image/*"
-                               capture="environment" />
-                        <label for="fileInput"
-                               class="btn btn-primary ps-5 pe-5 pt-2 pb-2 u-txt-bigger mb-2">
-                            <i class="fa-solid fa-camera me-2"></i>Nahrát fotografii
-                        </label>
-                        <p id="fileError" class="mt-1 u-txt-bigger"></p>
+                        <!--alt img text-->
+                        <div class="mb-2 ps-2 pe-2 ps-sm-5 pe-sm-5">
+                            <textarea class="form-control form-control-sm"
+                                      name="alt_text"
+                                      rows="2"
+                                      maxlength="255"
+                                      autocomplete="off"
+                                      placeholder="Doprovodný text ..."></textarea>
+                        </div>
+                        <!--image file-->
+                        <div>
+                            <input class="d-none"
+                                   type="file"
+                                   id="fileInput"
+                                   name="image"
+                                   accept="image/*"
+                                   capture="environment" />
+                            <label for="fileInput"
+                                   class="btn btn-primary ps-5 pe-5 pt-2 pb-2 u-txt-bigger mb-2">
+                                <i class="fa-solid fa-camera me-2"></i>Nahrát fotografii
+                            </label>
+                            <p id="fileError" class="mt-1 u-txt-bigger"></p>
+                        </div>
                     </form>
                 </div>
                 <hr>
