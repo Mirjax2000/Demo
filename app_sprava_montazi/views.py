@@ -10,6 +10,7 @@ from rich.console import Console
 # --- Django
 from django.db import transaction
 from django.utils import timezone
+from django.db.models import QuerySet
 from django.db.models.deletion import ProtectedError
 from django.conf import settings
 from django.contrib import messages
@@ -973,11 +974,16 @@ class OrderProtocolView(LoginRequiredMixin, ErrorContextMixin, DetailView):
         ).exists()
         if back_protocol_exist:
             back_protocol = OrderBackProtocol.objects.filter(order=order.pk).first()
+        # ---
+        montage_images_qs: QuerySet[OrderMontazImage] = OrderMontazImage.objects.filter(
+            order=order.pk
+        ).order_by("position", "created")
 
         # ---
         context.update(
             {
                 "recieved_protokol": back_protocol,
+                "montage_images": montage_images_qs,
                 "soulad": team_soulad(order),
                 "is_team_names_different": is_team_names_different(order.pk),
                 "protocol_site": True,

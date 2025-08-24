@@ -396,7 +396,7 @@ class ImageUploaderTestCase(TestCase):
             status=Status.ADVICED,
             delivery_termin=timezone.now().date(),
             evidence_termin=timezone.now().date(),
-            team_type=TeamType.BY_DELIVERY_CREW,
+            team_type=TeamType.BY_ASSEMBLY_CREW,
             notes="zaterminovano s dopravou",
         )
         self.url = reverse("upload_one_img", kwargs={"pk": self.order.pk})
@@ -409,6 +409,7 @@ class ImageUploaderTestCase(TestCase):
             image=SimpleUploadedFile(
                 "test.jpg", b"fake_content", content_type="image/jpeg"
             ),
+            alt_text="info o protokolu",
             request=self.request,
         )
 
@@ -428,7 +429,9 @@ class ImageUploaderTestCase(TestCase):
                 "test_image.jpg", tmp.read(), content_type="image/jpeg"
             )
 
-            response = self.client.post(self.url, {"image": test_image})
+            response = self.client.post(
+                self.url, {"image": test_image, "alt_text": "info o protokolu"}
+            )
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(OrderMontazImage.objects.count(), 1)
@@ -438,6 +441,7 @@ class ImageUploaderTestCase(TestCase):
 
         expected_filename = f"{self.order.order_number.upper()}_{img_obj.position}.webp"
         self.assertTrue(img_obj.image.name.endswith(".webp"))
+        self.assertEqual(img_obj.alt_text, "info o protokolu")
         self.assertEqual(Path(img_obj.image.name).name, expected_filename)
 
         full_path = Path(img_obj.image.path)
