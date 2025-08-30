@@ -1,12 +1,13 @@
 """servisni views"""
 
 import secrets
-from typing import Any
+import io
+import zipfile
 from rich.console import Console
 
 # --- Django
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import View
@@ -98,3 +99,27 @@ class OrderStatusView(LoginRequiredMixin, View):
 
         except Order.DoesNotExist:
             return JsonResponse({"status": "Neznámé číslo zakázky"}, status=404)
+
+
+# --- Download image zip ---
+
+
+class DownloadMontageImagesZipView(View, LoginRequiredMixin):
+    def get(self, request, order_number):
+        order = get_object_or_404(Order, order_number=order_number)
+        images = order.montage_images.all()  # type:ignore
+
+        # Vytvoření dočasného ZIP archivu v paměti
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for img in images:
+                if img.image:
+                    filename = f"{img.image.name.split('/')[-1]}"
+                    zip_file.writestr(filename, img.image.read())
+
+        buffer.seek(0)
+        response = HttpResponse(buffer, content_type="application/zip")
+        response["Content-Disposition"] = (
+            f"attachment; filename=fotky_{order.order_number}.zip"
+        )
+        return response

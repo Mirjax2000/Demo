@@ -45,6 +45,7 @@ from app_sprava_montazi.views_services import (
     AutocompleteOrdersByDeliveryGroupView as AtcompByDlivryOrders,
     OrderStatusView as OrderStatus,
     SendMailView as SendMail,
+    DownloadMontageImagesZipView as DownMontZip,
 )
 
 from API.views import (
@@ -60,6 +61,7 @@ from API.views import (
 # --- typove zkratky
 PK = "<int:pk>"
 OPK = "<int:order_pk>"
+ONMB = "<str:order_number>"
 SLUG = "<slug:slug>"
 MANDANT = "<str:mandant>"
 # ---
@@ -118,6 +120,8 @@ app_sprava_montazi: list = [
         "autocomp-orders/", AtcompByDlivryOrders.as_view(), name="autocomplete_orders"
     ),
     path("order-status/", OrderStatus.as_view(), name="order_status"),
+    # --- download image zip ---
+    path(f"order/{ONMB}/dwn-imgs/", DownMontZip.as_view(), name="dwn_mont_imgs_zip"),
 ]
 
 

@@ -989,5 +989,11 @@
             detailProfit.classList.add("zero");
         }
     }
+    lightbox.option({
+        'resizeDuration': 200,
+        'imageFadeDuration': 200,
+        'wrapAround': true,
+        "fitImagesInViewport": true,
+    })
 
 })();

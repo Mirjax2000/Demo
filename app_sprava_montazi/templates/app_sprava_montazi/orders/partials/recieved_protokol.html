@@ -2,22 +2,33 @@
     {% if montage_images %}
         <h3 class="L-detail__fieldset__header">Přijatá montážní fotodokumentace</h3>
         <hr>
-        <ul class="C-img-list">
+        <ul class="C-img-list mb-2">
             {% for montage_img in montage_images %}
                 <li class="C-img-list__item">
                     <div class="C-img-list__item__img">
-                        <img src="{{ montage_img.image.url }}"
-                             title="{{ montage_img.alt_text }}"
-                             alt="{{ montage_img.alt_text }}">
+                        <a href="{{ montage_img.image.url }}"
+                           data-lightbox="gallery"
+                           data-title="{{ montage_img.alt_text }}">
+                            <img src="{{ montage_img.image.url }}"
+                                 title="{{ montage_img.alt_text }}"
+                                 alt="{{ montage_img.alt_text }}">
+                        </a>
                     </div>
                 </li>
             {% endfor %}
         </ul>
+        <div class="text-end">
+            <a href="{% url 'dwn_mont_imgs_zip' order.order_number %}"
+               download
+               class="btn btn-primary btn-sm w-50">
+                <i class="fa-solid fa-download me-2"></i>Stáhnout obrázky
+            </a>
+        </div>
         <hr>
     {% endif %}
     {% if recieved_protokol %}
         <h3 class="L-detail__fieldset__header">Přijatý montážní protokol</h3>
-        <p class="alert alert-success mt-2">
+        <p class="alert alert-success mt-2 pt-1 pb-1 ps-2 pe-2">
             <strong>Protokol byl přijat:</strong>
             <br>
             <strong>{{ recieved_protokol.created|date:"d. m. Y v H:i" }}</strong>
