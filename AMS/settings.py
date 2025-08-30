@@ -122,7 +122,7 @@ DATABASES = {
         # "HOST": os.getenv("DB_HOST", "localhost"),
         # "PORT": os.getenv("DB_PORT", "5432"),
         "NAME": "rhenus",
-        "USER": "vigo",
+        "USER": "postgres",
         "PASSWORD": "Vigokiller2010",
         "HOST": "localhost",
         "PORT": "5432",

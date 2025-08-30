@@ -1783,7 +1783,7 @@ class ExportOrdersExcelViewTest(TestCase):
 
         # První objednávka s kompletními daty
         self.order1 = Order.objects.create(
-            order_number="12345-R",
+            order_number="TEST-1234567890-T",
             distrib_hub=self.hub,
             mandant="SCCZ",
             client=self.customer,
@@ -1808,9 +1808,9 @@ class ExportOrdersExcelViewTest(TestCase):
             incomplete=False,
         )
         self.order2 = Order.objects.create(
-            order_number="67890-S",
+            order_number="TEST-1234567890-S",
             distrib_hub=self.hub,
-            mandant="OtherMandant",
+            mandant="SCCZ",
             client=self.customer2,
             evidence_termin=date(2023, 6, 15),
             delivery_termin=None,  # Test None values
@@ -1823,7 +1823,7 @@ class ExportOrdersExcelViewTest(TestCase):
         self.order2.refresh_from_db()
 
         self.order3 = Order.objects.create(
-            order_number="54321-S",
+            order_number="TEST-1234567890-A",
             distrib_hub=self.hub,
             mandant="SCCZ",
             client=self.customer2,
@@ -1858,7 +1858,7 @@ class ExportOrdersExcelViewTest(TestCase):
         )
 
         self.order_adviced = Order.objects.create(
-            order_number="ADVICED-X",
+            order_number="TEST-1234567890-X",
             distrib_hub=self.hub,
             mandant="SCCZ",
             client=self.customer,
@@ -1872,7 +1872,7 @@ class ExportOrdersExcelViewTest(TestCase):
             vynos=Decimal(100),
         )
         self.order_adviced_2 = Order.objects.create(
-            order_number="ADVICED-X-2",
+            order_number="TEST-1234567890-Y",
             distrib_hub=self.hub,
             mandant="SCCZ",
             client=self.customer,
