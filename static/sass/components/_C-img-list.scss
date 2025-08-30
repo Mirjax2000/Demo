@@ -1,0 +1,44 @@
+.C-img-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  &__item {
+    flex-basis: 20%;
+    padding: 0.15em;
+    box-sizing: border-box;
+    opacity: 0.5;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+
+    &:first-child {
+      padding-left: 0;
+    }
+
+    &:last-child {
+      padding-right: 0;
+    }
+
+    &:hover {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    &__img {
+      width: 100%;
+      height: 6em;
+      overflow: hidden;
+      border-radius: 5px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+    }
+  }
+}

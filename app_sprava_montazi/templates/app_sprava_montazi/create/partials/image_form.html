@@ -1,0 +1,50 @@
+<fieldset class="L-form__fieldset fieldset-border">
+    <legend>
+        <i class="fa-solid fa-image me-2"></i>Uložení obrázku <span class="u-txt-smallest">(fallback)</span>
+    </legend>
+    <form action="{% url "create_upload_img" %}"
+          method="post"
+          enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Obrázek -->
+        <div class="L-form__group m-0">
+            <label for="fileInputImgFallback">Vyberte soubor s obrázkem</label>
+            <input class="form-control"
+                   type="file"
+                   id="fileInputImgFallback"
+                   name="image"
+                   required
+                   accept="image/*" />
+            <p class="u-txt-error u-error-special1" id="errorMessageImgfile"></p>
+        </div>
+        <!-- Číslo zakázky + autocomplete -->
+        <div class="L-form__group position-relative ">
+            <label for="orderNumberForImgFallback">Zadej číslo zakázky</label>
+            <input class="L-form__input"
+                   type="text"
+                   id="orderNumberForImgFallback"
+                   name="order_number"
+                   autocomplete="off"
+                   required
+                   placeholder="Číslo zakázky ..." />
+            <div id="orderSuggestionsForImgFallback" class="autocomplete-suggestions"></div>
+        </div>
+        <!--alt text-->
+        <div class="L-form__group">
+            <label for="altImgTextImg">Doprovodný text</label>
+            <textarea class="L-form__input"
+                      id="altImgTextImg"
+                      name="alt_text"
+                      rows="2"
+                      maxlength="255"
+                      autocomplete="off"
+                      placeholder="Doprovodný text ..."></textarea>
+        </div>
+        <!-- Tlačítko -->
+        <div class="u-txt-right mt-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-plus me-2"></i>Ulož obrázek
+            </button>
+        </div>
+    </form>
+</fieldset>

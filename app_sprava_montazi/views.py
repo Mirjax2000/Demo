@@ -10,6 +10,7 @@ from rich.console import Console
 # --- Django
 from django.db import transaction
 from django.utils import timezone
+from django.db.models import QuerySet
 from django.db.models.deletion import ProtectedError
 from django.conf import settings
 from django.contrib import messages
@@ -973,11 +974,16 @@ class OrderProtocolView(LoginRequiredMixin, ErrorContextMixin, DetailView):
         ).exists()
         if back_protocol_exist:
             back_protocol = OrderBackProtocol.objects.filter(order=order.pk).first()
+        # ---
+        montage_images_qs: QuerySet[OrderMontazImage] = OrderMontazImage.objects.filter(
+            order=order.pk
+        ).order_by("position", "created")
 
         # ---
         context.update(
             {
                 "recieved_protokol": back_protocol,
+                "montage_images": montage_images_qs,
                 "soulad": team_soulad(order),
                 "is_team_names_different": is_team_names_different(order.pk),
                 "protocol_site": True,
@@ -1139,6 +1145,7 @@ class UploadBackProtocolView(View):
     def post(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
         image = request.FILES.get("image")
+        alt_text = request.POST.get("alt_text", "")
         # ---
         try:
             order = Order.objects.get(pk=pk)
@@ -1146,9 +1153,16 @@ class UploadBackProtocolView(View):
             messages.error(request, "Zakázka neexistuje.")
             return redirect(request.META.get("HTTP_REFERER", "/"))
         #
+        if order.team_type != TeamType.BY_ASSEMBLY_CREW:
+            messages.error(
+                request,
+                f"Zakázka s číslem '{order.order_number}' není montážní zakázka.",
+            )
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
         # --- instance
         uploader: ProtocolUploader = ProtocolUploader(
-            order=order, image=image, request=request
+            order=order, image=image, alt_text=alt_text, request=request
         )
 
         if not uploader.validate_image():
@@ -1171,7 +1185,7 @@ class UploadBackProtocolView(View):
 
 
 class ProtocolUploadView(LoginRequiredMixin, View):
-    """tohle je fallback z create view"""
+    """tohle je fallback z create view pro nahravani doslych montaznich protokolu"""
 
     def get(self, request, *args, **kwargs):
         messages.error(request, "Formulář nebyl odeslán.")
@@ -1181,6 +1195,7 @@ class ProtocolUploadView(LoginRequiredMixin, View):
         image = request.FILES.get("image")
         order_number = str(request.POST.get("order_number", ""))
         realizovano = request.POST.get("realizovano") == "on"
+        alt_text: str = str(request.POST.get("alt_text", ""))
 
         try:
             order = Order.objects.get(order_number=order_number)
@@ -1188,8 +1203,14 @@ class ProtocolUploadView(LoginRequiredMixin, View):
             messages.error(request, f"Zakázka s číslem '{order_number}' neexistuje.")
             return redirect(request.META.get("HTTP_REFERER", "/"))
 
+        if order.team_type != TeamType.BY_ASSEMBLY_CREW:
+            messages.error(
+                request, f"Zakázka s číslem '{order_number}' není montážní zakázka."
+            )
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
         uploader: ProtocolUploader = ProtocolUploader(
-            order=order, image=image, request=request
+            order=order, image=image, alt_text=alt_text, request=request
         )
 
         if not uploader.validate_image():
@@ -1221,12 +1242,60 @@ class ProtocolUploadView(LoginRequiredMixin, View):
         return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
+class MontageImgUploadView(LoginRequiredMixin, View):
+    """tohle je fallback z create view pro nahravani obrazku"""
+
+    def get(self, request, *args, **kwargs):
+        messages.error(request, "Formulář nebyl odeslán.")
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+
+    def post(self, request):
+        image = request.FILES.get("image")
+        order_number = str(request.POST.get("order_number", ""))
+        alt_text: str = str(request.POST.get("alt_text", ""))
+
+        try:
+            order = Order.objects.get(order_number=order_number)
+        except Order.DoesNotExist:
+            messages.error(request, f"Zakázka s číslem '{order_number}' neexistuje.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        if order.team_type != TeamType.BY_ASSEMBLY_CREW:
+            messages.error(
+                request, f"Zakázka s číslem '{order_number}' není montážní zakázka."
+            )
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        img_uploader: ProtocolUploader = ProtocolUploader(
+            order=order, image=image, alt_text=alt_text, request=request
+        )
+
+        if not img_uploader.validate_image():
+            return img_uploader.redirect_with_error()
+
+        if not img_uploader.prepare_file_for_saving_images():
+            return img_uploader.redirect_with_error()
+
+        if not img_uploader.save_images():
+            return img_uploader.redirect_with_error()
+        # ---
+        img_uploader.convert_and_save_webp_images()
+
+        # ---
+        save_message: str = (
+            f"Obrázek montáže pro zakázku: {order_number} byl úspěšně uložen."
+        )
+        messages.success(request, save_message)
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
 class UploadOneImageView(View):
     """Upload img co se vrati zpet z montazniho tymu"""
 
     def post(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
         image = request.FILES.get("image")
+        alt_text: str = str(request.POST.get("alt_text", ""))
         # ---
         try:
             order = Order.objects.get(pk=pk)
@@ -1234,9 +1303,15 @@ class UploadOneImageView(View):
             messages.error(request, "Zakázka neexistuje.")
             return redirect(request.META.get("HTTP_REFERER", "/"))
         #
+        if order.team_type != TeamType.BY_ASSEMBLY_CREW:
+            messages.error(
+                request,
+                f"Zakázka s číslem '{order.order_number}' není montážní zakázka.",
+            )
+            return redirect(request.META.get("HTTP_REFERER", "/"))
         # --- instance
         img_uploader: ProtocolUploader = ProtocolUploader(
-            order=order, image=image, request=request
+            order=order, image=image, alt_text=alt_text, request=request
         )
 
         if not img_uploader.validate_image():

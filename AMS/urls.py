@@ -38,12 +38,14 @@ from app_sprava_montazi.views import (
     OrderHiddenView as OrderHidden,
     TeamDeleteView as TeamDelete,
     UploadOneImageView as UploadOneImg,
+    MontageImgUploadView as MontageImgUpload,
 )
 
 from app_sprava_montazi.views_services import (
-    AutocompleteOrdersView as AutocompleteOrders,
+    AutocompleteOrdersByDeliveryGroupView as AtcompByDlivryOrders,
     OrderStatusView as OrderStatus,
     SendMailView as SendMail,
+    DownloadMontageImagesZipView as DownMontZip,
 )
 
 from API.views import (
@@ -59,6 +61,7 @@ from API.views import (
 # --- typove zkratky
 PK = "<int:pk>"
 OPK = "<int:order_pk>"
+ONMB = "<str:order_number>"
 SLUG = "<slug:slug>"
 MANDANT = "<str:mandant>"
 # ---
@@ -95,6 +98,7 @@ app_sprava_montazi: list = [
     # --- create ---
     path("createpage/", CreatePage.as_view(), name="createpage"),
     path("createpage/upload/", ProtocolUpload.as_view(), name="create_upload_protocol"),
+    path("createpage/imgupload/", MontageImgUpload.as_view(), name="create_upload_img"),
     #
     # --- teams ---
     path("teams/", Teams.as_view(), name="teams"),
@@ -112,8 +116,12 @@ app_sprava_montazi: list = [
     path(f"send/{PK}/order/", SendMail.as_view(), name="send_mail"),
     #
     # --- autocomplete ---
-    path("autocomp-orders/", AutocompleteOrders.as_view(), name="autocomplete_orders"),
+    path(
+        "autocomp-orders/", AtcompByDlivryOrders.as_view(), name="autocomplete_orders"
+    ),
     path("order-status/", OrderStatus.as_view(), name="order_status"),
+    # --- download image zip ---
+    path(f"order/{ONMB}/dwn-imgs/", DownMontZip.as_view(), name="dwn_mont_imgs_zip"),
 ]
 
 
@@ -136,7 +144,9 @@ api_urls: list = [
     path("api-token-auth/", obtain_auth_token),
     # --- swagger
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
+    path(
+        "api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="api-docs"
+    ),
 ]
 
 #

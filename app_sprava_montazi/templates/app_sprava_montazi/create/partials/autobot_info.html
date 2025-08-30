@@ -1,35 +1,55 @@
-<section id="superuserOnly">
-    <div class="accordion accordion-flush" id="accordionFlushExample">
-        <div class="accordion-item theme">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed theme-lighter border border-secondary rounded"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#flush-collapseOne"
-                        aria-expanded="false"
-                        aria-controls="flush-collapseOne">Nastavení Autobota</button>
-            </h2>
-            <div id="flush-collapseOne"
-                 class="accordion-collapse collapse"
-                 data-bs-parent="#accordionFlushExample">
-                <div class="accordion-body">
-                    <p class="mb-1" id="autobotTokken">
-                        <strong>TOKEN</strong> = "{{ tokken }}"
-                    </p>
-                    <p class="mb-1" id="autobotUrlGet">
-                        <strong>API_URL_GET</strong> = "https://{{ url }}/api/incomplete-customers/"
-                    </p>
-                    <p class="mb-1" id="autobotUrlUpdate">
-                        <strong>API_URL_UPDATE</strong> = "https://{{ url }}/api/update-customers/"
-                    </p>
-                    <hr class="m-2">
-                    <p class="btn btn-sm btn-primary m-0" id="copyBtnAutobot">
-                        <i class="fa-solid fa-copy me-2"></i>copy
-                    </p>
-                    <strong class="alert alert-success u-txt-smaller d-none ms-2 p-1"
-                            id="copySuccessAutobot">zkopírováno</strong>
-                </div>
+<div class="accordion accordion-flush" id="accordionAutobot">
+    <div class="accordion-item theme">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed theme-lighter border border-secondary rounded"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseAutobot"
+                    aria-expanded="false"
+                    aria-controls="collapseAutobot">Nastavení Autobota</button>
+        </h2>
+        <div id="collapseAutobot"
+             class="accordion-collapse collapse"
+             data-bs-parent="#accordionAutobot">
+            <!-- incomplete/update customers -->
+            <div class="accordion-body pb-1">
+                <hr>
+                <p>nastavení pro incomplete/update zákazníků</p>
+                <p class="mb-1" id="autobotTokken">
+                    <strong>TOKEN</strong> = "{{ tokken }}"
+                </p>
+                <p class="mb-1" id="autobotUrlGet">
+                    <strong>API_URL_GET</strong> = "https://{{ url }}/api/incomplete-customers/"
+                </p>
+                <p class="mb-1" id="autobotUrlUpdate">
+                    <strong>API_URL_UPDATE</strong> = "https://{{ url }}/api/update-customers/"
+                </p>
+                <p class="btn btn-sm btn-primary m-0" id="copyBtnAutobot">
+                    <i class="fa-solid fa-copy me-2"></i>copy
+                </p>
+                <strong class="alert alert-success u-txt-smaller d-none m-0 p-1"
+                        id="copySuccessAutobot">Copied</strong>
+            </div>
+            <hr>
+            <!-- dopravní zakázka -->
+            <div class="accordion-body pb-1 pt-1">
+                <p>nastavení pro dopravní zakázky</p>
+                <p class="mb-1" id="autobotTokkenDopravniZakazka">
+                    <strong>TOKEN</strong> = "{{ tokken }}"
+                </p>
+                <p class="mb-1" id="autobotUrlGetDopravniZakazka">
+                    <strong>API_URL_GET</strong> = "https://{{ url }}/api/inc-dopravni-zakazka/"
+                </p>
+                <p class="mb-1" id="autobotUrlUpdateDopravniZakazka">
+                    <strong>API_URL_UPDATE</strong> = "https://{{ url }}/api/update-dopzak/"
+                </p>
+                <p class="btn btn-sm btn-primary m-0" id="copyBtnAutobotDopravniZakazka">
+                    <i class="fa-solid fa-copy me-2"></i>copy
+                </p>
+                <strong class="alert alert-success u-txt-smaller d-none m-0 p-1"
+                        id="copySuccessAutobotDopravniZakazka">Copied</strong>
+                <hr>
             </div>
         </div>
     </div>
-</section>
+</div>

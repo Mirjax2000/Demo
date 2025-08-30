@@ -3,6 +3,8 @@
 import logging
 import tempfile
 import shutil
+import io
+import zipfile
 from pathlib import Path
 from datetime import date, datetime
 from unittest.mock import patch, MagicMock
@@ -16,7 +18,7 @@ from django.shortcuts import redirect
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files.base import ContentFile
-from django.test import TestCase, override_settings
+from django.test import TestCase, Client as CL, override_settings
 from django.utils import timezone
 
 # --- modely
@@ -396,7 +398,7 @@ class ImageUploaderTestCase(TestCase):
             status=Status.ADVICED,
             delivery_termin=timezone.now().date(),
             evidence_termin=timezone.now().date(),
-            team_type=TeamType.BY_DELIVERY_CREW,
+            team_type=TeamType.BY_ASSEMBLY_CREW,
             notes="zaterminovano s dopravou",
         )
         self.url = reverse("upload_one_img", kwargs={"pk": self.order.pk})
@@ -409,6 +411,7 @@ class ImageUploaderTestCase(TestCase):
             image=SimpleUploadedFile(
                 "test.jpg", b"fake_content", content_type="image/jpeg"
             ),
+            alt_text="info o protokolu",
             request=self.request,
         )
 
@@ -428,7 +431,9 @@ class ImageUploaderTestCase(TestCase):
                 "test_image.jpg", tmp.read(), content_type="image/jpeg"
             )
 
-            response = self.client.post(self.url, {"image": test_image})
+            response = self.client.post(
+                self.url, {"image": test_image, "alt_text": "info o protokolu"}
+            )
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(OrderMontazImage.objects.count(), 1)
@@ -438,6 +443,7 @@ class ImageUploaderTestCase(TestCase):
 
         expected_filename = f"{self.order.order_number.upper()}_{img_obj.position}.webp"
         self.assertTrue(img_obj.image.name.endswith(".webp"))
+        self.assertEqual(img_obj.alt_text, "info o protokolu")
         self.assertEqual(Path(img_obj.image.name).name, expected_filename)
 
         full_path = Path(img_obj.image.path)
@@ -492,3 +498,49 @@ class ImageUploaderTestCase(TestCase):
         img_obj = OrderMontazImage.objects.first()
         self.assertEqual(img_obj.order, self.order)
         self.assertEqual(img_obj.position, 1)
+
+
+@override_settings(MEDIA_ROOT=tempfile.gettempdir())
+class DownloadMontageImagesZipViewTest(TestCase):
+    def setUp(self):
+        self.client = CL()
+
+        self.hub = DistribHub.objects.create(code="111", city="Praha")
+        self.customer = Client.objects.create(name="Pedro Pascal", zip_code="12345")
+        self.order = Order.objects.create(
+            order_number="ORDER-TEST-ADVICED-1",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            status=Status.ADVICED,
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+            notes="zaterminovano s dopravou",
+        )
+
+        # Vytvoříme 3 fake obrázky a přiřadíme k objednávce
+        for i in range(3):
+            img_content = SimpleUploadedFile(
+                f"test{i}.png", b"fake-image-bytes", content_type="image/png"
+            )
+            OrderMontazImage.objects.create(
+                order=self.order,
+                image=img_content,
+                position=i + 1,
+                alt_text=f"image{i + 1}",
+            )
+
+    def test_download_zip_contains_all_images(self):
+        url = reverse("dwn_mont_imgs_zip", args=[self.order.order_number])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/zip")
+
+        # Rozbalíme odpověď jako ZIP a zkontrolujeme počet souborů
+        zip_buffer = io.BytesIO(response.content)
+        with zipfile.ZipFile(zip_buffer, "r") as zip_file:
+            file_list = zip_file.namelist()
+            self.assertEqual(len(file_list), 3)
+            self.assertTrue(all(name.startswith("test") for name in file_list))

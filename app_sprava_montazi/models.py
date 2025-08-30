@@ -426,6 +426,7 @@ class OrderMontazImage(Model):
     )
     position = PositiveIntegerField(default=0)
     created = DateTimeField(auto_now_add=True, verbose_name="Cas ulozeni")
+    alt_text = CharField(max_length=255, blank=True, verbose_name="Popis obrazku")
 
     image = FileField(upload_to=upload_to_order_folder)
 
@@ -441,6 +442,7 @@ class OrderBackProtocol(Model):
         verbose_name="Objednávka",
     )
     file = FileField(upload_to="recieved_protocols/", verbose_name="Recieved protocols")
+    alt_text = CharField(max_length=255, blank=True, verbose_name="Popis obrazku")
     created = DateTimeField(auto_now=True, verbose_name="Čas uložení")
     history = HistoricalRecords()
 

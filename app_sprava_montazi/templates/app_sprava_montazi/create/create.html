@@ -5,11 +5,13 @@
 <!---->
 {% block content %}
     <section class="L-form" id="createPage">
-        <div class="u-flex-row-start">
+        <div class="u-flex-row-start-nogap-stretch">
             <!--CSV import-->
             {% include "app_sprava_montazi/create/partials/import_form.html" %}
-            <!--montazni protokol-->
+            <!--montazni protokol fallback-->
             {% include "app_sprava_montazi/create/partials/protocol_form.html" %}
+            <!--montazni image fallback-->
+            {% include "app_sprava_montazi/create/partials/image_form.html" %}
         </div>
         <!---->
         <hr class="mb-5 mt-5">
@@ -22,8 +24,12 @@
         <hr>
         <!-- pouze superUser -->
         {% if request.user.is_superuser %}
-            <!-- autobot info -->
-            {% include "app_sprava_montazi/create/partials/autobot_info.html" %}
+            <section id="superuserOnly">
+                <!-- autobot info -->
+                {% include "app_sprava_montazi/create/partials/autobot_info.html" %}
+                <!-- autobot info -->
+                {% include "app_sprava_montazi/create/partials/api_info.html" %}
+            </section>
         {% endif %}
     </section>
 {% endblock content %}

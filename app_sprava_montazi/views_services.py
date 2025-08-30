@@ -1,12 +1,13 @@
 """servisni views"""
 
 import secrets
-from typing import Any
+import io
+import zipfile
 from rich.console import Console
 
 # --- Django
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import View
@@ -15,7 +16,7 @@ from django.urls import reverse
 
 
 # --- modely z DB
-from .models import Order, OrderBackProtocolToken
+from .models import Order, OrderBackProtocolToken, TeamType
 
 # --- OOP classes
 from .OOP_emails import CustomEmail
@@ -71,12 +72,12 @@ class SendMailView(LoginRequiredMixin, View):
 # --- Autocomplete ---
 
 
-class AutocompleteOrdersView(LoginRequiredMixin, View):
+class AutocompleteOrdersByDeliveryGroupView(LoginRequiredMixin, View):
     def get(self, request):
         term = request.GET.get("term", "")
-        zakazky = Order.objects.filter(order_number__icontains=term).values_list(
-            "order_number", flat=True
-        )[:10]
+        zakazky = Order.objects.filter(
+            order_number__icontains=term, team_type=TeamType.BY_ASSEMBLY_CREW
+        ).values_list("order_number", flat=True)[:10]
 
         send_to_autocomplete: list[str] = []
         for zakazka in zakazky:
@@ -90,7 +91,35 @@ class OrderStatusView(LoginRequiredMixin, View):
         try:
             order = Order.objects.get(order_number=number)
             status = order.get_status_display()  # type:ignore
+            if order.team_type != TeamType.BY_ASSEMBLY_CREW:
+                return JsonResponse(
+                    {"status": "Toto není montážní zakázka"}, status=409
+                )
             return JsonResponse({"status": status}, status=200)
 
         except Order.DoesNotExist:
             return JsonResponse({"status": "Neznámé číslo zakázky"}, status=404)
+
+
+# --- Download image zip ---
+
+
+class DownloadMontageImagesZipView(View, LoginRequiredMixin):
+    def get(self, request, order_number):
+        order = get_object_or_404(Order, order_number=order_number)
+        images = order.montage_images.all()  # type:ignore
+
+        # Vytvoření dočasného ZIP archivu v paměti
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for img in images:
+                if img.image:
+                    filename = f"{img.image.name.split('/')[-1]}"
+                    zip_file.writestr(filename, img.image.read())
+
+        buffer.seek(0)
+        response = HttpResponse(buffer, content_type="application/zip")
+        response["Content-Disposition"] = (
+            f"attachment; filename=fotky_{order.order_number}.zip"
+        )
+        return response
