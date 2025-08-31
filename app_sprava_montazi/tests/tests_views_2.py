@@ -544,3 +544,92 @@ class DownloadMontageImagesZipViewTest(TestCase):
             file_list = zip_file.namelist()
             self.assertEqual(len(file_list), 3)
             self.assertTrue(all(name.startswith("test") for name in file_list))
+
+
+class SwitchAdvicedWithDeliveryToRealizedViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="pass")
+        self.client.login(username="testuser", password="pass")
+        self.hub = DistribHub.objects.create(code="111", city="Praha")
+        self.customer = Client.objects.create(name="Pedro Pascal", zip_code="12345")
+        self.valid_order = Order.objects.create(
+            order_number="ORDER-TEST-ADVICED-1",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            status=Status.ADVICED,
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_DELIVERY_CREW,
+            notes="zaterminovano s dopravou",
+        )
+
+        self.realized_order = Order.objects.create(
+            order_number="ORD_REALIZED",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            status=Status.REALIZED,
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_DELIVERY_CREW,
+        )
+
+        self.invalid_status_order = Order.objects.create(
+            order_number="ORD_WRONG_STATUS",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            status=Status.NEW,
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
+            team_type=TeamType.BY_DELIVERY_CREW,
+        )
+
+        self.invalid_team_type_order = Order.objects.create(
+            order_number="ORD_WRONG_TEAM_TYPE",
+            distrib_hub=self.hub,
+            mandant="SCCZ",
+            client=self.customer,
+            status=Status.ADVICED,
+            delivery_termin=timezone.now().date(),
+            evidence_termin=timezone.now().date(),
+            montage_termin=timezone.make_aware(datetime(2025, 4, 10, 10, 0)),
+            team_type=TeamType.BY_ASSEMBLY_CREW,
+        )
+
+    def test_switch_valid_order(self):
+        response = self.client.post(
+            reverse("order_switch_delivery_realized", args=[self.valid_order.pk])
+        )
+        self.valid_order.refresh_from_db()
+        self.assertEqual(self.valid_order.status, Status.REALIZED)
+        self.assertRedirects(response, reverse("orders"))
+
+    def test_switch_already_realized(self):
+        response = self.client.post(
+            reverse("order_switch_delivery_realized", args=[self.realized_order.pk])
+        )
+        self.realized_order.refresh_from_db()
+        self.assertEqual(self.realized_order.status, Status.REALIZED)
+        self.assertRedirects(response, reverse("orders"))
+
+    def test_switch_invalid_status(self):
+        response = self.client.post(
+            reverse(
+                "order_switch_delivery_realized", args=[self.invalid_status_order.pk]
+            )
+        )
+        self.invalid_status_order.refresh_from_db()
+        self.assertNotEqual(self.invalid_status_order.status, Status.REALIZED)
+        self.assertRedirects(response, reverse("orders"))
+
+    def test_switch_invalid_team_type(self):
+        response = self.client.post(
+            reverse(
+                "order_switch_delivery_realized", args=[self.invalid_team_type_order.pk]
+            )
+        )
+        self.invalid_team_type_order.refresh_from_db()
+        self.assertNotEqual(self.invalid_team_type_order.status, Status.REALIZED)
+        self.assertRedirects(response, reverse("orders"))
