@@ -21,24 +21,25 @@ from app_sprava_montazi.views import (
     TeamCreateView as TeamCreate,
     TeamUpdateView as TeamUpdate,
     TeamDetailView as TeamDetail,
+    TeamDeleteView as TeamDelete,
     OrderDetailView as OrderDetail,
     OrderDeleteView as OrderDelete,
     OrderCreateView as OrderCreate,
     OrderUpdateView as OrderUpdate,
     GeneratePDFView as GeneratePDF,
+    OrderHiddenView as OrderHidden,
     OrderHistoryView as OrderHistory,
     BackProtocolView as BackProtocol,
     ClientUpdateSecondaryView as CUS,
+    UploadOneImageView as UploadOneImg,
     OrderProtocolView as OrderProtocol,
     ClientsOrdersView as ClientsOrders,
     ProtocolUploadView as ProtocolUpload,
     UploadBackProtocolView as UplBckPrtcl,
     CheckPDFProtocolView as CheckPDFProtocol,
-    ExportOrdersExcelView as ExportOrdersExcel,
-    OrderHiddenView as OrderHidden,
-    TeamDeleteView as TeamDelete,
-    UploadOneImageView as UploadOneImg,
     MontageImgUploadView as MontageImgUpload,
+    ExportOrdersExcelView as ExportOrdersExcel,
+    SwitchAdvicedWithDeliveryToRealizedView as SwtchAdvcdDlrToRlzd,
 )
 
 from app_sprava_montazi.views_services import (
@@ -64,6 +65,8 @@ OPK = "<int:order_pk>"
 ONMB = "<str:order_number>"
 SLUG = "<slug:slug>"
 MANDANT = "<str:mandant>"
+SWTCH1 = "switch/adviced_delivery_to_realized"
+SWTCH1NAME = "order_switch_delivery_realized"
 # ---
 urlpatterns: list = [
     path("admin/", admin.site.urls),
@@ -78,6 +81,7 @@ app_sprava_montazi: list = [
     path("orders/", Orders.as_view(), name="orders"),
     path("order/create/", OrderCreate.as_view(), name="order_create"),
     path(f"order/{PK}/hidden/", OrderHidden.as_view(), name="order_hidden"),
+    path(f"order/{PK}/{SWTCH1}", SwtchAdvcdDlrToRlzd.as_view(), name=f"{SWTCH1NAME}"),
     path(f"order/{PK}/order_update/", OrderUpdate.as_view(), name="order_update"),
     path(f"order/{PK}/delete_order/", OrderDelete.as_view(), name="delete_order"),
     path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),
