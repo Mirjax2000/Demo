@@ -1,7 +1,7 @@
 <section class="L-form__fieldset">
+    <h3 class="L-detail__fieldset__header">Přijatá montážní fotodokumentace</h3>
+    <hr>
     {% if montage_images %}
-        <h3 class="L-detail__fieldset__header">Přijatá montážní fotodokumentace</h3>
-        <hr>
         <ul class="C-img-list mb-2">
             {% for montage_img in montage_images %}
                 <li class="C-img-list__item">
@@ -25,9 +25,12 @@
             </a>
         </div>
         <hr>
+    {% else %}
+        <p class="alert alert-info">Žádné došlé obrázky nebyly přijaty</p>
+        <hr>
     {% endif %}
+    <h3 class="L-detail__fieldset__header">Přijatý montážní protokol</h3>
     {% if recieved_protokol %}
-        <h3 class="L-detail__fieldset__header">Přijatý montážní protokol</h3>
         <p class="alert alert-success mt-2 pt-1 pb-1 ps-2 pe-2">
             <strong>Protokol byl přijat:</strong>
             <br>

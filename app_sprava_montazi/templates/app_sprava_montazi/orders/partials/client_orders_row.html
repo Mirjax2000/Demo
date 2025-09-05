@@ -2,7 +2,7 @@
     <tr class="L-table__body__row">
         <!--cislo zakazky-->
         <td>
-            <a href="{% url "order_detail" order.id %}" class="L-table__link">{{ order.order_number|upper }}</a>
+            <a href="{% url 'order_update' order.pk %}" class="L-table__link">{{ order.order_number }}</a>
         </td>
         <!--misto urceni-->
         <td>{{ order.distrib_hub }}</td>

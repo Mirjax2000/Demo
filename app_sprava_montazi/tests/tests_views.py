@@ -1810,7 +1810,7 @@ class ExportOrdersExcelViewTest(TestCase):
         self.order2 = Order.objects.create(
             order_number="67890-S",
             distrib_hub=self.hub,
-            mandant="OtherMandant",
+            mandant="PHA",
             client=self.customer2,
             evidence_termin=date(2023, 6, 15),
             delivery_termin=None,  # Test None values
@@ -1862,7 +1862,7 @@ class ExportOrdersExcelViewTest(TestCase):
             distrib_hub=self.hub,
             mandant="SCCZ",
             client=self.customer,
-            evidence_termin=date(2024, 3, 1),
+            evidence_termin=date(2024, 3, 2),
             delivery_termin=date(2024, 3, 1),
             montage_termin=timezone.now(),
             status=Status.ADVICED,

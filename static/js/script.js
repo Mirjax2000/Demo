@@ -27,6 +27,8 @@
     document.addEventListener("DOMContentLoaded", hiddenOrder);
     // delete team
     document.addEventListener("DOMContentLoaded", deleteTeam);
+    // delete switch na realizovano s dopravou
+    document.addEventListener("DOMContentLoaded", advicedRealizedOrder);
     // copy to schranka
     document.addEventListener("DOMContentLoaded", function () {
         setupAutobotCopy();
@@ -824,6 +826,22 @@
                 deleteOrderButton.classList.remove("disabled")
             } else {
                 deleteOrderButton.classList.add("disabled")
+            }
+        })
+    }
+    // zaterminovano s dopravou na Realizovano function
+    function advicedRealizedOrder() {
+        const checkBoxRealizovanoSDopravou = document.getElementById("checkBoxRealizovanoSDopravou");
+        const realizovanoSDopracouButton = document.getElementById("realizovanoSDopracouButton")
+
+        if (!checkBoxRealizovanoSDopravou && !realizovanoSDopracouButton) {
+            return
+        }
+        checkBoxRealizovanoSDopravou.addEventListener("change", function () {
+            if (checkBoxRealizovanoSDopravou.checked) {
+                realizovanoSDopracouButton.classList.remove("disabled")
+            } else {
+                realizovanoSDopracouButton.classList.add("disabled")
             }
         })
     }

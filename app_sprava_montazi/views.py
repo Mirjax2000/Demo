@@ -5,6 +5,7 @@ import time
 from typing import Any, cast, Tuple, List, Dict
 from datetime import datetime
 from openpyxl import Workbook
+from regex import T
 from rich.console import Console
 
 # --- Django
@@ -1326,3 +1327,85 @@ class UploadOneImageView(View):
         img_uploader.convert_and_save_webp_images()
 
         return img_uploader.redirect_with_success()
+
+
+class SwitchAdvicedWithDeliveryToRealizedView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        order = get_object_or_404(Order, pk=kwargs["pk"])
+
+        if order.status == Status.REALIZED:
+            messages.error(
+                request,
+                (
+                    f"Zakázka <strong>{order.order_number}</strong> "
+                    "je již ve stavu <strong>Realizováno</strong>."
+                ),
+            )
+            if settings.DEBUG:
+                cons.log(
+                    f"Zakázka {order.order_number} už je ve stavu REALIZED, přeskakuji.",
+                    style="red",
+                )
+            return redirect("orders")
+
+        je_validni = (
+            order.status == Status.ADVICED
+            and order.team_type == TeamType.BY_DELIVERY_CREW
+        )
+
+        if not je_validni:
+            messages.error(
+                request,
+                (
+                    f"Nastala chyba při změně stavu zakázky "
+                    f"<strong>{order.order_number}</strong>. "
+                    "Zakázka musí být ve stavu <strong>Zatermínováno</strong> "
+                    "a typu <strong>Dopravní</strong>."
+                ),
+            )
+            if settings.DEBUG:
+                cons.log(
+                    (
+                        f"[red][ERROR][/red] Zakázka {order.order_number} není ve "
+                        f"stavu [blue]ADVICED[/blue] a/nebo není "
+                        f"[blue]BY_DELIVERY_CREW[/blue]."
+                    )
+                )
+            return redirect("orders")
+
+        try:
+            order.status = Status.REALIZED
+            order.save()
+
+            messages.success(
+                request,
+                (
+                    f"Zakázka: <strong>{order.order_number}</strong> "
+                    "byla změněna na status <strong>Realizováno</strong>."
+                ),
+            )
+            if settings.DEBUG:
+                cons.log(
+                    (
+                        f"[green][INFO][/green] Zakázka {order.order_number} "
+                        "úspěšně přepnuta na REALIZED."
+                    )
+                )
+
+        except Exception as e:
+            messages.error(
+                request,
+                (
+                    "Nastala chyba při změně stavu zakázky "
+                    f"<strong>{order.order_number}</strong>."
+                ),
+            )
+            if settings.DEBUG:
+                cons.log(
+                    (
+                        f"[red][ERROR][/red] Nepodařilo se změnit stav zakázky "
+                        f"{order.order_number}: {str(e)}"
+                    )
+                )
+
+        return redirect("orders")
