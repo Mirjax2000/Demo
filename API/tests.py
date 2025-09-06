@@ -191,11 +191,13 @@ class IncompleteCustomersViewTest(TestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+
         data = response.json()
-        self.assertIsInstance(data, list)
-        self.assertTrue(all(isinstance(item, str) for item in data))
-        #  mame 70 zakazek ale 10 je skryto
-        self.assertTrue(len(data), 60)
+
+        self.assertIn("order_numbers", data)
+        self.assertIsInstance(data["order_numbers"], list)
+        self.assertTrue(all(isinstance(item, str) for item in data["order_numbers"]))
+        self.assertEqual(len(data["order_numbers"]), 60)
 
 
 class ZaterminovanoDopravouViewTest(TestCase):
@@ -362,9 +364,26 @@ class ZaterminovanoDopravouViewTest(TestCase):
     def test_inc_dopravani_zakazka(self):
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
         response = self.client.get(self.url)
+
         self.assertEqual(response.status_code, 200)
+
         data = response.json()
-        self.assertIsInstance(data, list)
-        self.assertTrue(all(isinstance(item, str) for item in data))
-        #  mame jen 10 zakazek s zaterminovano s dopravou
-        self.assertTrue(len(data), 10)
+
+        # Zkontrolovat, že odpověď je slovník
+        self.assertIsInstance(data, dict)
+        self.assertIn("orders", data)
+
+        orders = data["orders"]
+        self.assertIsInstance(orders, list)
+
+        # Každý prvek by měl být dict s klíči order_number a evidence_termin
+        for order in orders:
+            self.assertIn("order_number", order)
+            self.assertIn("evidence_termin", order)
+            self.assertIsInstance(order["order_number"], str)
+            self.assertIsInstance(order["evidence_termin"], str)
+            # Zkontrolujeme, že v odpovědi jsou jen objednávky s team_type BY_DELIVERY_CREW
+            self.assertTrue(order["order_number"].startswith("ADVICED-BY-DELIVERY-"))
+
+        # Očekává se 10 záznamů s typem BY_DELIVERY_CREW a statusem ADVICED
+        self.assertEqual(len(orders), self.range)

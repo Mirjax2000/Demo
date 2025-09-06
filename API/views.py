@@ -119,7 +119,7 @@ class ZaterminovanoDopravouView(APIView):
 
     @extend_schema(
         summary="Seznam zaterminovaných objednávek dopravou",
-        description="Vrací seznam `order_number` všech objednávek, které mají status `ADVICED` a `team_type` `BY_DELIVERY_CREW`.",
+        description="Vrací seznam objednávek s `order_number` a `evidence_termin`, které mají status `ADVICED` a `team_type` `BY_DELIVERY_CREW`.",
         responses={
             200: OpenApiResponse(
                 response=ZaterminovaneObjednavkySerializer,
@@ -128,10 +128,15 @@ class ZaterminovanoDopravouView(APIView):
                     OpenApiExample(
                         "Příklad úspěšné odpovědi",
                         value={
-                            "order_numbers": [
-                                "709815789100523888-R",
-                                "709815789100523889-R",
-                                "709815789100523890-R",
+                            "orders": [
+                                {
+                                    "order_number": "709815789100523888-R",
+                                    "evidence_termin": "2025-09-06",
+                                },
+                                {
+                                    "order_number": "709815789100523889-R",
+                                    "evidence_termin": "2025-09-07",
+                                },
                             ]
                         },
                     )
@@ -153,13 +158,20 @@ class ZaterminovanoDopravouView(APIView):
         qs = Order.objects.filter(
             status=Status.ADVICED, team_type=TeamType.BY_DELIVERY_CREW
         )
-        seznam = [record.order_number.upper() for record in qs]
+
+        seznam = [
+            {
+                "order_number": record.order_number.upper(),
+                "evidence_termin": record.evidence_termin,
+            }
+            for record in qs
+        ]
 
         if settings.DEBUG:
             cons.log(f"Počet zaterminovaných zakázek: {len(seznam)}")
             cons.log(f"Seznam zaterminovaných zakázek: {seznam}")
 
-        return Response({"order_numbers": seznam})
+        return Response({"orders": seznam})
 
 
 class CustomerUpdateView(APIView):
