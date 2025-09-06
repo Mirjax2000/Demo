@@ -1409,3 +1409,18 @@ class SwitchAdvicedWithDeliveryToRealizedView(LoginRequiredMixin, View):
                 )
 
         return redirect("orders")
+
+
+class RealizedByAssemblyView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
+    template_name = f"{APP_URL}/orders/realizedbyassembly.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # --- navigace
+        context["active"] = "orders_all"
+
+        # --- path param
+        path_order_number = self.kwargs.get("order_number")
+        context["path_order_number"] = path_order_number
+
+        return context

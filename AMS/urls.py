@@ -42,6 +42,7 @@ from app_sprava_montazi.views import (
     CheckPDFProtocolView as CheckPDFProtocol,
     MontageImgUploadView as MontageImgUpload,
     ExportOrdersExcelView as ExportOrdersExcel,
+    RealizedByAssemblyView as RealizedByAssembly,
     SwitchAdvicedWithDeliveryToRealizedView as SwtchAdvcdDlrToRlzd,
 )
 
@@ -90,6 +91,11 @@ app_sprava_montazi: list = [
     path(f"order/{PK}/delete_order/", OrderDelete.as_view(), name="delete_order"),
     path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),
     path("order/export/", ExportOrdersExcel.as_view(), name="order_export"),
+    path(
+        f"order/{ONMB}/realizedbyassembly/",
+        RealizedByAssembly.as_view(),
+        name="realized_by_assembly",
+    ),
     # --- client
     path(f"order/{PK}/client_update/", CUV.as_view(), name="client_update"),
     path(f"order/{SLUG}/client_update_sec/", CUS.as_view(), name="client_update_sec"),
