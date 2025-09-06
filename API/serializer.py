@@ -29,11 +29,13 @@ class IncompleteCustomersSerializer(serializers.Serializer):
     )
 
 
+class ZaterminovanaObjednavkaSerializer(serializers.Serializer):
+    order_number = serializers.CharField()
+    evidence_termin = serializers.DateField()
+
+
 class ZaterminovaneObjednavkySerializer(serializers.Serializer):
-    orders = serializers.ListField(
-        child=serializers.CharField(),
-        help_text="Seznam číslel zakázek zaterminovaných dopravou",
-    )
+    orders = ZaterminovanaObjednavkaSerializer(many=True)
 
 
 class ApiStatusSerializer(serializers.Serializer):
