@@ -1,0 +1,34 @@
+{% if order.status == "Adviced" %}
+    {% if order.team_type == "By_assembly_crew" %}
+        <a href="{% url 'protocol' order.pk %}"
+           class="btn btn-primary btn-sm u-width-180 text-nowrap me-2 position-relative">
+            {% if order_has_error %}
+                <span class="position-absolute top-0 start-100 translate-middle bg-danger error_mark">
+                    <i class="fa-solid fa-exclamation fa-beat-fade fa-sm"></i>
+                </span>
+                <i class="fa-solid fa-paper-plane me-2"></i>
+            {% endif %}
+            <span>Montážní protokol</span>
+        </a>
+    {% else %}
+        <!-- prepnout na realizovano-->
+        <div class="form-check form-switch mb-1">
+            <input class="form-check-input"
+                   type="checkbox"
+                   role="switch"
+                   id="checkBoxRealizovanoSDopravou"
+                   aria-checked="false">
+            <label class="form-check-label" for="checkBoxDeleteOrder">Opravdu přepnout?</label>
+        </div>
+        <!---->
+        <form method="post"
+              action="{% url 'order_switch_delivery_realized' order.pk %}">
+            {% csrf_token %}
+            <button type="submit"
+                    id="realizovanoSDopracouButton"
+                    class="btn btn-primary btn-sm u-width-180 text-nowrap me-2 disabled">
+                <i class="fa-solid fa-clipboard-check me-2"></i>Na Realizováno
+            </button>
+        </form>
+    {% endif %}
+{% endif %}

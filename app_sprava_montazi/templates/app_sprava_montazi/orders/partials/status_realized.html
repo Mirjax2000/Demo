@@ -1,0 +1,22 @@
+{% if order.status == "Realized" %}
+    {% if order.team_type == "By_assembly_crew" %}
+        <div>
+            <a class="btn btn-primary btn-sm u-width-180 text-nowrap me-2">
+                <i class="fa-solid fa-book me-2"></i>
+                montážní dok.
+            </a>
+        </div>
+    {% endif %}
+    <!---->
+    {% if order.team_type == "By_delivery_crew" %}
+        <div>
+            <div>
+                <a class="btn btn-primary btn-sm u-width-180 text-nowrap me-2 disabled">
+                    <i class="fa-solid fa-truck me-2"></i>
+                    dopravní dok.
+                </a>
+            </div>
+        </div>
+    {% endif %}
+    <!---->
+{% endif %}
