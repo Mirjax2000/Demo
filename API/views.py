@@ -246,16 +246,15 @@ class RealizujZakazkyView(APIView):
     )
     def post(self, request):
         serializer = ZakazkyUpdateSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=drf_status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            order_numbers = serializer.validated_data["orders"]
+            qs = Order.objects.filter(order_number__in=order_numbers)
 
-        order_numbers = serializer.validated_data["orders"]
-        qs = Order.objects.filter(order_number__in=order_numbers)
+            updated_orders = []
+            for order in qs:
+                order.status = Status.REALIZED
+                order.save(update_fields=["status"])
+                updated_orders.append(order.order_number)
 
-        updated_orders = []
-        for order in qs:
-            order.status = Status.REALIZED
-            order.save(update_fields=["status"])
-            updated_orders.append(order.order_number)
-
-        return Response({"updated": updated_orders})
+            return Response({"updated": updated_orders})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
