@@ -387,3 +387,201 @@ class ZaterminovanoDopravouViewTest(TestCase):
 
         # Očekává se 10 záznamů s typem BY_DELIVERY_CREW a statusem ADVICED
         self.assertEqual(len(orders), self.range)
+
+
+class RealizujZakazkyViewTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.url = "/api/api/update-dopzak/"
+        self.token_url = "/api-token-auth/"
+        self.username = "testuser1"
+        self.password = "testpass1"
+        self.user = User.objects.create_user(
+            username=self.username, password=self.password
+        )
+        self.team = Team.objects.create(
+            name="Ferda Company",
+            city="Praha",
+            phone="234234234",
+            email="ferda.company@gmail.cz",
+        )
+        self.hub = DistribHub.objects.create(code="626", city="Chrastany")
+        # ziskani tokenu
+        response = self.client.post(
+            self.token_url,
+            {"username": self.username, "password": self.password},
+            format="json",
+        )
+
+        # kontrola
+        self.assertEqual(response.status_code, 200)
+        self.token = response.data["token"]
+
+        self.range: int = 10
+        # Vytvoříme  objednávky
+        # status new by assembly crew
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Customer test-1-{i}", zip_code=f"123{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"NEW_BY_CREW{i:05}-O",
+                distrib_hub=self.hub,
+                mandant="SCCZ",
+                client=customer,
+                evidence_termin=date(2025, 1, 1),
+                delivery_termin=date(2025, 2, 10),
+                status=Status.NEW,
+                team_type=TeamType.BY_ASSEMBLY_CREW,
+            )
+        # status new by customer
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Customer test-2-{i}", zip_code=f"123{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"NEW_BY_CUST{i:05}-O",
+                distrib_hub=self.hub,
+                mandant="SCCZ",
+                client=customer,
+                evidence_termin=date(2025, 1, 1),
+                delivery_termin=date(2025, 2, 10),
+                status=Status.NEW,
+                team_type=TeamType.BY_CUSTOMER,
+            )
+        # status adviced s montazi
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Customer test-3-{i}", zip_code=f"123{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"ADVICED-BY-ASSEMBLY{i:03}-R",
+                distrib_hub=self.hub,
+                mandant="SCCZ",
+                client=customer,
+                evidence_termin=date(2025, 2, 2),
+                delivery_termin=date(2025, 3, 4),
+                montage_termin=timezone.make_aware(datetime(2025, 4, 10, 10, 0)),
+                status=Status.ADVICED,
+                team_type=TeamType.BY_ASSEMBLY_CREW,
+                team=self.team,
+            )
+        # status adviced s dopravou
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Customer test-4-{i}", zip_code=f"123{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"ADVICED-BY-DELIVERY-{i:03}-R",
+                distrib_hub=self.hub,
+                mandant="SCCZ",
+                client=customer,
+                evidence_termin=date(2025, 2, 2),
+                delivery_termin=date(2025, 3, 4),
+                status=Status.ADVICED,
+                team_type=TeamType.BY_DELIVERY_CREW,
+            )
+        # status Hidden by customer
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Customer test-5-{i}", zip_code=f"123{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"HIDDEN_CUST{i:05}-R",
+                distrib_hub=self.hub,
+                mandant="SCCZ",
+                client=customer,
+                evidence_termin=date(2025, 2, 2),
+                delivery_termin=date(2025, 3, 4),
+                status=Status.HIDDEN,
+                team_type=TeamType.BY_CUSTOMER,
+            )
+        # status Realized
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Customer test-6-{i}", zip_code=f"123{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"REALIZED_{i:05}-R",
+                distrib_hub=self.hub,
+                mandant="SCCZ",
+                client=customer,
+                evidence_termin=date(2025, 2, 2),
+                delivery_termin=date(2025, 3, 4),
+                montage_termin=timezone.make_aware(datetime(2025, 4, 10, 10, 0)),
+                status=Status.REALIZED,
+                team_type=TeamType.BY_ASSEMBLY_CREW,
+                team=self.team,
+            )
+        # status Canceled
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Customer test-7-{i}", zip_code=f"123{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"CANCELED_{i:05}-R",
+                distrib_hub=self.hub,
+                mandant="SCCZ",
+                client=customer,
+                evidence_termin=date(2025, 2, 2),
+                delivery_termin=date(2025, 3, 4),
+                montage_termin=timezone.make_aware(datetime(2025, 4, 10, 10, 0)),
+                status=Status.CANCELED,
+                team_type=TeamType.BY_ASSEMBLY_CREW,
+                team=self.team,
+            )
+        # status Billed
+        for i in range(self.range):
+            customer = Client.objects.create(
+                name=f"Customer test-8-{i}", zip_code=f"123{i:02}"
+            )
+            Order.objects.create(
+                order_number=f"BILLED_{i:06}-R",
+                distrib_hub=self.hub,
+                mandant="SCCZ",
+                client=customer,
+                evidence_termin=date(2025, 2, 2),
+                delivery_termin=date(2025, 3, 4),
+                montage_termin=timezone.make_aware(datetime(2025, 4, 10, 10, 0)),
+                status=Status.BILLED,
+                team_type=TeamType.BY_ASSEMBLY_CREW,
+                team=self.team,
+            )
+
+    def auth(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
+
+    def test_realizace_vsech_adviced_delivery_orders(self):
+        self.auth()
+        orders_good = Order.objects.filter(
+            status=Status.ADVICED, team_type=TeamType.BY_DELIVERY_CREW
+        )
+        orders_bad = Order.objects.filter(
+            status=Status.ADVICED, team_type=TeamType.BY_ASSEMBLY_CREW
+        )
+        orders = list(orders_bad) + list(orders_good)
+        order_numbers = [o.order_number for o in orders]
+
+        response = self.client.post(self.url, {"orders": order_numbers}, format="json")
+
+        self.assertEqual(response.status_code, 200)
+        # Updated orders = jen ty správné
+        updated_numbers = [o.order_number for o in orders_good]
+        self.assertCountEqual(response.data["updated"], updated_numbers)
+
+        # Skipped orders = ty špatné
+        skipped_numbers = [o.order_number for o in orders_bad]
+        self.assertCountEqual(response.data["skipped"], skipped_numbers)
+
+        # Žádné nenalezené
+        self.assertEqual(response.data["not_found"], [])
+
+        # Ověření, že všechny objednávky GOOD byly aktualizovány
+        for order in orders_good:
+            order.refresh_from_db()
+            self.assertEqual(order.status, Status.REALIZED)
+
+        # Ověření, že všechny objednávky BAD zůstaly stejné
+        for order in orders_bad:
+            order.refresh_from_db()
+            self.assertEqual(order.status, Status.ADVICED)
