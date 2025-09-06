@@ -15,7 +15,7 @@ class CustomerDetailSerializer(serializers.Serializer):
 
 class CustomerUpdateItemSerializer(serializers.Serializer):
     order_number = serializers.CharField()
-    details = CustomerDetailSerializer()  # <-- tady ukáže všechna pole
+    details = CustomerDetailSerializer()
 
 
 class OrderCustomerUpdateSerializer(serializers.Serializer):
@@ -40,3 +40,11 @@ class ZaterminovaneObjednavkySerializer(serializers.Serializer):
 
 class ApiStatusSerializer(serializers.Serializer):
     api_status = serializers.CharField()
+
+
+class ZakazkyUpdateSerializer(serializers.Serializer):
+    orders = serializers.ListField(
+        child=serializers.CharField(),
+        allow_empty=False,
+        required=True,
+    )

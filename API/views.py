@@ -23,7 +23,7 @@ from app_sprava_montazi.models import Order, Status, TeamType
 
 # --- serializer
 from .serializer import OrderCustomerUpdateSerializer, ApiStatusSerializer
-from .serializer import IncompleteCustomersSerializer
+from .serializer import IncompleteCustomersSerializer, ZakazkyUpdateSerializer
 from .serializer import ZaterminovaneObjednavkySerializer
 
 # --- 00P classes
@@ -114,6 +114,45 @@ class IncompleteCustomersView(APIView):
         return Response({"order_numbers": seznam})
 
 
+class CustomerUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Aktualizace zákazníků",
+        description="Přijímá seznam aktualizací zákazníků a aplikuje je.",
+        request=OrderCustomerUpdateSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                description="Zpráva o úspěšné aktualizaci",
+                examples=[
+                    OpenApiExample(
+                        "Úspěšná aktualizace",
+                        value={"message": "Zákazníci byli aktualizováni."},
+                    )
+                ],
+            ),
+            401: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                description="Nebyly zadány přihlašovací údaje.",
+                examples=[
+                    OpenApiExample(
+                        "NoCredentials",
+                        value={"detail": "Nebyly zadány přihlašovací údaje."},
+                    )
+                ],
+            ),
+        },
+    )
+    def post(self, request):
+        serializer = OrderCustomerUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            updates = serializer.validated_data["updates"]  # type: ignore
+            update_customers(updates)
+            return Response({"message": "Zákazníci byli aktualizováni."})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class ZaterminovanoDopravouView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -174,21 +213,22 @@ class ZaterminovanoDopravouView(APIView):
         return Response({"orders": seznam})
 
 
-class CustomerUpdateView(APIView):
+class RealizujZakazkyView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        summary="Aktualizace zákazníků",
-        description="Přijímá seznam aktualizací zákazníků a aplikuje je.",
-        request=OrderCustomerUpdateSerializer,
+        summary="Realizace objednávek",
+        request=ZakazkyUpdateSerializer,
         responses={
             200: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
-                description="Zpráva o úspěšné aktualizaci",
+                description="Úspěšně aktualizované objednávky",
                 examples=[
                     OpenApiExample(
-                        "Úspěšná aktualizace",
-                        value={"message": "Zákazníci byli aktualizováni."},
+                        "Příklad úspěchu",
+                        value={
+                            "updated": ["709815789100523888-R", "709815789100523889-R"]
+                        },
                     )
                 ],
             ),
@@ -205,9 +245,17 @@ class CustomerUpdateView(APIView):
         },
     )
     def post(self, request):
-        serializer = OrderCustomerUpdateSerializer(data=request.data)
-        if serializer.is_valid():
-            updates = serializer.validated_data["updates"]  # type: ignore
-            update_customers(updates)
-            return Response({"message": "Zákazníci byli aktualizováni."})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ZakazkyUpdateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=drf_status.HTTP_400_BAD_REQUEST)
+
+        order_numbers = serializer.validated_data["orders"]
+        qs = Order.objects.filter(order_number__in=order_numbers)
+
+        updated_orders = []
+        for order in qs:
+            order.status = Status.REALIZED
+            order.save(update_fields=["status"])
+            updated_orders.append(order.order_number)
+
+        return Response({"updated": updated_orders})
