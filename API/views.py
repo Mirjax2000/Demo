@@ -147,7 +147,7 @@ class CustomerUpdateView(APIView):
     def post(self, request):
         serializer = OrderCustomerUpdateSerializer(data=request.data)
         if serializer.is_valid():
-            updates = serializer.validated_data["updates"]  # type: ignore
+            updates = serializer.validated_data["updates"]  # type:ignore
             update_customers(updates)
             return Response({"message": "Zákazníci byli aktualizováni."})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -219,43 +219,84 @@ class RealizujZakazkyView(APIView):
     @extend_schema(
         summary="Realizace objednávek",
         request=ZakazkyUpdateSerializer,
+        examples=[
+            OpenApiExample(
+                "Příklad vstupu",
+                value={"orders": ["709815789100523888-R", "709815789100523889-R"]},
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Úspěšná aktualizace",
+                value={
+                    "updated": ["709815789100523888-R"],
+                    "not_found": ["709815789100523889-R"],
+                    "skipped": ["709815789100523890-R"],
+                },
+                response_only=True,
+            ),
+            OpenApiExample(
+                "Všechno špatně – žádná objednávka nenalezena",
+                value={"detail": "Žádné odpovídající objednávky nebyly nalezeny."},
+                response_only=True,
+                status_codes=["404"],
+            ),
+        ],
         responses={
             200: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
                 description="Úspěšně aktualizované objednávky",
-                examples=[
-                    OpenApiExample(
-                        "Příklad úspěchu",
-                        value={
-                            "updated": ["709815789100523888-R", "709815789100523889-R"]
-                        },
-                    )
-                ],
             ),
+            400: OpenApiResponse(description="Nevalidní vstupní data"),
             401: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
                 description="Nebyly zadány přihlašovací údaje.",
                 examples=[
                     OpenApiExample(
-                        "NoCredentials",
+                        "Chybí token",
                         value={"detail": "Nebyly zadány přihlašovací údaje."},
+                        response_only=True,
                     )
                 ],
             ),
+            404: OpenApiResponse(description="Žádné objednávky nenalezeny"),
         },
     )
     def post(self, request):
         serializer = ZakazkyUpdateSerializer(data=request.data)
         if not serializer.is_valid():
-            return Response(serializer.errors, status=drf_status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        order_numbers = serializer.validated_data["orders"]
+        order_numbers = serializer.validated_data["orders"]  # type:ignore
         qs = Order.objects.filter(order_number__in=order_numbers)
 
-        updated_orders = []
-        for order in qs:
-            order.status = Status.REALIZED
-            order.save(update_fields=["status"])
-            updated_orders.append(order.order_number)
+        found_numbers = set(qs.values_list("order_number", flat=True))
+        not_found = list(set(order_numbers) - found_numbers)
 
-        return Response({"updated": updated_orders})
+        if not qs.exists():
+            return Response(
+                {"detail": "Žádné odpovídající objednávky nebyly nalezeny."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        updated_orders = []
+        skipped_orders = []
+
+        for order in qs:
+            if (
+                order.status == Status.ADVICED
+                and order.team_type == TeamType.BY_DELIVERY_CREW
+            ):
+                order.status = Status.REALIZED
+                order.save(update_fields=["status"])
+                updated_orders.append(order.order_number)
+            else:
+                skipped_orders.append(order.order_number)
+
+        return Response(
+            {
+                "updated": updated_orders,
+                "not_found": not_found,
+                "skipped": skipped_orders,
+            },
+            status=status.HTTP_200_OK,
+        )
