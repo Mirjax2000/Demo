@@ -312,7 +312,7 @@ class JsonOrders:
         error: bool = check_order_error_adviced(order.pk)
         content = order.get_status_display()[:8]  # type: ignore
         icon = ""
-        is_images: bool = order.montage_images.exists()
+        is_images: bool = order.montage_images.exists()  # type: ignore
 
         if (
             order.status == Status.ADVICED

@@ -203,12 +203,24 @@ LOGGING = {
             "class": "logging.FileHandler",
             "filename": os.path.join(BASE_DIR, "logs", "login_failures.log"),
         },
+        # Přidáme nový handler pro chyby
+        "error_file": {
+            "level": "ERROR",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs", "django_error.log"),
+        },
     },
     "loggers": {
         "login": {
             "handlers": ["login_file"],
             "level": "INFO",
             "propagate": False,
+        },
+        # Přidáme nový logger pro všechny Django chyby
+        "django": {
+            "handlers": ["error_file"],
+            "level": "ERROR",
+            "propagate": True,
         },
     },
 }
