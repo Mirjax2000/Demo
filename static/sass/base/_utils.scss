@@ -388,3 +388,13 @@
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
 }
+
+.opacity-hover {
+  opacity: 0.7;
+  transition: 0.2s all ease-in-out;
+  cursor: default;
+
+  &:hover {
+    opacity: 1;
+  }
+}

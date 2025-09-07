@@ -10,7 +10,7 @@
     flex-basis: 20%;
     padding: 0.15em;
     box-sizing: border-box;
-    opacity: 0.5;
+    opacity: 0.6;
     transition: all 0.2s ease-in-out;
     cursor: pointer;
 
@@ -39,6 +39,45 @@
         object-fit: cover;
         display: block;
       }
+    }
+  }
+
+  &__item__doc {
+    box-sizing: border-box;
+    margin-bottom: 0.5em;
+
+    &__img {
+      width: 100%;
+      height: 10em;
+      overflow: hidden;
+      border-radius: 5px;
+
+      img {
+        width: 100%;
+        opacity: 0.8;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+    }
+  }
+}
+
+.C-img__protocol {
+  height: auto;
+
+  &__image {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 5px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      overflow: hidden;
     }
   }
 }

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}
+    Montazni dokumentace
+{% endblock title %}
+<!---->
+{% block content %}
+    <section class="u-flex-row-start">
+        <!---->
+        <div class="L-detail__fieldset">
+            <h3 class="L-detail__fieldset__header mt-3">
+                montáž: <span>{{ order.order_number }}</span>
+            </h3>
+            <hr>
+            <ul class="L-detail__list">
+                {% for image in order.montage_images.all %}
+                    <li class="L-detail__item C-img-list__item__doc">
+                        <div class="C-img-list__item__doc__img opacity-hover">
+                            <img src="{{ image.image.url }}" alt = "{{ image.alt_text }}">
+                        </div>
+                        <!---->
+                        <div class="u-flex-row-between mt-1">
+                            <p class="ps-1 m-0">přijato: {{ image.created }}</p>
+                            <a href="{{ image.image.url }}" download class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-download"></i>
+                            </a>
+                        </div>
+                        <div>
+                            <p class="ps-1 m-0">komentář: {{ image.alt_text }}</p>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            <hr>
+            <div class="text-end">
+                <a href="{% url 'dwn_mont_imgs_zip' order.order_number %}"
+                   download
+                   class="btn btn-primary btn-sm w-50">
+                    <i class="fa-solid fa-download me-2"></i>Stáhnout obrázky
+                </a>
+            </div>
+        </div>
+        <!---->
+        <div class="L-detail__fieldset">
+            <h3 class="L-detail__fieldset__header mt-3">Přijatý montážní protokol</h3>
+            <hr>
+            <div class="L-detail__item C-img__protocol">
+                <div class="C-img__protocol__image opacity-hover">
+                    <img src="{{ order.back_protocol.file.url }}"
+                         alt="{{ order.back_protocol.alt_text }}">
+                </div>
+                <div class="u-flex-row-between mt-1">
+                    <p class="ps-1 m-0">přijato: {{ order.back_protocol.created }}</p>
+                    <a href="{{ order.back_protocol.file.url }}"
+                       download
+                       class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-download"></i>
+                    </a>
+                </div>
+                <div>
+                    <p class="ps-1 m-0">komentář: {{ order.back_protocol.alt_text }}</p>
+                </div>
+            </div>
+        </div>
+        <!---->
+        <div class="L-detail__fieldset">
+            <h3 class="L-detail__fieldset__header mt-3">Detaily montáže</h3>
+            <hr>
+            <div class="opacity-hover">
+                <p class="m-0 mt-0">Zákazník:</p>
+                <p class="alert alert-info p-2">
+                    <strong class="d-block">{{ order.client }}</strong>
+                    <strong class="d-block">{{ order.client.street }}</strong>
+                    <strong class="d-block">{{ order.client.city }}</strong>
+                    <strong class="d-block">{{ order.client.zip_code }}</strong>
+                </p>
+            </div>
+            <hr>
+            <div class="opacity-hover">
+                <p class="m-0 mt-0">montážní team:</p>
+                <p class="alert alert-info p-2">
+                    <strong class="d-block">{{ order.team }}</strong>
+                    <strong class="d-block">email odeslan: {{ order.mail_datum_sended }}</strong>
+                </p>
+            </div>
+            <hr>
+            <div class="opacity-hover">
+                <p class="m-0 mt-0">profit/ztrata:</p>
+                <p class="alert alert-info p-2">
+                    <span class="u-flex-row-between">
+                        <strong>Výnos: {{ order.vynos }}</strong>
+                        <strong class="me-3">Náklad: {{ order.naklad }}</strong>
+                    </span>
+                    <strong class="d-block">Profit: {{ order.profit }}</strong>
+                </p>
+            </div>
+            <hr>
+            <div class="opacity-hover">
+                <p class="m-0 mt-0">history:</p>
+                <p class="alert alert-info p-2">
+                    <span class="u-flex-row-between">TBD - WIP</span>
+                </p>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

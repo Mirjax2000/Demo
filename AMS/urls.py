@@ -34,6 +34,7 @@ from app_sprava_montazi.views import (
     OrderHistoryView as OrderHistory,
     BackProtocolView as BackProtocol,
     ClientUpdateSecondaryView as CUS,
+    AssemblyDocsView as AssemblyDocs,
     UploadOneImageView as UploadOneImg,
     OrderProtocolView as OrderProtocol,
     ClientsOrdersView as ClientsOrders,
@@ -90,6 +91,7 @@ app_sprava_montazi: list = [
     path(f"order/{PK}/delete_order/", OrderDelete.as_view(), name="delete_order"),
     path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),
     path("order/export/", ExportOrdersExcel.as_view(), name="order_export"),
+    path(f"order/{PK}/assembly_docs/", AssemblyDocs.as_view(), name="assembly_docs"),
     # --- client
     path(f"order/{PK}/client_update/", CUV.as_view(), name="client_update"),
     path(f"order/{SLUG}/client_update_sec/", CUS.as_view(), name="client_update_sec"),
@@ -147,7 +149,7 @@ api_urls: list = [
         "api/inc-dopravni-zakazka/", ZatermDoprav.as_view(), name="inc-dopravni-zakazka"
     ),
     path("api/update-customers/", CustomerUpdate.as_view(), name="update-customers"),
-    path("api/api/update-dopzak/", RealizujZakazky.as_view(), name="update-dopzak/"),
+    path("api/update-dopzak/", RealizujZakazky.as_view(), name="update-dopzak/"),
     path("api/status/", ApiStatus.as_view(), name="api-status"),
     path("api-token-auth/", obtain_auth_token),
     # --- swagger

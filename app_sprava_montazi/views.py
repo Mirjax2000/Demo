@@ -1409,3 +1409,14 @@ class SwitchAdvicedWithDeliveryToRealizedView(LoginRequiredMixin, View):
                 )
 
         return redirect("orders")
+
+
+class AssemblyDocsView(LoginRequiredMixin, DetailView):
+    model = Order
+    template_name = f"{APP_URL}/orders/realizedbyassembly.html"
+    context_object_name = "order"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active"] = "orders_all"
+        return context

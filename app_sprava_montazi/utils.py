@@ -123,35 +123,37 @@ def client_created(name: str, zip_code: str, data) -> tuple[Client, bool]:
     return client, created
 
 
-def update_customers(customer_details: list) -> None:
+def update_customers(updates: list) -> None:
     """Update modelu Client"""
-    for item in customer_details:
-        for order_number, data in item.items():
-            try:
-                order: Order = Order.objects.get(order_number=order_number)
-                client: Client | None = order.client
-                if client:
-                    client_cons_log_porovnani(client)
-                    try:
-                        with transaction.atomic():
-                            # client.name = data["name"].strip()
-                            client.city = data.get("city", "").strip()
-                            # client.zip_code = data["zip_code"].strip()
-                            client.street = data.get("street", "").strip()
-                            client.phone = data.get("phone", "").strip()
-                            client.email = data.get("email", "").strip()
-                            client.save()
-                            client_cons_log_aktualizovan(client)
-                            client_cons_log_porovnani(client)
+    for item in updates:
+        order_number = item["order_number"]
+        data = item["details"]
 
-                    except Exception:
-                        client_cons_log_update_selhal(client)
+        try:
+            order: Order = Order.objects.get(order_number=order_number)
+            client: Client | None = order.client
+            if client:
+                client_cons_log_porovnani(client)
+                try:
+                    with transaction.atomic():
+                        # client.name = data.get("name", "").strip()
+                        # client.zip_code = data.get("zip_code", "").strip()
+                        client.city = data.get("city", "").strip()
+                        client.street = data.get("street", "").strip()
+                        client.phone = data.get("phone", "").strip()
+                        client.email = data.get("email", "").strip()
+                        client.save()
+                        client_cons_log_aktualizovan(client)
+                        client_cons_log_porovnani(client)
 
-                else:
-                    client_cons_log_client_nenalezen(client)
+                except Exception:
+                    client_cons_log_update_selhal(client)
 
-            except Order.DoesNotExist:
-                client_cons_log_zakazka_nenalezena(order_number)
+            else:
+                client_cons_log_client_nenalezen(client)
+
+        except Order.DoesNotExist:
+            client_cons_log_zakazka_nenalezena(order_number)
 
 
 def get_qrcode_value(image_path) -> None | str:
