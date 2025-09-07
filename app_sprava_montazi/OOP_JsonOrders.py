@@ -53,6 +53,7 @@ truck_icon: str = '<i class="fa-solid fa-truck me-1 u-txt-info-color"></i>'
 montage_icon: str = (
     '<i class="fa-solid fa-screwdriver-wrench me-1 u-txt-success-color"></i>'
 )
+image_icon: str = '<i class="fa-solid fa-image me-1 u-txt-success-color"></i>'
 
 
 class JsonOrders:
@@ -311,6 +312,7 @@ class JsonOrders:
         error: bool = check_order_error_adviced(order.pk)
         content = order.get_status_display()[:8]  # type: ignore
         icon = ""
+        is_images: bool = order.montage_images.exists()
 
         if (
             order.status == Status.ADVICED
@@ -327,12 +329,16 @@ class JsonOrders:
                     f'<a href="{reverse("protocol", kwargs={"pk": order.pk})}" '
                     f'title="Zobrazit protokol">{icon_link}</a>'
                 )
+
         elif (
             order.status == Status.ADVICED
             and order.team_type == TeamType.BY_DELIVERY_CREW
         ):
             name += "-doprava"
             icon = truck_icon
+
+        if is_images:
+            icon += f" {image_icon}"
 
         return f'<div name="{name}">{content} {icon}</div>'
 
