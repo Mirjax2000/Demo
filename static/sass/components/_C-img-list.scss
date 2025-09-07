@@ -10,7 +10,7 @@
     flex-basis: 20%;
     padding: 0.15em;
     box-sizing: border-box;
-    opacity: 0.5;
+    opacity: 0.6;
     transition: all 0.2s ease-in-out;
     cursor: pointer;
 
@@ -30,6 +30,25 @@
     &__img {
       width: 100%;
       height: 6em;
+      overflow: hidden;
+      border-radius: 5px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+    }
+  }
+
+  &__item__doc {
+    box-sizing: border-box;
+    opacity: 0.8;
+
+    &__img {
+      width: 100%;
+      height: 10em;
       overflow: hidden;
       border-radius: 5px;
 

@@ -1,10 +1,10 @@
 {% if order.status == "Realized" %}
     {% if order.team_type == "By_assembly_crew" %}
         <div>
-            <a href="{% url 'realized_by_assembly' order.order_number %}"
+            <a href="{% url 'assembly_docs' order.pk %}"
                class="btn btn-primary btn-sm u-width-180 text-nowrap me-2 ">
                 <i class="fa-solid fa-book me-2"></i>
-                montážní dok.
+                Montážní dok.
             </a>
         </div>
     {% endif %}
@@ -14,7 +14,7 @@
             <div>
                 <a class="btn btn-primary btn-sm u-width-180 text-nowrap me-2 disabled">
                     <i class="fa-solid fa-truck me-2"></i>
-                    dopravní dok.
+                    Dopravní dok.
                 </a>
             </div>
         </div>

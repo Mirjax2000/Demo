@@ -1,10 +1,44 @@
 {% extends "base.html" %}
 {% block title %}
-    Realizovana dopravni zakazka
+    Montazni dokumentace
 {% endblock title %}
 <!---->
 {% block content %}
-    <section>
-        ahoj
+    <section class="u-flex-row-start">
+        <!---->
+        <div class="L-detail__fieldset">
+            <h3 class="L-detail__fieldset__header mt-3">
+                Fotografie z montáže: <span>{{ order.order_number }}</span>
+            </h3>
+            <hr>
+            <ul class="L-detail__list">
+                {% for image in order.montage_images.all %}
+                    <li class="L-detail__item C-img-list__item__doc">
+                        <div class="C-img-list__item__doc__img">
+                            <img src="{{ image.image.url }}">
+                        </div>
+                        <div>
+                            <p class="ps-1 m-0">přijato: {{ image.created }}</p>
+                            <p class="ps-1 m-0 mt-1">komentář: {{ image.alt_text }}</p>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            <hr>
+            <div class="text-end">
+                <a href="{% url 'dwn_mont_imgs_zip' order.order_number %}"
+                   download
+                   class="btn btn-primary btn-sm w-50">
+                    <i class="fa-solid fa-download me-2"></i>Stáhnout obrázky
+                </a>
+            </div>
+        </div>
+        <!---->
+        <div class="L-detail__fieldset">
+            <h3 class="L-detail__fieldset__header mt-3">Montážní protokol</h3>
+            <hr>
+        </div>
+        <!---->
+        <div class="L-detail__fieldset"></div>
     </section>
 {% endblock content %}
