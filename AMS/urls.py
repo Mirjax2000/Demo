@@ -1,8 +1,6 @@
 """URLs config"""
 
 from rest_framework.authtoken.views import obtain_auth_token
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.conf import settings
 from django.conf.urls.static import static
@@ -76,7 +74,7 @@ SWTCH1NAME = "order_switch_delivery_realized"
 urlpatterns: list = [
     path("admin/", admin.site.urls),
 ]
-
+# ---
 app_sprava_montazi: list = [
     path("", Index.as_view(), name="index"),
     path("homepage/", HomePage.as_view(), name="homepage"),
@@ -133,14 +131,13 @@ app_sprava_montazi: list = [
     # --- download image zip ---
     path(f"order/{ONMB}/dwn-imgs/", DownMontZip.as_view(), name="dwn_mont_imgs_zip"),
 ]
-
-
+# ---
 app_accounts_urls: list = [
     path("accounts/login/", CustomLoginView.as_view(), name="login"),
     path("accounts/register/", RegisterView.as_view(), name="signup"),
     path("accounts/", include("django.contrib.auth.urls")),
 ]
-
+# ---
 api_urls: list = [
     path(
         "api/incomplete-customers/", IncmpCstmrs.as_view(), name="incomplete-customers"
@@ -160,8 +157,8 @@ api_urls: list = [
         name="api-docs",
     ),
 ]
-
-#
+# ---
+# sestaveni vsech urls
 urlpatterns += app_sprava_montazi
 urlpatterns += app_accounts_urls
 urlpatterns += api_urls

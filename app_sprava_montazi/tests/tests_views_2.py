@@ -347,7 +347,7 @@ class SendMailViewTests(TestCase):
         )
 
         # 2️⃣ zavoláme view
-        response = self.client.get(reverse("send_mail", kwargs={"pk": order.pk}))
+        response = self.client.get(reverse("send_mail", kwargs={"pk": order.pk}))  # type:ignore
 
         # 3️⃣ zkontrolujeme, že byl vytvořen nový token
         new_token_obj = OrderBackProtocolToken.objects.get(order=order)
@@ -374,17 +374,17 @@ class ImageUploaderTestCase(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         # Vytvoření dočasného adresáře
-        cls._temp_media_dir = tempfile.mkdtemp()
+        cls._temp_media_dir = tempfile.mkdtemp()  # type:ignore
         # Nastavení MEDIA_ROOT na dočasný adresář
         cls._media_root_manager = override_settings(MEDIA_ROOT=cls._temp_media_dir)
-        cls._media_root_manager.enable()
+        cls._media_root_manager.enable()  # type:ignore
 
     @classmethod
     def tearDownClass(cls):
         # Vrácení původního nastavení
-        cls._media_root_manager.disable()
+        cls._media_root_manager.disable()  # type:ignore
         # Odstranění dočasného adresáře
-        shutil.rmtree(cls._temp_media_dir, ignore_errors=True)
+        shutil.rmtree(cls._temp_media_dir, ignore_errors=True)  # type:ignore
         super().tearDownClass()
 
     def setUp(self):
@@ -442,11 +442,11 @@ class ImageUploaderTestCase(TestCase):
         self.assertIsNotNone(img_obj)
 
         expected_filename = f"{self.order.order_number.upper()}_{img_obj.position}.webp"
-        self.assertTrue(img_obj.image.name.endswith(".webp"))
-        self.assertEqual(img_obj.alt_text, "info o protokolu")
-        self.assertEqual(Path(img_obj.image.name).name, expected_filename)
+        self.assertTrue(img_obj.image.name.endswith(".webp"))  # type:ignore
+        self.assertEqual(img_obj.alt_text, "info o protokolu")  # type:ignore
+        self.assertEqual(Path(img_obj.image.name).name, expected_filename)  # type:ignore
 
-        full_path = Path(img_obj.image.path)
+        full_path = Path(img_obj.image.path)  # type:ignore
         self.assertTrue(full_path.exists())
         self.assertTrue(full_path.name.endswith(".webp"))
 

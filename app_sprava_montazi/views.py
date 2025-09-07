@@ -5,7 +5,6 @@ import time
 from typing import Any, cast, Tuple, List, Dict
 from datetime import datetime
 from openpyxl import Workbook
-from regex import T
 from rich.console import Console
 
 # --- Django

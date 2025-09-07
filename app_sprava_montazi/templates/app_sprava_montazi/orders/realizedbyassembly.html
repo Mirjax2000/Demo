@@ -15,7 +15,7 @@
                 {% for image in order.montage_images.all %}
                     <li class="L-detail__item C-img-list__item__doc">
                         <div class="C-img-list__item__doc__img opacity-hover">
-                            <img src="{{ image.image.url }}" alt = "{{ image.alt_text }}">
+                            <img src="{{ image.image.url }}" alt="{{ image.alt_text }}">
                         </div>
                         <!---->
                         <div class="u-flex-row-between mt-1">
