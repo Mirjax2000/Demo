@@ -392,7 +392,7 @@ class ZaterminovanoDopravouViewTest(TestCase):
 class RealizujZakazkyViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.url = "/api/api/update-dopzak/"
+        self.url = "/api/update-dopzak/"
         self.token_url = "/api-token-auth/"
         self.username = "testuser1"
         self.password = "testpass1"

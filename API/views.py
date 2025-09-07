@@ -263,6 +263,7 @@ class RealizujZakazkyView(APIView):
     )
     def post(self, request):
         serializer = ZakazkyUpdateSerializer(data=request.data)
+
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

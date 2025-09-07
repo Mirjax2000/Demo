@@ -149,7 +149,7 @@ api_urls: list = [
         "api/inc-dopravni-zakazka/", ZatermDoprav.as_view(), name="inc-dopravni-zakazka"
     ),
     path("api/update-customers/", CustomerUpdate.as_view(), name="update-customers"),
-    path("api/update-dopzak/", RealizujZakazky.as_view(), name="update-dopzak/"),
+    path("api/update-dopzak/", RealizujZakazky.as_view(), name="update-dopzak"),
     path("api/status/", ApiStatus.as_view(), name="api-status"),
     path("api-token-auth/", obtain_auth_token),
     # --- swagger
