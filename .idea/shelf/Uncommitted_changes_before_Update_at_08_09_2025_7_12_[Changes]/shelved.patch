@@ -1,0 +1,685 @@
+Index: .idea/shelf/Uncommitted_changes_before_Checkout_at_08_06_2025_17_44__Changes_1.xml
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_06_2025_17_44__Changes_1.xml b/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_06_2025_17_44__Changes_1.xml
+deleted file mode 100644
+--- a/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_06_2025_17_44__Changes_1.xml	(revision 3d4c26d7a26a465a1313ad2c23e6abea9fe78414)
++++ /dev/null	(revision 3d4c26d7a26a465a1313ad2c23e6abea9fe78414)
+@@ -1,4 +0,0 @@
+-<changelist name="Uncommitted_changes_before_Checkout_at_08_06_2025_17_44_[Changes]1" date="1749397510421" recycled="true" deleted="true">
+-  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_06_2025_17_44_[Changes]1/shelved.patch" />
+-  <option name="DESCRIPTION" value="Uncommitted changes before Checkout at 08.06.2025 17:44 [Changes]" />
+-</changelist>
+\ No newline at end of file
+Index: .idea/shelf/Uncommitted_changes_before_Checkout_at_08_06_2025_17_44_[Changes]1/shelved.patch
+===================================================================
+diff --git a/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_06_2025_17_44_[Changes]1/shelved.patch b/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_06_2025_17_44_[Changes]1/shelved.patch
+deleted file mode 100644
+--- a/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_06_2025_17_44_[Changes]1/shelved.patch	(revision 3d4c26d7a26a465a1313ad2c23e6abea9fe78414)
++++ /dev/null	(revision 3d4c26d7a26a465a1313ad2c23e6abea9fe78414)
+@@ -1,473 +0,0 @@
+-Index: extrakce udaju zakazniku.py
+-===================================================================
+-diff --git a/extrakce udaju zakazniku.py b/extrakce udaju zakazniku.py
+-new file mode 100644
+---- /dev/null	(date 1748438602717)
+-+++ b/extrakce udaju zakazniku.py	(date 1748438602717)
+-@@ -0,0 +1,466 @@
+-+import logging
+-+import time
+-+import pandas as pd
+-+from selenium import webdriver
+-+from selenium.webdriver import Keys
+-+from selenium.webdriver.common.by import By
+-+from selenium.webdriver.support.ui import WebDriverWait
+-+from selenium.webdriver.support import expected_conditions as EC
+-+from selenium.common.exceptions import StaleElementReferenceException, WebDriverException
+-+import customtkinter as ctk
+-+from tkinter import Tk, StringVar, filedialog
+-+from threading import Thread
+-+from datetime import datetime
+-+import queue
+-+from threading import Event
+-+from openpyxl import Workbook
+-+import re
+-+
+-+# Nastavení logování – chyby se zapíší do souboru automation.log
+-+logging.basicConfig(filename='automation.log', level=logging.INFO,
+-+                    format='%(asctime)s:%(levelname)s:%(message)s')
+-+
+-+
+-+def safe_click(driver, locator, max_attempts=120, sleep_time=0.1):
+-+    """
+-+    Bezpečně klikne na prvek definovaný locatorem s retry mechanismem.
+-+    Vrací nalezený prvek, nebo vyhodí výjimku, pokud prvek není nalezen.
+-+    """
+-+    attempts = 0
+-+    while attempts < max_attempts:
+-+        try:
+-+            element = WebDriverWait(driver, 10).until(
+-+                EC.element_to_be_clickable(locator)
+-+            )
+-+            time.sleep(sleep_time)  # Pauza, aby se stránka stabilizovala
+-+            element.click()
+-+            return element
+-+        except StaleElementReferenceException:
+-+            attempts += 1
+-+            logging.info("Stale element při safe_click na locator %s, pokus %s",
+-+                         locator, attempts)
+-+            time.sleep(sleep_time)
+-+        except WebDriverException as wde:
+-+            # Pokud se objeví jiná chyba (např. Node with given id does not belong to the document)
+-+            attempts += 1
+-+            logging.info(
+-+                "WebDriverException při safe_click na locator %s, pokus %s: %s",
+-+                locator, attempts, str(wde))
+-+            time.sleep(sleep_time)
+-+    raise Exception(
+-+        f"safe_click: Nelze bezpečně kliknout na prvek {locator} po {max_attempts} pokusech.")
+-+
+-+
+-+ctk.set_default_color_theme("dark-blue")
+-+default_font_color = "Goldenrod"
+-+default_hover_color = "grey21"
+-+border_width = 1
+-+border_color = "DarkRed"
+-+font: tuple = ("Century Gothic", 22, "bold")
+-+
+-+# Funkce pro výpočet zbývajícího času
+-+def calculate_remaining_time(start_time, processed, total):
+-+    elapsed_time = datetime.now() - start_time
+-+    avg_time_per_item = elapsed_time / (processed if processed > 0 else 1)
+-+    remaining_items = total - processed
+-+    remaining_time = avg_time_per_item * remaining_items
+-+    return remaining_time
+-+
+-+# Vytvoření GUI
+-+def create_gui(total_items, on_close):
+-+    ctk.set_appearance_mode("dark")
+-+    ctk.set_default_color_theme("dark-blue")
+-+    root = ctk.CTk()
+-+    root.title("Progress Tracker")
+-+
+-+    # Umístění GUI do pravého horního rohu
+-+    root.geometry("+1200+100")
+-+    root.attributes("-topmost", True)  # GUI bude vždy navrchu
+-+    # root.iconbitmap("CustomTkinter_icon_Windows.ico")  # Pokud máš ikonu, můžeš ji zde přidat
+-+
+-+    # Počítadlo
+-+    progress_var = StringVar(value=f"0/{total_items} Completed")
+-+    progress_label = ctk.CTkLabel(master=root, textvariable=progress_var, font=font)
+-+    progress_label.pack(pady=10)
+-+
+-+    # Procenta
+-+    percent_var = StringVar(value="0%")
+-+    percent_label = ctk.CTkLabel(master=root, textvariable=percent_var, font=font)
+-+    percent_label.pack(pady=10)
+-+
+-+    # Procentní progress bar
+-+    progress_bar = ctk.CTkProgressBar(master=root, width=300)
+-+    progress_bar.pack(pady=10)
+-+    progress_bar.set(0)
+-+
+-+    # Zbývající čas
+-+    remaining_time_var = StringVar(value="Calculating...")
+-+    remaining_time_label = ctk.CTkLabel(master=root, textvariable=remaining_time_var, font=font)
+-+    remaining_time_label.pack(pady=10)
+-+
+-+    # Tlačítko pro ukončení skriptu (deaktivováno do dokončení)
+-+    exit_button = ctk.CTkButton(master=root, text="Ukončit skript", state='disabled', font=font, text_color=default_font_color, border_width=border_width, border_color=border_color, hover_color=default_hover_color, command=on_close, width=250, height=50)
+-+    exit_button.pack(pady=10)
+-+
+-+    return root, progress_var, percent_var, progress_bar, remaining_time_var, exit_button
+-+
+-+# Aktualizace GUI během zpracovávání
+-+def update_gui(processed, total, start_time, progress_var, percent_var, progress_bar, remaining_time_var):
+-+    progress_var.set(f"{processed}/{total} Completed")
+-+    percent = int((processed / total) * 100)
+-+    percent_var.set(f"{percent}%")
+-+    progress_bar.set(percent / 100)
+-+    remaining_time = calculate_remaining_time(start_time, processed, total)
+-+    remaining_time_var.set(f"Remaining Time: {str(remaining_time).split('.')[0]}")
+-+
+-+# Funkce pro zapisování do Excelu ve druhém vlákně
+-+def excel_writer(data_queue, stop_event, output_file):
+-+    # Inicializace Excel souboru
+-+    wb = Workbook()
+-+    ws = wb.active
+-+    ws.title = "Výsledky"
+-+    ws.append(["CisloZasilky", "JmenoZakaznika", "Ulice", "PSC", "Mesto", "Stat", "Telefon1", "E-Mail"])  # Upravené hlavičky sloupců
+-+    try:
+-+        wb.save(output_file)
+-+    except Exception as e:
+-+        logging.error(f"Chyba při úvodním uložení Excel souboru '{output_file}': {e}", exc_info=True)
+-+        print(f"Chyba při úvodním uložení Excel souboru: {e}")
+-+        stop_event.set() # Signalizuj chybu ostatním vláknům
+-+        return # Ukonči funkci, pokud nelze soubor vytvořit/uložit
+-+
+-+    while not stop_event.is_set() or not data_queue.empty():
+-+        try:
+-+            data = data_queue.get(timeout=1)
+-+            cislo_zasilky = data.get('CisloZasilky', '')
+-+            jmeno_zakaznika = data.get('JmenoZakaznika', '')
+-+            ulice = data.get('Ulice', '')
+-+            psc = data.get('PSC', '')
+-+            mesto = data.get('Mesto', '')
+-+            stat = data.get('Stat', '')
+-+            telefon1 = data.get('Telefon1', '')
+-+            email = data.get('E-Mail', '')
+-+            ws.append([cislo_zasilky, jmeno_zakaznika, ulice, psc, mesto, stat, telefon1, email])
+-+            # Ukládej méně často, např. po každých 10 záznamech nebo po určitém čase
+-+            # Časté ukládání může zpomalovat a zvyšovat riziko konfliktu
+-+            # Pro jednoduchost necháme původní logiku, ale zvažte optimalizaci
+-+            wb.save(output_file)
+-+            data_queue.task_done()
+-+        except queue.Empty:
+-+            continue
+-+        except Exception as e:
+-+            logging.error(f"Chyba při zápisu do Excelu '{output_file}': {e}", exc_info=True)
+-+            print(f"Chyba při zápisu do Excelu: {e}")
+-+            # Můžete zvážit logiku opakování zápisu nebo přeskočení záznamu
+-+
+-+# Funkce pro přihlášení na web, extrakci dat z tabulky a jejich uložení do Excelu
+-+def run_script(progress_var, percent_var, progress_bar, remaining_time_var, exit_button, data_queue, stop_event, excel_file):
+-+    driver = None
+-+    try:
+-+        # Načtení dat z Excelu
+-+        try:
+-+            df = pd.read_excel(excel_file)
+-+            print("Názvy sloupců ve vašem Excel souboru:", df.columns.tolist())
+-+        except FileNotFoundError:
+-+            logging.error(f"Vstupní Excel soubor nebyl nalezen: {excel_file}")
+-+            print(f"Chyba: Vstupní Excel soubor nebyl nalezen: {excel_file}")
+-+            stop_event.set()
+-+            return
+-+        except Exception as e:
+-+            logging.error(f"Chyba při čtení Excel souboru '{excel_file}': {e}", exc_info=True)
+-+            print(f"Chyba při čtení vstupního Excel souboru: {e}")
+-+            stop_event.set()
+-+            return
+-+
+-+        # Inicializace Edge WebDriveru
+-+        try:
+-+            options = webdriver.EdgeOptions()
+-+            # Můžete přidat další options, pokud je potřeba
+-+            # options.add_argument('--headless') # Pro běh bez viditelného okna prohlížeče
+-+            # options.add_argument('--disable-gpu')
+-+            driver = webdriver.Edge(options=options)
+-+        except WebDriverException as e:
+-+             logging.error(f"Chyba při inicializaci WebDriveru: {e}", exc_info=True)
+-+             print(f"Chyba: Nepodařilo se spustit Microsoft Edge WebDriver. Ujistěte se, že je nainstalován a v systémové cestě (PATH). Chyba: {e}")
+-+             stop_event.set()
+-+             return
+-+        except Exception as e:
+-+             logging.error(f"Neočekávaná chyba při inicializaci WebDriveru: {e}", exc_info=True)
+-+             print(f"Neočekávaná chyba při startu WebDriveru: {e}")
+-+             stop_event.set()
+-+             return
+-+
+-+        # Maximalizace okna
+-+        driver.maximize_window()
+-+
+-+        # Přihlášení na stránku
+-+        try:
+-+            driver.get('https://tms.rhenus-hd.de/Login.aspx')
+-+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'inputlogin')))
+-+
+-+            # Zadejte své uživatelské jméno a heslo zde - POUŽIJTE PLACEHOLDERY NEBO NAČÍTÁNÍ Z KONFIGURACE
+-+            username = 'Dalibor.Zalesak'  # <-- Zde vložte vaše uživatelské jméno nebo použijte bezpečnější metodu
+-+            password = 'Dalzal626Z'              # <-- Zde vložte vaše heslo nebo použijte bezpečnější metodu
+-+
+-+            if username == 'VASE_UZIVATELSKE_JMENO' or password == 'VASE_HESLO':
+-+                 print("Varování: Ve skriptu nejsou nastaveny přihlašovací údaje!")
+-+                 logging.warning("Přihlašovací údaje nejsou ve skriptu nastaveny.")
+-+                 # Můžete zde skript ukončit nebo pokračovat, pokud je to žádoucí
+-+
+-+            user_field = driver.find_element(By.ID, 'inputlogin')
+-+            pass_field = driver.find_element(By.ID, 'inputpassword')
+-+
+-+            user_field.send_keys(username)
+-+            pass_field.send_keys(password)
+-+            pass_field.send_keys(Keys.RETURN)
+-+
+-+            # Čekání na přesměrování po přihlášení
+-+            WebDriverWait(driver, 10).until(EC.url_contains("Default.aspx?c=Start&interface=new"))
+-+            logging.info("Úspěšné přihlášení.")
+-+
+-+        except Exception as e:
+-+            logging.error(f"Chyba při přihlašování: {e}", exc_info=True)
+-+            print(f"Chyba při přihlašování: {e}")
+-+            stop_event.set()
+-+            if driver: driver.quit()
+-+            return
+-+
+-+        first_run = True  # Abychom ošetřili otevírání filtru při prvním běhu
+-+
+-+        total_items = len(df)
+-+        start_time = datetime.now()
+-+
+-+        for index, row in df.iterrows():
+-+            if stop_event.is_set():
+-+                logging.info("Skript byl externě zastaven.")
+-+                break  # Umožňuje bezpečné ukončení
+-+
+-+            processed_items = index + 1
+-+            logging.info(f"Zpracovávám položku {processed_items}/{total_items}.")
+-+
+-+            try:
+-+                cislo_zasilky = str(row['CisloZasilky'])  # Ujistěte se, že název sloupce odpovídá vašemu Excelu
+-+                cislo_zasilky_s_hvezdickou = f"{cislo_zasilky}"
+-+                logging.info(f"Číslo zásilky: {cislo_zasilky}")
+-+
+-+                # Najetí myší na záložku "zakázky"
+-+                menu_item = WebDriverWait(driver, 20).until(
+-+                    EC.presence_of_element_located((By.XPATH, "//li[contains(@onmouseover, \"Menu.open('TMS', this, 'Zakázky')\")]"))
+-+                )
+-+                actions = webdriver.ActionChains(driver)
+-+                actions.move_to_element(menu_item).perform()
+-+
+-+                # Kliknutí na položku "zakázky" - POUŽITO SAFE_CLICK
+-+                logging.info("Klikám na záložku 'Zakázky'")
+-+                safe_click(driver, (By.XPATH, "//li[contains(@onclick, 'location.href') and contains(text(), 'Zakázky')]"))
+-+
+-+                WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, 'body'))) # Počkat na načtení těla stránky
+-+
+-+                if first_run:
+-+                    # Otevření filtru při prvním průchodu - POUŽITO SAFE_CLICK
+-+                    logging.info("Otevírám filtr (první spuštění).")
+-+                    try:
+-+                         safe_click(driver, (By.ID, 'iwartikelverwaltungAuftraegeAuftraegeFilterOrderByPagingLabel'))
+-+                         logging.info("Filtr otevřen.")
+-+                    except Exception as e:
+-+                         logging.error(f"Nepodařilo se kliknout na tlačítko filtru: {e}", exc_info=True)
+-+                         print(f"Chyba: Nepodařilo se otevřít filtr. Pokračuji bez filtru? (Chyba: {e})")
+-+                         # Zvážit, zda pokračovat nebo ukončit skript, pokud je filtr kritický
+-+                         # stop_event.set(); break # Příklad ukončení
+-+                    first_run = False
+-+
+-+                # Vyplnění čísla zakázky
+-+                logging.info(f"Vyplňuji číslo zásilky do filtru: {cislo_zasilky_s_hvezdickou}")
+-+                order_input = WebDriverWait(driver, 20).until(
+-+                    EC.visibility_of_element_located((By.ID, 'iwartikelverwaltungAuftraegeAuftraegeFilterString,0')) # Čekat na viditelnost
+-+                )
+-+                # Použití JavaScriptu pro jistotu vyčištění a zadání hodnoty
+-+                driver.execute_script("arguments[0].value = '';", order_input) # Vyčistit pole
+-+                order_input.send_keys(cislo_zasilky_s_hvezdickou)
+-+
+-+
+-+                # Stisknutí tlačítka "aktualizovat" - POUŽITO SAFE_CLICK
+-+                logging.info("Klikám na 'Aktualizovat'")
+-+                safe_click(driver, (By.ID, 'iwartikelverwaltungAuftraegeAuftraegeSubmitChanges'))
+-+                # Přidat krátké čekání nebo čekání na zmizení/objevení nějakého elementu po aktualizaci
+-+                time.sleep(1) # Jednoduché čekání, lepší je explicitní čekání na výsledek
+-+
+-+                # Kliknutí na "detailní náhled" - POUŽITO SAFE_CLICK
+-+                logging.info("Klikám na 'Detailní náhled'")
+-+                safe_click(driver, (By.ID, 'iwartikelverwaltungAuftraegeAuftraegeBearbeitenDetail'))
+-+
+-+                # Kliknutí na záložku "Adresa" - POUŽITO SAFE_CLICK
+-+                logging.info("Klikám na záložku 'Adresa'")
+-+                safe_click(driver, (By.XPATH, "//a[contains(text(), 'Adresa')]"))
+-+
+-+                # Extrakce dat z elementu s id "AuftragDetailansicht_AuftragsanschriftLabel"
+-+                logging.info("Extrahuji adresu.")
+-+                adresa_element = WebDriverWait(driver, 20).until(
+-+                    EC.presence_of_element_located((By.ID, "AuftragDetailansicht_AuftragsanschriftLabel"))
+-+                )
+-+                adresa_html = adresa_element.get_attribute('innerHTML')
+-+                lines = adresa_html.split('<br>')
+-+                fields = {}
+-+                for line in lines:
+-+                    match = re.match(r'<b>([^<]+):</b>\s*(.*)', line)
+-+                    if match:
+-+                        field_name = match.group(1).strip().replace('&nbsp;', ' ') # Nahradit &nbsp;
+-+                        value = match.group(2).strip().replace('&nbsp;', ' ')
+-+                        fields[field_name] = value
+-+                logging.info(f"Extrahovaná data: {fields}")
+-+
+-+                # Vložení dat do fronty pro zápis do Excelu
+-+                data_to_write = {
+-+                    'CisloZasilky': cislo_zasilky,
+-+                    'JmenoZakaznika': fields.get('Jméno zákazníka', ''), # Použití přesných názvů polí z HTML
+-+                    'Ulice': fields.get('Ulice', ''),
+-+                    'PSC': fields.get('PSČ', ''),
+-+                    'Mesto': fields.get('Obec', ''),
+-+                    'Stat': fields.get('Stát', ''),
+-+                    'Telefon1': fields.get('Telefon1', ''),
+-+                    'E-Mail': fields.get('E-mail', '')
+-+                }
+-+                data_queue.put(data_to_write)
+-+                logging.info(f"Data pro {cislo_zasilky} vložena do fronty.")
+-+
+-+                # Aktualizace GUI
+-+                update_gui(processed_items, total_items, start_time, progress_var, percent_var, progress_bar, remaining_time_var)
+-+
+-+            except Exception as e:
+-+                 logging.error(f"Chyba při zpracování zásilky {cislo_zasilky} (index {index}): {e}", exc_info=True)
+-+                 print(f"Chyba při zpracování řádku {index + 1} (Zásilka: {cislo_zasilky}): {e}. Pokračuji dalším řádkem.")
+-+                 # Zde můžu implementovat logiku pro opakování pokusu pro daný řádek
+-+                 # nebo jednoduše pokračovat dalším řádkem (aktuální chování)
+-+                 # Pokud chyba nastane před navigací zpět, je potřeba zajistit návrat na správné místo
+-+                 try:
+-+                     # Pokus o návrat na stránku se zakázkami pro další iteraci
+-+                     driver.get("URL_STRANKY_SE_ZAKAZKAMI") # Nahraďte skutečnou URL, pokud je známa
+-+                     # nebo zkuste navigovat zpět pomocí tlačítek, pokud existují
+-+                 except Exception as nav_err:
+-+                     logging.error(f"Nepodařilo se navigovat zpět po chybě: {nav_err}")
+-+                     print("Kritická chyba: Nepodařilo se obnovit stav po chybě. Ukončuji skript.")
+-+                     stop_event.set()
+-+                     break # Ukončí smyčku
+-+
+-+
+-+        # Po zpracování všech zakázek aktivuj tlačítko pro ukončení
+-+        if not stop_event.is_set(): # Aktivuj jen pokud skript nebyl zastaven chybou nebo uživatelem
+-+             exit_button.configure(state='normal')
+-+             logging.info("Zpracování dokončeno.")
+-+        else:
+-+             logging.warning("Skript byl ukončen před dokončením všech položek.")
+-+
+-+
+-+    except Exception as e:
+-+        # Zachytí chyby, které nastaly mimo hlavní smyčku (např. při inicializaci, přihlášení)
+-+        logging.error(f"Závažná chyba ve skriptu mimo hlavní smyčku: {e}", exc_info=True)
+-+        print(f"Závažná chyba ve skriptu: {e}")
+-+        stop_event.set() # Signalizuj chybu ostatním vláknům
+-+
+-+
+-+    finally:
+-+        # Ukončení WebDriveru
+-+        if driver:
+-+            try:
+-+                driver.quit()
+-+                logging.info("WebDriver úspěšně ukončen.")
+-+            except Exception as qe:
+-+                logging.error(f"Chyba při ukončování WebDriveru: {qe}", exc_info=True)
+-+        # Signalizace, že hlavní vlákno skončilo (i v případě chyby)
+-+        stop_event.set()
+-+        logging.info("Hlavní vlákno (run_script) bylo ukončeno.")
+-+
+-+# Funkce pro spuštění skriptu ve vlákně
+-+def start_script_thread(progress_var, percent_var, progress_bar, remaining_time_var, exit_button, data_queue, stop_event, excel_file):
+-+    thread = Thread(target=run_script, args=(progress_var, percent_var, progress_bar, remaining_time_var, exit_button, data_queue, stop_event, excel_file))
+-+    thread.daemon = True # Nastavení vlákna jako daemon, aby se ukončilo s hlavním programem, pokud GUI zavřeme
+-+    thread.start()
+-+    logging.info("Spouštěcí vlákno (start_script_thread) bylo spuštěno.")
+-+
+-+# Funkce pro spuštění zapisovacího vlákna
+-+def start_writer_thread(data_queue, stop_event, output_file):
+-+    writer_thread = Thread(target=excel_writer, args=(data_queue, stop_event, output_file), daemon=True)
+-+    writer_thread.start()
+-+    logging.info("Zapisovací vlákno (excel_writer) bylo spuštěno.")
+-+    return writer_thread
+-+
+-+# Funkce pro bezpečné ukončení
+-+def on_gui_close(root, stop_event, data_queue, writer_thread):
+-+    logging.info("Zavírání GUI iniciováno uživatelem.")
+-+    print("Ukončování skriptu...")
+-+    stop_event.set() # Signalizuj ostatním vláknům, aby skončily
+-+    # Můžete přidat krátké čekání, aby vlákna stihla zareagovat
+-+    # time.sleep(1)
+-+    # Čekání na dokončení zápisu zbývajících dat
+-+    print("Čekání na dokončení zápisu do Excelu...")
+-+    data_queue.join() # Čeká, dokud nejsou všechny položky z fronty zpracovány (task_done())
+-+    if writer_thread and writer_thread.is_alive():
+-+         writer_thread.join(timeout=5) # Počká na ukončení zapisovacího vlákna max 5 sekund
+-+         if writer_thread.is_alive():
+-+             logging.warning("Zapisovací vlákno se neukončilo v časovém limitu.")
+-+    print("Skript ukončen.")
+-+    root.quit() # Ukončí hlavní smyčku Tkinter
+-+
+-+
+-+# Hlavní část pro spuštění GUI
+-+if __name__ == "__main__":
+-+    logging.info("="*20 + " Spuštění skriptu " + "="*20)
+-+
+-+    # Vytvoření dialogového okna pro výběr vstupního Excelu
+-+    root_tk = Tk()
+-+    root_tk.withdraw()  # Skryje hlavní okno Tkinter
+-+    excel_file = filedialog.askopenfilename(title="Vyberte vstupní Excel soubor", filetypes=[("Excel Files", "*.xlsx;*.xls")])
+-+    root_tk.destroy()
+-+
+-+    if not excel_file:
+-+        print("Nebyl vybrán žádný vstupní soubor. Skript se ukončí.")
+-+        logging.warning("Nebyl vybrán vstupní Excel soubor.")
+-+        exit()
+-+    logging.info(f"Vybrán vstupní soubor: {excel_file}")
+-+
+-+    # Načtení dat z Excelu pro získání počtu položek (pouze pro GUI, hlavní načtení je ve vlákně)
+-+    try:
+-+        df_check = pd.read_excel(excel_file)
+-+        total_items = len(df_check)
+-+        del df_check # Uvolnění paměti
+-+        logging.info(f"Celkový počet položek k zpracování: {total_items}")
+-+    except Exception as e:
+-+        print(f"Chyba při čtení vstupního Excelu pro zjištění počtu položek: {e}")
+-+        logging.error(f"Nepodařilo se načíst Excel pro zjištění počtu položek: {e}", exc_info=True)
+-+        total_items = 0 # Nebo ukončit skript
+-+
+-+    ctk.set_default_color_theme("dark-blue")
+-+
+-+    # Vytvoření fronty a stop eventu
+-+    data_queue = queue.Queue()
+-+    stop_event = Event()  # Vytvoření eventu pro zastavení
+-+
+-+    # Vytvoření dialogového okna pro uložení výstupního Excelu
+-+    root_tk = Tk()
+-+    root_tk.withdraw()
+-+    output_excel = filedialog.asksaveasfilename(title="Uložte výstupní Excel soubor", defaultextension=".xlsx", filetypes=[("Excel Files", "*.xlsx;*.xls")])
+-+    root_tk.destroy()
+-+
+-+    if not output_excel:
+-+        print("Nebyl vybrán žádný výstupní soubor. Skript se ukončí.")
+-+        logging.warning("Nebyl vybrán výstupní Excel soubor.")
+-+        exit()
+-+    logging.info(f"Vybrán výstupní soubor: {output_excel}")
+-+
+-+    # Spuštění zapisovacího vlákna
+-+    writer_thread = start_writer_thread(data_queue, stop_event, output_excel)
+-+
+-+    # Vytvoření GUI
+-+    # Použití lambda pro on_close, aby se předaly potřebné argumenty
+-+    root_gui, progress_var, percent_var, progress_bar, remaining_time_var, exit_button = create_gui(total_items, lambda: on_gui_close(root_gui, stop_event, data_queue, writer_thread))
+-+    # Připojení on_close i k zavření okna křížkem
+-+    root_gui.protocol("WM_DELETE_WINDOW", lambda: on_gui_close(root_gui, stop_event, data_queue, writer_thread))
+-+
+-+
+-+    # Spuštění skriptu ve vlákně
+-+    start_script_thread(progress_var, percent_var, progress_bar, remaining_time_var, exit_button, data_queue, stop_event, excel_file)
+-+
+-+    # Hlavní smyčka GUI
+-+    logging.info("Spouštím hlavní smyčku GUI.")
+-+    root_gui.mainloop()
+-+    logging.info("Hlavní smyčka GUI byla ukončena.")
+-+    logging.info("="*20 + " Ukončení skriptu " + "="*20)
+Index: .idea/Demo.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<module version=\"4\">\r\n  <component name=\"PyDocumentationSettings\">\r\n    <option name=\"format\" value=\"PLAIN\" />\r\n    <option name=\"myDocStringFormat\" value=\"Plain\" />\r\n  </component>\r\n  <component name=\"TemplatesService\">\r\n    <option name=\"TEMPLATE_CONFIGURATION\" value=\"Django\" />\r\n    <option name=\"TEMPLATE_FOLDERS\">\r\n      <list>\r\n        <option value=\"$MODULE_DIR$/accounts/templates\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n</module>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/Demo.iml b/.idea/Demo.iml
+--- a/.idea/Demo.iml	(revision 3d4c26d7a26a465a1313ad2c23e6abea9fe78414)
++++ b/.idea/Demo.iml	(date 1756648699544)
+@@ -12,4 +12,7 @@
+       </list>
+     </option>
+   </component>
++  <component name="TestRunnerService">
++    <option name="PROJECT_TEST_RUNNER" value="py.test" />
++  </component>
+ </module>
+\ No newline at end of file
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"a8cb8caa-ec67-4190-b28c-75e2aedaebe4\" name=\"Changes\" comment=\"Add .idea/workspace.xml to track IDE-specific settings&#10;&#10;This commit adds the PyCharm-specific workspace configuration file. It includes project-level settings such as change lists, Git integration, Python interpreter configuration, and other IDE preferences. These settings help to standardize the development environment for collaborators using PyCharm.\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/misc.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/misc.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/bot.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/bot.py\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"DjangoConsoleOptions\" custom-start-script=\"import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)\">\r\n    <option name=\"myCustomStartScript\" value=\"import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)\" />\r\n  </component>\r\n  <component name=\"FlaskConsoleOptions\" custom-start-script=\"import sys; print('Python %s on %s' % (sys.version, sys.platform)); sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo, NoAppException&#10;for module in [&quot;main.py&quot;, &quot;wsgi.py&quot;, &quot;app.py&quot;]:&#10;    try: locals().update(ScriptInfo(app_import_path=module, create_app=None).load_app().make_shell_context()); print(&quot;\\nFlask App: %s&quot; % app.import_name); break&#10;    except NoAppException: pass\">\r\n    <envs>\r\n      <env key=\"FLASK_APP\" value=\"app\" />\r\n    </envs>\r\n    <option name=\"myCustomStartScript\" value=\"import sys; print('Python %s on %s' % (sys.version, sys.platform)); sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo, NoAppException&#10;for module in [&quot;main.py&quot;, &quot;wsgi.py&quot;, &quot;app.py&quot;]:&#10;    try: locals().update(ScriptInfo(app_import_path=module, create_app=None).load_app().make_shell_context()); print(&quot;\\nFlask App: %s&quot; % app.import_name); break&#10;    except NoAppException: pass\" />\r\n    <option name=\"myEnvs\">\r\n      <map>\r\n        <entry key=\"FLASK_APP\" value=\"app\" />\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\r\n      <map>\r\n        <entry key=\"$PROJECT_DIR$\" value=\"master\" />\r\n      </map>\r\n    </option>\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 3\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2yEWm3HBeXK2Q59TVFSfXR95nso\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"Python.bot.executor\": \"Run\",\r\n    \"RunOnceActivity.OpenDjangoStructureViewOnStart\": \"true\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"RunOnceActivity.git.unshallow\": \"true\",\r\n    \"git-widget-placeholder\": \"import/feature__4\",\r\n    \"junie.onboarding.icon.badge.shown\": \"true\",\r\n    \"node.js.detected.package.eslint\": \"true\",\r\n    \"node.js.detected.package.stylelint\": \"true\",\r\n    \"node.js.detected.package.tslint\": \"true\",\r\n    \"node.js.selected.package.eslint\": \"(autodetect)\",\r\n    \"node.js.selected.package.stylelint\": \"C:\\\\Users\\\\dalibor.zalesak\\\\PycharmProjects\\\\AMS\\\\node_modules\\\\stylelint\",\r\n    \"node.js.selected.package.tslint\": \"(autodetect)\",\r\n    \"nodejs_package_manager_path\": \"npm\",\r\n    \"settings.editor.selected.configurable\": \"com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable\",\r\n    \"vue.rearranger.settings.migration\": \"true\"\r\n  }\r\n}]]></component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"AMS\" type=\"Python.DjangoServer\" factoryName=\"Django server\">\r\n      <module name=\"AMS\" />\r\n      <option name=\"ENV_FILES\" value=\"\" />\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"\" />\r\n      <option name=\"SDK_NAME\" value=\"Python 3.13 (AMS)\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"false\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <option name=\"launchJavascriptDebuger\" value=\"false\" />\r\n      <option name=\"port\" value=\"8000\" />\r\n      <option name=\"host\" value=\"\" />\r\n      <option name=\"additionalOptions\" value=\"\" />\r\n      <option name=\"browserUrl\" value=\"\" />\r\n      <option name=\"runTestServer\" value=\"false\" />\r\n      <option name=\"runNoReload\" value=\"false\" />\r\n      <option name=\"useCustomRunCommand\" value=\"false\" />\r\n      <option name=\"customRunCommand\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SharedIndexes\">\r\n    <attachedChunks>\r\n      <set>\r\n        <option value=\"bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.26574.90\" />\r\n        <option value=\"bundled-python-sdk-c1fac28bca04-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.26574.90\" />\r\n      </set>\r\n    </attachedChunks>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"a8cb8caa-ec67-4190-b28c-75e2aedaebe4\" name=\"Changes\" comment=\"\" />\r\n      <created>1749400368723</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1749400368723</updated>\r\n      <workItem from=\"1749400369949\" duration=\"210000\" />\r\n      <workItem from=\"1749400595859\" duration=\"1117000\" />\r\n      <workItem from=\"1749401953536\" duration=\"1304000\" />\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"Add .idea/workspace.xml to track IDE-specific settings&#10;&#10;This commit adds the PyCharm-specific workspace configuration file. It includes project-level settings such as change lists, Git integration, Python interpreter configuration, and other IDE preferences. These settings help to standardize the development environment for collaborators using PyCharm.\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"Add .idea/workspace.xml to track IDE-specific settings&#10;&#10;This commit adds the PyCharm-specific workspace configuration file. It includes project-level settings such as change lists, Git integration, Python interpreter configuration, and other IDE preferences. These settings help to standardize the development environment for collaborators using PyCharm.\" />\r\n  </component>\r\n  <component name=\"com.intellij.coverage.CoverageDataManagerImpl\">\r\n    <SUITE FILE_PATH=\"coverage/AMS$bot.coverage\" NAME=\"bot Coverage Results\" MODIFIED=\"1749402817004\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 3d4c26d7a26a465a1313ad2c23e6abea9fe78414)
++++ b/.idea/workspace.xml	(date 1757152779216)
+@@ -5,10 +5,11 @@
+   </component>
+   <component name="ChangeListManager">
+     <list default="true" id="a8cb8caa-ec67-4190-b28c-75e2aedaebe4" name="Changes" comment="Add .idea/workspace.xml to track IDE-specific settings&#10;&#10;This commit adds the PyCharm-specific workspace configuration file. It includes project-level settings such as change lists, Git integration, Python interpreter configuration, and other IDE preferences. These settings help to standardize the development environment for collaborators using PyCharm.">
+-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/Demo.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Demo.iml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_06_2025_17_44_[Changes]1/shelved.patch" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_06_2025_17_44__Changes_1.xml" beforeDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -32,10 +33,25 @@
+   <component name="Git.Settings">
+     <option name="RECENT_BRANCH_BY_REPOSITORY">
+       <map>
+-        <entry key="$PROJECT_DIR$" value="master" />
++        <entry key="$PROJECT_DIR$" value="email-feature_recieve_protokol" />
+       </map>
+     </option>
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
++  </component>
++  <component name="GitHubPullRequestSearchHistory">{
++  &quot;lastFilter&quot;: {
++    &quot;state&quot;: &quot;OPEN&quot;,
++    &quot;assignee&quot;: &quot;DaliborZ-tech&quot;
++  }
++}</component>
++  <component name="GithubPullRequestsUISettings">{
++  &quot;selectedUrlAndAccountId&quot;: {
++    &quot;url&quot;: &quot;https://github.com/Mirjax2000/Demo.git&quot;,
++    &quot;accountId&quot;: &quot;f2904811-6666-4ac4-9117-2253655fbc63&quot;
++  }
++}</component>
++  <component name="PackageJsonUpdateNotifier">
++    <dismissed value="$PROJECT_DIR$/package.json" />
+   </component>
+   <component name="ProjectColorInfo">{
+   &quot;associatedIndex&quot;: 3
+@@ -47,12 +63,16 @@
+   </component>
+   <component name="PropertiesComponent"><![CDATA[{
+   "keyToString": {
++    "Notification.DisplayName-DoNotAsk-DatabaseConfigFileWatcher.found": "New/updated database configurations found",
++    "Notification.DoNotAsk-DatabaseConfigFileWatcher.found": "true",
+     "Python.bot.executor": "Run",
+     "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+     "RunOnceActivity.ShowReadmeOnStart": "true",
++    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+     "RunOnceActivity.git.unshallow": "true",
+-    "git-widget-placeholder": "import/feature__4",
++    "git-widget-placeholder": "develop",
+     "junie.onboarding.icon.badge.shown": "true",
++    "last_opened_file_path": "D:/projects/Rhenus/Demo",
+     "node.js.detected.package.eslint": "true",
+     "node.js.detected.package.stylelint": "true",
+     "node.js.detected.package.tslint": "true",
+@@ -60,11 +80,12 @@
+     "node.js.selected.package.stylelint": "C:\\Users\\dalibor.zalesak\\PycharmProjects\\AMS\\node_modules\\stylelint",
+     "node.js.selected.package.tslint": "(autodetect)",
+     "nodejs_package_manager_path": "npm",
+-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
++    "settings.editor.selected.configurable": "ml.llm.LLMConfigurable",
++    "to.speed.mode.migration.done": "true",
+     "vue.rearranger.settings.migration": "true"
+   }
+ }]]></component>
+-  <component name="RunManager">
++  <component name="RunManager" selected="Django Server.Demo">
+     <configuration name="AMS" type="Python.DjangoServer" factoryName="Django server">
+       <module name="AMS" />
+       <option name="ENV_FILES" value="" />
+@@ -74,7 +95,31 @@
+         <env name="PYTHONUNBUFFERED" value="1" />
+       </envs>
+       <option name="SDK_HOME" value="" />
+-      <option name="SDK_NAME" value="Python 3.13 (AMS)" />
++      <option name="SDK_NAME" value="Python 3.12 (Demo)" />
++      <option name="WORKING_DIRECTORY" value="" />
++      <option name="IS_MODULE_SDK" value="false" />
++      <option name="ADD_CONTENT_ROOTS" value="true" />
++      <option name="ADD_SOURCE_ROOTS" value="true" />
++      <option name="launchJavascriptDebuger" value="false" />
++      <option name="port" value="8000" />
++      <option name="host" value="" />
++      <option name="additionalOptions" value="" />
++      <option name="browserUrl" value="" />
++      <option name="runTestServer" value="false" />
++      <option name="runNoReload" value="false" />
++      <option name="useCustomRunCommand" value="false" />
++      <option name="customRunCommand" value="" />
++      <method v="2" />
++    </configuration>
++    <configuration name="Demo" type="Python.DjangoServer" factoryName="Django server">
++      <module name="Demo" />
++      <option name="ENV_FILES" value="" />
++      <option name="INTERPRETER_OPTIONS" value="" />
++      <option name="PARENT_ENVS" value="true" />
++      <envs>
++        <env name="PYTHONUNBUFFERED" value="1" />
++      </envs>
++      <option name="SDK_HOME" value="" />
+       <option name="WORKING_DIRECTORY" value="" />
+       <option name="IS_MODULE_SDK" value="false" />
+       <option name="ADD_CONTENT_ROOTS" value="true" />
+@@ -94,8 +139,8 @@
+   <component name="SharedIndexes">
+     <attachedChunks>
+       <set>
+-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.26574.90" />
+-        <option value="bundled-python-sdk-c1fac28bca04-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.26574.90" />
++        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-PY-252.25557.178" />
++        <option value="bundled-python-sdk-ce6832f46686-7b97d883f26b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.25557.178" />
+       </set>
+     </attachedChunks>
+   </component>
+@@ -110,6 +155,19 @@
+       <workItem from="1749400369949" duration="210000" />
+       <workItem from="1749400595859" duration="1117000" />
+       <workItem from="1749401953536" duration="1304000" />
++      <workItem from="1750250818737" duration="572000" />
++      <workItem from="1750251439306" duration="30000" />
++      <workItem from="1750788816935" duration="3202000" />
++      <workItem from="1752056434593" duration="323000" />
++      <workItem from="1752056819347" duration="4293000" />
++      <workItem from="1755337563910" duration="3035000" />
++      <workItem from="1755583425780" duration="728000" />
++      <workItem from="1755584799057" duration="9986000" />
++      <workItem from="1756633769099" duration="4507000" />
++      <workItem from="1756649920931" duration="1931000" />
++      <workItem from="1757053111003" duration="759000" />
++      <workItem from="1757053912252" duration="7947000" />
++      <workItem from="1757142346229" duration="5209000" />
+     </task>
+     <servers />
+   </component>
+@@ -133,5 +191,6 @@
+   </component>
+   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+     <SUITE FILE_PATH="coverage/AMS$bot.coverage" NAME="bot Coverage Results" MODIFIED="1749402817004" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
++    <SUITE FILE_PATH="coverage/Demo$bot.coverage" NAME="bot Coverage Results" MODIFIED="1749398378663" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"Black\">\r\n    <option name=\"sdkName\" value=\"Python 3.12 virtualenv at D:\\projects\\Rhenus\\Demo\\.venv\" />\r\n  </component>\r\n  <component name=\"ProjectRootManager\" version=\"2\" project-jdk-name=\"Python 3.13 (AMS)\" project-jdk-type=\"Python SDK\" />\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 3d4c26d7a26a465a1313ad2c23e6abea9fe78414)
++++ b/.idea/misc.xml	(date 1756648699607)
+@@ -3,5 +3,5 @@
+   <component name="Black">
+     <option name="sdkName" value="Python 3.12 virtualenv at D:\projects\Rhenus\Demo\.venv" />
+   </component>
+-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.13 (AMS)" project-jdk-type="Python SDK" />
++  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 virtualenv at D:\projects\Rhenus\Demo\.venv" project-jdk-type="Python SDK" />
+ </project>
+\ No newline at end of file

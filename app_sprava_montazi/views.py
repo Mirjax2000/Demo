@@ -48,6 +48,12 @@ from .OOP_protokols import SCCZPdfGenerator
 from .OOP_back_protocol import ProtocolUploader
 from .OOP_JsonOrders import JsonOrders
 
+# import z views_services pro DashboardView ---
+from . import views_services
+
+
+APP_URL = "app_sprava_montazi"
+
 # --- typove aliasy
 OdChoice = Tuple[str, str]
 OdChoices = List[OdChoice]
@@ -70,6 +76,16 @@ OD_CHOICES: OdChoices = [
     ("709", "OD Plzeň"),
 ]
 OD_DICT: OdDict = dict(OD_CHOICES)
+
+# Pseudo-statusy z dashboardu -> popisky pro Orders (aby neprasklo na Status(...))
+PSEUDO_STATUS_LABELS: dict[str, str] = {
+    "open": "Otevřené",
+    "overdue": "Po termínu",
+    "pending_protocol": "Čeká na protokol",
+    "pending_pdf_check": "K revizi PDF",
+    "hidden": "Skryté",
+}
+
 # ---
 
 
@@ -195,6 +211,37 @@ class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         # --- navigace
         context["active"] = "dashboard"
+        # --- filtry (minimální sada – lze později převést na formulář)
+        filters = {
+            "date_from": self.request.GET.get("date_from") or "",
+            "date_to": self.request.GET.get("date_to") or "",
+            "status": self.request.GET.get("status") or "",
+            "team": self.request.GET.get("team") or "",
+            "q": self.request.GET.get("q") or "",
+        }
+        context["filters"] = filters
+        # --- services napojení
+        user = self.request.user
+        kpi = views_services.get_dashboard_kpi(filters=filters, user=user)
+        hot_orders = views_services.get_dashboard_hot_orders(filters=filters, user=user, limit=10)
+        teams_load = views_services.get_dashboard_teams_load(filters=filters, user=user)
+        alerts = views_services.get_dashboard_alerts(filters=filters, user=user)
+        # --- context data
+        context["kpi"] = kpi
+        context["hot_orders"] = hot_orders
+        context["teams_load"] = teams_load
+        context["alerts"] = alerts
+        # --- rychlé akce
+        context["quick_actions"] = [
+            {"label": "Vytvořit zakázku", "url_name": "order_create"},
+            {"label": "Export zakázek", "url_name": "order_export"},
+            {"label": "Vytvořit tým", "url_name": "team_create"},
+            {"label": "Uploady a zpracování", "url_name": "createpage"},
+        ]
+        # --- pomocné URL (např. pro autocomplete)
+        context["autocomplete_orders_url_name"] = "autocomplete_orders"
+        # --- preset "dnes" do šablony
+        context["today"] = timezone.localdate().isoformat()
         return context
 
 
@@ -493,11 +540,17 @@ class OrdersView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
             get_status = "Všechny"
         elif status_filter == "closed":
             get_status = "Uzavřené"
+        elif status_filter in PSEUDO_STATUS_LABELS:
+            # Bezpečné zobrazení popisku pro pseudo-statusy z dashboardu
+            get_status = PSEUDO_STATUS_LABELS[status_filter]
         elif status_filter:
-            get_status = Status(status_filter).label
+            # Skutečné enum hodnoty Status(...)
+            try:
+                get_status = Status(status_filter).label
+            except Exception:
+                get_status = ""
         else:
             get_status = ""
-
         # --- distrib hub
         hub_slug = self.filters["hub"]
         hub_value = ""
@@ -505,30 +558,25 @@ class OrdersView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
             hub_obj = DistribHub.objects.filter(slug=hub_slug).first()
             if hub_obj:
                 hub_value = f"{hub_obj.code}-{hub_obj.city}"
-
         # --- mandant
         mandant = self.filters["mandant"]
-
         # --- zacatek filtru
         get_start = (
             datetime.strptime(self.filters["start_date"], "%Y-%m-%d")
             if self.filters["start_date"]
             else None
         )
-
         # --- konec filtru
         get_end = (
             datetime.strptime(self.filters["end_date"], "%Y-%m-%d")
             if self.filters["end_date"]
             else None
         )
-
         # --- invalid filtr
         invalid = self.request.GET.get("invalid", "false").lower() == "true"
-
         # --- final context
         context.update(
-            {  # --- status
+            {
                 "statuses": Status,
                 "raw_status": status_filter,
                 "get_status": get_status,

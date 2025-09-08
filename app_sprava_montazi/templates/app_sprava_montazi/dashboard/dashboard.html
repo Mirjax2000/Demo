@@ -1,9 +1,313 @@
 {% extends "base.html" %}
-{% block title %}
-    Dashboard
-{% endblock title %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
 {% block content %}
-    <section id="dashboardPage">
-        <h1>Dashboard</h1>
-    </section>
-{% endblock content %}
+<div class="container">
+
+  <!-- Filtry -->
+  <section class="mb-4">
+    <h2 class="h5 mb-3">Filtry</h2>
+    <form method="get" action="{% url 'dashboard' %}" class="row g-2">
+      <div class="col-md-2">
+        <label for="date_from" class="form-label">Od</label>
+        <input type="date" id="date_from" name="date_from" value="{{ filters.date_from }}" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <label for="date_to" class="form-label">Do</label>
+        <input type="date" id="date_to" name="date_to" value="{{ filters.date_to }}" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label for="status" class="form-label">Stav</label>
+        <select id="status" name="status" class="form-select">
+          <option value="">— Vše —</option>
+          <option value="open" {% if filters.status == "open" %}selected{% endif %}>Otevřené</option>
+          <option value="overdue" {% if filters.status == "overdue" %}selected{% endif %}>Po termínu</option>
+          <option value="pending_protocol" {% if filters.status == "pending_protocol" %}selected{% endif %}>Čeká na protokol</option>
+          <option value="pending_pdf_check" {% if filters.status == "pending_pdf_check" %}selected{% endif %}>K revizi PDF</option>
+          <option value="hidden" {% if filters.status == "hidden" %}selected{% endif %}>Skryté</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="team" class="form-label">Tým</label>
+        <input type="text" id="team" name="team" value="{{ filters.team }}" class="form-control" placeholder="Název týmu">
+      </div>
+      <div class="col-md-2">
+        <label for="q" class="form-label">Hledat</label>
+        <input type="text" id="q" name="q" value="{{ filters.q }}" class="form-control" placeholder="č. zakázky, klient...">
+      </div>
+      <div class="col-12 d-flex flex-wrap gap-2 mt-2">
+        <button type="submit" class="btn btn-primary">Filtrovat</button>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Reset</a>
+        <a href="{% url 'orders' %}?date_from={{ today }}&date_to={{ today }}" class="btn btn-outline-primary">Dnes</a>
+        <a href="{% url 'orders' %}?preset=week" class="btn btn-outline-primary">Tento týden</a>
+        <a href="{% url 'orders' %}?status=overdue" class="btn btn-outline-danger">Po termínu</a>
+      </div>
+    </form>
+  </section>
+
+  <!-- KPI -->
+  <section class="mb-4">
+    <h2 class="h5 mb-3">Přehled</h2>
+    <div class="row g-3">
+      <div class="col-6 col-md-2">
+        <a class="text-decoration-none" href="{% url 'orders' %}?status=open">
+          <div class="card text-center">
+            <div class="card-body">
+              <div class="fw-bold">Otevřené</div>
+              <div class="display-6">{{ kpi.open_orders }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-2">
+        <a class="text-decoration-none" href="{% url 'orders' %}?status=overdue">
+          <div class="card text-center border-danger">
+            <div class="card-body">
+              <div class="fw-bold text-danger">Po termínu</div>
+              <div class="display-6 text-danger">{{ kpi.overdue_orders }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-2">
+        <a class="text-decoration-none" href="{% url 'orders' %}?preset=today">
+          <div class="card text-center">
+            <div class="card-body">
+              <div class="fw-bold">Dnes</div>
+              <div class="display-6">{{ kpi.today_orders }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-2">
+        <a class="text-decoration-none" href="{% url 'orders' %}?preset=week">
+          <div class="card text-center">
+            <div class="card-body">
+              <div class="fw-bold">Tento týden</div>
+              <div class="display-6">{{ kpi.week_orders }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-2">
+        <a class="text-decoration-none" href="{% url 'orders' %}?status=pending_protocol">
+          <div class="card text-center">
+            <div class="card-body">
+              <div class="fw-bold">Čeká na protokol</div>
+              <div class="display-6">{{ kpi.pending_protocol }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-2">
+        <a class="text-decoration-none" href="{% url 'orders' %}?status=pending_pdf_check">
+          <div class="card text-center">
+            <div class="card-body">
+              <div class="fw-bold">K revizi PDF</div>
+              <div class="display-6">{{ kpi.pending_pdf_check }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rychlé akce -->
+  <section class="mb-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <h2 class="h5 mb-0">Rychlé akce</h2>
+      <div class="d-flex flex-wrap gap-2">
+        {% for action in quick_actions %}
+          <a href="{% url action.url_name %}" class="btn btn-outline-dark btn-sm">{{ action.label }}</a>
+        {% endfor %}
+        <a href="{% url 'teams' %}" class="btn btn-outline-secondary btn-sm">Týmy</a>
+        <a href="{% url 'api-docs' %}" class="btn btn-outline-secondary btn-sm">API Docs</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="row">
+    <!-- Co hoří -->
+    <div class="col-lg-8">
+      <section class="mb-4">
+        <h2 class="h5 mb-3">Co hoří</h2>
+        <div class="card">
+          <div class="table-responsive">
+            <table class="table table-sm mb-0 align-middle">
+              <thead>
+                <tr>
+                  <th>Zakázka</th>
+                  <th>Zákazník</th>
+                  <th>Tým</th>
+                  <th>Plánováno</th>
+                  <th>Stav</th>
+                  <th class="text-end">Akce</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% if hot_orders %}
+                {% for o in hot_orders %}
+                  <tr>
+                    <td><a href="{% url 'order_detail' o.pk %}">{{ o.order_number }}</a></td>
+                    <td>{{ o.client }}</td>
+                    <td>{{ o.team }}</td>
+                    <td>{{ o.planned_at }}</td>
+                    <td>{{ o.status }}</td>
+                    <td class="text-end">
+                      <a href="{% url 'order_update' o.pk %}" class="btn btn-link btn-sm">Upravit</a>
+                      <a href="{% url 'generate_pdf' o.pk %}" class="btn btn-link btn-sm">PDF</a>
+                      <a href="{% url 'assembly_docs' o.pk %}" class="btn btn-link btn-sm">Dokumenty</a>
+                      <a href="{% url 'upload_one_img' o.pk %}" class="btn btn-link btn-sm">Obrázek</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">Žádné urgentní zakázky.</td></tr>
+              {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Vytížení týmů -->
+    <div class="col-lg-4">
+      <section class="mb-4">
+        <h2 class="h5 mb-3">Vytížení týmů</h2>
+        <div class="list-group">
+          {% if teams_load %}
+            {% for t in teams_load %}
+              <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                 href="{% url 'team_detail' t.detail_slug %}">
+                <span>{{ t.team_name }}</span>
+                <span class="badge bg-primary rounded-pill">{{ t.this_week_count }}</span>
+              </a>
+            {% endfor %}
+          {% else %}
+            <div class="list-group-item text-muted">Zatím žádná data o vytížení.</div>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Upozornění / Fronty -->
+    <div class="col-lg-6">
+      <section class="mb-4">
+        <h2 class="h5 mb-3">Čeká na protokol</h2>
+        <ul class="list-group">
+          {% if alerts.pending_protocol %}
+            {% for a in alerts.pending_protocol %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ a.order_number }}</span>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'upload_protocol' a.pk %}">Nahrát</a>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li class="list-group-item text-muted">Žádné položky.</li>
+          {% endif %}
+        </ul>
+      </section>
+    </div>
+    <div class="col-lg-6">
+      <section class="mb-4">
+        <h2 class="h5 mb-3">Protokoly k revizi PDF</h2>
+        <ul class="list-group">
+          {% if alerts.pending_pdf_check %}
+            {% for a in alerts.pending_pdf_check %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ a.order_number }}</span>
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'check_pdf' a.pk %}">Zkontrolovat</a>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li class="list-group-item text-muted">Žádné položky.</li>
+          {% endif %}
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <!-- Neúplní zákazníci -->
+  <section class="mb-5">
+    <div class="d-flex align-items-center justify-content-between">
+      <h2 class="h5 mb-3">Neúplní zákazníci</h2>
+      <a href="{% url 'incomplete-customers' %}" class="btn btn-outline-dark btn-sm">Otevřít přehled</a>
+    </div>
+    <ul class="list-group">
+      {% if alerts.incomplete_customers %}
+        {% for c in alerts.incomplete_customers %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ c.client_name }}</span>
+            {% if c.pk %}
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'client_update' c.pk %}">Doplnit</a>
+            {% elif c.slug %}
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'client_update_sec' c.slug %}">Doplnit</a>
+            {% else %}
+              <span class="text-muted">Nelze otevřít detail</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      {% else %}
+        <li class="list-group-item text-muted">Vše v pořádku.</li>
+      {% endif %}
+    </ul>
+  </section>
+
+</div>
+
+<!-- Lehký autocomplete pro hledání zakázek -->
+<script type="text/javascript">
+  (function() {
+    const input = document.getElementById('q');
+    if (!input) return;
+    const listId = 'autocomplete-orders-list';
+    const url = "{% url autocomplete_orders_url_name %}";
+    let box = null;
+
+    function ensureBox() {
+      if (box) return box;
+      box = document.createElement('div');
+      box.id = listId;
+      box.className = 'list-group position-absolute';
+      box.style.zIndex = '1000';
+      input.parentElement.style.position = 'relative';
+      input.parentElement.appendChild(box);
+      return box;
+    }
+
+    let debounceTimer = null;
+    input.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      const q = input.value.trim();
+      if (!q) { if (box) box.innerHTML=''; return; }
+      debounceTimer = setTimeout(async () => {
+        try {
+          const resp = await fetch(`${url}?q=${encodeURIComponent(q)}`, {headers: {'X-Requested-With':'XMLHttpRequest'}});
+          if (!resp.ok) return;
+          const data = await resp.json();
+          const container = ensureBox();
+          container.innerHTML = '';
+          (data.results || []).slice(0, 8).forEach(item => {
+            const a = document.createElement('a');
+            a.className = 'list-group-item list-group-item-action';
+            a.textContent = item.label || item.order_number || '';
+            if (item.pk) a.href = `{% url 'order_detail' 0 %}`.replace('/0/', `/${item.pk}/`);
+            else a.href = `{% url 'orders' %}?q=${encodeURIComponent(item.label || '')}`;
+            container.appendChild(a);
+          });
+        } catch(e) {}
+      }, 250);
+    });
+
+    document.addEventListener('click', (ev) => {
+      if (!box) return;
+      if (ev.target !== input && !box.contains(ev.target)) box.innerHTML = '';
+    });
+  })();
+</script>
+{% endblock %}
