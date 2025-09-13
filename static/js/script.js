@@ -1007,6 +1007,7 @@
             detailProfit.classList.add("zero");
         }
     }
+    // galerie lightbox
     lightbox.option({
         'resizeDuration': 200,
         'imageFadeDuration': 200,

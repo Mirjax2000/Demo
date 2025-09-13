@@ -439,12 +439,12 @@ class Utils:
         filter_cond: dict = {}
         exclude_cond: dict = {}
 
-        status = filters.get("status", "")
-        od_value = filters.get("od", "")
-        hub_value = filters.get("hub", "")
-        start_date = filters.get("start_date")
-        end_date = filters.get("end_date")
-        mandant = filters.get("mandant")
+        status: str = filters.get("status", "")
+        od_value: str = filters.get("od", "")
+        hub_value: str = filters.get("hub", "")
+        start_date: str | None = filters.get("start_date")
+        end_date: str | None = filters.get("end_date")
+        mandant: str | None = filters.get("mandant")
 
         # --- Status logika
         if status == "all":
@@ -458,7 +458,7 @@ class Utils:
 
         # --- mandant
         if mandant:
-            filter_cond["mandant"] = mandant
+            filter_cond["mandant__iexact"] = mandant
 
         # --- Datum od-do
         if start_date:

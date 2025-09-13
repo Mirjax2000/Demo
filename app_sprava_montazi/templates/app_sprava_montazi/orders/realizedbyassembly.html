@@ -5,7 +5,7 @@
 <!---->
 {% block content %}
     <section class="u-flex-row-start">
-        <!---->
+        <!--images-->
         <div class="L-detail__fieldset">
             <h3 class="L-detail__fieldset__header mt-3">
                 montáž: <span>{{ order.order_number }}</span>
@@ -15,9 +15,12 @@
                 {% for image in order.montage_images.all %}
                     <li class="L-detail__item C-img-list__item__doc">
                         <div class="C-img-list__item__doc__img opacity-hover">
-                            <img src="{{ image.image.url }}" alt="{{ image.alt_text }}">
+                            <a href="{{ image.image.url }}"
+                               data-lightbox="montage-{{ order.id }}"
+                               data-title="{{ image.alt_text }}">
+                                <img src="{{ image.image.url }}" alt="{{ image.alt_text }}">
+                            </a>
                         </div>
-                        <!---->
                         <div class="u-flex-row-between mt-1">
                             <p class="ps-1 m-0">přijato: {{ image.created }}</p>
                             <a href="{{ image.image.url }}" download class="btn btn-primary btn-sm">
@@ -39,14 +42,18 @@
                 </a>
             </div>
         </div>
-        <!---->
+        <!--protokol-->
         <div class="L-detail__fieldset">
             <h3 class="L-detail__fieldset__header mt-3">Přijatý montážní protokol</h3>
             <hr>
             <div class="L-detail__item C-img__protocol">
                 <div class="C-img__protocol__image opacity-hover">
-                    <img src="{{ order.back_protocol.file.url }}"
-                         alt="{{ order.back_protocol.alt_text }}">
+                    <a href="{{ order.back_protocol.file.url }}"
+                       data-lightbox="protocol-{{ order.id }}"
+                       data-title="{{ order.back_protocol.alt_text }}">
+                        <img src="{{ order.back_protocol.file.url }}"
+                             alt="{{ order.back_protocol.alt_text }}">
+                    </a>
                 </div>
                 <div class="u-flex-row-between mt-1">
                     <p class="ps-1 m-0">přijato: {{ order.back_protocol.created }}</p>
@@ -61,7 +68,7 @@
                 </div>
             </div>
         </div>
-        <!---->
+        <!--Detaily montaze-->
         <div class="L-detail__fieldset">
             <h3 class="L-detail__fieldset__header mt-3">Detaily montáže</h3>
             <hr>
