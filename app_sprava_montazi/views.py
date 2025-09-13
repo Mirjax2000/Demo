@@ -3,9 +3,11 @@
 import os
 import time
 from typing import Any, cast, Tuple, List, Dict
-from datetime import datetime
+from datetime import datetime, timedelta
 from openpyxl import Workbook
 from rich.console import Console
+from dotenv import load_dotenv
+import requests
 
 # --- Django
 from django.db import transaction
@@ -19,13 +21,16 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.forms import BaseModelForm, inlineformset_factory
 from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpResponse, FileResponse, HttpResponseForbidden
+from django.http import HttpResponse, FileResponse, HttpResponseForbidden, JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import View, UpdateView, TemplateView
 from django.views.generic import CreateView, DetailView, FormView, ListView
 
 # API rest ---
 from rest_framework.authtoken.models import Token
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
 # --- mixiny
 from .mixins import ErrorContextMixin
@@ -54,6 +59,7 @@ OdChoices = List[OdChoice]
 OdDict = Dict[str, str]
 
 cons: Console = Console()
+load_dotenv(override=True, verbose=True)
 User = get_user_model()
 # ---
 APP_URL = "app_sprava_montazi"
@@ -114,8 +120,24 @@ class CreatePageView(LoginRequiredMixin, ErrorContextMixin, FormView):
 
             user = User.objects.get(username=system_bot)
             token = Token.objects.get(user=user)
+            # --- zjistime jestli token je platny
+            expiration_time = timedelta(minutes=settings.TOKEN_EXPIRE_MINUTES)
+            expiry_datetime = token.created + expiration_time
+            time_remaining = expiry_datetime - timezone.now()
 
-            context["tokken"] = token.key
+            # kontrola, jestli token ještě platí
+            if token.created + expiration_time < timezone.now():
+                token_valid = False
+                token_key = ""
+                cons.log("Token vypršel!")
+            else:
+                token_valid = True
+                token_key = token.key
+                cons.log("Token je stále platný")
+
+            context["time_remaining"] = time_remaining
+            context["tokken_valid"] = token_valid
+            context["tokken"] = token_key
             context["url"] = hosts.split(",")[0].strip()
 
         except ValueError as e:
@@ -1328,6 +1350,7 @@ class UploadOneImageView(View):
         return img_uploader.redirect_with_success()
 
 
+# ---
 class SwitchAdvicedWithDeliveryToRealizedView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         order = get_object_or_404(Order, pk=kwargs["pk"])
@@ -1419,3 +1442,28 @@ class AssemblyDocsView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context["active"] = "orders_all"
         return context
+
+
+class TriggerTokenRefreshView(View):
+    def post(self, request):
+        username = os.getenv("SYSTEM_BOT", "")
+        password = os.getenv("SYSTEM_BOT_PASS", "")
+
+        if not username or not password:
+            messages.error(request, "Chybí přihlašovací údaje v .env.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        url = request.build_absolute_uri("/api-token-auth/")
+        payload = {"username": username, "password": password}
+
+        try:
+            response = requests.post(url, data=payload)
+            if response.status_code == 200:
+                messages.success(request, "Token byl úspěšně obnoven.")
+            else:
+                messages.error(request, f"Obnova selhala: {response.text}")
+                
+        except Exception as e:
+            messages.error(request, f"Nastala chyba: {str(e)}")
+
+        return redirect(request.META.get("HTTP_REFERER", "/"))

@@ -1,7 +1,8 @@
 """URLs config"""
 
 from rest_framework.authtoken.views import obtain_auth_token
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from drf_spectacular.views import SpectacularAPIView as APIs
+from drf_spectacular.views import SpectacularSwaggerView as Swagger
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -41,6 +42,7 @@ from app_sprava_montazi.views import (
     CheckPDFProtocolView as CheckPDFProtocol,
     MontageImgUploadView as MontageImgUpload,
     ExportOrdersExcelView as ExportOrdersExcel,
+    TriggerTokenRefreshView as TriggerTokenRefresh,
     SwitchAdvicedWithDeliveryToRealizedView as SwtchAdvcdDlrToRlzd,
 )
 
@@ -149,12 +151,11 @@ api_urls: list = [
     path("api/update-dopzak/", RealizujZakazky.as_view(), name="update-dopzak"),
     path("api/status/", ApiStatus.as_view(), name="api-status"),
     path("api-token-auth/", obtain_auth_token),
+    path("refresh-token/", TriggerTokenRefresh.as_view(), name="refresh-token"),
     # --- swagger
-    path("api/schema/", login_required(SpectacularAPIView.as_view()), name="schema"),
+    path("api/schema/", login_required(APIs.as_view()), name="schema"),
     path(
-        "api/docs/",
-        login_required(SpectacularSwaggerView.as_view(url_name="schema")),
-        name="api-docs",
+        "api/docs/", login_required(Swagger.as_view(url_name="schema")), name="api-docs"
     ),
 ]
 # ---

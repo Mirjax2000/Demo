@@ -13,6 +13,27 @@
              data-bs-parent="#accordionAutobot">
             <!-- incomplete/update customers -->
             <div class="accordion-body pb-1">
+                <p>
+                    platnost tokenu:
+                    {% if tokken_valid %}
+                        <span class="badge text-bg-success p-2">Platný</span>
+                        <span>zbývá: {{ time_remaining }}</span>
+                        <form method="post" action="{% url 'refresh-token' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="fa-solid fa-plus me-2"></i>obnovit
+                            </button>
+                        </form>
+                    {% else %}
+                        <span class="badge text-bg-danger me-2 p-2">Neplatný</span>
+                        <form method="post" action="{% url 'refresh-token' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="fa-solid fa-plus me-2"></i>obnovit
+                            </button>
+                        </form>
+                    {% endif %}
+                </p>
                 <hr>
                 <p>nastavení pro incomplete/update zákazníků</p>
                 <p class="mb-1" id="autobotTokken">

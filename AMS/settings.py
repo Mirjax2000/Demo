@@ -60,13 +60,14 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
+        "API.auth.ExpiringTokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
 }
 
+TOKEN_EXPIRE_MINUTES = 1
 
 PHONENUMBER_DEFAULT_REGION = "CZ"
 PHONENUMBER_DB_FORMAT = "E164"
