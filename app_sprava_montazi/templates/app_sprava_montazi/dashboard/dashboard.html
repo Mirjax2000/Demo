@@ -3,7 +3,33 @@
     Dashboard
 {% endblock title %}
 {% block content %}
-    <section id="dashboardPage">
+    <section id="dashboardPage" class="container-fluid">
         <h1>Dashboard</h1>
+        <div class="row">
+            <div class="col-3">
+                <div id="chartContainerDemo">
+                    <canvas id="mychart"></canvas>
+                </div>
+            </div>
+        </div>
+        <!--zde si pis scripty-->
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const ctx = document.querySelector("#mychart");
+
+                const data = {
+                    labels: [1, 2, 3],
+                    datasets: [{
+                        data: [100, 120, 150],
+                        label: "Value"
+                    }]
+                };
+
+                const myChart = new Chart(ctx, {
+                    type: 'polarArea',
+                    data: data
+                });
+            });
+        </script>
     </section>
 {% endblock content %}

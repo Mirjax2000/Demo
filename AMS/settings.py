@@ -66,10 +66,9 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
 }
-
+# --- token na API
 TOKEN_EXPIRE_MINUTES = 1440
-
-
+# model modul "phonenumber_field"
 PHONENUMBER_DEFAULT_REGION = "CZ"
 PHONENUMBER_DB_FORMAT = "E164"
 PHONENUMBER_DEFAULT_FORMAT = "E164"
@@ -132,9 +131,6 @@ DATABASES = {
 # }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -151,31 +147,20 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = "cs"
 
 TIME_ZONE = "Europe/Prague"
 USE_TZ = True
 
 USE_I18N = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# --- static files pro collect statics
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
-
+# --- pro ukladani soubor jako path z databze
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media/"
 
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -183,9 +168,11 @@ LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 
+# --- preklad kvuli boostrapu
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
+# --- email settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
@@ -195,7 +182,7 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "Automate with Django <miroslav.viktorin77@gmail.com>"
 
-
+# --- logovani chyb do adresare logs
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -226,6 +213,7 @@ LOGGING = {
         },
     },
 }
+
 # --- swagger
 SPECTACULAR_SETTINGS = {
     "TITLE": "Moje API",
