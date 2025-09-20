@@ -1,6 +1,4 @@
 <section>
-    <p class="u-txt-center">otevrene zakazky</p>
-    <canvas id="openOrders"
-            data-open-orders="{{ open_orders }}"
-            data-closed-orders="{{ closed_orders }}"></canvas>
+    <p class="u-txt-center m-0">otevřené zakázky</p>
+    <canvas id="openOrders" data-open-orders='{{ open_orders_json|safe }}'></canvas>
 </section>

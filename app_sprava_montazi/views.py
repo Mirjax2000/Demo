@@ -2,6 +2,7 @@
 
 import os
 import time
+import json
 from typing import Any, cast, Tuple, List, Dict
 from datetime import datetime, timedelta
 from openpyxl import Workbook
@@ -130,11 +131,9 @@ class CreatePageView(LoginRequiredMixin, ErrorContextMixin, FormView):
             if token.created + expiration_time < timezone.now():
                 token_valid = False
                 token_key = ""
-                cons.log("Token vypršel!")
             else:
                 token_valid = True
                 token_key = token.key
-                cons.log("Token je stále platný")
 
             context["time_remaining"] = time_remaining
             context["tokken_valid"] = token_valid
@@ -219,10 +218,15 @@ class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
         # --- navigace
         context["active"] = "dashboard"
 
-        # --- použijeme třídu Dashboard
         dashboard = Dashboard()
-        stats = dashboard.open_orders()
-        context.update(stats)
+        # --- invalidni zakazky
+        is_invalid, invalid_count = dashboard.invalid_orders()
+        context["is_invalid"] = is_invalid
+        context["invalid_count"] = invalid_count
+        # --- otevrene zakazky
+        open_orders_data = dashboard.open_orders()
+        context["open_orders_json"] = json.dumps(open_orders_data)
+
         return context
 
 
