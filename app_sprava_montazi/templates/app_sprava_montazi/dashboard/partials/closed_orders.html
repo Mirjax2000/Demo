@@ -1,22 +1,4 @@
 <section>
-    <p class="u-txt-center">Uzavrene Zakazky</p>
-    <canvas id="closedOrders"></canvas>
-    <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const ctx = document.querySelector("#closedOrders");
-
-                const data = {
-                    labels: [1, 2, 3],
-                    datasets: [{
-                        data: [30, 10, 10],
-                        label: "Value"
-                    }]
-                };
-
-                const closedOrders = new Chart(ctx, {
-                    type: 'polarArea',
-                    data: data
-                });
-            });
-    </script>
+    <p class="u-txt-center m-0">uzavřené zakázky</p>
+    <canvas id="closedOrders" data-closed-orders='{{ closed_orders_json|safe }}'></canvas>
 </section>

@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 
 # --- models
 from .models import Order, OrderBackProtocol, OrderBackProtocolToken, Status
-from .models import OrderMontazImage
+from .models import OrderMontazImage, TeamType
 
 # utils
 from .utils import call_errors_adviced
@@ -27,6 +27,28 @@ class Dashboard:
             "nove": status_new,
             "zaterminovane": status_adviced,
             "realizovane": status_realized,
+        }
+
+    @staticmethod
+    def closed_orders() -> dict[str, int]:
+        status_billed = Order.objects.filter(status=Status.BILLED).count()
+        status_canceled = Order.objects.filter(status=Status.CANCELED).count()
+        return {
+            "vyuctovane": status_billed,
+            "zrusene": status_canceled,
+        }
+
+    @staticmethod
+    def adviced_type_orders() -> dict[str, int]:
+        status_adviced_by_assembly = Order.objects.filter(
+            status=Status.ADVICED, team_type=TeamType.BY_ASSEMBLY_CREW
+        ).count()
+        status_adviced_by_delivery = Order.objects.filter(
+            status=Status.ADVICED, team_type=TeamType.BY_DELIVERY_CREW
+        ).count()
+        return {
+            "montazni": status_adviced_by_assembly,
+            "dopravni": status_adviced_by_delivery,
         }
 
     @staticmethod
