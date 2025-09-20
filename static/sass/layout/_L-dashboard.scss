@@ -18,9 +18,10 @@
       border-radius: 4px;
       transition: transform 0.3s ease;
 
-      canvas {
-        padding: 0.5em;
-        aspect-ratio: 1/1;
+      section {
+        canvas {
+          padding-bottom: 1em;
+        }
       }
 
       &.top_left {

@@ -853,9 +853,8 @@ body.home {
   border-radius: 4px;
   transition: transform 0.3s ease;
 }
-.L-dashboard__grid__item canvas {
-  padding: 0.5em;
-  aspect-ratio: 1/1;
+.L-dashboard__grid__item section canvas {
+  padding-bottom: 1em;
 }
 .L-dashboard__grid__item.top_left {
   transform-origin: top left;
