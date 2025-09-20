@@ -52,7 +52,21 @@
       }
 
       &.left_center {
-        transform-origin: left center; // zvětšuje se od středu levé strany
+        transform-origin: left center;
+
+        .grid-2x2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr; /* 2 sloupce */
+          grid-template-rows: auto auto; /* 2 řádky */
+          gap: 0.5em;
+        }
+
+        .grid-2x2 > div {
+          background-color: var(--bck-list-item);
+          border: 1px solid var(--shadow);
+          padding: 1rem;
+          text-align: center;
+        }
 
         &:active {
           transform: scale(2) translate(5%, 0); // posun doprava o 5%
