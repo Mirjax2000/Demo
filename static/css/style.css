@@ -851,7 +851,7 @@ body.home {
   align-items: center;
   justify-content: center;
   border-radius: 5px;
-  transition: transform 0.2s ease;
+  transition: transform 0.3s ease;
 }
 .L-dashboard__grid__item.top_left {
   transform-origin: top left;
@@ -865,6 +865,55 @@ body.home {
 }
 .L-dashboard__grid__item.top_center:active {
   transform: scale(2) translateY(5%);
+  z-index: 1;
+}
+.L-dashboard__grid__item.top_right {
+  transform-origin: top right;
+}
+.L-dashboard__grid__item.top_right:active {
+  transform: scale(2) translate(-5%, 5%);
+  z-index: 1;
+}
+.L-dashboard__grid__item.left_center {
+  transform-origin: left center;
+}
+.L-dashboard__grid__item.left_center:active {
+  transform: scale(2) translate(5%, 0);
+  z-index: 1;
+}
+.L-dashboard__grid__item.center_center {
+  transform-origin: center center;
+}
+.L-dashboard__grid__item.center_center:active {
+  transform: scale(2);
+  z-index: 1;
+}
+.L-dashboard__grid__item.right_center {
+  transform-origin: center right;
+}
+.L-dashboard__grid__item.right_center:active {
+  transform: scale(2) translate(-5%, 0);
+  z-index: 1;
+}
+.L-dashboard__grid__item.left_bottom {
+  transform-origin: bottom left;
+}
+.L-dashboard__grid__item.left_bottom:active {
+  transform: scale(2) translate(5%, -5%);
+  z-index: 1;
+}
+.L-dashboard__grid__item.center_bottom {
+  transform-origin: center bottom;
+}
+.L-dashboard__grid__item.center_bottom:active {
+  transform: scale(2) translateY(-5%);
+  z-index: 1;
+}
+.L-dashboard__grid__item.right_bottom {
+  transform-origin: bottom right;
+}
+.L-dashboard__grid__item.right_bottom:active {
+  transform: scale(2) translate(-5%, -5%);
   z-index: 1;
 }
 
