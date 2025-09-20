@@ -3,17 +3,23 @@
     Dashboard
 {% endblock title %}
 {% block content %}
-    <section id="dashboardPage" class="container-fluid">
+    <section class="L-dashboard">
         <h1>Dashboard</h1>
-        <div class="row">
-            <div class="col-3">
-                <div id="chartContainerDemo">
-                    <canvas id="mychart"></canvas>
-                </div>
-            </div>
+        <hr>
+        <div class="L-dashboard__grid">
+            <div class="L-dashboard__grid__item">1</div>
+            <div class="L-dashboard__grid__item">2</div>
+            <div class="L-dashboard__grid__item">3</div>
+            <div class="L-dashboard__grid__item">4</div>
+            <div class="L-dashboard__grid__item">5</div>
+            <div class="L-dashboard__grid__item">6</div>
+            <div class="L-dashboard__grid__item">7</div>
+            <div class="L-dashboard__grid__item">8</div>
+            <div class="L-dashboard__grid__item">9</div>
         </div>
-        <!--zde si pis scripty-->
-        <script>
+    </section>
+    <!--zde si pis scripty-->
+    {% comment %} <script>
             document.addEventListener("DOMContentLoaded", function () {
                 const ctx = document.querySelector("#mychart");
 
@@ -30,6 +36,5 @@
                     data: data
                 });
             });
-        </script>
-    </section>
+    </script> {% endcomment %}
 {% endblock content %}

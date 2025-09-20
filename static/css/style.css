@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /* --- style --- */
 /* --- root --- */
 :root {
@@ -834,6 +835,22 @@ body.home {
 }
 .L-detail__vynos_naklad_profit .detail__profit .detail__content.zero {
   background-color: var(--bck-zero);
+}
+
+.L-dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 sloupce */
+  grid-template-rows: repeat(3, 1fr); /* 3 řádky */
+  gap: 10px;
+  height: 90vh; /* výška gridu podle celé výšky obrazovky */
+}
+.L-dashboard__grid__item {
+  background-color: var(--bck-list-item);
+  border: 1px solid var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
 }
 
 .C-spinner {
