@@ -52,6 +52,7 @@ from .utils import client_created, team_soulad, is_team_names_different, format_
 from .OOP_protokols import SCCZPdfGenerator
 from .OOP_back_protocol import ProtocolUploader
 from .OOP_JsonOrders import JsonOrders
+from .OOP_dashboard import Dashboard
 
 # --- typove aliasy
 OdChoice = Tuple[str, str]
@@ -217,6 +218,11 @@ class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         # --- navigace
         context["active"] = "dashboard"
+
+        # --- použijeme třídu Dashboard
+        dashboard = Dashboard()
+        stats = dashboard.open_orders()
+        context.update(stats)
         return context
 
 

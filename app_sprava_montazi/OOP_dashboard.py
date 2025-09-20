@@ -17,3 +17,8 @@ cons: Console = Console()
 class Dashboard:
     def __init__(self) -> None:
         pass
+
+    def open_orders(self):
+        open_count = 10
+        closed_count = 20
+        return {"open_orders": open_count, "closed_orders": closed_count}

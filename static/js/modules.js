@@ -147,4 +147,23 @@
         "fitImagesInViewport": true,
     })
 
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.querySelector("#openOrders"); // tvůj canvas
+        const openOrders = parseInt(ctx.dataset.openOrders);
+        const closedOrders = parseInt(ctx.dataset.closedOrders);
+
+        const data = {
+            labels: ["Open Orders", "Closed Orders"],
+            datasets: [{
+                data: [openOrders, closedOrders],
+                label: "Value",
+            }]
+        };
+
+        const openOrdersChart = new Chart(ctx, {
+            type: 'polarArea',
+            data: data
+        });
+    });
+
 })();
