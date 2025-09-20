@@ -1,22 +1,22 @@
 <section class="grid-2x2">
     <!---->
     <div>
+        <div class="alert alert-info">celkem: {{ count_all }}</div>
+    </div>
+    <!---->
+    <div>
         {% if is_invalid %}
-            <div>invalid: {{ invalid_count }}</div>
+            <div class="alert alert-danger">invalid: {{ invalid_count }}</div>
         {% else %}
-            <div>{{ invalid_count }}</div>
+            <div class="alert alert-success">{{ invalid_count }}</div>
         {% endif %}
     </div>
     <!---->
     <div>
-        <div>Další buňka 2</div>
+        <div class="alert alert-info">skryto: {{ hidden }}</div>
     </div>
     <!---->
     <div>
-        <div>Další buňka 3</div>
-    </div>
-    <!---->
-    <div>
-        <div>Další buňka 4</div>
+        <div>buňka 4</div>
     </div>
 </section>

@@ -54,3 +54,13 @@ class Dashboard:
     @staticmethod
     def invalid_orders() -> tuple[bool, int]:
         return call_errors_adviced()
+
+    @staticmethod
+    def all_orders() -> int:
+        count = Order.objects.exclude(status=Status.HIDDEN).count()
+        return count
+
+    @staticmethod
+    def count_hidden() -> int:
+        count = Order.objects.filter(status=Status.HIDDEN).count()
+        return count

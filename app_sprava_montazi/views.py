@@ -229,9 +229,15 @@ class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
         # --- uzavrene zakazky
         closed_orders_data = dashboard.closed_orders()
         context["closed_orders_json"] = json.dumps(closed_orders_data)
-        # --- podle typu adiced dopravni/montazni
+        # --- podle typu adviced dopravni/montazni
         adviced_orders = dashboard.adviced_type_orders()
         context["adviced_type_orders_json"] = json.dumps(adviced_orders)
+        # --- vsechny zakazky
+        count_all = dashboard.all_orders()
+        context["count_all"] = count_all
+        # --- skryte
+        hidden = dashboard.count_hidden()
+        context["hidden"] = hidden
 
         return context
 
