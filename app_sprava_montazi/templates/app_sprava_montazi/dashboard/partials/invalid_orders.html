@@ -1,7 +1,15 @@
 <section>
-    {% if is_invalid %}
-        <div class="u-txt-warning">{{ invalid_count }}</div>
-    {% else %}
-        <div class="u-txt-success">{{ invalid_count }}</div>
-    {% endif %}
+    <div class="grid-2x2">
+        {% if is_invalid %}
+            <div class="u-txt-warning grid-2x2__item">
+                <div class="alert alert-danger" role="alert">{{ invalid_count }}</div>
+            </div>
+        {% else %}
+            <div class="u-txt-success grid-2x2__item">{{ invalid_count }}</div>
+        {% endif %}
+        <!-- Zbytek buněk (pokud chceš naplnit celý grid 2x2) -->
+        <div class="grid-2x2__item">Další buňka 2</div>
+        <div class="grid-2x2__item">Další buňka 3</div>
+        <div class="grid-2x2__item">Další buňka 4</div>
+    </div>
 </section>

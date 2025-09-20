@@ -841,8 +841,7 @@ body.home {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* 3 sloupce */
   grid-template-rows: repeat(3, 1fr); /* 3 řádky */
-  gap: 10px;
-  height: 90vh;
+  gap: 0.5em;
 }
 .L-dashboard__grid__item {
   background-color: var(--bck-list-item);
@@ -852,9 +851,10 @@ body.home {
   justify-content: center;
   border-radius: 5px;
   transition: transform 0.3s ease;
+  aspect-ratio: 1/1;
 }
 .L-dashboard__grid__item canvas {
-  padding: 1em;
+  padding: 0.5em;
 }
 .L-dashboard__grid__item.top_left {
   transform-origin: top left;
@@ -918,6 +918,21 @@ body.home {
 .L-dashboard__grid__item.right_bottom:active {
   transform: scale(2) translate(-5%, -5%);
   z-index: 1;
+}
+.L-dashboard .grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 sloupce */
+  grid-template-rows: auto auto; /* 2 řádky */
+  gap: 1em;
+}
+.L-dashboard .grid-2x2__item {
+  background-color: var(--bck-list-item);
+  border: 1px solid var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  transition: transform 0.3s ease;
 }
 
 .C-spinner {
