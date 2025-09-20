@@ -842,7 +842,7 @@ body.home {
   grid-template-columns: repeat(3, 1fr); /* 3 sloupce */
   grid-template-rows: repeat(3, 1fr); /* 3 řádky */
   gap: 10px;
-  height: 90vh; /* výška gridu podle celé výšky obrazovky */
+  height: 90vh;
 }
 .L-dashboard__grid__item {
   background-color: var(--bck-list-item);
@@ -851,6 +851,21 @@ body.home {
   align-items: center;
   justify-content: center;
   border-radius: 5px;
+  transition: transform 0.2s ease;
+}
+.L-dashboard__grid__item.top_left {
+  transform-origin: top left;
+}
+.L-dashboard__grid__item.top_left:active {
+  transform: scale(2) translate(5%, 5%);
+  z-index: 1;
+}
+.L-dashboard__grid__item.top_center {
+  transform-origin: top center;
+}
+.L-dashboard__grid__item.top_center:active {
+  transform: scale(2) translateY(5%);
+  z-index: 1;
 }
 
 .C-spinner {

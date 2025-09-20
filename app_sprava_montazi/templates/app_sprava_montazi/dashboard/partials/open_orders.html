@@ -1,0 +1,22 @@
+<section>
+    <p class="u-txt-center">otevrene zakazky</p>
+    <canvas id="openOrders"></canvas>
+    <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const ctx = document.querySelector("#openOrders");
+
+                const data = {
+                    labels: [1, 2, 3],
+                    datasets: [{
+                        data: [100, 120, 150],
+                        label: "Value"
+                    }]
+                };
+
+                const openOrders = new Chart(ctx, {
+                    type: 'polarArea',
+                    data: data
+                });
+            });
+    </script>
+</section>

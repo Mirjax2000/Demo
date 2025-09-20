@@ -7,7 +7,7 @@
     grid-template-columns: repeat(3, 1fr); /* 3 sloupce */
     grid-template-rows: repeat(3, 1fr); /* 3 řádky */
     gap: 10px;
-    height: 90vh; /* výška gridu podle celé výšky obrazovky */
+    height: 90vh;
 
     &__item {
       background-color: var(--bck-list-item);
@@ -16,6 +16,25 @@
       align-items: center;
       justify-content: center;
       border-radius: 5px;
+      transition: transform 0.2s ease;
+
+      &.top_left {
+        transform-origin: top left; // základní roh pro transformaci
+
+        &:active {
+          transform: scale(2) translate(5%, 5%);
+          z-index: 1;
+        }
+      }
+
+      &.top_center {
+        transform-origin: top center;
+
+        &:active {
+          transform: scale(2) translateY(5%);
+          z-index: 1;
+        }
+      }
     }
   }
 }

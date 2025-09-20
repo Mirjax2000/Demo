@@ -1462,7 +1462,7 @@ class TriggerTokenRefreshView(View):
                 messages.success(request, "Token byl úspěšně obnoven.")
             else:
                 messages.error(request, f"Obnova selhala: {response.text}")
-                
+
         except Exception as e:
             messages.error(request, f"Nastala chyba: {str(e)}")
 
