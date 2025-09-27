@@ -86,21 +86,13 @@
       }
 
       &.center_center {
-        transform-origin: center center; // zvětšuje se od středu
+        grid-column: span 2;
+        transform-origin: center center;
 
-        &:active {
-          transform: scale(2); // jen zvětšení, žádný posun
-          z-index: 1;
-        }
-      }
-
-      &.right_center {
-        transform-origin: center right; // zvětšuje se od středu pravé strany
-
-        &:active {
-          transform: scale(2) translate(-5%, 0); // posun doleva o 5%
-          z-index: 1;
-        }
+        // &:active {
+        //   transform: scale(1.5) translate(-25%, 0); // posun doleva o 5%
+        //   z-index: 1;
+        // }
       }
 
       &.left_bottom {

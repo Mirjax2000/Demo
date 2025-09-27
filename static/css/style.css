@@ -907,18 +907,8 @@ body.home {
   z-index: 1;
 }
 .L-dashboard__grid__item.center_center {
+  grid-column: span 2;
   transform-origin: center center;
-}
-.L-dashboard__grid__item.center_center:active {
-  transform: scale(2);
-  z-index: 1;
-}
-.L-dashboard__grid__item.right_center {
-  transform-origin: center right;
-}
-.L-dashboard__grid__item.right_center:active {
-  transform: scale(2) translate(-5%, 0);
-  z-index: 1;
 }
 .L-dashboard__grid__item.left_bottom {
   transform-origin: bottom left;
