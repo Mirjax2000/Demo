@@ -88,12 +88,6 @@
       &.center_center {
         grid-column: span 2;
         transform-origin: center center;
-        display: block;
-
-        // &:active {
-        //   transform: scale(1.5) translate(-25%, 0); // posun doleva o 5%
-        //   z-index: 1;
-        // }
       }
 
       &.left_bottom {
@@ -115,12 +109,8 @@
       }
 
       &.right_bottom {
-        transform-origin: bottom right; // zvětšuje se od pravého spodního rohu
-
-        &:active {
-          transform: scale(2) translate(-5%, -5%); // doleva a nahoru
-          z-index: 1;
-        }
+        transform-origin: bottom right;
+        grid-column: span 2;
       }
     }
   }
