@@ -32,6 +32,10 @@
         setupDopravniZakazka();
         setupApiBaseUrl();
     });
+    // dashboard
+    document.addEventListener('DOMContentLoaded', function () {
+        initCheckboxToggle();
+    });
 
 
 
@@ -870,6 +874,21 @@
         } else {
             detailProfit.classList.add("zero");
         }
+    }
+
+    // dashboard skryt zakazky
+    function initCheckboxToggle() {
+        document.querySelectorAll('.customerRCheck').forEach(function (chk) {
+            chk.addEventListener('change', function () {
+                const btn = document.querySelector(this.dataset.target);
+                if (!btn) return;
+                if (this.checked) {
+                    btn.classList.remove('disabled');
+                } else {
+                    btn.classList.add('disabled');
+                }
+            });
+        });
     }
 
 })();

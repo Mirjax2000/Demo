@@ -1,6 +1,8 @@
 <section class="L-table">
   <p class="u-txt-center m-0">Reklamace - k rozhodnutí, jestli jde o montáž</p>
-  <table class="L-table__table nowrap hover order-column display" id="customerRTable" data-opacity="full">
+  <table class="L-table__table nowrap hover order-column display"
+         id="customerRTable"
+         data-opacity="full">
     <thead>
       <tr>
         <th>Číslo zakázky</th>
@@ -15,8 +17,20 @@
           <td>
             <a href="{% url 'order_detail' pk=o.pk %}" class="L-table__link">{{ o.order_number }}</a>
           </td>
-          <td>{% if o.client %}{{ o.client.name }}{% else %}<span class="badge text-bg-warning">bez zákazníka</span>{% endif %}</td>
-          <td>{% if o.notes %}{{ o.notes }}{% else %}-{% endif %}</td>
+          <td>
+            {% if o.client %}
+              {{ o.client.name }}
+            {% else %}
+              <span class="badge text-bg-warning">bez zákazníka</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if o.notes %}
+              {{ o.notes }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
           <td>
             {% if o.status == 'New' %}
               <div class="d-flex align-items-center gap-2">
@@ -51,19 +65,4 @@
       {% endfor %}
     </tbody>
   </table>
-  <script nonce="{{ request.csp_nonce }}">
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.customerRCheck').forEach(function(chk){
-        chk.addEventListener('change', function(){
-          const btn = document.querySelector(this.dataset.target);
-          if (!btn) return;
-          if (this.checked) {
-            btn.classList.remove('disabled');
-          } else {
-            btn.classList.add('disabled');
-          }
-        });
-      });
-    });
-  </script>
 </section>
