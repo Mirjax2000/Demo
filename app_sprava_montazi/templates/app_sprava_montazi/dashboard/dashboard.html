@@ -5,6 +5,12 @@
 {% block content %}
     <section class="L-dashboard">
         <h1>Dashboard</h1>
+        <form method="get">
+            {{ form.month }}
+            {{ form.year }}
+            <button type="submit" class="btn btn-primary">Filtrovat</button>
+            <a href="?" class="btn btn-secondary">Vše</a>
+        </form>
         <hr>
         <div class="L-dashboard__grid">
             <div class="L-dashboard__grid__item top_left">

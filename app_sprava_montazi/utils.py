@@ -257,13 +257,14 @@ def convert_image_to_webp(img_file, new_name: str, quality=90) -> None | Content
     return webp_file
 
 
-def call_errors_adviced() -> tuple[bool, int]:
+def call_errors_adviced(base: QuerySet | None = None) -> tuple[bool, int]:
     """pocita chyby do navbaru u zakazky"""
     is_errors: bool = False
     all_count: int = 0
 
     # --- Základní queryset pro všechny ADVICED objednávky
-    base_query = Order.objects.filter(
+    base_qs = base if base is not None else Order.objects.all()
+    base_query = base_qs.filter(
         status=Status.ADVICED, team_type=TeamType.BY_ASSEMBLY_CREW
     )
 

@@ -208,6 +208,9 @@ class CreatePageView(LoginRequiredMixin, ErrorContextMixin, FormView):
             return redirect("createpage")
 
 
+from .forms import MonthFilterForm  # přidej import
+
+
 class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
     """Dashboard View"""
 
@@ -215,28 +218,43 @@ class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # --- navigace
+
         context["active"] = "dashboard"
 
+        form = MonthFilterForm(self.request.GET or None)
+        context["form"] = form
+
+        # Build base queryset filtered by evidence_termin according to filter form
+        from .models import Order  # local import to avoid circular
+        qs = Order.objects.all()
+        if form.is_valid():
+            month = form.cleaned_data.get("month")
+            year = form.cleaned_data.get("year")
+            if year:
+                qs = qs.filter(evidence_termin__year=int(year))
+            if month:
+                qs = qs.filter(evidence_termin__month=int(month))
+
+        # --- dashboard data
         dashboard = Dashboard()
-        # --- invalidni zakazky
-        is_invalid, invalid_count = dashboard.invalid_orders()
+
+        is_invalid, invalid_count = dashboard.invalid_orders(qs)
         context["is_invalid"] = is_invalid
         context["invalid_count"] = invalid_count
-        # --- otevrene zakazky
-        open_orders_data = dashboard.open_orders()
+
+        open_orders_data = dashboard.open_orders(qs)
         context["open_orders_json"] = json.dumps(open_orders_data)
-        # --- uzavrene zakazky
-        closed_orders_data = dashboard.closed_orders()
+
+        closed_orders_data = dashboard.closed_orders(qs)
         context["closed_orders_json"] = json.dumps(closed_orders_data)
-        # --- podle typu adviced dopravni/montazni
-        adviced_orders = dashboard.adviced_type_orders()
+
+        adviced_orders = dashboard.adviced_type_orders(qs)
         context["adviced_type_orders_json"] = json.dumps(adviced_orders)
-        # --- vsechny zakazky
-        count_all = dashboard.all_orders()
+
+        count_all = dashboard.all_orders(qs)
         context["count_all"] = count_all
-        # --- skryte
-        hidden = dashboard.count_hidden()
+
+        hidden = dashboard.count_hidden(qs)
         context["hidden"] = hidden
 
         return context

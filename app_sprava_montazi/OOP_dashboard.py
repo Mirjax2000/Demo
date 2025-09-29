@@ -19,10 +19,11 @@ cons: Console = Console()
 
 class Dashboard:
     @staticmethod
-    def open_orders() -> dict[str, int]:
-        status_new = Order.objects.filter(status=Status.NEW).count()
-        status_adviced = Order.objects.filter(status=Status.ADVICED).count()
-        status_realized = Order.objects.filter(status=Status.REALIZED).count()
+    def open_orders(qs=None) -> dict[str, int]:
+        base = qs if qs is not None else Order.objects.all()
+        status_new = base.filter(status=Status.NEW).count()
+        status_adviced = base.filter(status=Status.ADVICED).count()
+        status_realized = base.filter(status=Status.REALIZED).count()
         return {
             "nove": status_new,
             "zaterminovane": status_adviced,
@@ -30,20 +31,22 @@ class Dashboard:
         }
 
     @staticmethod
-    def closed_orders() -> dict[str, int]:
-        status_billed = Order.objects.filter(status=Status.BILLED).count()
-        status_canceled = Order.objects.filter(status=Status.CANCELED).count()
+    def closed_orders(qs=None) -> dict[str, int]:
+        base = qs if qs is not None else Order.objects.all()
+        status_billed = base.filter(status=Status.BILLED).count()
+        status_canceled = base.filter(status=Status.CANCELED).count()
         return {
             "vyuctovane": status_billed,
             "zrusene": status_canceled,
         }
 
     @staticmethod
-    def adviced_type_orders() -> dict[str, int]:
-        status_adviced_by_assembly = Order.objects.filter(
+    def adviced_type_orders(qs=None) -> dict[str, int]:
+        base = qs if qs is not None else Order.objects.all()
+        status_adviced_by_assembly = base.filter(
             status=Status.ADVICED, team_type=TeamType.BY_ASSEMBLY_CREW
         ).count()
-        status_adviced_by_delivery = Order.objects.filter(
+        status_adviced_by_delivery = base.filter(
             status=Status.ADVICED, team_type=TeamType.BY_DELIVERY_CREW
         ).count()
         return {
@@ -52,15 +55,18 @@ class Dashboard:
         }
 
     @staticmethod
-    def invalid_orders() -> tuple[bool, int]:
-        return call_errors_adviced()
+    def invalid_orders(qs=None) -> tuple[bool, int]:
+        base = qs if qs is not None else None
+        return call_errors_adviced(base)
 
     @staticmethod
-    def all_orders() -> int:
-        count = Order.objects.exclude(status=Status.HIDDEN).count()
+    def all_orders(qs=None) -> int:
+        base = qs if qs is not None else Order.objects.all()
+        count = base.exclude(status=Status.HIDDEN).count()
         return count
 
     @staticmethod
-    def count_hidden() -> int:
-        count = Order.objects.filter(status=Status.HIDDEN).count()
+    def count_hidden(qs=None) -> int:
+        base = qs if qs is not None else Order.objects.all()
+        count = base.filter(status=Status.HIDDEN).count()
         return count

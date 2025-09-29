@@ -575,3 +575,32 @@ class CallLogForm(forms.ModelForm):
 CallLogFormSet = inlineformset_factory(
     Client, CallLog, form=CallLogForm, extra=1, can_delete=True
 )
+
+
+class MonthFilterForm(forms.Form):
+    MONTHS = [
+        ("", "Všechny měsíce"),
+        ("01", "Leden"),
+        ("02", "Únor"),
+        ("03", "Březen"),
+        ("04", "Duben"),
+        ("05", "Květen"),
+        ("06", "Červen"),
+        ("07", "Červenec"),
+        ("08", "Srpen"),
+        ("09", "Září"),
+        ("10", "Říjen"),
+        ("11", "Listopad"),
+        ("12", "Prosinec"),
+    ]
+    month = forms.ChoiceField(choices=MONTHS, label="", required=False,
+                              widget=forms.Select(attrs={"class": "L-form__select"}))
+    year = forms.ChoiceField(label="", required=False,
+                             widget=forms.Select(attrs={"class": "L-form__select"}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Dynamicky naplnit roky podle evidence_termin
+        years_qs = Order.objects.dates("evidence_termin", "year", order="DESC")
+        years = [("", "Všechny roky")] + [(str(d.year), str(d.year)) for d in years_qs]
+        self.fields["year"].choices = years
