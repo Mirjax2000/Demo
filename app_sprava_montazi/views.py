@@ -266,6 +266,10 @@ class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
         new_issues_orders = dashboard.new_orders_issues(qs)
         context["new_issues_orders"] = new_issues_orders
 
+        # Orders by customer with order number ending with -R
+        customer_r_orders = dashboard.customer_r_orders(qs)
+        context["customer_r_orders"] = customer_r_orders
+
         return context
 
 
@@ -344,6 +348,9 @@ class OrderHiddenView(LoginRequiredMixin, View):
         else:
             messages.error(request, "Zakázka: nemohla být skryta.")
 
+        next_url = request.POST.get("next") or request.GET.get("next")
+        if next_url:
+            return redirect(next_url)
         return redirect("orders")
 
 

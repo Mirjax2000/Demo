@@ -593,10 +593,17 @@ class MonthFilterForm(forms.Form):
         ("11", "Listopad"),
         ("12", "Prosinec"),
     ]
-    month = forms.ChoiceField(choices=MONTHS, label="", required=False,
-                              widget=forms.Select(attrs={"class": "L-form__select"}))
-    year = forms.ChoiceField(label="", required=False,
-                             widget=forms.Select(attrs={"class": "L-form__select"}))
+    month = forms.ChoiceField(
+        choices=MONTHS,
+        label="Měsíc",
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select L-table__select", "id": "month"}),
+    )
+    year = forms.ChoiceField(
+        label="Rok",
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select L-table__select", "id": "year"}),
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -6,6 +6,7 @@
     const teamTable = document.getElementById("teamTable");
     const clientOrderTable = document.getElementById("clientOrderTable");
     const newIssuesTable = document.getElementById("newIssuesTable");
+    const customerRTable = document.getElementById("customerRTable");
     // chart.js - otevrene zakazky
     document.addEventListener("DOMContentLoaded", function () {
         renderOpenOrdersChart();
@@ -111,6 +112,33 @@
                 infoEmpty: "",
                 search: "Vyhledávání: ",
                 lengthMenu: "_MENU_ zakázek na stránku",
+            },
+        });
+    }
+
+    // datatables for dashboard customer R table
+    if (customerRTable) {
+        $(customerRTable).DataTable({
+            order: [[0, 'desc']],
+            rowReorder: false,
+            fixedColumns: false,
+            pageLength: 7,
+            lengthChange: false,
+            scrollY: '360px',
+            scrollCollapse: true,
+            searching: false,
+            layout: {
+                topStart: null,
+                topEnd: null,
+                bottomStart: 'info',
+                bottomEnd: 'paging'
+            },
+            language: {
+                emptyTable: 'Žádné objednávky',
+                decimal: ',',
+                info: 'Zobrazuji _START_ až _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)',
+                infoFiltered: '',
+                infoEmpty: ''
             },
         });
     }
