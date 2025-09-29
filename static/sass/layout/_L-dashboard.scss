@@ -86,12 +86,7 @@
       }
 
       &.center_center {
-        transform-origin: center center; // zvětšuje se od středu
-
-        &:active {
-          transform: scale(2); // jen zvětšení, žádný posun
-          z-index: 1;
-        }
+        grid-column: span 2;
       }
 
       &.right_center {
@@ -113,12 +108,7 @@
       }
 
       &.center_bottom {
-        transform-origin: center bottom; // zvětšuje se od středu spodní hrany
-
-        &:active {
-          transform: scale(2) translateY(-5%); // posun nahoru o 5%
-          z-index: 1;
-        }
+        grid-column: span 2;
       }
 
       &.right_bottom {

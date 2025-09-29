@@ -907,16 +907,7 @@ body.home {
   z-index: 1;
 }
 .L-dashboard__grid__item.center_center {
-  transform-origin: center center;
-}
-.L-dashboard__grid__item.center_center:active {
-  transform: scale(2);
-  z-index: 1;
-}
-/* Disable zoom on dashboard grid items with .no-zoom */
-.L-dashboard__grid__item.no-zoom:active {
-  transform: none !important;
-  z-index: auto !important;
+  grid-column: span 2;
 }
 .L-dashboard__grid__item.right_center {
   transform-origin: center right;
@@ -933,11 +924,7 @@ body.home {
   z-index: 1;
 }
 .L-dashboard__grid__item.center_bottom {
-  transform-origin: center bottom;
-}
-.L-dashboard__grid__item.center_bottom:active {
-  transform: scale(2) translateY(-5%);
-  z-index: 1;
+  grid-column: span 2;
 }
 .L-dashboard__grid__item.right_bottom {
   transform-origin: bottom right;
