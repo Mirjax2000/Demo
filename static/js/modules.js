@@ -5,11 +5,14 @@
     const orderTable = document.getElementById("orderTable");
     const teamTable = document.getElementById("teamTable");
     const clientOrderTable = document.getElementById("clientOrderTable");
+    const newIssuesTable = document.getElementById("newIssuesTable");
+    const customerRTable = document.getElementById("customerRTable");
     // chart.js - otevrene zakazky
     document.addEventListener("DOMContentLoaded", function () {
         renderOpenOrdersChart();
         renderClosedOrdersChart();
-        renderAdvicedTypeOrdersChart()
+        renderAdvicedTypeOrdersChart();
+        renderFinanceSummaryChart();
     });
 
     // DataTable for orders
@@ -75,6 +78,69 @@
                     console.log("❌ Kopírování selhalo.");
                 });
             }
+        });
+    }
+
+    // datatables for dashboard new issues table
+    if (newIssuesTable) {
+        $(newIssuesTable).DataTable({
+            order: [[1, 'desc']],
+            rowReorder: false,
+            fixedColumns: false,
+            pageLength: 8,
+            lengthMenu: [[8, 12, 20, -1], [8, 12, 20, "Vše"]],
+            scrollY: '360px',
+            scrollCollapse: true,
+            layout: {
+                topStart: {
+                    search: {
+                        placeholder: "Hledej ..."
+                    }
+                },
+                topEnd: 'pageLength',
+                bottomStart: 'info',
+                bottomEnd: 'paging'
+            },
+            columnDefs: [
+                { targets: [1, 2], type: 'date' },
+                { targets: [0, 3, 4, 5], orderable: true }
+            ],
+            language: {
+                emptyTable: "Žádné objednávky",
+                decimal: ",",
+                info: "Zobrazuji _START_ až _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
+                infoFiltered: "",
+                infoEmpty: "",
+                search: "Vyhledávání: ",
+                lengthMenu: "_MENU_ zakázek na stránku",
+            },
+        });
+    }
+
+    // datatables for dashboard customer R table
+    if (customerRTable) {
+        $(customerRTable).DataTable({
+            order: [[0, 'desc']],
+            rowReorder: false,
+            fixedColumns: false,
+            pageLength: 7,
+            lengthChange: false,
+            scrollY: '360px',
+            scrollCollapse: true,
+            searching: false,
+            layout: {
+                topStart: null,
+                topEnd: null,
+                bottomStart: 'info',
+                bottomEnd: 'paging'
+            },
+            language: {
+                emptyTable: 'Žádné objednávky',
+                decimal: ',',
+                info: 'Zobrazuji _START_ až _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)',
+                infoFiltered: '',
+                infoEmpty: ''
+            },
         });
     }
 
@@ -361,6 +427,79 @@
                                 let value = context.parsed;
                                 let percentage = ((value / total) * 100).toFixed(1);
                                 return `${context.label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [centerTextPlugin]
+        });
+    }
+
+    // chart.js finance summary (Výnos rozdělen na Náklady a Zisk)
+    function renderFinanceSummaryChart() {
+        const ctx = document.querySelector('#financeSummary');
+        if (!ctx) return;
+
+        const dataObj = JSON.parse(ctx.dataset.financeSummary);
+        const naklad = Number(dataObj.naklad || 0);
+        const profit = Number(dataObj.profit || 0);
+        const vynos = Number(dataObj.vynos || (naklad + profit));
+
+        const data = {
+            labels: ['Náklady', 'Zisk'],
+            datasets: [{
+                data: [naklad, profit],
+                backgroundColor: ['#dc3545', '#198754']
+            }]
+        };
+
+        const centerTextPlugin = {
+            id: 'centerTextFinance',
+            afterDraw(chart) {
+                const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                const centerX = (left + right) / 2;
+                const centerY = (top + bottom) / 2;
+
+                const getTextColor = () => {
+                    const html = document.documentElement;
+                    return html.dataset.theme === 'dark' ? '#ffffff' : '#000000';
+                };
+
+                ctx.save();
+                ctx.font = 'bold 28px Arial';
+                ctx.fillStyle = getTextColor();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const totalText = new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(vynos);
+                ctx.fillText(totalText, centerX, centerY);
+                ctx.restore();
+
+                if (!chart._observerSetup) {
+                    const html = document.documentElement;
+                    const observer = new MutationObserver(() => chart.update());
+                    observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+                    chart._observerSetup = true;
+                }
+            }
+        };
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const total = naklad + profit;
+                                const value = context.parsed;
+                                const percentage = total ? ((value / total) * 100).toFixed(1) : 0;
+                                const label = context.label;
+                                const money = new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(value);
+                                return `${label}: ${money} (${percentage}%)`;
                             }
                         }
                     }

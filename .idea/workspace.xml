@@ -4,11 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a8cb8caa-ec67-4190-b28c-75e2aedaebe4" name="Changes" comment="Add .idea/workspace.xml to track IDE-specific settings&#10;&#10;This commit adds the PyCharm-specific workspace configuration file. It includes project-level settings such as change lists, Git integration, Python interpreter configuration, and other IDE preferences. These settings help to standardize the development environment for collaborators using PyCharm.">
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
+    <list default="true" id="a8cb8caa-ec67-4190-b28c-75e2aedaebe4" name="Changes" comment="Add finance summary functionality and improve dashboard interactivity">
+      <change afterPath="$PROJECT_DIR$/app_sprava_montazi/templates/app_sprava_montazi/dashboard/partials/finance_summary.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,10 +29,25 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="develop" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;DaliborZ-tech&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Mirjax2000/Demo.git&quot;,
+    &quot;accountId&quot;: &quot;f2904811-6666-4ac4-9117-2253655fbc63&quot;
+  }
+}</component>
+  <component name="PackageJsonUpdateNotifier">
+    <dismissed value="$PROJECT_DIR$/package.json" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
@@ -50,8 +62,9 @@
     "Python.bot.executor": "Run",
     "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "import/feature__4",
+    "git-widget-placeholder": "feature/chart",
     "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.stylelint": "true",
@@ -61,6 +74,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -74,7 +88,6 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.13 (AMS)" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -94,8 +107,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.26574.90" />
-        <option value="bundled-python-sdk-c1fac28bca04-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.26574.90" />
+        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-PY-252.26199.168" />
+        <option value="bundled-python-sdk-b3d66beaba9a-c6efb3732140-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26199.168" />
       </set>
     </attachedChunks>
   </component>
@@ -110,7 +123,54 @@
       <workItem from="1749400369949" duration="210000" />
       <workItem from="1749400595859" duration="1117000" />
       <workItem from="1749401953536" duration="1304000" />
+      <workItem from="1758375644026" duration="1070000" />
+      <workItem from="1758725896951" duration="605000" />
+      <workItem from="1758726564172" duration="1602000" />
+      <workItem from="1758777139628" duration="5879000" />
+      <workItem from="1759079539752" duration="2170000" />
+      <workItem from="1759124444375" duration="22705000" />
     </task>
+    <task id="LOCAL-00001" summary="Enhance dashboard filtering and introduce month/year selection">
+      <option name="closed" value="true" />
+      <created>1759133987528</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1759133987528</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Improve dashboard reporting with new issue tracking and enhanced visuals. &#10;&#10;Added methods for identifying orders with missing details, updated partials with clearer labels and additional status highlighting, and included a new section for unresolved issues. Enhanced dashboard interactivity with grid item adjustments and new DataTable for tracking. Updated styles and JavaScript for better user experience in issue tracking.">
+      <option name="closed" value="true" />
+      <created>1759162458113</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1759162458113</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Enhance dashboard with new tables and improved issue tracking.&#10;&#10;Added sections for orders with missing details and customer-specific issues. Updated forms and templates for better filtering clarity. Introduced new DataTables with enhanced interactions.">
+      <option name="closed" value="true" />
+      <created>1759164139310</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1759164139310</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Refactor `OOP_dashboard.py` to remove unused code and streamline model imports.">
+      <option name="closed" value="true" />
+      <created>1759165092059</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1759165092059</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Add finance summary functionality and improve dashboard interactivity">
+      <option name="closed" value="true" />
+      <created>1759169269195</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1759169269195</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -129,7 +189,12 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Add .idea/workspace.xml to track IDE-specific settings&#10;&#10;This commit adds the PyCharm-specific workspace configuration file. It includes project-level settings such as change lists, Git integration, Python interpreter configuration, and other IDE preferences. These settings help to standardize the development environment for collaborators using PyCharm." />
-    <option name="LAST_COMMIT_MESSAGE" value="Add .idea/workspace.xml to track IDE-specific settings&#10;&#10;This commit adds the PyCharm-specific workspace configuration file. It includes project-level settings such as change lists, Git integration, Python interpreter configuration, and other IDE preferences. These settings help to standardize the development environment for collaborators using PyCharm." />
+    <MESSAGE value="Enhance dashboard filtering and introduce month/year selection" />
+    <MESSAGE value="Improve dashboard reporting with new issue tracking and enhanced visuals. &#10;&#10;Added methods for identifying orders with missing details, updated partials with clearer labels and additional status highlighting, and included a new section for unresolved issues. Enhanced dashboard interactivity with grid item adjustments and new DataTable for tracking. Updated styles and JavaScript for better user experience in issue tracking." />
+    <MESSAGE value="Enhance dashboard with new tables and improved issue tracking.&#10;&#10;Added sections for orders with missing details and customer-specific issues. Updated forms and templates for better filtering clarity. Introduced new DataTables with enhanced interactions." />
+    <MESSAGE value="Refactor `OOP_dashboard.py` to remove unused code and streamline model imports." />
+    <MESSAGE value="Add finance summary functionality and improve dashboard interactivity" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add finance summary functionality and improve dashboard interactivity" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/AMS$bot.coverage" NAME="bot Coverage Results" MODIFIED="1749402817004" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

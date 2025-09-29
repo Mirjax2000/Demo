@@ -6,6 +6,7 @@ from django import forms
 from django.utils.text import slugify
 from django.forms import inlineformset_factory
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from .models import (
     Order,
     Article,
@@ -579,6 +580,7 @@ CallLogFormSet = inlineformset_factory(
 
 class MonthFilterForm(forms.Form):
     MONTHS = [
+        ("", "Všechny měsíce"),
         ("01", "Leden"),
         ("02", "Únor"),
         ("03", "Březen"),
@@ -592,4 +594,29 @@ class MonthFilterForm(forms.Form):
         ("11", "Listopad"),
         ("12", "Prosinec"),
     ]
-    month = forms.ChoiceField(choices=MONTHS, label="", required=False)
+    month = forms.ChoiceField(
+        choices=MONTHS,
+        label="Měsíc",
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select L-table__select", "id": "month"}),
+    )
+    year = forms.ChoiceField(
+        label="Rok",
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select L-table__select", "id": "year"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Dynamicky naplnit roky podle evidence_termin + zajistit aktuální rok
+        years_qs = Order.objects.dates("evidence_termin", "year", order="DESC")
+        current_year = timezone.localdate().year if hasattr(timezone, 'localdate') else timezone.now().year
+        year_set = {d.year for d in years_qs}
+        year_set.add(current_year)
+        years_sorted = sorted(year_set, reverse=True)
+        years = [("", "Všechny roky")] + [(str(y), str(y)) for y in years_sorted]
+        self.fields["year"].choices = years
+        # Pokud je formulář nevyplněný (první načtení), nastav výchozí rok na aktuální
+        if not self.is_bound:
+            self.fields["year"].initial = str(current_year)
+            self.initial["year"] = str(current_year)

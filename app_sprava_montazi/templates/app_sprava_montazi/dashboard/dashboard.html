@@ -4,7 +4,30 @@
 {% endblock title %}
 {% block content %}
     <section class="L-dashboard">
-        <h1>Dashboard</h1>
+        <div class="L-table__nav-panel">
+            <form method="get"
+                  class="L-table__nav-panel__form"
+                  action="{% url 'dashboard' %}">
+                <div class="L-table__nav-panel__form__group">
+                    <label for="id_month">Měsíc</label>
+                    {{ form.month }}
+                </div>
+                <div class="L-table__nav-panel__form__group">
+                    <label for="id_year">Rok</label>
+                    {{ form.year }}
+                </div>
+                <div class="L-table__nav-panel__form__group">
+                    <button type="submit" class="shadow_button btn btn-primary btn-sm mt-4">
+                        <span class="me-2">Hledej</span>
+                        <i class="bi bi-search"></i>
+                    </button>
+                    <div class="u-txt-right mt-1">
+                        <a href="{% url 'dashboard' %}"
+                           class="shadow_button btn btn-sm btn-primary p-0 ps-1 pe-1 lh-sm">reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
         <hr>
         <div class="L-dashboard__grid">
             <div class="L-dashboard__grid__item top_left">
@@ -27,11 +50,17 @@
                 {% include "app_sprava_montazi/dashboard/partials/invalid_orders.html" %}
             </div>
             <!---->
-            <div class="L-dashboard__grid__item center_center">5 a 6</div>
+            <div class="L-dashboard__grid__item center_center">
+                {% include "app_sprava_montazi/dashboard/partials/new_orders_issues.html" %}
+            </div>
             <!---->
-            <div class="L-dashboard__grid__item left_bottom">7</div>
+            <div class="L-dashboard__grid__item left_bottom">
+                {% include "app_sprava_montazi/dashboard/partials/finance_summary.html" %}
+            </div>
             <!---->
-            <div class="L-dashboard__grid__item right_bottom">8 a 9</div>
+            <div class="L-dashboard__grid__item center_bottom">
+                {% include "app_sprava_montazi/dashboard/partials/customer_r_orders.html" %}
+            </div>
             <!---->
         </div>
     </section>

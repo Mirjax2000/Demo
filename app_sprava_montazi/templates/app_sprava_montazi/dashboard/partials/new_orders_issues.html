@@ -1,0 +1,46 @@
+<section class="L-table">
+  <p class="u-txt-center m-0">Nové zakázky s chybějícími údaji</p>
+  <table class="L-table__table nowrap hover order-column display" id="newIssuesTable" data-opacity="full">
+    <thead>
+      <tr>
+        <th>Číslo zakázky</th>
+        <th>Evidence</th>
+        <th>Doručení</th>
+        <th>Montážní tým</th>
+        <th>Zákazník</th>
+        <th>Problém</th>
+      </tr>
+    </thead>
+    <tbody class="L-table__body">
+      {% for o in new_issues_orders %}
+        <tr>
+          <td>
+            <a href="{% url 'order_detail' pk=o.pk %}" class="L-table__link">{{ o.order_number }}</a>
+          </td>
+          <td>{{ o.evidence_termin|date:"d.m.Y" }}</td>
+          <td>{% if o.delivery_termin %}{{ o.delivery_termin|date:"d.m.Y" }}{% else %}<span class="badge text-bg-warning">chybí</span>{% endif %}</td>
+          <td>{% if o.team %}{{ o.team.name }}{% else %}{% if o.team_type == 'By_assembly_crew' %}<span class="badge text-bg-warning">chybí</span>{% else %}-{% endif %}{% endif %}</td>
+          <td>
+            {% if o.client %}
+              {{ o.client.name }}{% if o.client.incomplete %} <span class="badge text-bg-warning">neúplné</span>{% endif %}
+            {% else %}
+              <span class="badge text-bg-warning">bez zákazníka</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if not o.delivery_termin %}
+              <span class="badge text-bg-danger">bez doručení</span>
+            {% endif %}
+            {% if not o.team and o.team_type == 'By_assembly_crew' %}
+              <span class="badge text-bg-danger">bez montážního týmu</span>
+            {% endif %}
+            {% if not o.client or o.client.incomplete %}
+              <span class="badge text-bg-danger">neúplné kontakty</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+      {% endfor %}
+    </tbody>
+  </table>
+</section>

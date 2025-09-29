@@ -24,36 +24,7 @@
         }
       }
 
-      &.top_left {
-        transform-origin: top left; // základní roh pro transformaci
-
-        &:active {
-          transform: scale(2) translate(5%, 5%);
-          z-index: 1;
-        }
-      }
-
-      &.top_center {
-        transform-origin: top center;
-
-        &:active {
-          transform: scale(2) translateY(5%);
-          z-index: 1;
-        }
-      }
-
-      &.top_right {
-        transform-origin: top right; // zvětšuje se od horního pravého rohu
-
-        &:active {
-          transform: scale(2) translate(-5%, 5%);
-          z-index: 1;
-        }
-      }
-
       &.left_center {
-        transform-origin: left center;
-
         .grid-2x2 {
           display: grid;
           grid-template-columns: 1fr 1fr; /* 2 sloupce */
@@ -78,14 +49,10 @@
             text-align: center;
           }
         }
-
-        &:active {
-          transform: scale(2) translate(5%, 0); // posun doprava o 5%
-          z-index: 1;
-        }
       }
 
       &.center_center {
+        grid-column: span 2;
         grid-column: span 2;
         transform-origin: center center;
       }
@@ -100,16 +67,6 @@
       }
 
       &.center_bottom {
-        transform-origin: center bottom; // zvětšuje se od středu spodní hrany
-
-        &:active {
-          transform: scale(2) translateY(-5%); // posun nahoru o 5%
-          z-index: 1;
-        }
-      }
-
-      &.right_bottom {
-        transform-origin: bottom right;
         grid-column: span 2;
       }
     }

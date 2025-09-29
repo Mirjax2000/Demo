@@ -1,0 +1,65 @@
+<section class="L-table">
+  <p class="u-txt-center m-0">Reklamace - k rozhodnutí, jestli jde o montáž</p>
+  <table class="L-table__table nowrap hover order-column display"
+         id="customerRTable"
+         data-opacity="full">
+    <thead>
+      <tr>
+        <th>Číslo zakázky</th>
+        <th>Zákazník</th>
+        <th>Poznámka</th>
+        <th>Akce</th>
+      </tr>
+    </thead>
+    <tbody class="L-table__body">
+      {% for o in customer_r_orders %}
+        <tr>
+          <td>
+            <a href="{% url 'order_detail' pk=o.pk %}" class="L-table__link">{{ o.order_number }}</a>
+          </td>
+          <td>
+            {% if o.client %}
+              {{ o.client.name }}
+            {% else %}
+              <span class="badge text-bg-warning">bez zákazníka</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if o.notes %}
+              {{ o.notes }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>
+            {% if o.status == 'New' %}
+              <div class="d-flex align-items-center gap-2">
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input customerRCheck"
+                         type="checkbox"
+                         role="switch"
+                         data-target="#hideBtn{{ o.pk }}"
+                         id="confirmHide{{ o.pk }}"
+                         aria-checked="false">
+                  <label class="form-check-label" for="confirmHide{{ o.pk }}">Opravdu přepnout?</label>
+                </div>
+                <form method="post" action="{% url 'order_hidden' o.pk %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  <button type="submit"
+                          id="hideBtn{{ o.pk }}"
+                          class="btn btn-danger btn-sm text-nowrap disabled">
+                    <i class="fa-solid fa-trash me-2"></i>Skrýt zakázku
+                  </button>
+                </form>
+              </div>
+            {% else %}
+              <span class="text-muted">-</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+      {% endfor %}
+    </tbody>
+  </table>
+</section>

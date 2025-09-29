@@ -1,13 +1,9 @@
-from dataclasses import dataclass
 from rich.console import Console
-
-# --- django
-from django.conf import settings
-from django.shortcuts import redirect
+from django.db.models import Q, Sum, F, Value, DecimalField
+from django.db.models.functions import Coalesce
 
 # --- models
-from .models import Order, OrderBackProtocol, OrderBackProtocolToken, Status
-from .models import OrderMontazImage, TeamType
+from .models import Order, Status, TeamType
 
 # utils
 from .utils import call_errors_adviced
@@ -19,10 +15,11 @@ cons: Console = Console()
 
 class Dashboard:
     @staticmethod
-    def open_orders() -> dict[str, int]:
-        status_new = Order.objects.filter(status=Status.NEW).count()
-        status_adviced = Order.objects.filter(status=Status.ADVICED).count()
-        status_realized = Order.objects.filter(status=Status.REALIZED).count()
+    def open_orders(qs=None) -> dict[str, int]:
+        base = qs if qs is not None else Order.objects.all()
+        status_new = base.filter(status=Status.NEW).count()
+        status_adviced = base.filter(status=Status.ADVICED).count()
+        status_realized = base.filter(status=Status.REALIZED).count()
         return {
             "nove": status_new,
             "zaterminovane": status_adviced,
@@ -30,20 +27,22 @@ class Dashboard:
         }
 
     @staticmethod
-    def closed_orders() -> dict[str, int]:
-        status_billed = Order.objects.filter(status=Status.BILLED).count()
-        status_canceled = Order.objects.filter(status=Status.CANCELED).count()
+    def closed_orders(qs=None) -> dict[str, int]:
+        base = qs if qs is not None else Order.objects.all()
+        status_billed = base.filter(status=Status.BILLED).count()
+        status_canceled = base.filter(status=Status.CANCELED).count()
         return {
             "vyuctovane": status_billed,
             "zrusene": status_canceled,
         }
 
     @staticmethod
-    def adviced_type_orders() -> dict[str, int]:
-        status_adviced_by_assembly = Order.objects.filter(
+    def adviced_type_orders(qs=None) -> dict[str, int]:
+        base = qs if qs is not None else Order.objects.all()
+        status_adviced_by_assembly = base.filter(
             status=Status.ADVICED, team_type=TeamType.BY_ASSEMBLY_CREW
         ).count()
-        status_adviced_by_delivery = Order.objects.filter(
+        status_adviced_by_delivery = base.filter(
             status=Status.ADVICED, team_type=TeamType.BY_DELIVERY_CREW
         ).count()
         return {
@@ -52,15 +51,93 @@ class Dashboard:
         }
 
     @staticmethod
-    def invalid_orders() -> tuple[bool, int]:
-        return call_errors_adviced()
+    def invalid_orders(qs=None) -> tuple[bool, int]:
+        base = qs if qs is not None else None
+        return call_errors_adviced(base)
 
     @staticmethod
-    def all_orders() -> int:
-        count = Order.objects.exclude(status=Status.HIDDEN).count()
+    def all_orders(qs=None) -> int:
+        base = qs if qs is not None else Order.objects.all()
+        count = base.exclude(status=Status.HIDDEN).count()
         return count
 
     @staticmethod
-    def count_hidden() -> int:
-        count = Order.objects.filter(status=Status.HIDDEN).count()
+    def count_hidden(qs=None) -> int:
+        base = qs if qs is not None else Order.objects.all()
+        count = base.filter(status=Status.HIDDEN).count()
         return count
+
+    @staticmethod
+    def no_montage_term_orders(qs=None) -> int:
+        """Count orders (excluding HIDDEN) where montage_termin is not set.
+        Respects provided queryset filtering (evidence_termin filter from form).
+        """
+        base = qs if qs is not None else Order.objects.all()
+        base = base.exclude(status=Status.HIDDEN)
+        count = base.filter(montage_termin__isnull=True).count()
+        return count
+
+    @staticmethod
+    def new_orders_issues(qs=None):
+        """Return queryset of NEW orders that are missing one of the required items:
+        - delivery_termin (agreed delivery date)
+        - assigned montage team when realization is by assembly crew
+        - completed customer contact details (client.incomplete True or missing client)
+        Respects provided queryset filtering (evidence_termin filter from form).
+        """
+        base = qs if qs is not None else Order.objects.all()
+        base = base.filter(status=Status.NEW)
+
+        cond_missing_delivery = Q(delivery_termin__isnull=True)
+        cond_missing_team = Q(team__isnull=True, team_type=TeamType.BY_ASSEMBLY_CREW)
+        cond_incomplete_client = Q(client__isnull=True) | Q(client__incomplete=True)
+
+        queryset = (
+            base.filter(
+                cond_missing_delivery | cond_missing_team | cond_incomplete_client
+            )
+            .select_related("client", "team", "distrib_hub")
+            .distinct()
+        )
+        return queryset
+
+    @staticmethod
+    def customer_r_orders(qs=None):
+        """Orders with order_number ending with '-R' (case-insensitive), realization by customer,
+        and status NEW. Excludes HIDDEN. Respects provided queryset filtering.
+        """
+        base = qs if qs is not None else Order.objects.all()
+        base = base.exclude(status=Status.HIDDEN)
+        queryset = (
+            base.filter(
+                team_type=TeamType.BY_CUSTOMER,
+                order_number__iendswith="-r",
+                status=Status.NEW,
+            )
+            .select_related("client")
+            .order_by("-evidence_termin")
+        )
+        return queryset
+
+    @staticmethod
+    def finance_summary(qs=None) -> dict:
+        """Aggregate total finances for current selection.
+        Returns dict with keys: vynos, naklad, profit (as floats for JSON).
+        - Respects provided queryset filtering (evidence_termin)
+        - Excludes HIDDEN orders
+        - Treats NULL as 0 using Coalesce
+        """
+        base = qs if qs is not None else Order.objects.all()
+        base = base.exclude(status=Status.HIDDEN)
+
+        zero = Value(0, output_field=DecimalField(max_digits=14, decimal_places=2))
+        decimal_field = DecimalField(max_digits=14, decimal_places=2)
+
+        agg = base.aggregate(
+            total_vynos=Coalesce(Sum(Coalesce("vynos", zero)), zero, output_field=decimal_field),
+            total_naklad=Coalesce(Sum(Coalesce("naklad", zero)), zero, output_field=decimal_field),
+        )
+        vynos = float(agg.get("total_vynos") or 0)
+        naklad = float(agg.get("total_naklad") or 0)
+        profit = vynos - naklad
+        return {"vynos": round(vynos, 2), "naklad": round(naklad, 2), "profit": round(profit, 2)}

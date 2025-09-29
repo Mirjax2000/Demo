@@ -30,7 +30,7 @@ SECURE_SSL_REDIRECT = IS_PRODUCTION and USE_HTTPS
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
-ALLOWED_HOSTS: list = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
+ALLOWED_HOSTS: list = os.getenv("ALLOWED_HOSTS", "127.0.0.1").split(",")
 
 
 # Application definition

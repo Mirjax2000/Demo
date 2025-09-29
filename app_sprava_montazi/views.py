@@ -224,27 +224,64 @@ class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
         form = MonthFilterForm(self.request.GET or None)
         context["form"] = form
 
+        # Build base queryset filtered by evidence_termin according to filter form
+        from .models import Order  # local import to avoid circular
+        qs = Order.objects.all()
+
+        # Determine filter values: use cleaned_data when form is bound and valid,
+        # otherwise fall back to form.initial (so default current year applies on first load)
+        month = None
+        year = None
+        if form.is_bound and form.is_valid():
+            month = form.cleaned_data.get("month")
+            year = form.cleaned_data.get("year")
+        else:
+            month = form.initial.get("month") or getattr(form.fields.get("month"), "initial", None) or None
+            year = form.initial.get("year") or getattr(form.fields.get("year"), "initial", None) or None
+
+        if year:
+            qs = qs.filter(evidence_termin__year=int(year))
+        if month:
+            qs = qs.filter(evidence_termin__month=int(month))
+
         # --- dashboard data
         dashboard = Dashboard()
 
-        is_invalid, invalid_count = dashboard.invalid_orders()
+        is_invalid, invalid_count = dashboard.invalid_orders(qs)
         context["is_invalid"] = is_invalid
         context["invalid_count"] = invalid_count
 
-        open_orders_data = dashboard.open_orders()
+        open_orders_data = dashboard.open_orders(qs)
         context["open_orders_json"] = json.dumps(open_orders_data)
 
-        closed_orders_data = dashboard.closed_orders()
+        closed_orders_data = dashboard.closed_orders(qs)
         context["closed_orders_json"] = json.dumps(closed_orders_data)
 
-        adviced_orders = dashboard.adviced_type_orders()
+        adviced_orders = dashboard.adviced_type_orders(qs)
         context["adviced_type_orders_json"] = json.dumps(adviced_orders)
 
-        count_all = dashboard.all_orders()
+        count_all = dashboard.all_orders(qs)
         context["count_all"] = count_all
 
-        hidden = dashboard.count_hidden()
+        hidden = dashboard.count_hidden(qs)
         context["hidden"] = hidden
+
+        # Orders without agreed montage date (montage_termin not set), excluding hidden
+        no_montage_term_count = dashboard.no_montage_term_orders(qs)
+        context["no_montage_term_count"] = no_montage_term_count
+        context["has_no_montage_term"] = no_montage_term_count > 0
+
+        # New orders with missing delivery date or montage team or incomplete client
+        new_issues_orders = dashboard.new_orders_issues(qs)
+        context["new_issues_orders"] = new_issues_orders
+
+        # Orders by customer with order number ending with -R
+        customer_r_orders = dashboard.customer_r_orders(qs)
+        context["customer_r_orders"] = customer_r_orders
+
+        # Finance summary (total revenue split into costs and profit)
+        finance = dashboard.finance_summary(qs)
+        context["finance_summary_json"] = json.dumps(finance)
 
         return context
 
@@ -324,6 +361,9 @@ class OrderHiddenView(LoginRequiredMixin, View):
         else:
             messages.error(request, "Zakázka: nemohla být skryta.")
 
+        next_url = request.POST.get("next") or request.GET.get("next")
+        if next_url:
+            return redirect(next_url)
         return redirect("orders")
 
 
