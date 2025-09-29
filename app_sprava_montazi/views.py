@@ -227,13 +227,22 @@ class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
         # Build base queryset filtered by evidence_termin according to filter form
         from .models import Order  # local import to avoid circular
         qs = Order.objects.all()
-        if form.is_valid():
+
+        # Determine filter values: use cleaned_data when form is bound and valid,
+        # otherwise fall back to form.initial (so default current year applies on first load)
+        month = None
+        year = None
+        if form.is_bound and form.is_valid():
             month = form.cleaned_data.get("month")
             year = form.cleaned_data.get("year")
-            if year:
-                qs = qs.filter(evidence_termin__year=int(year))
-            if month:
-                qs = qs.filter(evidence_termin__month=int(month))
+        else:
+            month = form.initial.get("month") or getattr(form.fields.get("month"), "initial", None) or None
+            year = form.initial.get("year") or getattr(form.fields.get("year"), "initial", None) or None
+
+        if year:
+            qs = qs.filter(evidence_termin__year=int(year))
+        if month:
+            qs = qs.filter(evidence_termin__month=int(month))
 
         # --- dashboard data
         dashboard = Dashboard()
@@ -269,6 +278,10 @@ class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
         # Orders by customer with order number ending with -R
         customer_r_orders = dashboard.customer_r_orders(qs)
         context["customer_r_orders"] = customer_r_orders
+
+        # Finance summary (total revenue split into costs and profit)
+        finance = dashboard.finance_summary(qs)
+        context["finance_summary_json"] = json.dumps(finance)
 
         return context
 

@@ -11,7 +11,8 @@
     document.addEventListener("DOMContentLoaded", function () {
         renderOpenOrdersChart();
         renderClosedOrdersChart();
-        renderAdvicedTypeOrdersChart()
+        renderAdvicedTypeOrdersChart();
+        renderFinanceSummaryChart();
     });
 
     // DataTable for orders
@@ -426,6 +427,79 @@
                                 let value = context.parsed;
                                 let percentage = ((value / total) * 100).toFixed(1);
                                 return `${context.label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [centerTextPlugin]
+        });
+    }
+
+    // chart.js finance summary (Výnos rozdělen na Náklady a Zisk)
+    function renderFinanceSummaryChart() {
+        const ctx = document.querySelector('#financeSummary');
+        if (!ctx) return;
+
+        const dataObj = JSON.parse(ctx.dataset.financeSummary);
+        const naklad = Number(dataObj.naklad || 0);
+        const profit = Number(dataObj.profit || 0);
+        const vynos = Number(dataObj.vynos || (naklad + profit));
+
+        const data = {
+            labels: ['Náklady', 'Zisk'],
+            datasets: [{
+                data: [naklad, profit],
+                backgroundColor: ['#dc3545', '#198754']
+            }]
+        };
+
+        const centerTextPlugin = {
+            id: 'centerTextFinance',
+            afterDraw(chart) {
+                const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                const centerX = (left + right) / 2;
+                const centerY = (top + bottom) / 2;
+
+                const getTextColor = () => {
+                    const html = document.documentElement;
+                    return html.dataset.theme === 'dark' ? '#ffffff' : '#000000';
+                };
+
+                ctx.save();
+                ctx.font = 'bold 28px Arial';
+                ctx.fillStyle = getTextColor();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const totalText = new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(vynos);
+                ctx.fillText(totalText, centerX, centerY);
+                ctx.restore();
+
+                if (!chart._observerSetup) {
+                    const html = document.documentElement;
+                    const observer = new MutationObserver(() => chart.update());
+                    observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+                    chart._observerSetup = true;
+                }
+            }
+        };
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const total = naklad + profit;
+                                const value = context.parsed;
+                                const percentage = total ? ((value / total) * 100).toFixed(1) : 0;
+                                const label = context.label;
+                                const money = new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(value);
+                                return `${label}: ${money} (${percentage}%)`;
                             }
                         }
                     }

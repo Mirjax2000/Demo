@@ -1,5 +1,6 @@
 from rich.console import Console
-from django.db.models import Q
+from django.db.models import Q, Sum, F, Value, DecimalField
+from django.db.models.functions import Coalesce
 
 # --- models
 from .models import Order, Status, TeamType
@@ -117,3 +118,26 @@ class Dashboard:
             .order_by("-evidence_termin")
         )
         return queryset
+
+    @staticmethod
+    def finance_summary(qs=None) -> dict:
+        """Aggregate total finances for current selection.
+        Returns dict with keys: vynos, naklad, profit (as floats for JSON).
+        - Respects provided queryset filtering (evidence_termin)
+        - Excludes HIDDEN orders
+        - Treats NULL as 0 using Coalesce
+        """
+        base = qs if qs is not None else Order.objects.all()
+        base = base.exclude(status=Status.HIDDEN)
+
+        zero = Value(0, output_field=DecimalField(max_digits=14, decimal_places=2))
+        decimal_field = DecimalField(max_digits=14, decimal_places=2)
+
+        agg = base.aggregate(
+            total_vynos=Coalesce(Sum(Coalesce("vynos", zero)), zero, output_field=decimal_field),
+            total_naklad=Coalesce(Sum(Coalesce("naklad", zero)), zero, output_field=decimal_field),
+        )
+        vynos = float(agg.get("total_vynos") or 0)
+        naklad = float(agg.get("total_naklad") or 0)
+        profit = vynos - naklad
+        return {"vynos": round(vynos, 2), "naklad": round(naklad, 2), "profit": round(profit, 2)}
