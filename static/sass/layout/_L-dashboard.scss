@@ -53,17 +53,6 @@
 
       &.center_center {
         grid-column: span 2;
-        grid-column: span 2;
-        transform-origin: center center;
-      }
-
-      &.left_bottom {
-        transform-origin: bottom left; // zvětšuje se od levého spodního rohu
-
-        &:active {
-          transform: scale(2) translate(5%, -5%); // doprava a nahoru
-          z-index: 1;
-        }
       }
 
       &.center_bottom {

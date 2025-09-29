@@ -880,15 +880,6 @@ body.home {
 }
 .L-dashboard__grid__item.center_center {
   grid-column: span 2;
-  grid-column: span 2;
-  transform-origin: center center;
-}
-.L-dashboard__grid__item.left_bottom {
-  transform-origin: bottom left;
-}
-.L-dashboard__grid__item.left_bottom:active {
-  transform: scale(2) translate(5%, -5%);
-  z-index: 1;
 }
 .L-dashboard__grid__item.center_bottom {
   grid-column: span 2;
