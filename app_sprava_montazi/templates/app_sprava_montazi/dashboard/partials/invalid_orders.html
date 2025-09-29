@@ -1,22 +1,26 @@
 <section class="grid-2x2">
     <!---->
     <div>
-        <div class="alert alert-primary">celkem: {{ count_all }}</div>
+        <div class="alert alert-primary">Celkem: {{ count_all }}</div>
     </div>
     <!---->
     <div>
         {% if is_invalid %}
-            <div class="alert alert-danger">invalid: {{ invalid_count }}</div>
+            <div class="alert alert-danger">Invalid: {{ invalid_count }}</div>
         {% else %}
             <div class="alert alert-success">{{ invalid_count }}</div>
         {% endif %}
     </div>
     <!---->
     <div>
-        <div class="alert alert-secondary">skryto: {{ hidden }}</div>
+        <div class="alert alert-secondary">Skryto: {{ hidden }}</div>
     </div>
     <!---->
     <div>
-        <div>buňka 4</div>
+        {% if has_no_montage_term %}
+            <div class="alert alert-warning">Bez termínu montáže: {{ no_montage_term_count }}</div>
+        {% else %}
+            <div class="alert alert-success">Bez termínu montáže: {{ no_montage_term_count }}</div>
+        {% endif %}
     </div>
 </section>

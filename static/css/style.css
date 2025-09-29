@@ -913,6 +913,11 @@ body.home {
   transform: scale(2);
   z-index: 1;
 }
+/* Disable zoom on dashboard grid items with .no-zoom */
+.L-dashboard__grid__item.no-zoom:active {
+  transform: none !important;
+  z-index: auto !important;
+}
 .L-dashboard__grid__item.right_center {
   transform-origin: center right;
 }

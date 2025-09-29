@@ -5,6 +5,7 @@
     const orderTable = document.getElementById("orderTable");
     const teamTable = document.getElementById("teamTable");
     const clientOrderTable = document.getElementById("clientOrderTable");
+    const newIssuesTable = document.getElementById("newIssuesTable");
     // chart.js - otevrene zakazky
     document.addEventListener("DOMContentLoaded", function () {
         renderOpenOrdersChart();
@@ -75,6 +76,42 @@
                     console.log("❌ Kopírování selhalo.");
                 });
             }
+        });
+    }
+
+    // datatables for dashboard new issues table
+    if (newIssuesTable) {
+        $(newIssuesTable).DataTable({
+            order: [[1, 'desc']],
+            rowReorder: false,
+            fixedColumns: false,
+            pageLength: 8,
+            lengthMenu: [[8, 12, 20, -1], [8, 12, 20, "Vše"]],
+            scrollY: '360px',
+            scrollCollapse: true,
+            layout: {
+                topStart: {
+                    search: {
+                        placeholder: "Hledej ..."
+                    }
+                },
+                topEnd: 'pageLength',
+                bottomStart: 'info',
+                bottomEnd: 'paging'
+            },
+            columnDefs: [
+                { targets: [1, 2], type: 'date' },
+                { targets: [0, 3, 4, 5], orderable: true }
+            ],
+            language: {
+                emptyTable: "Žádné objednávky",
+                decimal: ",",
+                info: "Zobrazuji _START_ až _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
+                infoFiltered: "",
+                infoEmpty: "",
+                search: "Vyhledávání: ",
+                lengthMenu: "_MENU_ zakázek na stránku",
+            },
         });
     }
 
