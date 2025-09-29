@@ -44,6 +44,7 @@ from app_sprava_montazi.views import (
     ExportOrdersExcelView as ExportOrdersExcel,
     TriggerTokenRefreshView as TriggerTokenRefresh,
     SwitchAdvicedWithDeliveryToRealizedView as SwtchAdvcdDlrToRlzd,
+    SwitchRealizationToAssemblyView as SwitchToAssembly,
 )
 
 from app_sprava_montazi.views_services import (
@@ -87,6 +88,7 @@ app_sprava_montazi: list = [
     path("order/create/", OrderCreate.as_view(), name="order_create"),
     path(f"order/{PK}/hidden/", OrderHidden.as_view(), name="order_hidden"),
     path(f"order/{PK}/{SWTCH1}", SwtchAdvcdDlrToRlzd.as_view(), name=f"{SWTCH1NAME}"),
+    path(f"order/{PK}/switch/to_assembly/", SwitchToAssembly.as_view(), name="order_switch_to_assembly"),
     path(f"order/{PK}/order_update/", OrderUpdate.as_view(), name="order_update"),
     path(f"order/{PK}/delete_order/", OrderDelete.as_view(), name="delete_order"),
     path(f"order/{PK}/detail/", OrderDetail.as_view(), name="order_detail"),

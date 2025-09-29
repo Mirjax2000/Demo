@@ -38,7 +38,7 @@
                   <input class="form-check-input customerRCheck"
                          type="checkbox"
                          role="switch"
-                         data-target="#hideBtn{{ o.pk }}"
+                         data-target=".actionBtns{{ o.pk }}"
                          id="confirmHide{{ o.pk }}"
                          aria-checked="false">
                   <label class="form-check-label" for="confirmHide{{ o.pk }}">Opravdu přepnout?</label>
@@ -48,8 +48,17 @@
                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
                   <button type="submit"
                           id="hideBtn{{ o.pk }}"
-                          class="btn btn-danger btn-sm text-nowrap disabled">
-                    <i class="fa-solid fa-trash me-2"></i>Skrýt zakázku
+                          class="btn btn-danger btn-sm text-nowrap disabled actionBtns{{ o.pk }}">
+                    <i class="fa-solid fa-trash me-2"></i>Bez montáže
+                  </button>
+                </form>
+                <form method="post" action="{% url 'order_switch_to_assembly' o.pk %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  <button type="submit"
+                          id="switchToAssemblyBtn{{ o.pk }}"
+                          class="btn btn-warning btn-sm text-nowrap disabled actionBtns{{ o.pk }}">
+                    <i class="fa-solid fa-people-group me-2"></i>Montáž
                   </button>
                 </form>
               </div>

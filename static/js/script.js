@@ -880,13 +880,15 @@
     function initCheckboxToggle() {
         document.querySelectorAll('.customerRCheck').forEach(function (chk) {
             chk.addEventListener('change', function () {
-                const btn = document.querySelector(this.dataset.target);
-                if (!btn) return;
-                if (this.checked) {
-                    btn.classList.remove('disabled');
-                } else {
-                    btn.classList.add('disabled');
-                }
+                const btns = document.querySelectorAll(this.dataset.target);
+                if (!btns || btns.length === 0) return;
+                btns.forEach((btn) => {
+                    if (this.checked) {
+                        btn.classList.remove('disabled');
+                    } else {
+                        btn.classList.add('disabled');
+                    }
+                });
             });
         });
     }

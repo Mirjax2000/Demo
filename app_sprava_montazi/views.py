@@ -1536,3 +1536,36 @@ class TriggerTokenRefreshView(View):
             messages.error(request, f"Nastala chyba: {str(e)}")
 
         return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+class SwitchRealizationToAssemblyView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        order = get_object_or_404(Order, pk=kwargs["pk"])
+
+        allowed = order.status == Status.NEW and order.team_type == TeamType.BY_CUSTOMER
+        if not allowed:
+            messages.error(
+                request,
+                (
+                    "Nelze přepnout Realizace kým. Povolené pouze pro nové zakázky "
+                    "realizované zákazníkem."
+                ),
+            )
+            next_url = request.POST.get("next") or request.GET.get("next")
+            return redirect(next_url or "dashboard")
+        try:
+            order.team_type = TeamType.BY_ASSEMBLY_CREW
+            order.save()
+            messages.success(
+                request,
+                f"Zakázka: {order.order_number} přepnuta na Realizace kým: Montážníky.",
+            )
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            if settings.DEBUG:
+                cons.log(f"[ERROR] Switch to assembly failed for {order.order_number}: {e}", style="red")
+            messages.error(
+                request,
+                f"Nepodařilo se přepnout Realizace kým u zakázky {order.order_number}.",
+            )
+        next_url = request.POST.get("next") or request.GET.get("next")
+        return redirect(next_url or "dashboard")
