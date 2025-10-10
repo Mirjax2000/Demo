@@ -4,8 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a8cb8caa-ec67-4190-b28c-75e2aedaebe4" name="Changes" comment="Add finance summary partial">
+    <list default="true" id="a8cb8caa-ec67-4190-b28c-75e2aedaebe4" name="Changes" comment="Add order-switch-to-assembly functionality and refactor related checkbox logic">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_sprava_montazi/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_sprava_montazi/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_sprava_montazi/templates/app_sprava_montazi/dashboard/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/app_sprava_montazi/templates/app_sprava_montazi/dashboard/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_sprava_montazi/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_sprava_montazi/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,27 +61,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.bot.executor": "Run",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature/chart",
-    "junie.onboarding.icon.badge.shown": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.stylelint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.stylelint": "C:\\Users\\dalibor.zalesak\\PycharmProjects\\AMS\\node_modules\\stylelint",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.bot.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/chart&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.stylelint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.stylelint&quot;: &quot;C:\\Users\\dalibor.zalesak\\PycharmProjects\\AMS\\node_modules\\stylelint&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="AMS" type="Python.DjangoServer" factoryName="Django server">
       <module name="AMS" />
@@ -107,8 +111,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-PY-252.26199.168" />
-        <option value="bundled-python-sdk-b3d66beaba9a-c6efb3732140-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26199.168" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.26830.99" />
+        <option value="bundled-python-sdk-164cda30dcd9-0af03a5fa574-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26830.99" />
       </set>
     </attachedChunks>
   </component>
@@ -128,7 +132,12 @@
       <workItem from="1758726564172" duration="1602000" />
       <workItem from="1758777139628" duration="5879000" />
       <workItem from="1759079539752" duration="2170000" />
-      <workItem from="1759124444375" duration="24529000" />
+      <workItem from="1759124444375" duration="26229000" />
+      <workItem from="1759234654289" duration="3850000" />
+      <workItem from="1759684938134" duration="424000" />
+      <workItem from="1759744624955" duration="291000" />
+      <workItem from="1759744967053" duration="3157000" />
+      <workItem from="1760120009979" duration="461000" />
     </task>
     <task id="LOCAL-00001" summary="Enhance dashboard filtering and introduce month/year selection">
       <option name="closed" value="true" />
@@ -178,7 +187,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759169461710</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Add order-switch-to-assembly functionality and refactor related checkbox logic">
+      <option name="closed" value="true" />
+      <created>1759171561541</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1759171561541</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -203,9 +220,11 @@
     <MESSAGE value="Refactor `OOP_dashboard.py` to remove unused code and streamline model imports." />
     <MESSAGE value="Add finance summary functionality and improve dashboard interactivity" />
     <MESSAGE value="Add finance summary partial" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add finance summary partial" />
+    <MESSAGE value="Add order-switch-to-assembly functionality and refactor related checkbox logic" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add order-switch-to-assembly functionality and refactor related checkbox logic" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/AMS$bot.coverage" NAME="bot Coverage Results" MODIFIED="1749402817004" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Demo$bot.coverage" NAME="bot Coverage Results" MODIFIED="1759241251542" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

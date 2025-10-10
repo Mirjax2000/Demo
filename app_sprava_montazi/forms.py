@@ -605,6 +605,16 @@ class MonthFilterForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={"class": "form-select L-table__select", "id": "year"}),
     )
+    mandant = forms.ChoiceField(
+        label="Mandant",
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select L-table__select", "id": "mandant"}),
+    )
+    distrib_hub = forms.ChoiceField(
+        label="Místo určení",
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select L-table__select", "id": "distrib_hub"}),
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -616,6 +626,20 @@ class MonthFilterForm(forms.Form):
         years_sorted = sorted(year_set, reverse=True)
         years = [("", "Všechny roky")] + [(str(y), str(y)) for y in years_sorted]
         self.fields["year"].choices = years
+        # Mandanty (distinct z Order)
+        mandants = list(
+            Order.objects.order_by().values_list("mandant", flat=True).distinct()
+        )
+        mandant_choices = [("", "Všichni")] + [
+            (m, m) for m in mandants if m
+        ]
+        self.fields["mandant"].choices = mandant_choices
+        # Místa určení (DistribHub)
+        hubs = list(DistribHub.objects.all().order_by("code", "city"))
+        hub_choices = [("", "Všechna místa")] + [
+            (str(h.id), str(h)) for h in hubs
+        ]
+        self.fields["distrib_hub"].choices = hub_choices
         # Pokud je formulář nevyplněný (první načtení), nastav výchozí rok na aktuální
         if not self.is_bound:
             self.fields["year"].initial = str(current_year)

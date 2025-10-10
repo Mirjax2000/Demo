@@ -235,14 +235,25 @@ class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
         if form.is_bound and form.is_valid():
             month = form.cleaned_data.get("month")
             year = form.cleaned_data.get("year")
+            mandant = form.cleaned_data.get("mandant")
+            distrib_hub = form.cleaned_data.get("distrib_hub")
         else:
             month = form.initial.get("month") or getattr(form.fields.get("month"), "initial", None) or None
             year = form.initial.get("year") or getattr(form.fields.get("year"), "initial", None) or None
+            mandant = form.initial.get("mandant") or None
+            distrib_hub = form.initial.get("distrib_hub") or None
 
         if year:
             qs = qs.filter(evidence_termin__year=int(year))
         if month:
             qs = qs.filter(evidence_termin__month=int(month))
+        if mandant:
+            qs = qs.filter(mandant=mandant)
+        if distrib_hub:
+            try:
+                qs = qs.filter(distrib_hub_id=int(distrib_hub))
+            except (TypeError, ValueError):
+                pass
 
         # --- dashboard data
         dashboard = Dashboard()
