@@ -1,26 +1,45 @@
 <section class="grid-2x2">
     <!---->
     <div>
-        <div class="alert alert-primary">Celkem: {{ count_all }}</div>
+        <section>
+            <p class="u-txt-center m-0">Celkem</p>
+            <canvas id="totalOrdersChart"
+                    data-total="{{ count_all }}"
+                    aria-label="Celkem objednávek: {{ count_all }}"
+                    role="img"></canvas>
+        </section>
     </div>
     <!---->
     <div>
-        {% if is_invalid %}
-            <div class="alert alert-danger">Invalid: {{ invalid_count }}</div>
-        {% else %}
-            <div class="alert alert-success">{{ invalid_count }}</div>
-        {% endif %}
+        <section>
+            <p class="u-txt-center m-0">Invalid</p>
+            <canvas id="invalidOrdersChart"
+                    data-invalid="{{ invalid_count }}"
+                    data-total="{{ count_all }}"
+                    aria-label="Neplatné záznamy: {{ invalid_count }} z {{ count_all }}"
+                    role="img"></canvas>
+        </section>
     </div>
     <!---->
     <div>
-        <div class="alert alert-secondary">Skryto: {{ hidden }}</div>
+        <section>
+            <p class="u-txt-center m-0">Skryto</p>
+            <canvas id="hiddenOrdersChart"
+                    data-hidden="{{ hidden }}"
+                    data-total="{{ count_all }}"
+                    aria-label="Skryté záznamy: {{ hidden }} z {{ count_all }}"
+                    role="img"></canvas>
+        </section>
     </div>
     <!---->
     <div>
-        {% if has_no_montage_term %}
-            <div class="alert alert-warning">Bez termínu montáže: {{ no_montage_term_count }}</div>
-        {% else %}
-            <div class="alert alert-success">Bez termínu montáže: {{ no_montage_term_count }}</div>
-        {% endif %}
+        <section>
+            <p class="u-txt-center m-0">Bez termínu montáže</p>
+            <canvas id="noMontageChart"
+                    data-no-montage="{{ no_montage_term_count }}"
+                    data-total="{{ count_all }}"
+                    aria-label="Bez termínu montáže: {{ no_montage_term_count }} z {{ count_all }}"
+                    role="img"></canvas>
+        </section>
     </div>
 </section>
