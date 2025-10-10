@@ -282,6 +282,10 @@ class DashboardView(LoginRequiredMixin, ErrorContextMixin, TemplateView):
         context["no_montage_term_count"] = no_montage_term_count
         context["has_no_montage_term"] = no_montage_term_count > 0
 
+        # Denominator for the no-montage chart (exclude hidden + closed)
+        no_montage_total_count = dashboard.no_montage_total(qs)
+        context["no_montage_total_count"] = no_montage_total_count
+
         # New orders with missing delivery date or montage team or incomplete client
         new_issues_orders = dashboard.new_orders_issues(qs)
         context["new_issues_orders"] = new_issues_orders

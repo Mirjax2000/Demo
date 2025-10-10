@@ -62,6 +62,16 @@ class Dashboard:
         return count
 
     @staticmethod
+    def no_montage_total(qs=None) -> int:
+        """Total count for the 'No montage term' chart denominator.
+        Excludes HIDDEN and closed (BILLED, CANCELED) statuses.
+        Respects provided queryset filtering.
+        """
+        base = qs if qs is not None else Order.objects.all()
+        base = base.exclude(status__in=[Status.HIDDEN, Status.BILLED, Status.CANCELED])
+        return base.count()
+
+    @staticmethod
     def count_hidden(qs=None) -> int:
         base = qs if qs is not None else Order.objects.all()
         count = base.filter(status=Status.HIDDEN).count()
@@ -69,11 +79,11 @@ class Dashboard:
 
     @staticmethod
     def no_montage_term_orders(qs=None) -> int:
-        """Count orders (excluding HIDDEN) where montage_termin is not set.
+        """Count orders where montage_termin is not set, excluding HIDDEN and closed (BILLED, CANCELED).
         Respects provided queryset filtering (evidence_termin filter from form).
         """
         base = qs if qs is not None else Order.objects.all()
-        base = base.exclude(status=Status.HIDDEN)
+        base = base.exclude(status__in=[Status.HIDDEN, Status.BILLED, Status.CANCELED])
         count = base.filter(montage_termin__isnull=True).count()
         return count
 
