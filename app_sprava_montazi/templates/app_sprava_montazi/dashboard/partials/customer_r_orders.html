@@ -1,4 +1,4 @@
-<section class="L-table">
+<section class="L-table m-0 w-100">
   <p class="u-txt-center m-0">Reklamace - k rozhodnutí, jestli jde o montáž</p>
   <table class="L-table__table nowrap hover order-column display"
          id="customerRTable"
@@ -48,7 +48,7 @@
                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
                   <button type="submit"
                           id="hideBtn{{ o.pk }}"
-                          class="btn btn-danger btn-sm text-nowrap disabled actionBtns{{ o.pk }}">
+                          class="btn btn-danger btn-sm text-nowrap disabled actionBtns{{ o.pk }} ps-1 pe-1 pt-0 pb-0">
                     <i class="fa-solid fa-trash me-2"></i>Bez montáže
                   </button>
                 </form>
@@ -57,7 +57,7 @@
                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
                   <button type="submit"
                           id="switchToAssemblyBtn{{ o.pk }}"
-                          class="btn btn-warning btn-sm text-nowrap disabled actionBtns{{ o.pk }}">
+                          class="btn btn-warning btn-sm text-nowrap disabled actionBtns{{ o.pk }} ps-1 pe-1 pt-0 pb-0">
                     <i class="fa-solid fa-people-group me-2"></i>Montáž
                   </button>
                 </form>

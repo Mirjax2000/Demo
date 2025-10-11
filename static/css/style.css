@@ -843,15 +843,13 @@ body.home {
   display: flex;
   justify-content: flex-start;
   align-items: stretch;
-  gap: 0.5em;
-  margin-bottom: 0.5em;
 }
 .L-dashboard .first_row > * {
   font-size: 0.7rem;
   flex-basis: 25%;
 }
 .L-dashboard .first_row > * section {
-  width: 65%;
+  width: 60%;
 }
 .L-dashboard .first_row > * section canvas {
   padding-bottom: 1em;
@@ -861,26 +859,25 @@ body.home {
   display: flex;
   justify-content: flex-start;
   align-items: stretch;
-  gap: 0.5em;
-  margin-bottom: 0.5em;
   font-size: 0.6rem;
 }
 .L-dashboard .second_row > :first-child {
   width: 25%;
 }
 .L-dashboard .second_row > :last-child {
-  width: 75%;
+  flex-grow: 1;
 }
 .L-dashboard .third_row {
   display: flex;
   justify-content: flex-start;
   align-items: stretch;
-  gap: 0.5em;
-  margin-bottom: 0.5em;
   font-size: 0.6rem;
 }
 .L-dashboard .third_row > :first-child {
-  width: 100%;
+  width: 25%;
+}
+.L-dashboard .third_row > :last-child {
+  flex-grow: 1;
 }
 .L-dashboard__item {
   background-color: var(--bck-list-item);

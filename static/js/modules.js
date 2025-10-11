@@ -87,17 +87,12 @@
             order: [[1, 'desc']],
             rowReorder: false,
             fixedColumns: false,
-            pageLength: 8,
-            lengthMenu: [[8, 12, 20, -1], [8, 12, 20, "Vše"]],
+            searching: false,
+            lengthChange: false,
+            pageLength: 5,
             scrollY: '360px',
             scrollCollapse: true,
             layout: {
-                topStart: {
-                    search: {
-                        placeholder: "Hledej ..."
-                    }
-                },
-                topEnd: 'pageLength',
                 bottomStart: 'info',
                 bottomEnd: 'paging'
             },
@@ -111,8 +106,6 @@
                 info: "Zobrazuji _START_ až _END_ z _TOTAL_ záznamů (filtr z _MAX_ záznamů)",
                 infoFiltered: "",
                 infoEmpty: "",
-                search: "Vyhledávání: ",
-                lengthMenu: "_MENU_ zakázek na stránku",
             },
         });
     }
@@ -123,14 +116,12 @@
             order: [[0, 'desc']],
             rowReorder: false,
             fixedColumns: false,
-            pageLength: 7,
+            pageLength: 5,
             lengthChange: false,
             scrollY: '360px',
             scrollCollapse: true,
             searching: false,
             layout: {
-                topStart: null,
-                topEnd: null,
                 bottomStart: 'info',
                 bottomEnd: 'paging'
             },

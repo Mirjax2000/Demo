@@ -8,15 +8,13 @@
     display: flex;
     justify-content: flex-start;
     align-items: stretch;
-    gap: 0.5em;
-    margin-bottom: 0.5em;
 
     & > * {
       font-size: 0.7rem;
       flex-basis: 25%;
 
       section {
-        width: 65%;
+        width: 60%;
 
         canvas {
           padding-bottom: 1em;
@@ -30,8 +28,6 @@
     display: flex;
     justify-content: flex-start;
     align-items: stretch;
-    gap: 0.5em;
-    margin-bottom: 0.5em;
     font-size: 0.6rem;
 
     > :first-child {
@@ -39,7 +35,7 @@
     }
 
     > :last-child {
-      width: 75%;
+      flex-grow: 1;
     }
   }
 
@@ -47,12 +43,14 @@
     display: flex;
     justify-content: flex-start;
     align-items: stretch;
-    gap: 0.5em;
-    margin-bottom: 0.5em;
     font-size: 0.6rem;
 
     > :first-child {
-      width: 100%;
+      width: 25%;
+    }
+
+    > :last-child {
+      flex-grow: 1;
     }
   }
 
