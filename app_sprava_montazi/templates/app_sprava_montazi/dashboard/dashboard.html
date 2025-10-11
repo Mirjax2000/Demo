@@ -37,39 +37,45 @@
             </form>
         </div>
         <hr>
-        <div class="L-dashboard__grid">
-            <div class="L-dashboard__grid__item top_left">
-                <!-- open orders -->
-                {% include "app_sprava_montazi/dashboard/partials/open_orders.html" %}
+        <div class="L-dashboard__flex">
+            <!--first row-->
+            <div class="first_row">
+                <div class="L-dashboard__item">
+                    <!-- open orders -->
+                    {% include "app_sprava_montazi/dashboard/partials/open_orders.html" %}
+                </div>
+                <!---->
+                <div class="L-dashboard__item">
+                    <!-- closed orders -->
+                    {% include "app_sprava_montazi/dashboard/partials/closed_orders.html" %}
+                </div>
+                <!---->
+                <div class="L-dashboard__item">
+                    <!-- adviced type orders -->
+                    {% include "app_sprava_montazi/dashboard/partials/adviced_orders.html" %}
+                </div>
+                <!---->
+                <div class="L-dashboard__item">
+                    <!-- finance -->
+                    {% include "app_sprava_montazi/dashboard/partials/finance_summary.html" %}
+                </div>
             </div>
-            <!---->
-            <div class="L-dashboard__grid__item top_center">
-                <!-- closed orders -->
-                {% include "app_sprava_montazi/dashboard/partials/closed_orders.html" %}
+            <!--second row-->
+            <div class="second_row">
+                <div class="L-dashboard__item">
+                    1
+                    <!-- invalid orders -->
+                    {% comment %} {% include "app_sprava_montazi/dashboard/partials/invalid_orders.html" %} {% endcomment %}
+                </div>
+                <div class="L-dashboard__item">
+                    <!---->
+                    {% include "app_sprava_montazi/dashboard/partials/new_orders_issues.html" %}
+                </div>
             </div>
-            <!---->
-            <div class="L-dashboard__grid__item top_right">
-                <!-- adviced type orders -->
-                {% include "app_sprava_montazi/dashboard/partials/adviced_orders.html" %}
+            <!--third row-->
+            <div class="third_row">
+                <div class="L-dashboard__item">{% include "app_sprava_montazi/dashboard/partials/customer_r_orders.html" %}</div>
             </div>
-            <!---->
-            <div class="L-dashboard__grid__item left_center">
-                <!-- invalid orders -->
-                {% include "app_sprava_montazi/dashboard/partials/invalid_orders.html" %}
-            </div>
-            <!---->
-            <div class="L-dashboard__grid__item center_center">
-                {% include "app_sprava_montazi/dashboard/partials/new_orders_issues.html" %}
-            </div>
-            <!---->
-            <div class="L-dashboard__grid__item left_bottom">
-                {% include "app_sprava_montazi/dashboard/partials/finance_summary.html" %}
-            </div>
-            <!---->
-            <div class="L-dashboard__grid__item center_bottom">
-                {% include "app_sprava_montazi/dashboard/partials/customer_r_orders.html" %}
-            </div>
-            <!---->
         </div>
     </section>
 {% endblock content %}

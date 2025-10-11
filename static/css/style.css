@@ -1,4 +1,3 @@
-@charset "UTF-8";
 /* --- style --- */
 /* --- root --- */
 :root {
@@ -837,14 +836,53 @@ body.home {
   background-color: var(--bck-zero);
 }
 
-.L-dashboard__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 sloupce */
-  grid-template-rows: repeat(3, 1fr); /* 3 řádky */
-  gap: 0.5em;
-  height: 90dvh;
+.L-dashboard {
+  width: 100%;
 }
-.L-dashboard__grid__item {
+.L-dashboard .first_row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 0.5em;
+  margin-bottom: 0.5em;
+}
+.L-dashboard .first_row > * {
+  font-size: 0.7rem;
+  flex-basis: 25%;
+}
+.L-dashboard .first_row > * section {
+  width: 65%;
+}
+.L-dashboard .first_row > * section canvas {
+  padding-bottom: 1em;
+}
+.L-dashboard .second_row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 0.5em;
+  margin-bottom: 0.5em;
+  font-size: 0.6rem;
+}
+.L-dashboard .second_row > :first-child {
+  width: 25%;
+}
+.L-dashboard .second_row > :last-child {
+  width: 75%;
+}
+.L-dashboard .third_row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 0.5em;
+  margin-bottom: 0.5em;
+  font-size: 0.6rem;
+}
+.L-dashboard .third_row > :first-child {
+  width: 100%;
+}
+.L-dashboard__item {
   background-color: var(--bck-list-item);
   border: 1px solid var(--shadow);
   display: flex;
@@ -852,37 +890,6 @@ body.home {
   align-items: center;
   border-radius: 4px;
   transition: transform 0.3s ease;
-}
-.L-dashboard__grid__item section canvas {
-  padding-bottom: 1em;
-}
-.L-dashboard__grid__item.left_center .grid-2x2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 sloupce */
-  grid-template-rows: auto auto; /* 2 řádky */
-  width: 100%;
-  height: 100%;
-  gap: 0.5em;
-}
-.L-dashboard__grid__item.left_center .grid-2x2 > div {
-  width: inherit;
-  height: inherit;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--bck-list-item);
-  border: 1px solid var(--shadow);
-}
-.L-dashboard__grid__item.left_center .grid-2x2 > div div {
-  margin: 0;
-  width: 90%;
-  text-align: center;
-}
-.L-dashboard__grid__item.center_center {
-  grid-column: span 2;
-}
-.L-dashboard__grid__item.center_bottom {
-  grid-column: span 2;
 }
 
 .C-spinner {
