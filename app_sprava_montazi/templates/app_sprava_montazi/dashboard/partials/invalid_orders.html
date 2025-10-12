@@ -1,6 +1,6 @@
 <section class="grid-2x2">
-    <!---->
-    <div>
+    <!--first row-->
+    <div class="grid-2x2__flex">
         <section>
             <p class="u-txt-center m-0">Celkem</p>
             <canvas id="totalOrdersChart"
@@ -8,9 +8,7 @@
                     aria-label="Celkem objednávek: {{ count_all }}"
                     role="img"></canvas>
         </section>
-    </div>
-    <!---->
-    <div>
+        <!---->
         <section>
             <p class="u-txt-center m-0">Invalid</p>
             <canvas id="invalidOrdersChart"
@@ -20,8 +18,8 @@
                     role="img"></canvas>
         </section>
     </div>
-    <!---->
-    <div>
+    <!--second row-->
+    <div class="grid-2x2__flex">
         <section>
             <p class="u-txt-center m-0">Skryto</p>
             <canvas id="hiddenOrdersChart"
@@ -30,9 +28,7 @@
                     aria-label="Skryté záznamy: {{ hidden }} z {{ count_all }}"
                     role="img"></canvas>
         </section>
-    </div>
-    <!---->
-    <div>
+        <!---->
         <section>
             <p class="u-txt-center m-0">Bez termínu montáže</p>
             <canvas id="noMontageChart"
