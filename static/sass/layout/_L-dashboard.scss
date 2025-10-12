@@ -69,8 +69,12 @@
         border: 1px solid var(--shadow);
         background-color: var(--bck-list-item);
 
-        canvas {
-          padding-bottom: 1em;
+        .canvas_container {
+          width: 50%;
+
+          canvas {
+            padding: 0.5em;
+          }
         }
       }
     }

@@ -123,6 +123,12 @@
   user-select: none;
 }
 
+.u-flex-center-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .u-flex-row {
   display: flex;
   justify-content: flex-start;

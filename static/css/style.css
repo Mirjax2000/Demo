@@ -209,6 +209,12 @@ body.home {
   user-select: none;
 }
 
+.u-flex-center-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .u-flex-row {
   display: flex;
   justify-content: flex-start;
@@ -895,8 +901,11 @@ body.home {
   border: 1px solid var(--shadow);
   background-color: var(--bck-list-item);
 }
-.L-dashboard .grid-2x2__flex section canvas {
-  padding-bottom: 1em;
+.L-dashboard .grid-2x2__flex section .canvas_container {
+  width: 50%;
+}
+.L-dashboard .grid-2x2__flex section .canvas_container canvas {
+  padding: 0.5em;
 }
 
 .C-spinner {
