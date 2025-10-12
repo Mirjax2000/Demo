@@ -217,218 +217,183 @@
     // chart.js otevrene zakazky
     function renderOpenOrdersChart() {
         const ctx = document.querySelector("#openOrders");
-        if (!ctx) return; // kdyby tam canvas nebyl
+        if (!ctx) return;
 
         const ordersData = JSON.parse(ctx.dataset.openOrders);
+        const total = ordersData.nove + ordersData.zaterminovane + ordersData.realizovane;
 
-        const data = {
-            labels: ["Nové", "Zaterm.", "Realiz."],
-            datasets: [{
-                data: [
-                    ordersData.nove,
-                    ordersData.zaterminovane,
-                    ordersData.realizovane
-                ],
-            }]
-        };
+        const labels = ["Nové", "Zaterminovane", "Realizovane"]; // jen pro tooltip
 
-        const centerTextPlugin = {
-            id: 'centerText',
-            afterDraw(chart) {
-                const { ctx, chartArea: { left, right, top, bottom } } = chart;
-                const centerX = (left + right) / 2;
-                const centerY = (top + bottom) / 2;
-                const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-
-                const getTextColor = () => {
-                    const html = document.documentElement;
-                    return html.dataset.theme === 'dark' ? '#ffffff' : '#000000';
-                };
-
-                ctx.save();
-                ctx.font = 'bold 26px Arial';
-                ctx.fillStyle = getTextColor();
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(total, centerX, centerY);
-                ctx.restore();
-
-                if (!chart._observerSetup) {
-                    const html = document.documentElement;
-                    const observer = new MutationObserver(() => chart.update());
-                    observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
-                    chart._observerSetup = true;
-                }
-            }
-        };
-
-        new Chart(ctx, {
+        const chart = new Chart(ctx, {
             type: 'doughnut',
-            data: data,
+            data: {
+                datasets: [{
+                    data: [ordersData.nove, ordersData.zaterminovane, ordersData.realizovane],
+                    backgroundColor: ['#0d6efd', '#ffc107', '#198754'] // můžeš si barvy nastavit dle libosti
+                }]
+            },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { position: 'top' },
+                    legend: { display: false }, // 👈 žádná legenda nahoře
                     tooltip: {
                         callbacks: {
-                            label: function (context) {
-                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                let value = context.parsed;
-                                let percentage = ((value / total) * 100).toFixed(1);
-                                return `${context.label}: ${value} (${percentage}%)`;
+                            label: context => {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const value = context.parsed;
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                const label = labels[context.dataIndex];
+                                return `${label}: ${value} (${percentage}%)`;
                             }
                         }
                     }
                 }
             },
-            plugins: [centerTextPlugin]
+            plugins: [{
+                id: 'centerText',
+                afterDraw(chart) {
+                    const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                    const centerX = (left + right) / 2;
+                    const centerY = (top + bottom) / 2;
+                    const html = document.documentElement;
+                    const color = html.dataset.theme === 'dark' ? '#fff' : '#000';
+
+                    ctx.save();
+                    ctx.font = 'bold 26px Arial';
+                    ctx.fillStyle = color;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(total, centerX, centerY);
+                    ctx.restore();
+
+                    if (!chart._observerSetup) {
+                        const observer = new MutationObserver(() => chart.update());
+                        observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+                        chart._observerSetup = true;
+                    }
+                }
+            }]
         });
     }
 
-    // chart.js closed zakazky
     function renderClosedOrdersChart() {
         const ctx = document.querySelector("#closedOrders");
-        if (!ctx) return; // kdyby tam canvas nebyl
+        if (!ctx) return;
 
         const ordersData = JSON.parse(ctx.dataset.closedOrders);
+        const total = ordersData.vyuctovane + ordersData.zrusene;
 
-        const data = {
-            labels: ["Vyúčtované", "Zrušené"],
-            datasets: [{
-                data: [
-                    ordersData.vyuctovane,
-                    ordersData.zrusene,
-                ],
-                backgroundColor: [
-                    '#6c757d',
-                    '#dc3545',
-                ]
-            }]
-        };
-
-        const centerTextPlugin = {
-            id: 'centerText',
-            afterDraw(chart) {
-                const { ctx, chartArea: { left, right, top, bottom } } = chart;
-                const centerX = (left + right) / 2;
-                const centerY = (top + bottom) / 2;
-                const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-
-                const getTextColor = () => {
-                    const html = document.documentElement;
-                    return html.dataset.theme === 'dark' ? '#ffffff' : '#000000';
-                };
-
-                ctx.save();
-                ctx.font = 'bold 26px Arial';
-                ctx.fillStyle = getTextColor();
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(total, centerX, centerY);
-                ctx.restore();
-
-                if (!chart._observerSetup) {
-                    const html = document.documentElement;
-                    const observer = new MutationObserver(() => chart.update());
-                    observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
-                    chart._observerSetup = true;
-                }
-            }
-        };
-
-        new Chart(ctx, {
+        const chart = new Chart(ctx, {
             type: 'doughnut',
-            data: data,
+            data: {
+                labels: ["Vyúčtované", "Zrušené"],
+                datasets: [{
+                    data: [ordersData.vyuctovane, ordersData.zrusene],
+                    backgroundColor: ['#6c757d', '#dc3545']
+                }]
+            },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { position: 'top' },
+                    legend: { display: false }, // 👈 schová legendu
                     tooltip: {
                         callbacks: {
-                            label: function (context) {
-                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                let value = context.parsed;
-                                let percentage = ((value / total) * 100).toFixed(1);
+                            label: context => {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const value = context.parsed;
+                                const percentage = ((value / total) * 100).toFixed(1);
                                 return `${context.label}: ${value} (${percentage}%)`;
                             }
                         }
                     }
                 }
             },
-            plugins: [centerTextPlugin]
+            plugins: [{
+                id: 'centerText',
+                afterDraw(chart) {
+                    const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                    const centerX = (left + right) / 2;
+                    const centerY = (top + bottom) / 2;
+                    const html = document.documentElement;
+                    const color = html.dataset.theme === 'dark' ? '#fff' : '#000';
+
+                    ctx.save();
+                    ctx.font = 'bold 26px Arial';
+                    ctx.fillStyle = color;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(total, centerX, centerY);
+                    ctx.restore();
+
+                    // sleduj změnu tématu (light/dark)
+                    if (!chart._observerSetup) {
+                        const observer = new MutationObserver(() => chart.update());
+                        observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+                        chart._observerSetup = true;
+                    }
+                }
+            }]
         });
     }
+
     // chart.js adviced type zakazky
     function renderAdvicedTypeOrdersChart() {
         const ctx = document.querySelector("#advicedOrders");
-        if (!ctx) return; // kdyby tam canvas nebyl
+        if (!ctx) return;
 
         const ordersData = JSON.parse(ctx.dataset.advicedTypeOrders);
+        const total = ordersData.montazni + ordersData.dopravni;
+        const labels = ["Montážní", "Dopravní"];
 
-        const data = {
-            labels: ["Montážní", "Dopravní"],
-            datasets: [{
-                data: [
-                    ordersData.montazni,
-                    ordersData.dopravni,
-                ],
-                backgroundColor: [
-                    '#3384ff', // modrá pro Montážní
-                    '#198754', // tmavě zelená pro Dopravní
-                ]
-            }]
-        };
-
-        const centerTextPlugin = {
-            id: 'centerText',
-            afterDraw(chart) {
-                const { ctx, chartArea: { left, right, top, bottom } } = chart;
-                const centerX = (left + right) / 2;
-                const centerY = (top + bottom) / 2;
-                const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-
-                const getTextColor = () => {
-                    const html = document.documentElement;
-                    return html.dataset.theme === 'dark' ? '#ffffff' : '#000000';
-                };
-
-                ctx.save();
-                ctx.font = 'bold 26px Arial';
-                ctx.fillStyle = getTextColor();
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(total, centerX, centerY);
-                ctx.restore();
-
-                if (!chart._observerSetup) {
-                    const html = document.documentElement;
-                    const observer = new MutationObserver(() => chart.update());
-                    observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
-                    chart._observerSetup = true;
-                }
-            }
-        };
-
-        new Chart(ctx, {
+        const chart = new Chart(ctx, {
             type: 'doughnut',
-            data: data,
+            data: {
+                datasets: [{
+                    data: [ordersData.montazni, ordersData.dopravni],
+                    backgroundColor: ['#3384ff', '#198754'] // barvy podle typu
+                }]
+            },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { position: 'top' },
+                    legend: { display: false }, // schová legendu
                     tooltip: {
                         callbacks: {
-                            label: function (context) {
-                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                let value = context.parsed;
-                                let percentage = ((value / total) * 100).toFixed(1);
-                                return `${context.label}: ${value} (${percentage}%)`;
+                            label: context => {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const value = context.parsed;
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                const label = labels[context.dataIndex];
+                                return `${label}: ${value} (${percentage}%)`;
                             }
                         }
                     }
                 }
             },
-            plugins: [centerTextPlugin]
+            plugins: [{
+                id: 'centerText',
+                afterDraw(chart) {
+                    const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                    const centerX = (left + right) / 2;
+                    const centerY = (top + bottom) / 2;
+                    const html = document.documentElement;
+                    const color = html.dataset.theme === 'dark' ? '#fff' : '#000';
+
+                    ctx.save();
+                    ctx.font = 'bold 26px Arial';
+                    ctx.fillStyle = color;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(total, centerX, centerY);
+                    ctx.restore();
+
+                    if (!chart._observerSetup) {
+                        const observer = new MutationObserver(() => chart.update());
+                        observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+                        chart._observerSetup = true;
+                    }
+                }
+            }]
         });
     }
 
@@ -442,8 +407,9 @@
         const profit = Number(dataObj.profit || 0);
         const vynos = Number(dataObj.vynos || (naklad + profit));
 
+        const labels = ['Náklady', 'Zisk']; // jen pro tooltip
+
         const data = {
-            labels: ['Náklady', 'Zisk'],
             datasets: [{
                 data: [naklad, profit],
                 backgroundColor: ['#dc3545', '#198754']
@@ -467,7 +433,11 @@
                 ctx.fillStyle = getTextColor();
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                const totalText = new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(vynos);
+                const totalText = new Intl.NumberFormat('cs-CZ', {
+                    style: 'currency',
+                    currency: 'CZK',
+                    maximumFractionDigits: 0
+                }).format(vynos);
                 ctx.fillText(totalText, centerX, centerY);
                 ctx.restore();
 
@@ -486,15 +456,19 @@
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { position: 'top' },
+                    legend: { display: false }, // 👈 skryto jako u ostatních
                     tooltip: {
                         callbacks: {
                             label: function (context) {
                                 const total = naklad + profit;
                                 const value = context.parsed;
                                 const percentage = total ? ((value / total) * 100).toFixed(1) : 0;
-                                const label = context.label;
-                                const money = new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(value);
+                                const label = labels[context.dataIndex];
+                                const money = new Intl.NumberFormat('cs-CZ', {
+                                    style: 'currency',
+                                    currency: 'CZK',
+                                    maximumFractionDigits: 0
+                                }).format(value);
                                 return `${label}: ${money} (${percentage}%)`;
                             }
                         }
@@ -505,6 +479,8 @@
         });
     }
 
+
+    // total zakazek chart.js
     function renderTotalOrdersChart() {
         const canvas = document.getElementById('totalOrdersChart');
         if (!canvas || typeof Chart === 'undefined') return;
@@ -527,7 +503,7 @@
                 const html = document.documentElement;
                 const color = html.dataset.theme === 'dark' ? '#ffffff' : '#000000';
                 ctx.save();
-                ctx.font = 'bold 24px Arial';
+                ctx.font = 'bold 20px Arial';
                 ctx.fillStyle = color;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -548,7 +524,7 @@
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { display: false }, // 👈 skryto jako u ostatních
+                    legend: { display: false },
                     tooltip: {
                         callbacks: {
                             label: function (context) {
@@ -591,7 +567,7 @@
                 const html = document.documentElement;
                 const color = html.dataset.theme === 'dark' ? '#ffffff' : '#000000';
                 ctx.save();
-                ctx.font = 'bold 24px Arial';
+                ctx.font = 'bold 20px Arial';
                 ctx.fillStyle = color;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -612,7 +588,7 @@
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { display: false }, // 👈 schová legendu
+                    legend: { display: false },
                     tooltip: {
                         callbacks: {
                             label: function (context) {
@@ -658,7 +634,7 @@
                 const html = document.documentElement;
                 const color = html.dataset.theme === 'dark' ? '#ffffff' : '#000000';
                 ctx.save();
-                ctx.font = 'bold 24px Arial';
+                ctx.font = 'bold 20px Arial';
                 ctx.fillStyle = color;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -728,7 +704,7 @@
                 };
 
                 ctx.save();
-                ctx.font = 'bold 24px Arial';
+                ctx.font = 'bold 20px Arial';
                 ctx.fillStyle = getTextColor();
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';

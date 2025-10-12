@@ -1,56 +1,52 @@
 <section class="grid-2x2">
     <!--first row-->
     <div class="grid-2x2__flex">
-        <section>
+        <section class="section">
             <p class="u-txt-center m-0">Celkem</p>
-            <div class="u-flex-center-center">
-                <div class="canvas_container">
-                    <canvas id="totalOrdersChart"
-                            data-total="{{ count_all }}"
-                            aria-label="Celkem objednávek: {{ count_all }}"
-                            role="img"></canvas>
-                </div>
+            <div class="canvas_container">
+                <canvas class="canvas"
+                        id="totalOrdersChart"
+                        data-total="{{ count_all }}"
+                        aria-label="Celkem objednávek: {{ count_all }}"
+                        role="img"></canvas>
             </div>
         </section>
         <!---->
-        <section>
+        <section class="section">
             <p class="u-txt-center m-0">Invalid</p>
-            <div class="u-flex-center-center">
-                <div class="canvas_container">
-                    <canvas id="invalidOrdersChart"
-                            data-invalid="{{ invalid_count }}"
-                            data-total="{{ count_all }}"
-                            aria-label="Neplatné záznamy: {{ invalid_count }} z {{ count_all }}"
-                            role="img"></canvas>
-                </div>
+            <div class="canvas_container">
+                <canvas class="canvas"
+                        id="invalidOrdersChart"
+                        data-invalid="{{ invalid_count }}"
+                        data-total="{{ count_all }}"
+                        aria-label="Neplatné záznamy: {{ invalid_count }} z {{ count_all }}"
+                        role="img"></canvas>
             </div>
         </section>
     </div>
     <!--second row-->
     <div class="grid-2x2__flex">
-        <section>
+        <section class="section">
             <p class="u-txt-center m-0">Skryto</p>
-            <div class="u-flex-center-center">
-                <div class="canvas_container">
-                    <canvas id="hiddenOrdersChart"
-                            data-hidden="{{ hidden }}"
-                            data-total="{{ count_all }}"
-                            aria-label="Skryté záznamy: {{ hidden }} z {{ count_all }}"
-                            role="img"></canvas>
-                </div>
+            <div class="canvas_container">
+                <canvas class="canvas"
+                        id="hiddenOrdersChart"
+                        data-hidden="{{ hidden }}"
+                        data-total="{{ count_all }}"
+                        aria-label="Skryté záznamy: {{ hidden }} z {{ count_all }}"
+                        role="img"></canvas>
             </div>
         </section>
         <!---->
-        <section>
+        <section class="section">
             <p class="u-txt-center m-0">Bez termínu montáže</p>
-            <div class="u-flex-center-center">
-                <div class="canvas_container">
-                    <canvas id="noMontageChart"
-                            data-no-montage="{{ no_montage_term_count }}"
-                            data-total="{{ no_montage_total_count }}"
-                            aria-label="Bez termínu montáže: {{ no_montage_term_count }} z {{ no_montage_total_count }}"
-                            role="img"></canvas>
-                </div>
+            <div class="canvas_container">
+                <canvas class="canvas"
+                        id="noMontageChart"
+                        data-no-montage="{{ no_montage_term_count }}"
+                        data-total="{{ no_montage_total_count }}"
+                        aria-label="Bez termínu montáže: {{ no_montage_term_count }} z {{ no_montage_total_count }}"
+                        role="img"></canvas>
             </div>
         </section>
     </div>
