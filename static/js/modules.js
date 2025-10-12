@@ -13,6 +13,9 @@
         renderClosedOrdersChart();
         renderAdvicedTypeOrdersChart();
         renderFinanceSummaryChart();
+        renderHiddenOrdersChart();
+        renderInvalidOrdersChart();
+        renderTotalOrdersChart()
     });
 
     // DataTable for orders
@@ -492,6 +495,179 @@
                                 const label = context.label;
                                 const money = new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(value);
                                 return `${label}: ${money} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [centerTextPlugin]
+        });
+    }
+    function renderTotalOrdersChart() {
+        const canvas = document.getElementById('totalOrdersChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        const total = Math.max(0, Number(canvas.dataset.total || 0));
+
+        const data = {
+            labels: ['Celkem'],
+            datasets: [{ data: [total], backgroundColor: ['#0d6efd'] }]
+        };
+
+        const centerTextPlugin = {
+            id: 'centerTextTotal',
+            afterDraw(chart) {
+                const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                const centerX = (left + right) / 2;
+                const centerY = (top + bottom) / 2;
+                const html = document.documentElement;
+                const color = html.dataset.theme === 'dark' ? '#ffffff' : '#000000';
+                ctx.save();
+                ctx.font = 'bold 24px Arial';
+                ctx.fillStyle = color;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(total, centerX, centerY);
+                ctx.restore();
+                if (!chart._observerSetup) {
+                    const observer = new MutationObserver(() => chart.update());
+                    observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+                    chart._observerSetup = true;
+                }
+            }
+        };
+
+        new Chart(canvas, {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `Celkem: ${context.parsed}`;
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [centerTextPlugin]
+        });
+    }
+
+    // chart.js - donut for Invalid vs Valid
+    function renderInvalidOrdersChart() {
+        const canvas = document.getElementById('invalidOrdersChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        const invalid = Math.max(0, Number(canvas.dataset.invalid || 0));
+        const total = Math.max(0, Number(canvas.dataset.total || 0));
+        const valid = Math.max(0, total - invalid);
+
+        const data = {
+            labels: ['Invalid', 'Validní'],
+            datasets: [{ data: [invalid, valid], backgroundColor: ['#dc3545', '#20c997'] }]
+        };
+
+        const centerTextPlugin = {
+            id: 'centerTextInvalid',
+            afterDraw(chart) {
+                const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                const centerX = (left + right) / 2;
+                const centerY = (top + bottom) / 2;
+                const html = document.documentElement;
+                const color = html.dataset.theme === 'dark' ? '#ffffff' : '#000000';
+                ctx.save();
+                ctx.font = 'bold 24px Arial';
+                ctx.fillStyle = color;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(invalid, centerX, centerY);
+                ctx.restore();
+                if (!chart._observerSetup) {
+                    const observer = new MutationObserver(() => chart.update());
+                    observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+                    chart._observerSetup = true;
+                }
+            }
+        };
+
+        new Chart(canvas, {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const sum = invalid + valid;
+                                const value = context.parsed;
+                                const percentage = sum ? ((value / sum) * 100).toFixed(1) : 0;
+                                return `${context.label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [centerTextPlugin]
+        });
+    }
+
+    // chart.js - donut for Hidden vs Visible
+    function renderHiddenOrdersChart() {
+        const canvas = document.getElementById('hiddenOrdersChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        const hidden = Math.max(0, Number(canvas.dataset.hidden || 0));
+        const total = Math.max(0, Number(canvas.dataset.total || 0));
+        const visible = Math.max(0, total - hidden);
+
+        const data = {
+            labels: ['Skryto', 'Viditelné'],
+            datasets: [{ data: [hidden, visible], backgroundColor: ['#6c757d', '#0dcaf0'] }]
+        };
+
+        const centerTextPlugin = {
+            id: 'centerTextHidden',
+            afterDraw(chart) {
+                const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                const centerX = (left + right) / 2;
+                const centerY = (top + bottom) / 2;
+                const html = document.documentElement;
+                const color = html.dataset.theme === 'dark' ? '#ffffff' : '#000000';
+                ctx.save();
+                ctx.font = 'bold 24px Arial';
+                ctx.fillStyle = color;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(hidden, centerX, centerY);
+                ctx.restore();
+                if (!chart._observerSetup) {
+                    const observer = new MutationObserver(() => chart.update());
+                    observer.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+                    chart._observerSetup = true;
+                }
+            }
+        };
+
+        new Chart(canvas, {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const sum = hidden + visible;
+                                const value = context.parsed;
+                                const percentage = sum ? ((value / sum) * 100).toFixed(1) : 0;
+                                return `${context.label}: ${value} (${percentage}%)`;
                             }
                         }
                     }
