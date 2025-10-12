@@ -10,11 +10,14 @@
     align-items: stretch;
 
     & > * {
-      font-size: 0.7rem;
-      flex-basis: 25%;
+      width: 25%;
 
       section {
-        width: 60%;
+        width: 75%;
+
+        p {
+          font-size: 0.8rem;
+        }
 
         canvas {
           padding-bottom: 1em;
@@ -28,15 +31,13 @@
     display: flex;
     justify-content: flex-start;
     align-items: stretch;
-    font-size: 0.6rem;
 
     > :first-child {
       width: 25%;
-      flex-shrink: 0;
     }
 
     > :last-child {
-      flex-grow: 1;
+      width: 75%;
     }
   }
 

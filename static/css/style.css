@@ -845,11 +845,13 @@ body.home {
   align-items: stretch;
 }
 .L-dashboard .first_row > * {
-  font-size: 0.7rem;
-  flex-basis: 25%;
+  width: 25%;
 }
 .L-dashboard .first_row > * section {
-  width: 60%;
+  width: 75%;
+}
+.L-dashboard .first_row > * section p {
+  font-size: 0.8rem;
 }
 .L-dashboard .first_row > * section canvas {
   padding-bottom: 1em;
@@ -859,14 +861,12 @@ body.home {
   display: flex;
   justify-content: flex-start;
   align-items: stretch;
-  font-size: 0.6rem;
 }
 .L-dashboard .second_row > :first-child {
   width: 25%;
-  flex-shrink: 0;
 }
 .L-dashboard .second_row > :last-child {
-  flex-grow: 1;
+  width: 75%;
 }
 .L-dashboard__item {
   background-color: var(--bck-list-item);

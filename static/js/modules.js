@@ -209,6 +209,7 @@
         'wrapAround': true,
         "fitImagesInViewport": true,
     })
+
     // chart.js otevrene zakazky
     function renderOpenOrdersChart() {
         const ctx = document.querySelector("#openOrders");
@@ -217,7 +218,7 @@
         const ordersData = JSON.parse(ctx.dataset.openOrders);
 
         const data = {
-            labels: ["Nové", "Zatermínované", "Realizované"],
+            labels: ["Nové", "Zaterm.", "Realiz."],
             datasets: [{
                 data: [
                     ordersData.nove,
@@ -241,7 +242,7 @@
                 };
 
                 ctx.save();
-                ctx.font = 'bold 30px Arial';
+                ctx.font = 'bold 26px Arial';
                 ctx.fillStyle = getTextColor();
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -315,7 +316,7 @@
                 };
 
                 ctx.save();
-                ctx.font = 'bold 30px Arial';
+                ctx.font = 'bold 26px Arial';
                 ctx.fillStyle = getTextColor();
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -388,7 +389,7 @@
                 };
 
                 ctx.save();
-                ctx.font = 'bold 30px Arial';
+                ctx.font = 'bold 26px Arial';
                 ctx.fillStyle = getTextColor();
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -458,7 +459,7 @@
                 };
 
                 ctx.save();
-                ctx.font = 'bold 20px Arial';
+                ctx.font = 'bold 14px Arial';
                 ctx.fillStyle = getTextColor();
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
