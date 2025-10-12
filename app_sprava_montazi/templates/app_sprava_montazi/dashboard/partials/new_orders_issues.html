@@ -1,4 +1,4 @@
-<section class="L-table m-0 w-100">
+<section class="L-table m-1 w-100">
   <p class="u-txt-center m-0">Nové zakázky s chybějícími údaji</p>
   <table class="L-table__table nowrap hover order-column display"
          id="newIssuesTable"
@@ -16,18 +16,18 @@
     <tbody class="L-table__body">
       {% for o in new_issues_orders %}
         <tr>
-          <td>
+          <td class="p-0 pt-1 pb-1 ps-1">
             <a href="{% url 'order_detail' pk=o.pk %}" class="L-table__link">{{ o.order_number }}</a>
           </td>
-          <td>{{ o.evidence_termin|date:"d.m.Y" }}</td>
-          <td>
+          <td class="p-0 pt-1 pb-1">{{ o.evidence_termin|date:"d.m.Y" }}</td>
+          <td class="p-0 pt-1 pb-1">
             {% if o.delivery_termin %}
               {{ o.delivery_termin|date:"d.m.Y" }}
             {% else %}
               <span class="badge text-bg-warning">chybí</span>
             {% endif %}
           </td>
-          <td>
+          <td class="p-0 pt-1 pb-1">
             {% if o.team %}
               {{ o.team.name }}
             {% else %}
@@ -38,7 +38,7 @@
               {% endif %}
             {% endif %}
           </td>
-          <td>
+          <td class="p-0 pt-1 pb-1">
             {% if o.client %}
               {{ o.client.name }}
               {% if o.client.incomplete %}<span class="badge text-bg-warning">neúplné</span>{% endif %}
@@ -46,7 +46,7 @@
               <span class="badge text-bg-warning">bez zákazníka</span>
             {% endif %}
           </td>
-          <td>
+          <td class="p-0 pt-1 pb-1">
             {% if not o.delivery_termin %}<span class="badge text-bg-danger">bez doručení</span>{% endif %}
             {% if not o.team and o.team_type == 'By_assembly_crew' %}
               <span class="badge text-bg-danger">bez montážního týmu</span>

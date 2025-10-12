@@ -32,21 +32,7 @@
 
     > :first-child {
       width: 25%;
-    }
-
-    > :last-child {
-      flex-grow: 1;
-    }
-  }
-
-  .third_row {
-    display: flex;
-    justify-content: flex-start;
-    align-items: stretch;
-    font-size: 0.6rem;
-
-    > :first-child {
-      width: 25%;
+      flex-shrink: 0;
     }
 
     > :last-child {

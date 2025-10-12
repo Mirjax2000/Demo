@@ -863,20 +863,9 @@ body.home {
 }
 .L-dashboard .second_row > :first-child {
   width: 25%;
+  flex-shrink: 0;
 }
 .L-dashboard .second_row > :last-child {
-  flex-grow: 1;
-}
-.L-dashboard .third_row {
-  display: flex;
-  justify-content: flex-start;
-  align-items: stretch;
-  font-size: 0.6rem;
-}
-.L-dashboard .third_row > :first-child {
-  width: 25%;
-}
-.L-dashboard .third_row > :last-child {
   flex-grow: 1;
 }
 .L-dashboard__item {

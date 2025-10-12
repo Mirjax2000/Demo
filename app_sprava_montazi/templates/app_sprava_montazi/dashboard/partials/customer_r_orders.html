@@ -1,4 +1,4 @@
-<section class="L-table m-0 w-100">
+<section class="L-table m-1 w-100">
   <p class="u-txt-center m-0">Reklamace - k rozhodnutí, jestli jde o montáž</p>
   <table class="L-table__table nowrap hover order-column display"
          id="customerRTable"
@@ -14,24 +14,24 @@
     <tbody class="L-table__body">
       {% for o in customer_r_orders %}
         <tr>
-          <td>
+          <td class="p-0 pt-1 pb-1 ps-1">
             <a href="{% url 'order_detail' pk=o.pk %}" class="L-table__link">{{ o.order_number }}</a>
           </td>
-          <td>
+          <td class="p-0">
             {% if o.client %}
               {{ o.client.name }}
             {% else %}
               <span class="badge text-bg-warning">bez zákazníka</span>
             {% endif %}
           </td>
-          <td>
+          <td class="p-0 pt-1 pb-1">
             {% if o.notes %}
               {{ o.notes }}
             {% else %}
               -
             {% endif %}
           </td>
-          <td>
+          <td class="p-0 pt-1 pb-1">
             {% if o.status == 'New' %}
               <div class="d-flex align-items-center gap-2">
                 <div class="form-check form-switch mb-0">
