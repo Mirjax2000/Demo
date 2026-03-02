@@ -1,0 +1,74 @@
+# ═══════════════════════════════════════════════════════════
+# AMS — Správa montáží  |  Django + React (Vite)
+# ═══════════════════════════════════════════════════════════
+
+# ── Python / Django ──────────────────────────────────────
+*.py[cod]
+*$py.class
+__pycache__/
+*.so
+*.egg-info/
+*.egg
+.Python
+build/
+dist/
+*.manifest
+*.spec
+
+# Virtual environments
+.env
+.env_*
+.venv/
+venv/
+env/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+media/
+*.log
+*.pot
+
+# ── Node / Frontend ──────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/node_modules/
+.vite/
+.cache/
+*.local
+
+# ── IDE / Editor ─────────────────────────────────────────
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# ── Testing / CI ─────────────────────────────────────────
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+.pytype/
+
+# ── Logs ─────────────────────────────────────────────────
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── OS / Misc ────────────────────────────────────────────
+*.pid
+*.pid.lock
+*.seed
+*.csv
